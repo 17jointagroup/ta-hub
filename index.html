@@ -25,7 +25,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TA HUB — 技術美術每日精選</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -34,16 +37,16 @@
   --shader:#ff6b35;--proc:#7b5fff;--vfx:#00d4ff;--char:#ff3d9a;
   --scene:#50fa7b;--gfx:#ffb86c;--anim:#ff79c6;--tools:#8be9fd;
 }
-body{background:var(--bg);color:var(--txt);font-family:'Barlow','Noto Sans TC',sans-serif;font-weight:300;font-size:17px;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+body{background:var(--bg);color:var(--txt);font-family:'Barlow',-apple-system,BlinkMacSystemFont,'Helvetica Neue','Noto Sans TC',sans-serif;font-weight:300;font-size:17px;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:1;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes newPop{0%{opacity:0;transform:scale(.7)}60%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+@keyframes newPop{0%{opacity:1;transform:scale(.7)}60%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
 
 /* TICKER */
 #ticker{background:var(--surf2);border-bottom:1px solid var(--bdr);padding:5px 24px;overflow:hidden;white-space:nowrap;flex-shrink:0;}
@@ -204,6 +207,7 @@ header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:
 /* Lang display modes */
 body.lang-en .card-ttl-zh,body.lang-en .card-exc-zh{display:none!important;}
 body.lang-zh .card-exc-en{display:none!important;}
+body.lang-ja .card-exc-en{display:none!important;}
 body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13px!important;color:var(--muted)!important;font-weight:400!important;}
 #r-panel.rmode-en .body-zh,#r-panel.rmode-en .art-t-zh,#r-panel.rmode-en .art-t-pending{display:none!important;}
 #r-panel.rmode-zh .body-en{display:none!important;}
@@ -340,7 +344,7 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 
 </style>
 </head>
-<body class="lang-both">
+<body class="lang-en">
 
 <!-- TICKER -->
 <div id="ticker">
@@ -677,6 +681,15 @@ function renderSecHTML(s, isZh=false){
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
+// Catch any JS crash — never let page stay blank
+window.onerror = function(msg, src, line){ 
+  console.error('TA HUB error:', msg, src, line);
+  return false; 
+};
+window.onunhandledrejection = function(e){ 
+  console.error('Unhandled promise:', e.reason); 
+};
+
 window.addEventListener('DOMContentLoaded', async () => {
   // Build source list
   const srcListEl = document.getElementById('src-list');
@@ -829,7 +842,10 @@ function doSort(v){ sortBy=v; render(); }
 function setLang(l){
   lang=l;
   document.body.className='lang-'+l;
-  ['en','both','zh'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===l));
+  ['en','zh','ja'].forEach(x=>{
+    const btn=document.getElementById('btn-'+x);
+    if(btn) btn.classList.toggle('active',x===l);
+  });
   render();
 }
 // onApiKey removed - no key needed for Google Translate
