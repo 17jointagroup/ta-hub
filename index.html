@@ -286,8 +286,8 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
   .art-t-zh { font-size: 18px !important; }
   .sec p { font-size: 15px !important; }
   .sec h3.en { font-size: 17px !important; }
-  /* Overlay */
-  #r-overlay { display: block !important; }
+  /* Overlay — only show when reader open (JS-controlled) */
+  /* #r-overlay display is managed by openReader/closeReader JS */
   /* Bottom nav bar for mobile (filter toggle) */
   #mobile-filter-btn {
     display: flex !important;
@@ -307,36 +307,53 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
   }
 }
 
-  /* iOS Safari performance fixes */
-  * { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 768px) {
+  :root {
+    --bg: #0e0e12;
+    --surf: #161620;
+    --surf2: #1e1e28;
+    --bdr: #333348;
+    --muted: #7777aa;
+  }
+  body { background: var(--bg) !important; }
+}
+
+@media (max-width: 768px) {
+  /* === iOS Safari essential fixes === */
   
-  /* Disable backdrop-filter (very slow on iPhone) */
-  header { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(10,10,12,0.98) !important; }
+  /* Disable ALL animations on mobile — prevent jank and freezes */
+  *, *::before, *::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
+  }
+  
+  /* Re-enable only critical transitions */
+  #r-panel { transition: none !important; }
+  
+  /* Remove backdrop filters completely — major GPU drain */
+  header { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
   #r-overlay { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
   
-  /* Disable card stagger animations — causes jank with many cards */
-  .card { animation: none !important; opacity: 1 !important; transform: none !important; }
-  
-  /* Disable shimmer skeleton animation */
-  .skel { animation: none !important; background: var(--surf2) !important; }
-  
-  /* Fix iOS 100vh issue — use dvh */
-  #r-panel {
-    position: fixed !important;
-    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    border-radius: 0 !important;
-    border-left: none !important;
+  /* Touch target sizing — minimum 44px for iOS */
+  .filt, .lbtn, .r-tab, .r-close, .card {
+    min-height: 44px;
+    cursor: pointer;
   }
-  #r-body, #r-smart { -webkit-overflow-scrolling: touch; overflow-y: auto; }
   
-  /* Improve scroll performance */
-  .feed { -webkit-overflow-scrolling: touch; overflow-y: auto; }
-  #r-body, #r-smart { -webkit-overflow-scrolling: touch; }
+  /* Prevent touch callout on buttons */
+  button, .card, .filt, .lbtn {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+  }
   
-  /* Fix overflow hidden body on iOS (blocks scroll) */
-  body.reader-open { position: fixed; width: 100%; }
+  /* iOS scroll momentum */
+  .feed, #r-body { -webkit-overflow-scrolling: touch; }
+  
+  /* Ensure nothing covers the page */
+  #r-overlay { pointer-events: none; }
+  #r-overlay.active { pointer-events: auto; }
+}
 
 @media (min-width: 769px){
   #mobile-filter-btn { display: none !important; }
@@ -1095,7 +1112,7 @@ function openReader(id){
   setRL('en', false);
   renderReader();
 
-  document.getElementById('r-overlay').style.display='block';
+  const ov=document.getElementById('r-overlay'); ov.style.display='block'; ov.classList.add('active');
   document.getElementById('r-panel').classList.add('open');
   document.body.style.overflow='hidden'; document.body.classList.add('reader-open');
   document.getElementById('r-body').scrollTop=0;
@@ -1103,7 +1120,7 @@ function openReader(id){
 }
 
 function closeReader(){
-  document.getElementById('r-overlay').style.display='none';
+  const ov2=document.getElementById('r-overlay'); ov2.style.display='none'; ov2.classList.remove('active');
   document.getElementById('r-panel').classList.remove('open');
   document.body.style.overflow=''; document.body.classList.remove('reader-open');
   readerArt=null;
