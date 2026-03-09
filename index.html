@@ -23,7 +23,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TA HUB — 技術美術每日精選</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -34,7 +34,7 @@
   --shader:#ff6b35;--proc:#7b5fff;--vfx:#00d4ff;--char:#ff3d9a;
   --scene:#50fa7b;--gfx:#ffb86c;--anim:#ff79c6;--tools:#8be9fd;
 }
-body{background:var(--bg);color:var(--txt);font-family:'Barlow','Noto Sans TC',sans-serif;font-weight:300;font-size:17px;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+body{background:var(--bg);color:var(--txt);font-family:'Barlow','Noto Sans TC',sans-serif;font-weight:300;font-size:17px;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
@@ -47,11 +47,11 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow','Noto Sans TC',s
 
 /* TICKER */
 #ticker{background:var(--surf2);border-bottom:1px solid var(--bdr);padding:5px 24px;overflow:hidden;white-space:nowrap;flex-shrink:0;}
-#ticker-inner{display:inline-block;animation:ticker 50s linear infinite;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+#ticker-inner{display:inline-block;animation:none;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
 #ticker-inner em{color:var(--acc);font-style:normal;margin:0 10px;}
 
 /* HEADER */
-header{background:rgba(10,10,12,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:0 20px;flex-shrink:0;}
+header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:0 20px;flex-shrink:0;}
 .hdr{max-width:1420px;margin:0 auto;display:flex;align-items:center;gap:12px;height:56px;}
 .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:.15em;color:var(--acc);display:flex;align-items:center;gap:8px;}
 .logo-dot{width:8px;height:8px;background:var(--acc);border-radius:50%;animation:pulse 2s ease-in-out infinite;}
@@ -103,7 +103,7 @@ header{background:rgba(10,10,12,.94);backdrop-filter:blur(20px);border-bottom:1p
 .clog-line{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);line-height:1.9;}
 
 /* CARDS */
-.card{background:var(--surf);border:1px solid var(--bdr);border-left:3px solid transparent;border-radius:3px;padding:13px 15px;margin-bottom:8px;cursor:pointer;transition:all .17s;animation:fadeUp .24s ease both;}
+.card{background:var(--surf);border:1px solid var(--bdr);border-left:3px solid transparent;border-radius:3px;padding:13px 15px;margin-bottom:8px;cursor:pointer;transition:border .15s;}
 .card:hover{border-color:rgba(0,229,160,.3);background:var(--surf2);transform:translateX(2px);}
 .card.is-new{background:linear-gradient(135deg,rgba(0,229,160,.05),rgba(123,95,255,.04));border-color:rgba(0,229,160,.22);border-left-color:var(--acc);}
 .card-hd{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;}
@@ -145,7 +145,7 @@ header{background:rgba(10,10,12,.94);backdrop-filter:blur(20px);border-bottom:1p
 .src-type{margin-left:auto;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
 
 /* READER PANEL */
-#r-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);z-index:500;display:none;}
+#r-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;}
 #r-panel{position:fixed;top:0;right:0;bottom:0;width:min(860px,100vw);background:var(--surf);border-left:1px solid var(--bdr);z-index:600;display:none;flex-direction:column;}
 #r-panel.open{display:flex;animation:slideIn .32s cubic-bezier(.22,.6,.36,1);}
 .r-topbar{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--bdr);background:rgba(10,10,12,.9);flex-shrink:0;}
@@ -179,7 +179,7 @@ header{background:rgba(10,10,12,.94);backdrop-filter:blur(20px);border-bottom:1p
 .vc-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;}
 .summary-box{background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--acc3);border-radius:0 3px 3px 0;padding:14px 18px;font-size:17px;line-height:1.8;color:var(--txt);}
 .summary-box.zh{color:#c0c0dc;border-left-color:var(--acc);}
-#r-body{flex:1;overflow-y:auto;padding:22px 30px 48px;}
+#r-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:22px 30px 48px;}
 
 /* Reader article content */
 .art-hdr{margin-bottom:26px;padding-bottom:18px;border-bottom:1px solid var(--bdr);}
@@ -302,6 +302,38 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
     z-index: 200;
   }
 }
+
+  /* iOS Safari performance fixes */
+  * { -webkit-tap-highlight-color: transparent; }
+  
+  /* Disable backdrop-filter (very slow on iPhone) */
+  header { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(10,10,12,0.98) !important; }
+  #r-overlay { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  
+  /* Disable card stagger animations — causes jank with many cards */
+  .card { animation: none !important; opacity: 1 !important; transform: none !important; }
+  
+  /* Disable shimmer skeleton animation */
+  .skel { animation: none !important; background: var(--surf2) !important; }
+  
+  /* Fix iOS 100vh issue — use dvh */
+  #r-panel {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+  }
+  #r-body, #r-smart { -webkit-overflow-scrolling: touch; overflow-y: auto; }
+  
+  /* Improve scroll performance */
+  .feed { -webkit-overflow-scrolling: touch; overflow-y: auto; }
+  #r-body, #r-smart { -webkit-overflow-scrolling: touch; }
+  
+  /* Fix overflow hidden body on iOS (blocks scroll) */
+  body.reader-open { position: fixed; width: 100%; }
+
 @media (min-width: 769px){
   #mobile-filter-btn { display: none !important; }
 }
@@ -686,9 +718,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   // ESC closes reader
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReader(); });
 
-  // Auto-collect if not done today
+  // Auto-collect if not done today — longer delay on mobile
   if(lastCollect !== today()){
-    await delay(800);
+    const collectDelay = window.innerWidth <= 768 ? 2000 : 800;
+    await delay(collectDelay);
     runCollect();
   }
 });
@@ -727,7 +760,7 @@ function render(){
     const isNew=a.isNew;
     const tZh=a.title_zh?`<div class="card-ttl-zh">${a.title_zh}</div>`:'';
     const eZh=a.excerpt_zh?`<p class="card-exc-zh">${a.excerpt_zh}</p>`:'';
-    return `<div class="card${isNew?' is-new':''}" style="animation-delay:${Math.min(i,12)*.022}s" onclick="openReader('${a.id}')">
+    return `<div class="card${isNew?' is-new':''}" style="animation-delay:${Math.min(i,5)*.025}s" onclick="openReader('${a.id}')">
       <div class="card-hd">
         ${srcBadgeHTML(a.sc,a.src)}
         ${isNew?'<span class="new-badge">NEW</span>':''}
@@ -1048,7 +1081,7 @@ function openReader(id){
 
   document.getElementById('r-overlay').style.display='block';
   document.getElementById('r-panel').classList.add('open');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow='hidden'; document.body.classList.add('reader-open');
   document.getElementById('r-body').scrollTop=0;
   const _rs=document.getElementById('r-smart'); if(_rs) _rs.scrollTop=0;
 }
@@ -1056,7 +1089,7 @@ function openReader(id){
 function closeReader(){
   document.getElementById('r-overlay').style.display='none';
   document.getElementById('r-panel').classList.remove('open');
-  document.body.style.overflow='';
+  document.body.style.overflow=''; document.body.classList.remove('reader-open');
   readerArt=null;
 }
 
@@ -1263,3 +1296,23 @@ async function translateReader(lang){
 <div id="mobile-filter-btn" onclick="alert('篩選功能請橫屏或使用電腦版')">☰ 篩選 / Filter</div>
 </body>
 </html>
+  #ticker { display: none !important; }
+
+  /* iOS: let page scroll naturally, don't trap in overflow:hidden containers */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    overflow-x: hidden !important;
+  }
+  .layout {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .feed {
+    overflow: visible !important;
+    height: auto !important;
+    padding-bottom: 80px !important;
+  }
+  .sb-left, .sb-right {
+    overflow: visible !important;
+  }
