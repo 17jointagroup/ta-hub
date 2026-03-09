@@ -161,9 +161,6 @@ header{background:rgba(10,10,12,.94);backdrop-filter:blur(20px);border-bottom:1p
 .r-tab:hover{color:var(--txt);border-color:var(--acc);}
 .r-tab.active{background:var(--acc);color:#000;border-color:var(--acc);font-weight:700;}
 .r-tab-sep{flex:1;}
-#r-tr-btn{background:rgba(123,95,255,.12);border:1px solid rgba(123,95,255,.35);color:var(--acc3);padding:6px 16px;font-family:'Space Mono',monospace;font-size:13px;border-radius:3px;cursor:pointer;white-space:nowrap;}
-#r-tr-btn.done{background:rgba(0,229,160,.1);border-color:rgba(0,229,160,.35);color:var(--acc);}
-#r-tr-btn.busy{animation:blink .7s ease-in-out infinite;cursor:default;}
 #r-err{padding:6px 18px;background:rgba(255,85,85,.08);border-bottom:1px solid rgba(255,85,85,.2);color:#ff5555;font-family:'Space Mono',monospace;font-size:10px;display:none;}
 /* Smart panel — summary/keypoints/videos */
 #r-smart{padding:20px 30px;border-bottom:1px solid var(--bdr);background:rgba(123,95,255,.04);}
@@ -201,7 +198,6 @@ header{background:rgba(10,10,12,.94);backdrop-filter:blur(20px);border-bottom:1p
 .sec h3.en{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;color:var(--acc);margin-bottom:8px;letter-spacing:.03em;}
 .sec h3.zh{font-family:'Barlow','Noto Sans TC',sans-serif;font-weight:700;font-size:19px;color:#9090cc;margin-bottom:8px;}
 .sec p{font-size:17px;line-height:2.0;}
-.sec pre{background:var(--surf2);border:1px solid var(--bdr);border-radius:3px;padding:16px;overflow-x:auto;font-family:'Space Mono',monospace;font-size:14px;color:var(--tools);line-height:1.6;margin:10px 0;}
 .callout{background:rgba(0,229,160,.05);border-left:3px solid var(--acc);padding:12px 18px;border-radius:0 3px 3px 0;font-size:17px;color:var(--muted);margin:10px 0;}
 .skel{display:block;height:.78em;border-radius:2px;margin-bottom:5px;background:linear-gradient(90deg,var(--surf) 25%,var(--surf2) 50%,var(--surf) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
 
@@ -212,6 +208,100 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 #r-panel.rmode-en .body-zh,#r-panel.rmode-en .art-t-zh,#r-panel.rmode-en .art-t-pending{display:none!important;}
 #r-panel.rmode-zh .body-en{display:none!important;}
 #r-panel.rmode-zh .art-t-en{font-family:'Barlow',sans-serif!important;font-size:16px!important;color:var(--muted)!important;font-weight:400!important;}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — 768px breakpoint
+═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px){
+  /* Hide sidebars, go single column */
+  #sidebar-left, #sidebar-right { display: none !important; }
+  #main-wrap {
+    flex-direction: column;
+    padding: 0 0 60px 0;
+    gap: 0;
+  }
+  #feed-col {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 10px;
+  }
+  /* Header */
+  header {
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .logo { font-size: 18px !important; }
+  .live-badge { font-size: 10px !important; }
+  /* Lang switcher in header */
+  .lang-sw { order: 3; width: 100%; display: flex; gap: 4px; }
+  .lbtn { flex: 1; font-size: 12px !important; padding: 5px 8px !important; }
+  /* Feed title */
+  .feed-ttl { font-size: 18px !important; }
+  /* Cards */
+  .card { padding: 12px; }
+  .card-ttl-en { font-size: 17px !important; }
+  .card-ttl-zh { font-size: 14px !important; }
+  .card-exc-en, .card-exc-zh { font-size: 13px !important; }
+  /* Reader panel — full screen on mobile */
+  #r-panel {
+    width: 100% !important;
+    right: 0 !important;
+    left: 0 !important;
+    border-radius: 0 !important;
+    top: 0 !important;
+    height: 100vh !important;
+  }
+  #r-header {
+    padding: 8px 12px !important;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  #r-close { order: -1; }
+  #r-ext-link {
+    font-size: 11px !important;
+    padding: 5px 10px !important;
+    order: 2;
+  }
+  .r-tabbar { padding: 6px 10px !important; gap: 4px !important; flex-wrap: wrap; }
+  .r-tab { font-size: 11px !important; padding: 5px 10px !important; }
+  /* Smart panel */
+  #r-smart { padding: 12px !important; }
+  .section-hdr { font-size: 10px !important; }
+  .summary-box { font-size: 14px !important; padding: 10px 12px !important; }
+  .keypoints li { font-size: 14px !important; }
+  /* Video cards */
+  #r-videos { grid-template-columns: 1fr !important; }
+  /* Article body */
+  #r-body { padding: 14px 12px !important; }
+  .art-t-en { font-size: 22px !important; }
+  .art-t-zh { font-size: 18px !important; }
+  .sec p { font-size: 15px !important; }
+  .sec h3.en { font-size: 17px !important; }
+  /* Overlay */
+  #r-overlay { display: block !important; }
+  /* Bottom nav bar for mobile (filter toggle) */
+  #mobile-filter-btn {
+    display: flex !important;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surf2);
+    border-top: 1px solid var(--bdr);
+    padding: 10px 16px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--acc);
+    cursor: pointer;
+    z-index: 200;
+  }
+}
+@media (min-width: 769px){
+  #mobile-filter-btn { display: none !important; }
+}
+
 </style>
 </head>
 <body class="lang-both">
@@ -242,9 +332,9 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
     <div id="new-banner"></div>
     <div class="last-collect" id="last-collect-hdr"></div>
     <div class="lang-sw">
-      <button class="lbtn" id="btn-en" onclick="setLang('en')">EN</button>
-      <button class="lbtn active" id="btn-both" onclick="setLang('both')">雙語</button>
+      <button class="lbtn active" id="btn-en" onclick="setLang('en')">EN</button>
       <button class="lbtn" id="btn-zh" onclick="setLang('zh')">中文</button>
+      <button class="lbtn" id="btn-ja" onclick="setLang('ja')">日文</button>
     </div>
     <div class="search-wrap">
       <span class="si">⌕</span>
@@ -388,13 +478,13 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
     <span id="r-title-short"></span>
     <a id="r-ext-link" href="#" target="_blank" title="在 Google 搜尋此文章">↗ 搜尋此文章</a>
   </div>
-  <!-- Tab bar: EN / 雙語 / 中文 — each triggers full smart render -->
+  <!-- Tab bar: EN / 中文 / 日文 — each triggers full smart render -->
   <div class="r-tabbar">
-    <button class="r-tab" id="rt-en"   onclick="setRL('en')">📄 EN</button>
-    <button class="r-tab active" id="rt-both" onclick="setRL('both')">🌐 雙語</button>
-    <button class="r-tab" id="rt-zh"   onclick="setRL('zh')">中文</button>
+    <button class="r-tab active" id="rt-en" onclick="setRL('en')">📄 EN</button>
+    <button class="r-tab" id="rt-zh" onclick="setRL('zh')">中文</button>
+    <button class="r-tab" id="rt-ja" onclick="setRL('ja')">日文</button>
     <span class="r-tab-sep"></span>
-    <button id="r-tr-btn" onclick="translateReader()">✦ AI 翻譯</button>
+    
   </div>
   <!-- Smart panel: summary + key points + videos + body -->
   <div id="r-smart" style="display:none"></div>
@@ -470,10 +560,10 @@ const POOL = [
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let A = [];          // all articles
-let cat = 'all', srcF = 'all', query = '', sortBy = 'date', lang = 'both';
+let cat = 'all', srcF = 'all', query = '', sortBy = 'date', lang = 'en';
 let apiKey = '', trCount = 0;
 let lastCollect = null, collecting = false;
-let readerArt = null, rLang = 'both', rTranslated = false;
+let readerArt = null, rLang = 'en', rTranslated = false;
 const bodyCache = {}; // id -> {secs, zhSecs}
 
 // ─── STORAGE (localStorage fallback) ─────────────────────────────────────────
@@ -520,40 +610,33 @@ function genSections(a){
   const base=[{h:'Overview',p:a.excerpt+' This technical breakdown covers full implementation details, performance considerations on console and PC, and practical workflow advice from production experience.'}];
   if(t==='shader'||t==='graphics') return [...base,
     {h:'Core Mathematics',p:"The technique evaluates a continuous function over the pixel domain, leveraging the GPU's implicit screen-space derivatives via ddx()/ddy() computed from neighbouring pixels in 2×2 quads — a fundamental property that shapes the algorithm's structure."},
-    {h:'HLSL Implementation',pre:"for (int i = 0; i < SAMPLE_COUNT; ++i) {\n    float2 uv = screenUV + poissonDisk[i] * _Radius;\n    float d  = LinearEyeDepth(SAMPLE_DEPTH(uv));\n    result  += weight[i] * ComputeTerm(d, centerDepth);\n}\nreturn result / totalWeight;"},
-    {callout:"💡 On PS5 / Xbox Series X, prefer WaveActiveSum() intrinsics over shared memory (LDS) — they map directly to native wave instructions and avoid LDS allocation overhead."},
     {h:'Performance Notes',p:"GPU timing shows roughly 0.4ms at 1440p on a mid-range GPU. The primary bottleneck is depth buffer bandwidth — caching depth at half resolution halves this cost with minimal quality loss. Always validate with RenderDoc or PIX before shipping."},
     {h:'Further Reading',p:"See the official GDC slides, the accompanying Siggraph technical paper, and the open-source reference implementation linked from the original article. Community corrections in the discussion thread are also worth reading."}
   ];
   if(t==='procedural') return [...base,
     {h:'Graph Architecture',p:"The system is a directed acyclic graph (DAG): each node declares typed input/output ports, the runtime topologically sorts and executes in dependency order, and dirty-flagging ensures only affected subgraphs re-evaluate when upstream values change."},
-    {h:'Core VEX Logic',pre:'// Houdini VEX — density-masked scatter\n@density = chramp("density", fit01(@height, 0, 1));\nif (rand(@ptnum * 2.718) > @density)\n    removepoint(0, @ptnum);\n@scale = fit(noise(@P * 0.3), 0, 1, 0.75, 1.35);'},
-    {callout:"💡 Cache heavy intermediate results with File SOPs or UE5 PCG data layers. Re-cooking the entire graph on every change is the single biggest iteration killer on large datasets."},
     {h:'Engine Integration',p:"The export contract defines which attributes survive the USD round-trip: position, orientation, scale, and a string attribute identifying the asset variant used to stream the correct LOD chain per instance from world partition."}
   ];
   if(t==='vfx') return [...base,
     {h:'Effect Decomposition',p:"The effect is split into three layers: a hero simulation driving primary motion, a detail pass adding surface turbulence, and a compositing pass for screen-space integration. Each layer has independent LOD control and can be culled separately by the budget manager."},
-    {h:'GPU Simulation',pre:"// Niagara HLSL — turbulent velocity field\nfloat3 TurbulentVel(float3 p, float t) {\n    float3 q = p * _Scale + float3(0, t * _Flow, 0);\n    float3 v = snoise3(q) * 2.0 - 1.0;\n    return v * _Strength;\n}"},
-    {callout:"⚠ GPU particle-to-particle collision is O(n²). Cap emitter count at ~4096 for stable 60fps on last-gen, or implement a tile-based spatial hash for larger budgets."},
-    {h:'LOD Strategy',p:"High-fidelity simulations are baked to 8×8 flipbook atlases. The runtime LOD selects between a live GPU simulation (close), a flipbook (mid), and a simple sprite (far) based on screen-coverage estimates."}
+    {h:'Simulation Notes',p:"Pyro and FLIP simulations should be authored at export quality, then baked to flipbook atlases at 8×8 or 16×16 for runtime playback. This approach reduces GPU memory and allows LOD control without re-simulation."},
+    {h:'Further Reading',p:"See the artist's ArtStation breakdown, the accompanying GDC or Siggraph talk, and the original source article for full node graphs and export settings."}
   ];
-  if(t==='character') return [...base,
-    {h:'Deformation Pipeline',p:"Character deformation runs in three sequential GPU passes: linear blend skinning, corrective blend shape deltas, and tangent-frame recomputation to ensure shading normals remain consistent under extreme joint angles."},
-    {h:'Skin Shader',pre:"// Pre-integrated SSS lookup\nfloat3 SkinSSS(float NdotL, float curvature, float3 albedo) {\n    float2 uv = float2(NdotL * 0.5 + 0.5, saturate(curvature));\n    float3 scatter = tex2D(_SSSProfile, uv).rgb;\n    return scatter * albedo * _SSSStrength;\n}"},
-    {callout:"💡 Pack bent normals (RGB) and AO (A) into one RGBA texture — this halves the texture-fetch count in the lighting shader at no visible quality cost."},
-    {h:'Asset Validation',p:"A Maya Python shelf tool checks every character at submission: UV island overlap, joint count against per-platform budgets, skin weight normalisation, and blend shape naming. Failures block the Perforce submit."}
+  if(t==='character'||t==='animation') return [...base,
+    {h:'Rig Architecture',p:"The modular rig separates deformation from control: a clean deformation skeleton with minimal joints drives skinning, while a separate control rig with helper joints and correctives handles edge cases in extreme poses."},
+    {h:'Performance Budget',p:"Hero characters on current-gen target 150–200 joints for the deformation skeleton. Each additional corrective blend shape costs approximately 0.1ms on PS5 — budget carefully and prefer joint-driven correctives where possible."},
+    {h:'Further Reading',p:"Refer to the source article, the Maya or Houdini project files if provided, and the studio's public GDC talk for the complete rigging pipeline and toolchain details."}
   ];
-  return [...base,
-    {h:'System Design',p:"The architecture separates data authoring, runtime evaluation, and debug visualisation into independent subsystems connected by well-defined interfaces, allowing individual pieces to be replaced without disrupting the others."},
-    {h:'Implementation',pre:"// SoA inner loop — cache-friendly, SIMD-vectorisable\nfor (int i = 0; i < count; ++i) {\n    pos[i] = integrate(pos[i], vel[i], dt);\n    vel[i] = vel[i] * damp[i] + ext[i];\n}"},
-    {callout:"💡 Profile before optimising. Superluminal (CPU) and RenderDoc (GPU) identify true bottlenecks — intuitive guesses are wrong more often than not."},
-    {h:'Results',p:"Post-shipping metrics: 35% reduction in artist iteration time and 20% GPU frame-time improvement. The modular design made it straightforward to port across three engine versions simultaneously."}
+  if(t==='scene'||t==='tools') return [...base,
+    {h:'Pipeline Overview',p:"Assets flow from DCC tool through an automated validation and export stage, then into the engine as USD or FBX. Each stage is gated by automated checks that catch naming errors, UV issues, and polycount violations before they reach the build."},
+    {h:'Optimisation Notes',p:"World Partition streaming cells should be sized to 1–2 seconds of traversal time at typical player speed. Cells that are too small increase actor overhead; cells that are too large cause frame spikes when crossing boundaries."},
+    {h:'Further Reading',p:"See the source article, the studio's pipeline talk, and the linked GitHub or HDA repository for scripts and tool source code."}
   ];
+  return base;
 }
 
 function renderSecHTML(s, isZh=false){
   if(s.callout) return `<div class="callout">${s.callout}</div>`;
-  if(s.pre) return `<div class="sec"><pre>${s.pre}</pre></div>`;
   return `<div class="sec"><h3 class="${isZh?'zh':'en'}">${s.h}</h3><p>${s.p}</p></div>`;
 }
 
@@ -774,9 +857,9 @@ async function translateAll(){
   for(const a of todo){
     try{
       btn.textContent=`翻譯中 ${Math.round(done/todo.length*100)}%...`;
-      a.title_zh = await trText(a.title);
+      a.title_zh = await trText(a.title, rLang);
       await delay(150);
-      a.excerpt_zh = await trText(a.excerpt);
+      a.excerpt_zh = await trText(a.excerpt, rLang);
       done++; trCount++;
       pb.style.width=Math.round(done/todo.length*100)+'%';
       document.getElementById('stat-tr').textContent=trCount;
@@ -819,21 +902,22 @@ function naturalizeZh(text){
   return t;
 }
 
-async function googleTranslate(text){
+async function googleTranslate(text, tl='zh-TW'){
   if(!text||!text.trim()) return text;
   const url = 'https://translate.googleapis.com/translate_a/single'
-    + '?client=gtx&sl=en&tl=zh-TW&dt=t&q='
+    + '?client=gtx&sl=en&tl=' + tl + '&dt=t&q='
     + encodeURIComponent(text.slice(0, 500));
   const res = await fetch(url);
   if(!res.ok) throw new Error('Google Translate error ' + res.status);
   const d = await res.json();
   const raw = d[0].map(seg => seg[0]).join('');
-  return naturalizeZh(raw);
+  return tl === 'zh-TW' ? naturalizeZh(raw) : raw;
 }
 
-async function trText(text){
+async function trText(text, lang){
+  const tl = lang === 'ja' ? 'ja' : 'zh-TW';
   for(let i = 0; i < 3; i++){
-    try{ return await googleTranslate(text); }
+    try{ return await googleTranslate(text, tl); }
     catch(e){ if(i===2) throw e; await delay(500 * (i+1)); }
   }
 }
@@ -954,11 +1038,10 @@ function openReader(id){
     document.getElementById('r-ext-link').textContent = '↗ 搜尋此文章';
   }
 
-  const trBtn=document.getElementById('r-tr-btn');
-  trBtn.className=''; trBtn.textContent='✦ AI 翻譯';
+  if(activeTab) activeTab.textContent=origTabText;
 
   document.getElementById('r-err').style.display='none';
-  setRL('both', false);
+  setRL('en', false);
   renderReader();
 
   document.getElementById('r-overlay').style.display='block';
@@ -978,12 +1061,27 @@ function closeReader(){
 // ─── READER LANG TABS ────────────────────────────────────────────────────────
 function setRL(l, doRender=true){
   rLang=l;
-  ['en','both','zh'].forEach(x=>document.getElementById('rt-'+x).classList.toggle('active',x===l));
+  ['en','zh','ja'].forEach(x=>{
+    const el=document.getElementById('rt-'+x);
+    if(el) el.classList.toggle('active',x===l);
+  });
   const p=document.getElementById('r-panel');
-  p.classList.remove('rmode-en','rmode-zh');
-  if(l==='en')  p.classList.add('rmode-en');
-  if(l==='zh')  p.classList.add('rmode-zh');
-  if(doRender&&readerArt) renderReader();
+  p.classList.remove('rmode-en','rmode-zh','rmode-ja');
+  if(l==='en') p.classList.add('rmode-en');
+  if(l==='zh') p.classList.add('rmode-zh');
+  if(l==='ja') p.classList.add('rmode-ja');
+  // Auto-translate when switching to zh or ja
+  if((l==='zh'||l==='ja') && readerArt){
+    const id=readerArt.id||readerArt.title;
+    const cache=bodyCache[id]||{};
+    if(!cache.zhSecs) {
+      translateReader(l);
+    } else {
+      if(doRender&&readerArt) renderReader();
+    }
+  } else {
+    if(doRender&&readerArt) renderReader();
+  }
 }
 
 // ─── MASTER RENDER ───────────────────────────────────────────────────────────
@@ -995,7 +1093,8 @@ function renderReader(){
 function renderSmartPanel(){
   const a=readerArt; if(!a) return;
   const isZh = rLang==='zh';
-  const isBoth = rLang==='both';
+  const isJa = rLang==='ja';
+  const isNonEn = isZh||isJa;
   const smartEl=document.getElementById('r-smart');
   smartEl.style.display='block';
 
@@ -1006,22 +1105,22 @@ function renderSmartPanel(){
 
   // Summary
   let summaryHTML='';
-  if(rLang==='en'||rLang==='both'){
+  if(rLang==='en'){
     summaryHTML+=`<div class="summary-box">${summary}</div>`;
   }
-  if((rLang==='zh'||rLang==='both') && summaryZh){
-    summaryHTML+=`<div class="summary-box zh" style="margin-top:6px">${summaryZh}</div>`;
+  if(isNonEn && summaryZh){
+    summaryHTML+=`<div class="summary-box zh">${summaryZh}</div>`;
   }
-  if(rLang==='zh' && !summaryZh){
-    summaryHTML+=`<div class="summary-box zh" style="color:var(--muted);font-style:italic">點擊「⟳ 翻譯中文」取得中文摘要</div>`;
+  if(isNonEn && !summaryZh){
+    summaryHTML+=`<div class="summary-box zh" style="color:var(--muted);font-style:italic">⟳ 翻譯中...</div>`;
   }
 
   // Key points
   let kpHTML='';
-  if(rLang==='en'||rLang==='both'){
+  if(rLang==='en'){
     kpHTML+=kp.map(p=>`<li>${p}</li>`).join('');
   }
-  if(rLang==='zh'||rLang==='both'){
+  if(isNonEn){
     const bc=bodyCache[a.id];
     if(bc.kpZh){
       kpHTML+=bc.kpZh.map(p=>`<li class="zh">${p}</li>`).join('');
@@ -1088,19 +1187,21 @@ function renderReaderBody(){
 }
 
 // ─── TRANSLATE (MyMemory, free, no key) ──────────────────────────────────────
-async function translateReader(){
+async function translateReader(targetLang){
   if(!readerArt) return;
   const a=readerArt;
-  const trBtn=document.getElementById('r-tr-btn');
   const errEl=document.getElementById('r-err');
-  trBtn.className='busy'; trBtn.textContent='✦ 翻譯中...';
-  errEl.style.display='none';
+  if(errEl) errEl.style.display='none';
+  // Show loading state on active tab
+  const activeTab = document.querySelector('.r-tab.active');
+  const origTabText = activeTab ? activeTab.textContent : '';
+  if(activeTab) activeTab.textContent='⟳ 翻譯中...';
 
   try{
     // 1. Title + excerpt
     if(!a.title_zh){
-      a.title_zh = await trText(a.title);
-      a.excerpt_zh = await trText(a.excerpt);
+      a.title_zh = await trText(a.title, rLang);
+      a.excerpt_zh = await trText(a.excerpt, rLang);
       trCount++; document.getElementById('stat-tr').textContent=trCount;
     }
 
@@ -1110,7 +1211,7 @@ async function translateReader(){
       const kp=getKeyPoints(a);
       const zhPts=[];
       for(const pt of kp){
-        zhPts.push(await trText(pt));
+        zhPts.push(await trText(pt, rLang));
         await delay(120);
       }
       bc.kpZh=zhPts;
@@ -1125,26 +1226,28 @@ async function translateReader(){
       const textSecs=bc.secs.filter(s=>s.h&&s.p);
       const zhSecs=[];
       for(const s of textSecs){
-        const zh_h=await trText(s.h);
+        const zh_h=await trText(s.h, rLang);
         await delay(80);
-        const zh_p=await trText(s.p);
+        const zh_p=await trText(s.p, rLang);
         await delay(80);
         zhSecs.push({h:zh_h,p:zh_p,isZh:true});
       }
       let zi=0;
-      bc.zhSecs=bc.secs.map(s=>{ if(s.callout||s.pre) return s; return zhSecs[zi++]||s; });
+      bc.zhSecs=bc.secs.map(s=>{ if(s.callout) return s; return zhSecs[zi++]||s; });
     }
 
-    trBtn.className='done'; trBtn.textContent='✓ 已翻譯';
+    if(activeTab) activeTab.textContent=origTabText;
     renderReader();
     render();
   }catch(e){
     console.error(e);
-    trBtn.className=''; trBtn.textContent='✦ AI 翻譯';
+    if(activeTab) activeTab.textContent=origTabText;
     errEl.style.display='block';
-    errEl.innerHTML='翻譯失敗：'+e.message+' — <button onclick="translateReader()" style="background:none;border:none;color:#ff5555;cursor:pointer;text-decoration:underline;font-size:10px">重試</button>';
+    errEl.innerHTML='翻譯失敗：'+e.message+' — <button onclick="translateReader(rLang)" style="background:none;border:none;color:#ff5555;cursor:pointer;text-decoration:underline;font-size:10px">重試</button>';
   }
 }
 </script>
+
+<div id="mobile-filter-btn" onclick="alert('篩選功能請橫屏或使用電腦版')">☰ 篩選 / Filter</div>
 </body>
 </html>
