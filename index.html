@@ -1331,21 +1331,26 @@ async function translateReader(lang){
 </html>
   #ticker { display: none !important; }
 
-  /* iOS: let page scroll naturally, don't trap in overflow:hidden containers */
-  html, body {
-    height: auto !important;
-    overflow: visible !important;
-    overflow-x: hidden !important;
+  /* iOS scroll fix: let feed scroll, not body */
+  html { height: 100%; overflow: hidden; }
+  body {
+    height: 100% !important;
+    overflow: hidden !important;
   }
   .layout {
-    overflow: visible !important;
-    height: auto !important;
+    height: calc(100dvh - 56px) !important;
+    overflow: hidden !important;
+    touch-action: pan-y !important;
   }
   .feed {
-    overflow: visible !important;
-    height: auto !important;
+    height: 100% !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    -webkit-transform: translateZ(0) !important;
+    touch-action: pan-y !important;
     padding-bottom: 80px !important;
   }
-  .sb-left, .sb-right {
-    overflow: visible !important;
+  /* Prevent cards from blocking scroll gesture */
+  .card {
+    touch-action: manipulation !important;
   }
