@@ -589,9 +589,16 @@ function renderStep(){
   sw.appendChild(d);window.scrollTo(0,0);
 }
 function answer(el,ok){
-  el.parentElement.querySelectorAll('.choice').forEach(b=>b.onclick=null);
-  if(ok){el.classList.add('correct');el.innerHTML='✓ '+el.innerHTML;setTimeout(nextStep,900);}
-  else{el.classList.add('wrong');setTimeout(()=>{el.classList.remove('wrong');el.onclick=e=>answer(el,false);},550);}
+  if(el.classList.contains('correct')||el.classList.contains('wrong'))return;
+  if(ok){
+    // lock all, mark correct
+    el.parentElement.querySelectorAll('.choice').forEach(b=>b.style.pointerEvents='none');
+    el.classList.add('correct');el.innerHTML='✓ '+el.innerHTML;
+    setTimeout(nextStep,900);
+  } else {
+    el.classList.add('wrong');
+    setTimeout(()=>el.classList.remove('wrong'),550);
+  }
 }
 function nextStep(){stopAFs();curIdx++;if(curIdx>=steps(curCh.id).length)curIdx=steps(curCh.id).length-1;renderStep();}
 function finishLesson(){
