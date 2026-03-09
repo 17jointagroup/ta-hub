@@ -580,10 +580,18 @@ window.addEventListener('DOMContentLoaded', async () => {
   SEEDS.forEach(a=>{ map[a.id]={...a}; });
   saved.forEach(a=>{
     if(!map[a.id]) map[a.id]={...a};
-    else if(a.title_zh){ map[a.id].title_zh=a.title_zh; map[a.id].excerpt_zh=a.excerpt_zh; }
+    else {
+      // Only restore translations from localStorage, never overwrite url/title/tags from seed
+      if(a.title_zh){ map[a.id].title_zh=a.title_zh; map[a.id].excerpt_zh=a.excerpt_zh; }
+    }
   });
   A = Object.values(map);
   lastCollect = savedLastCollect;
+  // Force-refresh URLs from POOL for any daily articles saved with old homepage URLs
+  const POOL_URL_MAP = {};
+  POOL.forEach(p=>{ POOL_URL_MAP[p.title]=p.url; });
+  SEEDS.forEach(s=>{ POOL_URL_MAP[s.title]=s.url; });
+  A.forEach(a=>{ if(POOL_URL_MAP[a.title]) a.url=POOL_URL_MAP[a.title]; });
 
   updateStats(); render();
   updateCollectStatus();
