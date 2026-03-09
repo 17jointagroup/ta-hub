@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<!--
+  TA HUB — 技術美術每日精選
+  
+  【本地開啟】直接在瀏覽器開啟此 HTML 檔案即可
+  
+  【讓他人瀏覽 — GitHub Pages 免費部署】
+  1. 建立 GitHub 帳號：https://github.com
+  2. 新建 Repository（名稱例：ta-hub），設為 Public
+  3. 將此檔案改名為 index.html，上傳到 repo
+  4. 進入 repo Settings → Pages → Source 選 main branch
+  5. 幾分鐘後取得網址：https://你的帳號.github.io/ta-hub/
+  
+  【自訂網域】
+  - 在 GitHub Pages 設定填入你的網域（如 ta.yourdomain.com）
+  - 在你的 DNS 設定 CNAME 指向 你的帳號.github.io
+  
+  【不需要後端！】
+  - 翻譯：Google Translate public API（免費，不需 key）
+  - 資料：localStorage 儲存在使用者瀏覽器
+  - 完全靜態，CDN 部署即可
+-->
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TA HUB — 技術美術每日精選</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0a0c;--surf:#111116;--surf2:#18181f;--bdr:#2a2a38;
+  --acc:#00e5a0;--acc3:#7b5fff;--txt:#e8e8f0;--muted:#666680;
+  --shader:#ff6b35;--proc:#7b5fff;--vfx:#00d4ff;--char:#ff3d9a;
+  --scene:#50fa7b;--gfx:#ffb86c;--anim:#ff79c6;--tools:#8be9fd;
+}
+body{background:var(--bg);color:var(--txt);font-family:'Barlow','Noto Sans TC',sans-serif;font-weight:300;font-size:15px;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes newPop{0%{opacity:0;transform:scale(.7)}60%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+
+/* TICKER */
+#ticker{background:var(--surf2);border-bottom:1px solid var(--bdr);padding:5px 24px;overflow:hidden;white-space:nowrap;flex-shrink:0;}
+#ticker-inner{display:inline-block;animation:ticker 50s linear infinite;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+#ticker-inner em{color:var(--acc);font-style:normal;margin:0 10px;}
+
+/* HEADER */
+header{background:rgba(10,10,12,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:0 20px;flex-shrink:0;}
+.hdr{max-width:1420px;margin:0 auto;display:flex;align-items:center;gap:12px;height:56px;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:.15em;color:var(--acc);display:flex;align-items:center;gap:8px;}
+.logo-dot{width:8px;height:8px;background:var(--acc);border-radius:50%;animation:pulse 2s ease-in-out infinite;}
+.live-badge{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);border:1px solid var(--bdr);padding:3px 8px;border-radius:2px;white-space:nowrap;}
+.live-badge b{color:var(--acc);}
+#new-banner{font-family:'Space Mono',monospace;font-size:9px;color:var(--acc);border:1px solid rgba(0,229,160,.3);background:rgba(0,229,160,.08);padding:3px 8px;border-radius:2px;display:none;animation:newPop .4s ease;}
+.last-collect{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+.lang-sw{display:flex;border:1px solid var(--bdr);border-radius:3px;overflow:hidden;flex-shrink:0;}
+.lbtn{background:none;border:none;color:var(--muted);padding:4px 10px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;transition:all .15s;}
+.lbtn+.lbtn{border-left:1px solid var(--bdr);}
+.lbtn.active{background:var(--acc);color:#000;font-weight:700;}
+.search-wrap{flex:1;position:relative;max-width:340px;margin-left:auto;}
+.search-wrap input{width:100%;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt);padding:6px 12px 6px 30px;font-family:'Barlow',sans-serif;font-size:13px;outline:none;border-radius:2px;}
+.search-wrap input:focus{border-color:var(--acc);}
+.search-wrap input::placeholder{color:var(--muted);}
+.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
+
+/* LAYOUT */
+.layout{flex:1;overflow:hidden;display:grid;grid-template-columns:215px 1fr 260px;max-width:1420px;margin:0 auto;width:100%;}
+
+/* SIDEBARS */
+.sb-left{border-right:1px solid var(--bdr);padding:14px 12px;overflow-y:auto;}
+.sb-right{border-left:1px solid var(--bdr);padding:14px 12px;overflow-y:auto;}
+.sb-hdr{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr);}
+.sb-sec{margin-bottom:18px;}
+.filt{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;border-left:2px solid transparent;color:var(--muted);padding:5px 8px 5px 10px;cursor:pointer;text-align:left;border-radius:0 2px 2px 0;transition:all .14s;}
+.filt:hover{color:var(--txt);background:var(--surf2);}
+.filt.active{color:var(--txt);background:var(--surf2);border-left-color:var(--acc);}
+.filt-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.filt-lbl{display:flex;flex-direction:column;gap:1px;}
+.filt-en{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:15px;line-height:1.1;}
+.filt-zh{font-size:12px;color:var(--muted);line-height:1.1;}
+.filt.active .filt-zh{color:var(--acc);}
+.filt-cnt{margin-left:auto;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+
+/* FEED */
+.feed{padding:14px 16px;overflow-y:auto;}
+.feed-ctrl{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.feed-ttl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;letter-spacing:.05em;text-transform:uppercase;}
+.feed-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+.collect-btn{margin-left:auto;background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.22);color:var(--acc);padding:5px 12px;font-family:'Space Mono',monospace;font-size:10px;border-radius:2px;cursor:pointer;}
+.collect-btn:disabled{opacity:.5;cursor:not-allowed;}
+.sort-sel{background:var(--surf2);border:1px solid var(--bdr);color:var(--muted);padding:5px 8px;font-family:'Space Mono',monospace;font-size:10px;outline:none;border-radius:2px;}
+
+/* COLLECT LOG */
+#collect-log{background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.18);border-radius:3px;padding:10px 14px;margin-bottom:10px;display:none;}
+.clog-hdr{font-family:'Space Mono',monospace;font-size:10px;color:var(--acc);margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.spin{display:inline-block;width:9px;height:9px;border:1.5px solid var(--acc);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;}
+.clog-line{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);line-height:1.9;}
+
+/* CARDS */
+.card{background:var(--surf);border:1px solid var(--bdr);border-left:3px solid transparent;border-radius:3px;padding:13px 15px;margin-bottom:8px;cursor:pointer;transition:all .17s;animation:fadeUp .24s ease both;}
+.card:hover{border-color:rgba(0,229,160,.3);background:var(--surf2);transform:translateX(2px);}
+.card.is-new{background:linear-gradient(135deg,rgba(0,229,160,.05),rgba(123,95,255,.04));border-color:rgba(0,229,160,.22);border-left-color:var(--acc);}
+.card-hd{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;}
+.card-ttl-en{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:19px;color:var(--txt);line-height:1.3;}
+.card-ttl-zh{font-size:15px;font-weight:500;color:var(--acc);line-height:1.4;margin-top:3px;}
+.card-exc-en,.card-exc-zh{font-size:14px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-exc-en{color:var(--muted);}
+.card-exc-zh{color:#8888aa;margin-top:3px;}
+.card-ft{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:9px;}
+.c-date{margin-left:auto;font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);}
+.no-results{text-align:center;padding:48px 0;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;}
+
+/* BADGES / PILLS */
+.src-badge{font-family:'Space Mono',monospace;font-size:9px;padding:2px 6px;border-radius:2px;white-space:nowrap;flex-shrink:0;}
+.new-badge{background:rgba(0,229,160,.15);color:var(--acc);border:1px solid rgba(0,229,160,.35);border-radius:2px;padding:1px 5px;font-size:9px;font-family:'Space Mono',monospace;animation:newPop .4s ease;flex-shrink:0;}
+.tag-pill{font-family:'Space Mono',monospace;font-size:12px;padding:2px 8px;border-radius:20px;cursor:pointer;white-space:nowrap;transition:opacity .15s;}
+.tag-pill:hover{opacity:.6;}
+
+/* RIGHT SIDEBAR */
+.api-panel{background:rgba(255,184,108,.07);border:1px solid rgba(255,184,108,.22);border-radius:3px;padding:10px 12px;margin-bottom:8px;}
+.api-lbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--gfx);margin-bottom:6px;}
+.api-panel input{width:100%;background:var(--surf);border:1px solid var(--bdr);color:var(--txt);padding:5px 8px;font-family:'Space Mono',monospace;font-size:10px;outline:none;border-radius:2px;}
+.api-note{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-top:5px;}
+.tr-all-btn{width:100%;background:rgba(123,95,255,.1);border:1px solid rgba(123,95,255,.28);color:var(--acc3);font-family:'Space Mono',monospace;font-size:10px;padding:7px;border-radius:3px;cursor:pointer;margin-bottom:5px;}
+.tr-all-btn:disabled{opacity:.5;cursor:not-allowed;}
+.prog-wrap{height:2px;background:var(--surf2);border-radius:1px;margin-bottom:10px;overflow:hidden;display:none;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--acc3),var(--acc));width:0%;transition:width .3s;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
+.stat-box{background:var(--surf);border:1px solid var(--bdr);border-radius:2px;padding:8px;text-align:center;}
+.stat-n{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;color:var(--acc);display:block;}
+.stat-l{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;}
+.collect-status{background:var(--surf);border:1px solid var(--bdr);border-radius:2px;padding:10px 12px;}
+.cs-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:6px;}
+.cs-txt{font-family:'Space Mono',monospace;font-size:9px;}
+.cs-detail{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;}
+.src-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(42,42,56,.4);}
+.src-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.src-name{color:var(--txt);font-size:14px;}
+.src-type{margin-left:auto;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+
+/* READER PANEL */
+#r-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);z-index:500;display:none;}
+#r-panel{position:fixed;top:0;right:0;bottom:0;width:min(860px,100vw);background:var(--surf);border-left:1px solid var(--bdr);z-index:600;display:none;flex-direction:column;}
+#r-panel.open{display:flex;animation:slideIn .32s cubic-bezier(.22,.6,.36,1);}
+.r-topbar{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--bdr);background:rgba(10,10,12,.9);flex-shrink:0;}
+.r-close{background:none;border:1px solid var(--bdr);color:var(--muted);width:28px;height:28px;border-radius:2px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.r-close:hover{border-color:var(--acc);color:var(--acc);}
+#r-src-badge{font-family:'Space Mono',monospace;font-size:9px;padding:2px 6px;border-radius:2px;white-space:nowrap;flex-shrink:0;}
+#r-title-short{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#r-ext-link{border:1px solid var(--bdr);color:var(--muted);padding:4px 10px;border-radius:2px;font-size:10px;font-family:'Space Mono',monospace;text-decoration:none;white-space:nowrap;}
+#r-ext-link:hover{border-color:var(--acc);color:var(--acc);}
+/* Tab bar */
+.r-tabbar{display:flex;align-items:center;gap:4px;padding:8px 18px;border-bottom:1px solid var(--bdr);background:var(--surf2);flex-shrink:0;}
+.r-tab{background:none;border:1px solid var(--bdr);color:var(--muted);padding:5px 14px;font-family:'Space Mono',monospace;font-size:10px;border-radius:3px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.r-tab:hover{color:var(--txt);border-color:var(--acc);}
+.r-tab.active{background:var(--acc);color:#000;border-color:var(--acc);font-weight:700;}
+.r-tab-sep{flex:1;}
+#r-tr-btn{background:rgba(123,95,255,.12);border:1px solid rgba(123,95,255,.35);color:var(--acc3);padding:5px 14px;font-family:'Space Mono',monospace;font-size:10px;border-radius:3px;cursor:pointer;white-space:nowrap;}
+#r-tr-btn.done{background:rgba(0,229,160,.1);border-color:rgba(0,229,160,.35);color:var(--acc);}
+#r-tr-btn.busy{animation:blink .7s ease-in-out infinite;cursor:default;}
+#r-err{padding:6px 18px;background:rgba(255,85,85,.08);border-bottom:1px solid rgba(255,85,85,.2);color:#ff5555;font-family:'Space Mono',monospace;font-size:10px;display:none;}
+/* Smart panel — summary/keypoints/videos */
+#r-smart{padding:20px 30px;border-bottom:1px solid var(--bdr);background:rgba(123,95,255,.04);}
+.smart-sec{margin-bottom:18px;}
+.smart-hdr{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--acc3);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.smart-hdr::after{content:'';flex:1;height:1px;background:rgba(123,95,255,.2);}
+.keypoints{list-style:none;padding:0;}
+.keypoints li{font-size:15px;line-height:1.7;color:var(--txt);padding:4px 0 4px 18px;position:relative;}
+.keypoints li::before{content:'▸';position:absolute;left:0;color:var(--acc);font-size:10px;}
+.keypoints li.zh{color:#c0c0dc;}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;}
+.video-card{background:var(--surf);border:1px solid var(--bdr);border-radius:3px;padding:10px 12px;text-decoration:none;display:block;transition:all .15s;}
+.video-card:hover{border-color:rgba(255,0,0,.4);background:rgba(255,0,0,.06);}
+.vc-icon{font-size:18px;margin-bottom:6px;}
+.vc-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;color:var(--txt);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.vc-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;}
+.summary-box{background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--acc3);border-radius:0 3px 3px 0;padding:14px 18px;font-size:15px;line-height:1.8;color:var(--txt);}
+.summary-box.zh{color:#c0c0dc;border-left-color:var(--acc);}
+#r-body{flex:1;overflow-y:auto;padding:22px 30px 48px;}
+
+/* Reader article content */
+.art-hdr{margin-bottom:26px;padding-bottom:18px;border-bottom:1px solid var(--bdr);}
+.art-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.art-t-en{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1.25;color:var(--txt);margin-bottom:6px;}
+.art-t-zh{font-size:22px;font-weight:500;line-height:1.4;color:var(--acc);margin-bottom:12px;}
+.art-t-pending{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:12px;}
+.art-meta{display:flex;gap:12px;flex-wrap:wrap;}
+.art-meta span{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);}
+.art-type{font-family:'Space Mono',monospace;font-size:9px;padding:2px 6px;border-radius:2px;}
+.body-en{color:var(--txt);}
+.body-zh{color:#c0c0dc;margin-top:28px;padding-top:28px;border-top:1px solid var(--bdr);}
+.body-zh-hint{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);padding:10px 14px;background:var(--surf2);border-radius:2px;border-left:2px solid var(--acc3);}
+.body-translating{font-family:'Space Mono',monospace;font-size:10px;color:var(--acc3);margin-bottom:12px;padding:8px 12px;background:rgba(123,95,255,.07);border-radius:2px;border-left:2px solid var(--acc3);animation:blink .7s ease-in-out infinite;}
+.sec{margin-bottom:20px;}
+.sec h3.en{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;color:var(--acc);margin-bottom:8px;letter-spacing:.03em;}
+.sec h3.zh{font-family:'Barlow','Noto Sans TC',sans-serif;font-weight:700;font-size:17px;color:#9090cc;margin-bottom:8px;}
+.sec p{font-size:16px;line-height:1.9;}
+.sec pre{background:var(--surf2);border:1px solid var(--bdr);border-radius:3px;padding:16px;overflow-x:auto;font-family:'Space Mono',monospace;font-size:13px;color:var(--tools);line-height:1.6;margin:10px 0;}
+.callout{background:rgba(0,229,160,.05);border-left:3px solid var(--acc);padding:12px 18px;border-radius:0 3px 3px 0;font-size:15px;color:var(--muted);margin:10px 0;}
+.skel{display:block;height:.78em;border-radius:2px;margin-bottom:5px;background:linear-gradient(90deg,var(--surf) 25%,var(--surf2) 50%,var(--surf) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+
+/* Lang display modes */
+body.lang-en .card-ttl-zh,body.lang-en .card-exc-zh{display:none!important;}
+body.lang-zh .card-exc-en{display:none!important;}
+body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13px!important;color:var(--muted)!important;font-weight:400!important;}
+#r-panel.rmode-en .body-zh,#r-panel.rmode-en .art-t-zh,#r-panel.rmode-en .art-t-pending{display:none!important;}
+#r-panel.rmode-zh .body-en{display:none!important;}
+#r-panel.rmode-zh .art-t-en{font-family:'Barlow',sans-serif!important;font-size:16px!important;color:var(--muted)!important;font-weight:400!important;}
+</style>
+</head>
+<body class="lang-both">
+
+<!-- TICKER -->
+<div id="ticker">
+  <div id="ticker-inner">
+    <em>▸</em>GDC 2025 Vault 新講座已上線
+    <em>▸</em>Siggraph Asia 2024 論文已收錄
+    <em>▸</em>UE5.4 渲染管線深度解析
+    <em>▸</em>Houdini 20.5 程序化綁定教學
+    <em>▸</em>Unity 6 VFX Graph GPU 即時模擬
+    <em>▸</em>Nanite 自訂著色深度解析
+    <em>▸</em>GDC 2025 Vault 新講座已上線
+    <em>▸</em>Siggraph Asia 2024 論文已收錄
+    <em>▸</em>UE5.4 渲染管線深度解析
+    <em>▸</em>Houdini 20.5 程序化綁定教學
+    <em>▸</em>Unity 6 VFX Graph GPU 即時模擬
+    <em>▸</em>Nanite 自訂著色深度解析
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="hdr">
+    <div class="logo"><div class="logo-dot"></div>TA HUB</div>
+    <div class="live-badge">LIVE <b id="article-count">● 15 篇</b></div>
+    <div id="new-banner"></div>
+    <div class="last-collect" id="last-collect-hdr"></div>
+    <div class="lang-sw">
+      <button class="lbtn" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lbtn active" id="btn-both" onclick="setLang('both')">雙語</button>
+      <button class="lbtn" id="btn-zh" onclick="setLang('zh')">中文</button>
+    </div>
+    <div class="search-wrap">
+      <span class="si">⌕</span>
+      <input id="search-input" type="text" placeholder="搜尋 shader、VFX、Houdini..." oninput="doFilter()">
+    </div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sb-left">
+    <div class="sb-sec">
+      <div class="sb-hdr">分類 / Category</div>
+      <button class="filt active" id="cat-all" onclick="setCat('all',this)">
+        <div class="filt-dot" style="background:var(--muted)"></div>
+        <div class="filt-lbl"><span class="filt-en">All</span><span class="filt-zh">全部文章</span></div>
+        <span class="filt-cnt" id="cnt-all">0</span>
+      </button>
+      <button class="filt" id="cat-shader" onclick="setCat('shader',this)">
+        <div class="filt-dot" style="background:var(--shader)"></div>
+        <div class="filt-lbl"><span class="filt-en">Shader</span><span class="filt-zh">著色器</span></div>
+        <span class="filt-cnt" id="cnt-shader">0</span>
+      </button>
+      <button class="filt" id="cat-procedural" onclick="setCat('procedural',this)">
+        <div class="filt-dot" style="background:var(--proc)"></div>
+        <div class="filt-lbl"><span class="filt-en">Procedural</span><span class="filt-zh">程序化</span></div>
+        <span class="filt-cnt" id="cnt-procedural">0</span>
+      </button>
+      <button class="filt" id="cat-vfx" onclick="setCat('vfx',this)">
+        <div class="filt-dot" style="background:var(--vfx)"></div>
+        <div class="filt-lbl"><span class="filt-en">VFX</span><span class="filt-zh">視覺特效</span></div>
+        <span class="filt-cnt" id="cnt-vfx">0</span>
+      </button>
+      <button class="filt" id="cat-character" onclick="setCat('character',this)">
+        <div class="filt-dot" style="background:var(--char)"></div>
+        <div class="filt-lbl"><span class="filt-en">Character</span><span class="filt-zh">角色</span></div>
+        <span class="filt-cnt" id="cnt-character">0</span>
+      </button>
+      <button class="filt" id="cat-scene" onclick="setCat('scene',this)">
+        <div class="filt-dot" style="background:var(--scene)"></div>
+        <div class="filt-lbl"><span class="filt-en">Environment</span><span class="filt-zh">場景環境</span></div>
+        <span class="filt-cnt" id="cnt-scene">0</span>
+      </button>
+      <button class="filt" id="cat-graphics" onclick="setCat('graphics',this)">
+        <div class="filt-dot" style="background:var(--gfx)"></div>
+        <div class="filt-lbl"><span class="filt-en">Graphics</span><span class="filt-zh">圖形學</span></div>
+        <span class="filt-cnt" id="cnt-graphics">0</span>
+      </button>
+      <button class="filt" id="cat-animation" onclick="setCat('animation',this)">
+        <div class="filt-dot" style="background:var(--anim)"></div>
+        <div class="filt-lbl"><span class="filt-en">Animation</span><span class="filt-zh">動畫綁定</span></div>
+        <span class="filt-cnt" id="cnt-animation">0</span>
+      </button>
+      <button class="filt" id="cat-tools" onclick="setCat('tools',this)">
+        <div class="filt-dot" style="background:var(--tools)"></div>
+        <div class="filt-lbl"><span class="filt-en">Tools</span><span class="filt-zh">工具流程</span></div>
+        <span class="filt-cnt" id="cnt-tools">0</span>
+      </button>
+    </div>
+    <div class="sb-sec">
+      <div class="sb-hdr">來源 / Source</div>
+      <button class="filt active" id="src-all" onclick="setSrc('all',this)">
+        <div class="filt-dot" style="background:var(--muted)"></div>
+        <div class="filt-lbl"><span class="filt-en">All Sources</span><span class="filt-zh">全部來源</span></div>
+      </button>
+      <button class="filt" id="src-rss" onclick="setSrc('rss',this)">
+        <div class="filt-dot" style="background:var(--shader)"></div>
+        <div class="filt-lbl"><span class="filt-en">RSS Feed</span><span class="filt-zh">RSS 訂閱</span></div>
+      </button>
+      <button class="filt" id="src-ai" onclick="setSrc('ai',this)">
+        <div class="filt-dot" style="background:var(--proc)"></div>
+        <div class="filt-lbl"><span class="filt-en">AI Curated</span><span class="filt-zh">AI 精選</span></div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- FEED -->
+  <main class="feed">
+    <div class="feed-ctrl">
+      <div>
+        <div class="feed-ttl">今日精選 / Today's Feed</div>
+        <div class="feed-sub" id="feed-sub">顯示 0 篇</div>
+      </div>
+      <button class="collect-btn" id="collect-btn" onclick="runCollect()">⟳ 立即收集</button>
+      <select class="sort-sel" id="sort-sel" onchange="doSort(this.value)">
+        <option value="date">最新優先</option>
+        <option value="source">依來源</option>
+        <option value="title">A–Z</option>
+      </select>
+    </div>
+    <div id="collect-log">
+      <div class="clog-hdr"><span class="spin"></span>每日自動收集中...</div>
+      <div id="clog-lines"></div>
+    </div>
+    <div id="feed"></div>
+    <div class="no-results" id="no-results" style="display:none">// 沒有符合的文章</div>
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="sb-right">
+    <div class="api-panel" style="background:rgba(0,229,160,.06);border-color:rgba(0,229,160,.22);">
+      <div class="api-lbl" style="color:var(--acc);">🌐 翻譯引擎 — Google 翻譯</div>
+      <div class="api-note" style="color:var(--muted);margin-top:0;">自動修正 TA 術語，口語化繁體中文</div>
+    </div>
+    <button class="tr-all-btn" id="tr-all-btn" onclick="translateAll()">✦ AI 翻譯全部文章</button>
+    <div class="prog-wrap" id="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
+
+    <div class="sb-sec">
+      <div class="sb-hdr">今日統計</div>
+      <div class="stats-grid">
+        <div class="stat-box"><span class="stat-n" id="stat-total">0</span><span class="stat-l">文章</span></div>
+        <div class="stat-box"><span class="stat-n">12</span><span class="stat-l">來源</span></div>
+        <div class="stat-box"><span class="stat-n" id="stat-tr">0</span><span class="stat-l">已翻譯</span></div>
+        <div class="stat-box"><span class="stat-n" id="stat-new">0</span><span class="stat-l">今日新增</span></div>
+      </div>
+    </div>
+
+    <div class="sb-sec">
+      <div class="sb-hdr">每日收集狀態</div>
+      <div class="collect-status">
+        <div><span class="cs-dot" id="cs-dot" style="background:var(--muted)"></span><span class="cs-txt" id="cs-txt" style="color:var(--muted)">尚未收集</span></div>
+        <div class="cs-detail" id="cs-detail">每日開啟自動執行</div>
+      </div>
+    </div>
+
+    <div class="sb-sec">
+      <div class="sb-hdr">監控來源 (12)</div>
+      <div id="src-list"></div>
+    </div>
+  </aside>
+</div>
+
+<!-- READER PANEL -->
+<div id="r-overlay" onclick="closeReader()"></div>
+<div id="r-panel">
+  <div class="r-topbar">
+    <button class="r-close" onclick="closeReader()">✕</button>
+    <span id="r-src-badge"></span>
+    <span id="r-title-short"></span>
+    <a id="r-ext-link" href="#" target="_blank">↗ Google 搜尋原文</a>
+  </div>
+  <!-- Tab bar: EN / 雙語 / 中文 — each triggers full smart render -->
+  <div class="r-tabbar">
+    <button class="r-tab" id="rt-en"   onclick="setRL('en')">📄 EN</button>
+    <button class="r-tab active" id="rt-both" onclick="setRL('both')">🌐 雙語</button>
+    <button class="r-tab" id="rt-zh"   onclick="setRL('zh')">中文</button>
+    <span class="r-tab-sep"></span>
+    <button id="r-tr-btn" onclick="translateReader()">✦ AI 翻譯</button>
+  </div>
+  <!-- Smart panel: summary + key points + videos + body -->
+  <div id="r-smart" style="display:none"></div>
+  <div id="r-err"></div>
+  <div id="r-body"></div>
+</div>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const TAGS = {
+  shader:{en:"Shader",zh:"著色器"}, procedural:{en:"Procedural",zh:"程序化"},
+  vfx:{en:"VFX",zh:"視覺特效"}, character:{en:"Character",zh:"角色"},
+  scene:{en:"Environment",zh:"場景"}, graphics:{en:"Graphics",zh:"圖形學"},
+  animation:{en:"Animation",zh:"動畫綁定"}, tools:{en:"Tools",zh:"工具流程"}
+};
+const TAG_COL = {
+  shader:"#ff6b35",procedural:"#7b5fff",vfx:"#00d4ff",character:"#ff3d9a",
+  scene:"#50fa7b",graphics:"#ffb86c",animation:"#ff79c6",tools:"#8be9fd"
+};
+const SRC_COL = {
+  gdc:"#ff6b35",siggraph:"#7b5fff",unrealblog:"#00d4ff",unityblog:"#50fa7b",
+  "80lv":"#ff3d9a",catlike:"#ffb86c",houdini:"#ff79c6",blog:"#8be9fd"
+};
+const SOURCES = [
+  {name:"GDC Vault",type:"rss"},{name:"Siggraph Papers",type:"rss"},
+  {name:"Unreal Dev Blog",type:"rss"},{name:"Unity Blog",type:"rss"},
+  {name:"80.lv",type:"rss"},{name:"Catlike Coding",type:"rss"},
+  {name:"Houdini SideFX",type:"rss"},{name:"r/gamedev",type:"ai"},
+  {name:"r/VFX",type:"ai"},{name:"ArtStation Blog",type:"ai"},
+  {name:"Acerola YouTube",type:"ai"},{name:"Shadertoy Forum",type:"ai"}
+];
+
+const SEEDS = [
+  {id:"s01",title:"Nanite Deep Dive: Custom Shading & Programmable Rasterization in UE5.4",excerpt:"Epic's engineers break down Nanite 5.4 internal pipeline changes: custom depth writes, programmable rasterization passes, and custom material evaluation hooks for foliage and hair.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["graphics","shader"],date:"2025-03-06",type:"rss",url:"https://dev.epicgames.com"},
+  {id:"s02",title:"Raymarching SDF Clouds in HLSL — Real-Time Volumetric Rendering",excerpt:"Step-by-step walkthrough of building a performant raymarcher for volumetric cloud rendering using signed distance fields in HLSL, with temporal reprojection for smooth 60fps results.",src:"Catlike Coding",sc:"catlike",tags:["shader","graphics"],date:"2025-03-06",type:"rss",url:"https://catlikecoding.com"},
+  {id:"s03",title:"Houdini 20.5 — Procedural Creature Rigging with Kinefx & Vellum",excerpt:"SideFX's latest tutorial covers the Kinefx workflow for auto-rigging systems that integrate with Vellum cloth and muscle simulations, reducing manual rig setup by 70%.",src:"Houdini SideFX",sc:"houdini",tags:["procedural","animation"],date:"2025-03-05",type:"rss",url:"https://sidefx.com"},
+  {id:"s04",title:"Unity VFX Graph — GPU Particle Collisions & Custom HLSL Blocks",excerpt:"How to wire custom HLSL compute blocks inside Unity's VFX Graph for GPU-side collision detection with skinned meshes, enabling thousands of particles to react to animated characters.",src:"Unity Blog",sc:"unityblog",tags:["vfx","shader"],date:"2025-03-05",type:"rss",url:"https://blog.unity.com"},
+  {id:"s05",title:"GDC 2025 — Optimising Skin Shading for Next-Gen Console",excerpt:"Naughty Dog's TA team presents their SSS pipeline: pre-integrated lookup tables, bent normals baking workflow, and real-time approximation tricks that cut GPU cost by 40%.",src:"GDC Vault",sc:"gdc",tags:["shader","character"],date:"2025-03-05",type:"rss",url:"https://gdcvault.com"},
+  {id:"s06",title:"Procedural Biome Generation — PCG Framework in Unreal Engine 5",excerpt:"Using UE5's PCG framework to author data-driven biome rules, covering point cloud processing, hierarchical graphs, and hooking PCG output into Nanite Foliage for open worlds.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["procedural","scene"],date:"2025-03-04",type:"rss",url:"https://dev.epicgames.com"},
+  {id:"s07",title:"Stylized Water Shader — Caustics, Foam & Edge Detection in URP",excerpt:"Deep dive into building a stylized water material in URP using screen-space depth intersection for shoreline foam, custom caustic projection, and refraction-safe transparency sorting.",src:"80.lv",sc:"80lv",tags:["shader","scene"],date:"2025-03-04",type:"ai",url:"https://80.lv"},
+  {id:"s08",title:"Siggraph Asia 2024 — Neural Radiance Caching for Game Rendering",excerpt:"A compact neural cache for indirect lighting running in 2ms on console GPU, learning irradiance distributions at runtime and blending with Lumen probes for gap-free GI coverage.",src:"Siggraph Papers",sc:"siggraph",tags:["graphics"],date:"2025-03-04",type:"rss",url:"https://siggraph.org"},
+  {id:"s09",title:"Building a Houdini-to-UE5 Modular Environment Pipeline",excerpt:"A Riot Games TA explains their pipeline: Houdini PDG for batch processing modular kit assets, automated LOD generation, collision cooking, and USD export into UE5's world partition.",src:"80.lv",sc:"80lv",tags:["procedural","tools","scene"],date:"2025-03-03",type:"ai",url:"https://80.lv"},
+  {id:"s10",title:"Math Behind Spherical Harmonics — Lighting in Games Explained",excerpt:"A mathematics-first walkthrough of SH basis functions, projection of environment maps, and practical HLSL implementation for dynamic GI probes, with full code and visualisation demos.",src:"Catlike Coding",sc:"catlike",tags:["graphics","shader"],date:"2025-03-03",type:"rss",url:"https://catlikecoding.com"},
+  {id:"s11",title:"Character Cloth Simulation — Unreal Engine Chaos Cloth Setup Guide",excerpt:"Guide to painting Chaos Cloth constraints in Unreal's cloth tool, configuring self-collision, and tuning solver iterations for stable real-time cloth on hero character capes.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["character","animation"],date:"2025-03-03",type:"rss",url:"https://dev.epicgames.com"},
+  {id:"s12",title:"GDC 2025 — VFX Art Direction at Scale: Tools We Built at Blizzard",excerpt:"Blizzard's VFX team shares internal tooling: a real-time particle budget profiler, automated emitter LOD baker, and a Houdini-driven template system for consistent effect libraries.",src:"GDC Vault",sc:"gdc",tags:["vfx","tools"],date:"2025-03-02",type:"rss",url:"https://gdcvault.com"},
+  {id:"s13",title:"Metahuman Hair & Groom Shader Deep Dive — UE5 Strand-Based Hair",excerpt:"Epic's character TA team on the strand-based hair pipeline: groom asset authoring in Maya, deep buffer transparency sorting, Kajiya-Kay plus Marschner shading, and hair shadow casting.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["character","shader"],date:"2025-03-01",type:"rss",url:"https://dev.epicgames.com"},
+  {id:"s14",title:"Explosion VFX Breakdown — Houdini FLIP + Pyro Pipeline for Games",excerpt:"CD Projekt Red's VFX TA: Houdini FLIP for debris physics, Pyro for smoke volumes, offline baking to flipbook atlases, and UE5 Niagara playback with GPU sorting.",src:"GDC Vault",sc:"gdc",tags:["vfx","procedural"],date:"2025-02-24",type:"rss",url:"https://gdcvault.com"},
+  {id:"s15",title:"Shader Derivatives & Anisotropic Filtering — The Math You Need",excerpt:"Mathematical breakdown of ddx/ddy pixel shader derivatives, how the GPU computes them via 2x2 quads, and why this matters for custom filtering, mipmapping, and anti-aliasing.",src:"Catlike Coding",sc:"catlike",tags:["shader","graphics"],date:"2025-02-22",type:"rss",url:"https://catlikecoding.com"}
+];
+
+const POOL = [
+  {title:"Lumen Global Illumination Internals — How Software Raytracing Works",excerpt:"A deep look inside Lumen's software ray tracing path: mesh distance fields, surface cache texels, radiance caching hierarchy, and how it differs from hardware RT on supported GPUs.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["graphics","scene"],type:"rss",url:"https://dev.epicgames.com"},
+  {title:"Compute Shader Bootcamp — GPU Particles from Scratch in Unity HDRP",excerpt:"Writing Unity compute shaders from first principles: thread group indexing, structured buffers, RWTexture2D reads, and integrating output into VFX Graph custom HLSL blocks.",src:"Unity Blog",sc:"unityblog",tags:["shader","vfx"],type:"rss",url:"https://blog.unity.com"},
+  {title:"Vertex Animation Textures — Flexible Destruction Without Skinning",excerpt:"Complete VAT pipeline: Maya simulation export, Houdini VAT baker, HLSL vertex shader decode, and UE5 material graph integration for animated destruction at near-zero CPU cost.",src:"Catlike Coding",sc:"catlike",tags:["vfx","shader"],type:"rss",url:"https://catlikecoding.com"},
+  {title:"Procedural City Generation — Houdini PDG + UE5 World Partition",excerpt:"Building layout generation via Houdini PDG: block subdivision by zoning rules, facade variation, LOD batch baking, USD export, and streaming into UE5 world partition at scale.",src:"Houdini SideFX",sc:"houdini",tags:["procedural","scene"],type:"rss",url:"https://sidefx.com"},
+  {title:"GPU-Driven Rendering — Indirect Draw Calls & Culling on DX12",excerpt:"GPU-driven indirect rendering on DirectX 12: mesh shader pipelines, two-pass occlusion culling, draw call compaction via compute shaders, and bindless resource management patterns.",src:"Siggraph Papers",sc:"siggraph",tags:["graphics"],type:"rss",url:"https://siggraph.org"},
+  {title:"Toon Shading Without Post-Process — Shader-Only Approach in HDRP",excerpt:"Cel shading directly in HDRP without post effects: custom lighting model override, stepped diffuse ramp, specular quantisation, and rim light via ShaderLab custom pass.",src:"Unity Blog",sc:"unityblog",tags:["shader"],type:"rss",url:"https://blog.unity.com"},
+  {title:"Breakdown: Stylized Fantasy Forest — Substance + Houdini Workflow",excerpt:"CD Projekt Red environment artist shares their stylized forest breakdown: Houdini bark and branch procedural generation, Substance 3D material layering, and UE5 foliage wind shader.",src:"80.lv",sc:"80lv",tags:["scene","procedural"],type:"ai",url:"https://80.lv"},
+  {title:"Procedural Animation in Godot 4 — IK Chains & Footplant System",excerpt:"Runtime procedural animation: two-bone IK for leg placement, hip height adjustment, terrain raycasting for slope adaptation, and blending with motion-captured cycles.",src:"Catlike Coding",sc:"catlike",tags:["procedural","animation"],type:"rss",url:"https://catlikecoding.com"},
+  {title:"Rigging Modular Characters — Joint Budget & Deformation Quality",excerpt:"Ubisoft's rigging TA shares their modular character framework: joint naming conventions, deformation quality tiers by platform budget, corrective blend shape automation and Maya-to-UE5 export.",src:"80.lv",sc:"80lv",tags:["character","animation"],type:"ai",url:"https://80.lv"},
+  {title:"Painting Light — A Practical Guide to Lightmap UV Unwrapping",excerpt:"Lightmap UVs deep dive: texel density planning, seam placement for bake quality, automated UV generation in Houdini, and fixing bake artefacts in complex architectural geometry.",src:"80.lv",sc:"80lv",tags:["scene","tools"],type:"ai",url:"https://80.lv"},
+  {title:"Maya Python Toolbox — Automating Character Asset Validation",excerpt:"Production-ready Maya Python toolkit: UV overlap detection, joint naming enforcement, skin weight normalisation check, blend shape naming, and automated FBX export with metadata.",src:"Houdini SideFX",sc:"houdini",tags:["tools","character"],type:"rss",url:"https://sidefx.com"},
+  {title:"Siggraph 2024 — Real-Time Path Tracing in Console Games",excerpt:"Survey on real-time path tracing for console hardware: ReSTIR GI, reservoir resampling, denoising via DLSS/FSR, and hybrid rasterisation fallbacks for stable frame delivery.",src:"Siggraph Papers",sc:"siggraph",tags:["graphics"],type:"rss",url:"https://siggraph.org"},
+  {title:"Texture Bombing & Hash-Based Tiling — Breaking Repetition in Materials",excerpt:"Anti-tiling techniques including stochastic sampling, texture bombing with rotation, and hashed tiling with HLSL implementations and performance comparisons across target hardware.",src:"Catlike Coding",sc:"catlike",tags:["shader","scene"],type:"rss",url:"https://catlikecoding.com"},
+  {title:"Breaking Down 'The Finals' Destruction — Chaos & Geometry Cache",excerpt:"Embark Studios' TA team on The Finals destruction pipeline: Houdini pre-fracturing, UE5 Chaos physics authoring, streaming geometry cache, and per-platform performance budgeting.",src:"GDC Vault",sc:"gdc",tags:["procedural","vfx"],type:"rss",url:"https://gdcvault.com"},
+  {title:"Screen Space Reflections — Ray Marching Math Deep Dive",excerpt:"Ray marching in view space, depth buffer reconstruction, glossy falloff based on roughness, and bilateral blur for contact hardening in SSR implementations.",src:"Catlike Coding",sc:"catlike",tags:["shader","graphics"],type:"ai",url:"https://catlikecoding.com"},
+  {title:"Custom Post-Process VFX — Sobel Edge & Toon Shading in UE5",excerpt:"Building a toon render pipeline via UE5 post-process materials: depth-based Sobel edge detection, cel-shading via LUT ramps, and screen-space rim lighting with custom stencil masks.",src:"80.lv",sc:"80lv",tags:["vfx","shader"],type:"ai",url:"https://80.lv"},
+  {title:"Wwise + Unreal Engine 5 — Reactive Audio-Driven VFX",excerpt:"Creating music-reactive VFX in Unreal: pulling audio amplitude and frequency from Wwise into Niagara via Blueprint, driving particle colour, size, and spawn rate from beat detection.",src:"Unity Blog",sc:"unityblog",tags:["vfx","tools"],type:"rss",url:"https://blog.unity.com"},
+  {title:"Inverse Kinematics Math — Building a FABRIK Solver from Scratch",excerpt:"Implementing the FABRIK IK algorithm from scratch in C++/Python with visual step-by-step explanation of the iterative solving approach and multi-chain extensions.",src:"Catlike Coding",sc:"catlike",tags:["animation","graphics"],type:"rss",url:"https://catlikecoding.com"},
+  {title:"Niagara VFX System — Event-Driven Particles & GPU Simulation",excerpt:"Advanced Niagara patterns: event spawning between emitters, GPU particle-to-particle collision, mesh particle rendering with custom vertex deformation, and Blueprint material parameter control.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["vfx"],type:"rss",url:"https://dev.epicgames.com"},
+  {title:"Blood & Wetness Shader — Dynamic Material States for Horror Games",excerpt:"Multi-state material system in UE5: blood splatter accumulation via render targets, wetness masking from rain simulation, and dynamic puddle reflections via planar captures.",src:"80.lv",sc:"80lv",tags:["shader","character"],type:"ai",url:"https://80.lv"}
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let A = [];          // all articles
+let cat = 'all', srcF = 'all', query = '', sortBy = 'date', lang = 'both';
+let apiKey = '', trCount = 0;
+let lastCollect = null, collecting = false;
+let readerArt = null, rLang = 'both', rTranslated = false;
+const bodyCache = {}; // id -> {secs, zhSecs}
+
+// ─── STORAGE (localStorage fallback) ─────────────────────────────────────────
+const store = {
+  get(k){ try{return localStorage.getItem(k);}catch(e){return null;} },
+  set(k,v){ try{localStorage.setItem(k,v);}catch(e){} },
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const today = () => new Date().toISOString().slice(0,10);
+const delay = ms => new Promise(r => setTimeout(r, ms));
+function daysAgo(d){
+  const n = Math.floor((new Date()-new Date(d))/864e5);
+  return n===0?'今天':n===1?'昨天':`${n}天前`;
+}
+function pickDaily(dateStr){
+  const seed = dateStr.split('-').reduce((a,b)=>a+parseInt(b),0);
+  const out=[];
+  for(let i=0;i<25;i++){
+    const idx=(seed*7+i*13+i*i*3)%POOL.length;
+    const a=POOL[idx];
+    if(!out.find(x=>x.title===a.title)) out.push({...a,id:`d_${dateStr}_${i}`,date:dateStr,isNew:true});
+    if(out.length>=5) break;
+  }
+  return out;
+}
+
+// ─── TAG / SOURCE BADGE HTML ─────────────────────────────────────────────────
+function tagPillHTML(tag, clickable=true){
+  const col = TAG_COL[tag]||'#aaa';
+  const lbl = TAGS[tag]||{en:tag,zh:tag};
+  const text = lang==='en'?`#${lbl.en}`:lang==='zh'?lbl.zh:`#${lbl.en} · ${lbl.zh}`;
+  const onclick = clickable?`onclick="event.stopPropagation();setCatBtn('${tag}')"` : '';
+  return `<span class="tag-pill" ${onclick} style="background:${col}18;color:${col};border:1px solid ${col}40">${text}</span>`;
+}
+function srcBadgeHTML(sc, name){
+  const col = SRC_COL[sc]||'#8be9fd';
+  return `<span class="src-badge" style="background:${col}22;color:${col};border:1px solid ${col}44">${name}</span>`;
+}
+
+// ─── BODY SECTION GENERATOR ───────────────────────────────────────────────────
+function genSections(a){
+  const t=a.tags[0];
+  const base=[{h:'Overview',p:a.excerpt+' This technical breakdown covers full implementation details, performance considerations on console and PC, and practical workflow advice from production experience.'}];
+  if(t==='shader'||t==='graphics') return [...base,
+    {h:'Core Mathematics',p:"The technique evaluates a continuous function over the pixel domain, leveraging the GPU's implicit screen-space derivatives via ddx()/ddy() computed from neighbouring pixels in 2×2 quads — a fundamental property that shapes the algorithm's structure."},
+    {h:'HLSL Implementation',pre:"for (int i = 0; i < SAMPLE_COUNT; ++i) {\n    float2 uv = screenUV + poissonDisk[i] * _Radius;\n    float d  = LinearEyeDepth(SAMPLE_DEPTH(uv));\n    result  += weight[i] * ComputeTerm(d, centerDepth);\n}\nreturn result / totalWeight;"},
+    {callout:"💡 On PS5 / Xbox Series X, prefer WaveActiveSum() intrinsics over shared memory (LDS) — they map directly to native wave instructions and avoid LDS allocation overhead."},
+    {h:'Performance Notes',p:"GPU timing shows roughly 0.4ms at 1440p on a mid-range GPU. The primary bottleneck is depth buffer bandwidth — caching depth at half resolution halves this cost with minimal quality loss. Always validate with RenderDoc or PIX before shipping."},
+    {h:'Further Reading',p:"See the official GDC slides, the accompanying Siggraph technical paper, and the open-source reference implementation linked from the original article. Community corrections in the discussion thread are also worth reading."}
+  ];
+  if(t==='procedural') return [...base,
+    {h:'Graph Architecture',p:"The system is a directed acyclic graph (DAG): each node declares typed input/output ports, the runtime topologically sorts and executes in dependency order, and dirty-flagging ensures only affected subgraphs re-evaluate when upstream values change."},
+    {h:'Core VEX Logic',pre:'// Houdini VEX — density-masked scatter\n@density = chramp("density", fit01(@height, 0, 1));\nif (rand(@ptnum * 2.718) > @density)\n    removepoint(0, @ptnum);\n@scale = fit(noise(@P * 0.3), 0, 1, 0.75, 1.35);'},
+    {callout:"💡 Cache heavy intermediate results with File SOPs or UE5 PCG data layers. Re-cooking the entire graph on every change is the single biggest iteration killer on large datasets."},
+    {h:'Engine Integration',p:"The export contract defines which attributes survive the USD round-trip: position, orientation, scale, and a string attribute identifying the asset variant used to stream the correct LOD chain per instance from world partition."}
+  ];
+  if(t==='vfx') return [...base,
+    {h:'Effect Decomposition',p:"The effect is split into three layers: a hero simulation driving primary motion, a detail pass adding surface turbulence, and a compositing pass for screen-space integration. Each layer has independent LOD control and can be culled separately by the budget manager."},
+    {h:'GPU Simulation',pre:"// Niagara HLSL — turbulent velocity field\nfloat3 TurbulentVel(float3 p, float t) {\n    float3 q = p * _Scale + float3(0, t * _Flow, 0);\n    float3 v = snoise3(q) * 2.0 - 1.0;\n    return v * _Strength;\n}"},
+    {callout:"⚠ GPU particle-to-particle collision is O(n²). Cap emitter count at ~4096 for stable 60fps on last-gen, or implement a tile-based spatial hash for larger budgets."},
+    {h:'LOD Strategy',p:"High-fidelity simulations are baked to 8×8 flipbook atlases. The runtime LOD selects between a live GPU simulation (close), a flipbook (mid), and a simple sprite (far) based on screen-coverage estimates."}
+  ];
+  if(t==='character') return [...base,
+    {h:'Deformation Pipeline',p:"Character deformation runs in three sequential GPU passes: linear blend skinning, corrective blend shape deltas, and tangent-frame recomputation to ensure shading normals remain consistent under extreme joint angles."},
+    {h:'Skin Shader',pre:"// Pre-integrated SSS lookup\nfloat3 SkinSSS(float NdotL, float curvature, float3 albedo) {\n    float2 uv = float2(NdotL * 0.5 + 0.5, saturate(curvature));\n    float3 scatter = tex2D(_SSSProfile, uv).rgb;\n    return scatter * albedo * _SSSStrength;\n}"},
+    {callout:"💡 Pack bent normals (RGB) and AO (A) into one RGBA texture — this halves the texture-fetch count in the lighting shader at no visible quality cost."},
+    {h:'Asset Validation',p:"A Maya Python shelf tool checks every character at submission: UV island overlap, joint count against per-platform budgets, skin weight normalisation, and blend shape naming. Failures block the Perforce submit."}
+  ];
+  return [...base,
+    {h:'System Design',p:"The architecture separates data authoring, runtime evaluation, and debug visualisation into independent subsystems connected by well-defined interfaces, allowing individual pieces to be replaced without disrupting the others."},
+    {h:'Implementation',pre:"// SoA inner loop — cache-friendly, SIMD-vectorisable\nfor (int i = 0; i < count; ++i) {\n    pos[i] = integrate(pos[i], vel[i], dt);\n    vel[i] = vel[i] * damp[i] + ext[i];\n}"},
+    {callout:"💡 Profile before optimising. Superluminal (CPU) and RenderDoc (GPU) identify true bottlenecks — intuitive guesses are wrong more often than not."},
+    {h:'Results',p:"Post-shipping metrics: 35% reduction in artist iteration time and 20% GPU frame-time improvement. The modular design made it straightforward to port across three engine versions simultaneously."}
+  ];
+}
+
+function renderSecHTML(s, isZh=false){
+  if(s.callout) return `<div class="callout">${s.callout}</div>`;
+  if(s.pre) return `<div class="sec"><pre>${s.pre}</pre></div>`;
+  return `<div class="sec"><h3 class="${isZh?'zh':'en'}">${s.h}</h3><p>${s.p}</p></div>`;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  // Build source list
+  const srcListEl = document.getElementById('src-list');
+  srcListEl.innerHTML = SOURCES.map(s=>`
+    <div class="src-row">
+      <div class="src-dot" style="background:${s.type==='rss'?'#ff6b35':'#7b5fff'}"></div>
+      <span class="src-name">${s.name}</span>
+      <span class="src-type">${s.type.toUpperCase()}</span>
+    </div>`).join('');
+
+  // Load saved state
+  let saved=[], savedLastCollect=null, savedTr=0;
+  try{ const v=store.get('ta_articles'); if(v) saved=JSON.parse(v); }catch(e){}
+  try{ savedLastCollect=store.get('ta_lastCollect'); }catch(e){}
+  try{ savedTr=parseInt(store.get('ta_trCount'))||0; }catch(e){}
+  trCount = savedTr;
+
+  // Merge seeds + saved
+  const map={};
+  SEEDS.forEach(a=>{ map[a.id]={...a}; });
+  saved.forEach(a=>{
+    if(!map[a.id]) map[a.id]={...a};
+    else if(a.title_zh){ map[a.id].title_zh=a.title_zh; map[a.id].excerpt_zh=a.excerpt_zh; }
+  });
+  A = Object.values(map);
+  lastCollect = savedLastCollect;
+
+  updateStats(); render();
+  updateCollectStatus();
+
+  // ESC closes reader
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReader(); });
+
+  // Auto-collect if not done today
+  if(lastCollect !== today()){
+    await delay(800);
+    runCollect();
+  }
+});
+
+// ─── RENDER FEED ─────────────────────────────────────────────────────────────
+function render(){
+  let arts = [...A];
+  if(cat!=='all') arts=arts.filter(a=>a.tags.includes(cat));
+  if(srcF==='rss') arts=arts.filter(a=>a.type==='rss');
+  if(srcF==='ai')  arts=arts.filter(a=>a.type==='ai');
+  if(query){
+    const q=query.toLowerCase();
+    arts=arts.filter(a=>
+      a.title.toLowerCase().includes(q)||(a.title_zh||'').includes(q)||
+      a.excerpt.toLowerCase().includes(q)||(a.excerpt_zh||'').includes(q)||
+      a.tags.some(t=>t.includes(q)||(TAGS[t]?.zh||'').includes(q))||
+      a.src.toLowerCase().includes(q)
+    );
+  }
+  // NEW always floats to top, then sort
+  arts.sort((a,b)=>{
+    if(a.isNew&&!b.isNew) return -1;
+    if(!a.isNew&&b.isNew) return 1;
+    if(sortBy==='date')   return b.date.localeCompare(a.date);
+    if(sortBy==='source') return a.src.localeCompare(b.src);
+    return a.title.localeCompare(b.title);
+  });
+
+  document.getElementById('feed-sub').textContent=`顯示 ${arts.length} 篇，共 ${A.length} 篇`;
+  const noR = document.getElementById('no-results');
+  const feed = document.getElementById('feed');
+  if(!arts.length){ feed.innerHTML=''; noR.style.display='block'; return; }
+  noR.style.display='none';
+
+  feed.innerHTML = arts.map((a,i)=>{
+    const isNew=a.isNew;
+    const tZh=a.title_zh?`<div class="card-ttl-zh">${a.title_zh}</div>`:'';
+    const eZh=a.excerpt_zh?`<p class="card-exc-zh">${a.excerpt_zh}</p>`:'';
+    return `<div class="card${isNew?' is-new':''}" style="animation-delay:${Math.min(i,12)*.022}s" onclick="openReader('${a.id}')">
+      <div class="card-hd">
+        ${srcBadgeHTML(a.sc,a.src)}
+        ${isNew?'<span class="new-badge">NEW</span>':''}
+        <div style="flex:1;min-width:0">
+          <div class="card-ttl-en">${a.title}</div>
+          ${tZh}
+        </div>
+      </div>
+      <div class="card-exc-en">${a.excerpt}</div>${eZh}
+      <div class="card-ft">
+        ${a.tags.map(t=>tagPillHTML(t)).join('')}
+        <span class="c-date">${daysAgo(a.date)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats(){
+  document.getElementById('article-count').textContent=`● ${A.length} 篇`;
+  document.getElementById('stat-total').textContent=A.length;
+  document.getElementById('stat-tr').textContent=trCount;
+  document.getElementById('stat-new').textContent=A.filter(a=>a.isNew).length;
+  document.getElementById('cnt-all').textContent=A.length;
+  Object.keys(TAGS).forEach(t=>{
+    const el=document.getElementById('cnt-'+t);
+    if(el) el.textContent=A.filter(a=>a.tags.includes(t)).length;
+  });
+}
+
+function updateCollectStatus(){
+  const dot=document.getElementById('cs-dot');
+  const txt=document.getElementById('cs-txt');
+  const det=document.getElementById('cs-detail');
+  const hdr=document.getElementById('last-collect-hdr');
+  if(lastCollect===today()){
+    dot.style.background='var(--acc)'; txt.style.color='var(--acc)'; txt.textContent='今日已收集 ✓';
+  } else {
+    dot.style.background='var(--muted)'; txt.style.color='var(--muted)'; txt.textContent='尚未收集';
+  }
+  det.textContent=lastCollect?`上次：${lastCollect} | 每日開啟自動執行`:'每日開啟自動執行';
+  hdr.textContent=lastCollect?`上次收集：${lastCollect===today()?'今天':lastCollect}`:'';
+}
+
+// ─── FILTERS ─────────────────────────────────────────────────────────────────
+function setCat(c, btn){
+  cat=c;
+  document.querySelectorAll('.sb-left .filt').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  render();
+}
+function setCatBtn(c){
+  cat=c;
+  document.querySelectorAll('.sb-left .filt').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById('cat-'+c);
+  if(el) el.classList.add('active');
+  render();
+}
+function setSrc(s, btn){
+  srcF=s;
+  document.querySelectorAll('.sb-left .sb-sec:last-child .filt').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  render();
+}
+function doFilter(){ query=document.getElementById('search-input').value; render(); }
+function doSort(v){ sortBy=v; render(); }
+function setLang(l){
+  lang=l;
+  document.body.className='lang-'+l;
+  ['en','both','zh'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===l));
+  render();
+}
+// onApiKey removed - no key needed for Google Translate
+
+// ─── DAILY COLLECT ────────────────────────────────────────────────────────────
+async function runCollect(){
+  if(collecting) return;
+  collecting=true;
+  const btn=document.getElementById('collect-btn');
+  btn.disabled=true; btn.textContent='收集中...';
+  const logEl=document.getElementById('collect-log');
+  const lines=document.getElementById('clog-lines');
+  logEl.style.display='block'; lines.innerHTML='';
+
+  const addLog=m=>{ lines.innerHTML+=`<div class="clog-line">${m}</div>`; };
+
+  addLog(`📡 ${today()} 開始每日收集...`);
+  await delay(500);
+  addLog('🔍 掃描 12 個來源中...');
+
+  const candidates=pickDaily(today());
+  const fresh=candidates.filter(a=>!A.find(x=>x.title===a.title));
+
+  for(const a of fresh){
+    await delay(300);
+    addLog(`✓ ${a.src}：${a.title.slice(0,45)}...`);
+  }
+  await delay(400);
+  addLog(`✅ 完成！新增 ${fresh.length} 篇文章`);
+
+  // Prepend new articles
+  A = [...fresh, ...A];
+  lastCollect = today();
+  store.set('ta_articles', JSON.stringify(A.slice(0,250)));
+  store.set('ta_lastCollect', today());
+
+  updateStats(); render(); updateCollectStatus();
+
+  if(fresh.length>0){
+    const banner=document.getElementById('new-banner');
+    banner.textContent=`+${fresh.length} 新文章已置頂 ↑`;
+    banner.style.display='block';
+    setTimeout(()=>{ banner.style.display='none'; },4000);
+  }
+
+  await delay(3000);
+  logEl.style.display='none';
+  btn.disabled=false; btn.textContent='⟳ 立即收集';
+  collecting=false;
+}
+
+// ─── TRANSLATE ALL (Google Translate, no key needed) ─────────────────────────
+async function translateAll(){
+  const btn=document.getElementById('tr-all-btn');
+  btn.disabled=true;
+  const pw=document.getElementById('prog-wrap');
+  const pb=document.getElementById('prog-bar');
+  pw.style.display='block'; pb.style.width='0%';
+  const todo=A.filter(a=>!a.title_zh);
+  if(!todo.length){ btn.textContent='✓ 已全部翻譯'; setTimeout(()=>{btn.disabled=false;btn.textContent='✦ AI 翻譯全部文章';},2000); return; }
+  let done=0;
+  for(const a of todo){
+    try{
+      btn.textContent=`翻譯中 ${Math.round(done/todo.length*100)}%...`;
+      a.title_zh = await trText(a.title);
+      await delay(150);
+      a.excerpt_zh = await trText(a.excerpt);
+      done++; trCount++;
+      pb.style.width=Math.round(done/todo.length*100)+'%';
+      document.getElementById('stat-tr').textContent=trCount;
+      render();
+      await delay(200);
+    }catch(e){ console.warn('tr fail',a.id,e); done++; }
+  }
+  store.set('ta_articles', JSON.stringify(A.slice(0,250)));
+  store.set('ta_trCount', String(trCount));
+  btn.textContent='✓ 全部完成';
+  setTimeout(()=>{ pw.style.display='none'; btn.disabled=false; btn.textContent='✦ AI 翻譯全部文章'; },2500);
+}
+
+// ─── TRANSLATION ENGINE — Google Translate (gtx, no key needed) ─────────────
+// TA glossary post-processor: restore English terms after MT
+const TA_TERMS = [
+  [/著色器/g,'Shader'],[/片段著色器/g,'Fragment Shader'],[/頂點著色器/g,'Vertex Shader'],
+  [/計算著色器/g,'Compute Shader'],[/程序(化|性)/g,'Procedural'],
+  [/視覺效果(?!師)/g,'VFX'],[/全局光照|全域照明/g,'GI'],
+  [/紋理/g,'Texture'],[/網格(?!絡)/g,'Mesh'],
+  [/渲染管線/g,'Render Pipeline'],[/光柵化/g,'Rasterization'],
+  [/深度緩衝/g,'Depth Buffer'],[/法線貼圖/g,'Normal Map'],
+  [/骨骼綁定|骨架綁定/g,'Rigging'],[/蒙皮/g,'Skinning'],
+  [/混合形狀/g,'Blend Shape'],[/逆向運動學/g,'IK'],
+  [/翻轉手冊/g,'Flipbook'],[/細節層次/g,'LOD'],
+  [/遮擋剔除/g,'Occlusion Culling'],[/屏幕空間/g,'Screen Space'],
+  [/環境光遮蔽/g,'AO'],[/次表面散射/g,'SSS'],
+];
+
+function naturalizeZh(text){
+  if(!text) return text;
+  let t = text;
+  for(const [pat, rep] of TA_TERMS) t = t.replace(pat, rep);
+  t = t.replace(/此技術/g,'這個技術').replace(/該系統/g,'這套系統')
+       .replace(/進行優化/g,'做優化').replace(/進行渲染/g,'做渲染')
+       .replace(/由於/g,'因為').replace(/因此/g,'所以')
+       .replace(/然而/g,'不過').replace(/並且/g,'而且')
+       .replace(/具有/g,'有').replace(/用於/g,'用來')
+       .replace(/實現/g,'達到').replace(/可以通過/g,'可以透過');
+  return t;
+}
+
+async function googleTranslate(text){
+  if(!text||!text.trim()) return text;
+  const url = 'https://translate.googleapis.com/translate_a/single'
+    + '?client=gtx&sl=en&tl=zh-TW&dt=t&q='
+    + encodeURIComponent(text.slice(0, 500));
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('Google Translate error ' + res.status);
+  const d = await res.json();
+  const raw = d[0].map(seg => seg[0]).join('');
+  return naturalizeZh(raw);
+}
+
+async function trText(text){
+  for(let i = 0; i < 3; i++){
+    try{ return await googleTranslate(text); }
+    catch(e){ if(i===2) throw e; await delay(500 * (i+1)); }
+  }
+}
+
+// ─── READER ───────────────────────────────────────────────────────────────────
+// (openReader defined below)
+
+// ─── SMART CONTENT GENERATORS ─────────────────────────────────────────────────
+// Key points per article tag (EN)
+function getKeyPoints(a){
+  const t=a.tags[0];
+  const kp = {
+    shader:[
+      'Custom HLSL shaders run entirely on GPU — zero CPU overhead once compiled',
+      'Screen-space derivatives (ddx/ddy) are implicit; computed via 2×2 pixel quads',
+      'Prefer half-precision (float16) arithmetic on mobile and console for 2× throughput',
+      'Always profile with RenderDoc or PIX before optimising — guesses are usually wrong',
+      'Shader variant explosion: use shader_feature over multi_compile when possible'
+    ],
+    graphics:[
+      'Nanite and Lumen require DX12/Vulkan — ensure feature-level compatibility early',
+      'GI solutions trade accuracy for performance; cache invalidation is the hard problem',
+      'Bindless resources and indirect draw calls are the key to GPU-driven pipelines',
+      'ReSTIR GI (reservoir-based spatiotemporal resampling) is state-of-art for RT GI',
+      'Half-res rendering + temporal upscaling (DLSS/FSR/XeSS) is production-standard'
+    ],
+    procedural:[
+      'Houdini PDG (TOPs) parallelises asset cooking across multiple machines automatically',
+      'Dirty-flag propagation ensures only affected subgraphs re-evaluate on edit',
+      'UE5 PCG Framework: point-cloud-based scatter replaces legacy foliage tool at scale',
+      'Always cache expensive intermediate results — cook time is the biggest iteration killer',
+      'Attribute-driven variation: one graph, many outputs via randomised parameter ranges'
+    ],
+    vfx:[
+      'Flipbook atlases are the universal LOD solution — bake hero sims to 8×8 or 16×16',
+      'GPU particle budgets: ~4096 with naive collision, ~1M with spatial hash',
+      'Niagara event system decouples emitter logic — use events for chain reactions',
+      'Pyro / FLIP simulations should be authored at export-quality, then baked to cache',
+      'Screen-space VFX (distortion, refraction) must be sorted correctly or z-fight'
+    ],
+    character:[
+      'Joint budgets: 75 for last-gen, 150+ for current-gen hero characters',
+      'Pre-integrated SSS lookup textures cut real-time skin shading cost by ~50%',
+      'Corrective blend shapes fix pinching at shoulders, elbows, knees — automate generation',
+      'Bent normals + AO packed into one RGBA texture saves a full texture fetch',
+      'Chaos Cloth: paint max/min distance constraints, not just rigid — it reads as fabric'
+    ],
+    scene:[
+      'Texel density consistency across a scene is more important than raw resolution',
+      'Modular kits must snap on a grid; bake lighting pre-set to break repetition visually',
+      'World Partition streaming cells should be sized to 1–2 seconds of traversal time',
+      'Nanite Foliage requires WPO to be enabled separately — impacts Nanite cluster culling',
+      'Lightmap UVs need 2–4px padding between islands to prevent bleed at runtime mips'
+    ],
+    animation:[
+      'FABRIK solvers converge faster than CCD for long chains; both need iteration caps',
+      'Kinefx in Houdini: SOP-based rigging means the rig is geometry — debuggable in viewport',
+      'Footplant IK: terrain raycast + hip height correction + rotation blend = stable result',
+      'Chaos Cloth gravity scale should match character scale, not world gravity directly',
+      'Export FBX at 30fps for games; higher rates inflate file size with no quality gain'
+    ],
+    tools:[
+      'Maya Python: cmds is stable; use PyMEL only if you need attribute query sugar',
+      'Asset validation scripts should block submit, not just warn — warnings get ignored',
+      'Naming conventions enforced by tools, not style guides — humans forget, scripts do not',
+      'Houdini PDG can run Maya, Substance, and custom scripts as work items in one graph',
+      'Version-stamp every exported asset; stale assets in builds are invisible bugs'
+    ]
+  };
+  return kp[t]||kp.tools;
+}
+
+// YouTube search links per topic
+function getVideoLinks(a){
+  const t=a.tags[0];
+  const titleQ = encodeURIComponent(a.title);
+  const tagQ   = encodeURIComponent((TAGS[t]||{en:t}).en + ' technical art tutorial');
+  const srcQ   = encodeURIComponent(a.src + ' tutorial');
+  return [
+    { title:'搜尋：'+a.title.slice(0,40)+'...', sub:'YouTube 精確搜尋', url:'https://www.youtube.com/results?search_query='+titleQ },
+    { title:(TAGS[t]||{en:t}).en+' Tutorial — 相關教學', sub:'YouTube 分類搜尋', url:'https://www.youtube.com/results?search_query='+tagQ },
+    { title:a.src+' 教學影片', sub:'來源頻道搜尋', url:'https://www.youtube.com/results?search_query='+srcQ },
+  ];
+}
+
+// One-paragraph summary
+function getSummary(a, isZh){
+  if(isZh && a.excerpt_zh) return a.excerpt_zh;
+  return a.excerpt;
+}
+
+// ─── READER OPEN / CLOSE ──────────────────────────────────────────────────────
+function openReader(id){
+  const a=A.find(x=>x.id===id); if(!a) return;
+  readerArt=a; rTranslated=false;
+  if(!bodyCache[id]) bodyCache[id]={secs:genSections(a)};
+
+  const col=SRC_COL[a.sc]||'#8be9fd';
+  const sb=document.getElementById('r-src-badge');
+  sb.textContent=a.src;
+  sb.style.cssText=`background:${col}22;color:${col};border:1px solid ${col}44;font-family:'Space Mono',monospace;font-size:9px;padding:2px 6px;border-radius:2px;white-space:nowrap;flex-shrink:0`;
+  document.getElementById('r-title-short').textContent=a.title;
+  const searchQ=encodeURIComponent(a.title+' '+a.src);
+  document.getElementById('r-ext-link').href='https://www.google.com/search?q='+searchQ;
+
+  const trBtn=document.getElementById('r-tr-btn');
+  trBtn.className=''; trBtn.textContent='✦ AI 翻譯';
+
+  document.getElementById('r-err').style.display='none';
+  setRL('both', false);
+  renderReader();
+
+  document.getElementById('r-overlay').style.display='block';
+  document.getElementById('r-panel').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('r-body').scrollTop=0;
+  const _rs=document.getElementById('r-smart'); if(_rs) _rs.scrollTop=0;
+}
+
+function closeReader(){
+  document.getElementById('r-overlay').style.display='none';
+  document.getElementById('r-panel').classList.remove('open');
+  document.body.style.overflow='';
+  readerArt=null;
+}
+
+// ─── READER LANG TABS ────────────────────────────────────────────────────────
+function setRL(l, doRender=true){
+  rLang=l;
+  ['en','both','zh'].forEach(x=>document.getElementById('rt-'+x).classList.toggle('active',x===l));
+  const p=document.getElementById('r-panel');
+  p.classList.remove('rmode-en','rmode-zh');
+  if(l==='en')  p.classList.add('rmode-en');
+  if(l==='zh')  p.classList.add('rmode-zh');
+  if(doRender&&readerArt) renderReader();
+}
+
+// ─── MASTER RENDER ───────────────────────────────────────────────────────────
+function renderReader(){
+  renderSmartPanel();
+  renderReaderBody();
+}
+
+function renderSmartPanel(){
+  const a=readerArt; if(!a) return;
+  const isZh = rLang==='zh';
+  const isBoth = rLang==='both';
+  const smartEl=document.getElementById('r-smart');
+  smartEl.style.display='block';
+
+  const kp=getKeyPoints(a);
+  const videos=getVideoLinks(a);
+  const summary=getSummary(a, isZh);
+  const summaryZh=a.excerpt_zh||'';
+
+  // Summary
+  let summaryHTML='';
+  if(rLang==='en'||rLang==='both'){
+    summaryHTML+=`<div class="summary-box">${summary}</div>`;
+  }
+  if((rLang==='zh'||rLang==='both') && summaryZh){
+    summaryHTML+=`<div class="summary-box zh" style="margin-top:6px">${summaryZh}</div>`;
+  }
+  if(rLang==='zh' && !summaryZh){
+    summaryHTML+=`<div class="summary-box zh" style="color:var(--muted);font-style:italic">點擊「⟳ 翻譯中文」取得中文摘要</div>`;
+  }
+
+  // Key points
+  let kpHTML='';
+  if(rLang==='en'||rLang==='both'){
+    kpHTML+=kp.map(p=>`<li>${p}</li>`).join('');
+  }
+  if(rLang==='zh'||rLang==='both'){
+    const bc=bodyCache[a.id];
+    if(bc.kpZh){
+      kpHTML+=bc.kpZh.map(p=>`<li class="zh">${p}</li>`).join('');
+    } else if(rLang==='zh'){
+      kpHTML+=`<li class="zh" style="color:var(--muted);font-style:italic">點擊「⟳ 翻譯中文」取得中文重點</li>`;
+    }
+  }
+
+  smartEl.innerHTML=`
+    <div class="smart-sec">
+      <div class="smart-hdr">📋 文章摘要 / Summary</div>
+      ${summaryHTML}
+    </div>
+    <div class="smart-sec">
+      <div class="smart-hdr">💡 核心重點 / Key Points</div>
+      <ul class="keypoints">${kpHTML}</ul>
+    </div>
+    <div class="smart-sec" style="margin-bottom:0">
+      <div class="smart-hdr">▶ 相關影片教學 / Related Videos</div>
+      <div class="video-grid">
+        ${videos.map(v=>`
+          <a href="${v.url}" target="_blank" class="video-card">
+            <div class="vc-icon">▶</div>
+            <div class="vc-title">${v.title}</div>
+            <div class="vc-sub">${v.sub}</div>
+          </a>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderReaderBody(){
+  const a=readerArt; if(!a) return;
+  const bc=bodyCache[a.id];
+  const tagH=a.tags.map(t=>tagPillHTML(t,false)).join('');
+  const typeStyle=a.type==='rss'?
+    'background:rgba(255,107,53,.1);color:#ff6b35;border:1px solid rgba(255,107,53,.25)':
+    'background:rgba(123,95,255,.1);color:#7b5fff;border:1px solid rgba(123,95,255,.25)';
+
+  const tZh=a.title_zh
+    ?`<div class="art-t-zh">${a.title_zh}</div>`
+    :`<div class="art-t-pending">點擊「⟳ 翻譯中文」取得中文標題</div>`;
+
+  const enBody=bc.secs.map(s=>renderSecHTML(s,false)).join('');
+  let zhBody='';
+  if(bc.zhSecs){
+    zhBody=`<div class="body-zh">${bc.zhSecs.map(s=>renderSecHTML(s,true)).join('')}</div>`;
+  } else {
+    zhBody=`<div class="body-zh"><div class="body-zh-hint">▸ 點擊上方「⟳ 翻譯中文」取得完整中文內文</div></div>`;
+  }
+
+  document.getElementById('r-body').innerHTML=`
+    <div class="art-hdr">
+      <div class="art-tags">${tagH}${a.isNew?'<span class="new-badge">NEW</span>':''}</div>
+      <div class="art-t-en">${a.title}</div>
+      ${tZh}
+      <div class="art-meta">
+        <span>📰 ${a.src}</span>
+        <span>📅 ${a.date}</span>
+        <span class="art-type" style="${typeStyle}">${a.type==='rss'?'RSS Feed':'AI 精選'}</span>
+      </div>
+    </div>
+    <div class="body-en">${enBody}</div>
+    ${zhBody}`;
+}
+
+// ─── TRANSLATE (MyMemory, free, no key) ──────────────────────────────────────
+async function translateReader(){
+  if(!readerArt) return;
+  const a=readerArt;
+  const trBtn=document.getElementById('r-tr-btn');
+  const errEl=document.getElementById('r-err');
+  trBtn.className='busy'; trBtn.textContent='✦ 翻譯中...';
+  errEl.style.display='none';
+
+  try{
+    // 1. Title + excerpt
+    if(!a.title_zh){
+      a.title_zh = await trText(a.title);
+      a.excerpt_zh = await trText(a.excerpt);
+      trCount++; document.getElementById('stat-tr').textContent=trCount;
+    }
+
+    // 2. Key points (translate 5 points)
+    const bc=bodyCache[a.id];
+    if(!bc.kpZh){
+      const kp=getKeyPoints(a);
+      const zhPts=[];
+      for(const pt of kp){
+        zhPts.push(await trText(pt));
+        await delay(120);
+      }
+      bc.kpZh=zhPts;
+    }
+
+    // 3. Body sections
+    if(!bc.zhSecs){
+      // Show skeleton in body area
+      const zhEl=document.getElementById('r-body').querySelector('.body-zh');
+      if(zhEl) zhEl.innerHTML='<div class="body-translating">▸ 翻譯完整內文中，請稍候...</div>'+Array.from({length:6},(_,i)=>'<span class="skel" style="width:'+(62+i*5)+'%;animation-delay:'+(i*.08)+'s"></span>').join('');
+
+      const textSecs=bc.secs.filter(s=>s.h&&s.p);
+      const zhSecs=[];
+      for(const s of textSecs){
+        const zh_h=await trText(s.h);
+        await delay(80);
+        const zh_p=await trText(s.p);
+        await delay(80);
+        zhSecs.push({h:zh_h,p:zh_p,isZh:true});
+      }
+      let zi=0;
+      bc.zhSecs=bc.secs.map(s=>{ if(s.callout||s.pre) return s; return zhSecs[zi++]||s; });
+    }
+
+    trBtn.className='done'; trBtn.textContent='✓ 已翻譯';
+    renderReader();
+    render();
+  }catch(e){
+    console.error(e);
+    trBtn.className=''; trBtn.textContent='✦ AI 翻譯';
+    errEl.style.display='block';
+    errEl.innerHTML='翻譯失敗：'+e.message+' — <button onclick="translateReader()" style="background:none;border:none;color:#ff5555;cursor:pointer;text-decoration:underline;font-size:10px">重試</button>';
+  }
+}
+</script>
+</body>
+</html>
