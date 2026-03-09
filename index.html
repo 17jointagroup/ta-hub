@@ -36,6 +36,9 @@
   --acc:#00e5a0;--acc3:#7b5fff;--txt:#e8e8f0;--muted:#666680;
   --shader:#ff6b35;--proc:#7b5fff;--vfx:#00d4ff;--char:#ff3d9a;
   --scene:#50fa7b;--gfx:#ffb86c;--anim:#ff79c6;--tools:#8be9fd;
+  /* Art Tips channel colors */
+  --concept:#f7c948;--modeling:#4ecdc4;--texturing:#ff9f43;--lighting:#a29bfe;
+  --ai-art:#fd79a8;
 }
 body{background:var(--bg);color:var(--txt);font-family:'Barlow',-apple-system,BlinkMacSystemFont,'Helvetica Neue','Noto Sans TC',sans-serif;font-weight:300;font-size:17px;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
@@ -56,6 +59,11 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',-apple-system,Bl
 /* HEADER */
 header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:0 20px;flex-shrink:0;}
 .hdr{max-width:1420px;margin:0 auto;display:flex;align-items:center;gap:12px;height:56px;}
+.ch-sw{display:flex;border:1px solid var(--bdr);border-radius:3px;overflow:hidden;flex-shrink:0;margin-right:4px;}
+.ch-btn{background:none;border:none;padding:5px 12px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ch-btn.active{background:var(--surf2);color:var(--txt);}
+.ch-btn.active.ch-ta{color:#00e5a0;}
+.ch-btn.active.ch-art{color:#f7c948;}
 .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:.15em;color:var(--acc);display:flex;align-items:center;gap:8px;}
 .logo-dot{width:8px;height:8px;background:var(--acc);border-radius:50%;animation:pulse 2s ease-in-out infinite;}
 .live-badge{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);border:1px solid var(--bdr);padding:3px 8px;border-radius:2px;white-space:nowrap;}
@@ -122,6 +130,9 @@ header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:
 /* BADGES / PILLS */
 .src-badge{font-family:'Space Mono',monospace;font-size:9px;padding:2px 6px;border-radius:2px;white-space:nowrap;flex-shrink:0;}
 .new-badge{background:rgba(0,229,160,.15);color:var(--acc);border:1px solid rgba(0,229,160,.35);border-radius:2px;padding:1px 5px;font-size:9px;font-family:'Space Mono',monospace;animation:newPop .4s ease;flex-shrink:0;}
+.tip-badge{background:rgba(247,201,72,.12);color:#f7c948;border:1px solid rgba(247,201,72,.3);border-radius:2px;padding:1px 5px;font-size:9px;font-family:'Space Mono',monospace;flex-shrink:0;}
+.card.is-tip{border-left-color:rgba(247,201,72,.5);}
+.card.is-tip:hover{border-left-color:#f7c948;}
 .tag-pill{font-family:'Space Mono',monospace;font-size:13px;padding:2px 8px;border-radius:20px;cursor:pointer;white-space:nowrap;transition:opacity .15s;}
 .tag-pill:hover{opacity:.6;}
 
@@ -276,6 +287,9 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
   .logo { font-size: 17px !important; }
   .live-badge { font-size: 10px !important; }
   #new-banner, .last-collect { display: none !important; }
+  /* Channel switcher on mobile */
+  .ch-sw { order: 2; }
+  .ch-btn { font-size: 10px !important; padding: 5px 8px !important; }
   .lang-sw { order: 3; width: 100%; display: flex; gap: 4px; }
   .lbtn { flex: 1; font-size: 12px !important; padding: 5px 6px !important; }
   .search-box { flex: 1; min-width: 120px; }
@@ -375,6 +389,10 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 <header>
   <div class="hdr">
     <div class="logo"><div class="logo-dot"></div>TA HUB</div>
+    <div class="ch-sw">
+      <button class="ch-btn ch-ta active" id="ch-ta" onclick="setChannel('ta')">⚙ TA</button>
+      <button class="ch-btn ch-art" id="ch-art" onclick="setChannel('art')">🎨 Art Tips</button>
+    </div>
     <div class="live-badge">LIVE <b id="article-count">● 15 篇</b></div>
     <div id="new-banner"></div>
     <div class="last-collect" id="last-collect-hdr"></div>
@@ -464,7 +482,7 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
   <main class="feed">
     <div class="feed-ctrl">
       <div>
-        <div class="feed-ttl">今日精選 / Today's Feed</div>
+        <div class="feed-ttl" id="feed-ttl-text">今日精選 / Today's Feed</div>
         <div class="feed-sub" id="feed-sub">顯示 0 篇</div>
       </div>
       <button class="collect-btn" id="collect-btn" onclick="runCollect()">⟳ 立即收集</button>
@@ -510,7 +528,7 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
     </div>
 
     <div class="sb-sec">
-      <div class="sb-hdr">監控來源 (12)</div>
+      <div class="sb-hdr" id="src-count-hdr">監控來源 (12)</div>
       <div id="src-list"></div>
     </div>
   </aside>
@@ -542,20 +560,30 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 <script>
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 const TAGS = {
-  shader:{en:"Shader",zh:"著色器"}, procedural:{en:"Procedural",zh:"程序化"},
-  vfx:{en:"VFX",zh:"視覺特效"}, character:{en:"Character",zh:"角色"},
-  scene:{en:"Environment",zh:"場景"}, graphics:{en:"Graphics",zh:"圖形學"},
-  animation:{en:"Animation",zh:"動畫綁定"}, tools:{en:"Tools",zh:"工具流程"}
+  // TA channel
+  shader:{en:"Shader",zh:"著色器",ch:"ta"}, procedural:{en:"Procedural",zh:"程序化",ch:"ta"},
+  vfx:{en:"VFX",zh:"視覺特效",ch:"ta"}, character:{en:"Character",zh:"角色",ch:"both"},
+  scene:{en:"Environment",zh:"場景",ch:"ta"}, graphics:{en:"Graphics",zh:"圖形學",ch:"ta"},
+  animation:{en:"Animation",zh:"動畫綁定",ch:"both"}, tools:{en:"Tools",zh:"工具流程",ch:"both"},
+  // Art Tips channel
+  concept:{en:"Concept Art",zh:"概念設計",ch:"art"}, modeling:{en:"Modeling",zh:"3D建模",ch:"art"},
+  texturing:{en:"Texturing",zh:"貼圖材質",ch:"art"}, lighting:{en:"Lighting",zh:"燈光",ch:"art"},
+  "ai-art":{en:"AI Tools",zh:"AI工具",ch:"art"}
 };
 const TAG_COL = {
+  // TA
   shader:"#ff6b35",procedural:"#7b5fff",vfx:"#00d4ff",character:"#ff3d9a",
-  scene:"#50fa7b",graphics:"#ffb86c",animation:"#ff79c6",tools:"#8be9fd"
+  scene:"#50fa7b",graphics:"#ffb86c",animation:"#ff79c6",tools:"#8be9fd",
+  // Art Tips
+  concept:"#f7c948",modeling:"#4ecdc4",texturing:"#ff9f43",lighting:"#a29bfe","ai-art":"#fd79a8"
 };
 const SRC_COL = {
   gdc:"#ff6b35",siggraph:"#7b5fff",unrealblog:"#00d4ff",unityblog:"#50fa7b",
-  "80lv":"#ff3d9a",catlike:"#ffb86c",houdini:"#ff79c6",blog:"#8be9fd"
+  "80lv":"#ff3d9a",catlike:"#ffb86c",houdini:"#ff79c6",blog:"#8be9fd",
+  // Art Tips sources
+  artstation:"#f7c948",substanceblog:"#ff9f43",polycount:"#4ecdc4",cgcookie:"#a29bfe"
 };
-const SOURCES = [
+const TA_SOURCES = [
   {name:"GDC Vault",type:"rss"},{name:"Siggraph Papers",type:"rss"},
   {name:"Unreal Dev Blog",type:"rss"},{name:"Unity Blog",type:"rss"},
   {name:"80.lv",type:"rss"},{name:"Catlike Coding",type:"rss"},
@@ -563,6 +591,14 @@ const SOURCES = [
   {name:"r/VFX",type:"ai"},{name:"ArtStation Blog",type:"ai"},
   {name:"Acerola YouTube",type:"ai"},{name:"Shadertoy Forum",type:"ai"}
 ];
+const ART_SOURCES = [
+  {name:"ArtStation Blog",type:"ai"},{name:"Adobe Substance Blog",type:"rss"},
+  {name:"Polycount",type:"ai"},{name:"80.lv",type:"rss"},
+  {name:"CG Cookie",type:"rss"},{name:"r/learnart",type:"ai"},
+  {name:"r/gamedev",type:"ai"},{name:"Concept Art World",type:"ai"},
+  {name:"CGMA",type:"rss"},{name:"New Masters Academy",type:"ai"}
+];
+const SOURCES = TA_SOURCES; // default, updated by setChannel
 
 const SEEDS = [
   {id:"s01",title:"Procedural Hand-Painted Skin Shader in Blender",excerpt:"Abir Dutta (Xeofrios) shares a procedural non-photorealistic skin shader in Blender using Shader Nodes — 100% procedural, no painting. Covers SubSurface Scattering, Voronoi Texture for painterly effect, and texture mixing.",src:"80.lv",sc:"80lv",tags:["shader","character"],date:"2023-10-10",type:"rss",url:"https://80.lv/articles/procedural-hand-painted-skin-shader-created-with-blender"},
@@ -603,10 +639,51 @@ const POOL = [
   {title:"Lumen Global Illumination & Reflections in UE5",excerpt:"Epic's documentation on Lumen GI and reflections: software ray tracing via mesh distance fields, surface cache, hardware RT mode, Lumen scene detail settings, and performance tuning for console and PC targets.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["graphics","scene"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine"},
   {title:"UE5 Procedural Content Generation (PCG) Framework Overview",excerpt:"Epic's guide to UE5's PCG framework: point cloud processing, hierarchical graphs, biome rule authoring, data-driven foliage placement, and hooking PCG output into Nanite Foliage for open-world environments.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["procedural","scene"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/procedural-content-generation-overview"},
   {title:"Chaos Cloth Asset Editor User Guide — UE5",excerpt:"Epic's guide to Chaos Cloth in UE5: painting constraints in the cloth tool, configuring self-collision, tuning solver iterations, and achieving stable real-time cloth simulation on hero character capes and garments.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["character","animation"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/chaos-cloth-asset-editor-user-guide"}
+// ─── ART TIPS DATA ────────────────────────────────────────────────────────────
+const ART_SEEDS = [
+  {id:"a01",title:"The 7 Values of Colour — Painting Light from Imagination",excerpt:"James Gurney's breakdown of how artists use value structure to imply convincing light. Covers lost and found edges, form shadows vs cast shadows, and the 3-value sketch method used in concept production pipelines.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2024-03-15",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
+  {id:"a02",title:"Substance 3D Painter Smart Materials — Building a Reusable Library",excerpt:"How to build a studio-grade smart material library in Substance 3D Painter: folder structure, anchor point setup, height-blending for layered wear, and exporting multi-channel maps for Unreal and Unity in one click.",src:"Adobe Substance Blog",sc:"substanceblog",tags:["texturing"],date:"2024-06-01",type:"rss",url:"https://substance3d.adobe.com/community-blog",tip:false},
+  {id:"a03",title:"Hard Surface Modeling Tips — Bevel, Boolean, and Mesh Clean-up",excerpt:"Production tips for hard surface game assets: bevel workflow for smooth normal bakes, boolean operations without topology nightmares, and the 'floater geo' technique to add detail without extra polygons on the low-poly.",src:"80.lv",sc:"80lv",tags:["modeling"],date:"2024-09-20",type:"rss",url:"https://80.lv/articles/hard-surface-modeling-tips",tip:false},
+  {id:"a04",title:"Lighting a Game Scene — 3-Point Setup to HDRI Blend",excerpt:"Step-by-step guide to lighting an interior environment in UE5: starting with a 3-point directional/fill/rim setup, blending sky HDRI, adding emissive props for fill, and final LUT-based colour grading in post.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["lighting","scene"],date:"2024-11-05",type:"rss",url:"https://dev.epicgames.com/community/learning",tip:false},
+  {id:"a05",title:"AI-Assisted Concept Art Pipeline — Midjourney to Production",excerpt:"How studios use Midjourney and Stable Diffusion for early concept exploration: prompt structures for consistent character designs, img2img for iterating on rough sketches, and when to hand off to a human artist for final polish.",src:"ArtStation Blog",sc:"artstation",tags:["concept","ai-art"],date:"2025-01-10",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
+  {id:"a06",title:"Character Silhouette Design — 10 Rules from AAA Studios",excerpt:"10 silhouette rules used by character artists at AAA studios: the thumbnail test, silhouette weight distribution, why tighter silhouettes read better on small screens, and how negative space creates memorable characters.",src:"80.lv",sc:"80lv",tags:["concept","character"],date:"2024-08-14",type:"rss",url:"https://80.lv/articles/character-silhouette-design",tip:false},
+  {id:"a07",title:"Organic Sculpting in ZBrush — From Blockout to Hero Detail",excerpt:"Full workflow from ZSphere blockout to hero mesh detail in ZBrush: proportional blocking with DynaMesh, macro surface forms with ClayBuildup and TrimDynamic, and micro-detail with Alpha brushes and Surface Noise for skin pores.",src:"ArtStation Blog",sc:"artstation",tags:["modeling","character"],date:"2024-07-22",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
+  {id:"a08",title:"Trim Sheet Workflow — One Texture, Infinite Architecture",excerpt:"How to build a game-ready trim sheet texture: planning the 9 trim zones on a 2K atlas, baking normals and AO from a high-poly source, and applying trim sheets in Unreal to modular architecture assets for maximum texture reuse.",src:"80.lv",sc:"80lv",tags:["texturing","scene"],date:"2024-05-03",type:"rss",url:"https://80.lv/articles/trim-sheet-workflow",tip:false},
+  {id:"a09",title:"Midpoint Value Study — Mastering Greyscale Before Colour",excerpt:"Why greyscale studies accelerate colour learning: the midpoint value method (everything maps to mid grey, lights up, darks down), how to do a 30-minute master copy study, and translating greyscale value maps to full colour.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2024-02-28",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
+  {id:"a10",title:"Rigging Stylized Characters in Maya — Squash & Stretch Controls",excerpt:"Building expressive squash-and-stretch rigs for stylized game characters in Maya: SDK-driven volume controls, non-linear deformers for cartoon exaggeration, and baking to a clean deformation skeleton for engine export.",src:"80.lv",sc:"80lv",tags:["character","animation"],date:"2024-10-11",type:"rss",url:"https://80.lv/articles/rigging-stylized-characters",tip:false}
+];
+
+// Short Tips (card-only, no reader body) — the Art Tips channel
+const ART_TIPS = [
+  {id:"t01",title:"UV islands should never share edges across material boundaries",excerpt:"When tiling textures meet unique baked detail, UV island boundaries act as hard seams under normal map filtering. Keep separate materials on separate UV islands — even if it means splitting a mesh — to prevent seam artefacts at runtime.",src:"Polycount",sc:"polycount",tags:["texturing","modeling"],date:"2025-01-20",type:"ai",url:"https://polycount.com/discussion",tip:true},
+  {id:"t02",title:"Paint shadows before highlights when doing greyscale studies",excerpt:"Shadows establish form; highlights are surface response. Painting shadows first forces you to commit to a light direction and prevents the common mistake of floating highlights with no grounding shadow to anchor them.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2025-01-18",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
+  {id:"t03",title:"Keep your hero mesh under 1% of your poly budget",excerpt:"A hero character in a current-gen open world title has a budget of ~80K triangles. Using more than 1% (~800 tris) on a single fingernail means you're robbing budget from silhouette-forming geometry elsewhere.",src:"80.lv",sc:"80lv",tags:["modeling","character"],date:"2025-01-15",type:"rss",url:"https://80.lv",tip:true},
+  {id:"t04",title:"Use a 1-pixel black outline in your concept colour script",excerpt:"A 1px black stroke around all value shapes in a colour script forces you to check that every shape reads as a distinct value — if two adjacent shapes have the same value, the stroke disappears and the forms merge.",src:"ArtStation Blog",sc:"artstation",tags:["concept"],date:"2025-01-12",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
+  {id:"t05",title:"Cavity maps should be baked at twice your target texel density",excerpt:"Cavity detail baked at 2× texel density, then downsampled, gives you anti-aliased micro-surface detail that catches specular correctly. Baking at target resolution results in aliased edges that break under area lights.",src:"Polycount",sc:"polycount",tags:["texturing"],date:"2025-01-10",type:"ai",url:"https://polycount.com",tip:true},
+  {id:"t06",title:"Three-light setups: key, fill, and rim should never share the same hue",excerpt:"Key and fill lights from the same colour temperature create flat, toneless renders. Use a warm key with a cool fill (or vice-versa), and a rim with a complementary hue to the key — the contrast reads as dimensional on any display.",src:"ArtStation Blog",sc:"artstation",tags:["lighting"],date:"2025-01-08",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
+  {id:"t07",title:"Midjourney style consistency: use --cref for character references",excerpt:"The --cref (character reference) flag in Midjourney v6 locks style and identity across prompts more reliably than textual description. Combine with --sw 50–80 for variation while preserving core character features in concept series.",src:"ArtStation Blog",sc:"artstation",tags:["ai-art","concept"],date:"2025-01-05",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
+  {id:"t08",title:"Use floating geometry to add chamfer detail without topology cost",excerpt:"Floating (non-connected) geo slightly above a surface bakes into the normal map as a chamfer seam — zero polygon cost on the low-poly. Essential for hard-surface panel lines. Keep floaters within 0.001 world units of the base mesh for accurate bakes.",src:"Polycount",sc:"polycount",tags:["modeling","texturing"],date:"2025-01-02",type:"ai",url:"https://polycount.com",tip:true},
+  {id:"t09",title:"Always block in at 50% grey before colour in Painter",excerpt:"Starting in Substance 3D Painter at 50% grey (128,128,128) for your Base Colour channel lets you evaluate height and cavity-driven detail in greyscale before committing to colour — the same principle as a traditional greyscale study.",src:"Adobe Substance Blog",sc:"substanceblog",tags:["texturing"],date:"2024-12-28",type:"rss",url:"https://substance3d.adobe.com",tip:true},
+  {id:"t10",title:"Your thumbnail pass should be completable in 5 minutes",excerpt:"If your concept thumbnail takes more than 5 minutes, you're rendering, not designing. Thumbnails are composition and silhouette decisions. Use a 2B brush at 100% opacity, no blending. Kill the rendering urge.",src:"ArtStation Blog",sc:"artstation",tags:["concept"],date:"2024-12-22",type:"ai",url:"https://www.artstation.com/blogs",tip:true}
+];
+
+const ART_POOL = [
+  {title:"Environment Concept Painting — Atmospheric Perspective in Games",excerpt:"How to fake atmospheric perspective in real-time games: value compression at distance, desaturation curves in post, and fog density settings in UE5's Exponential Height Fog that match painted concept reference.",src:"ArtStation Blog",sc:"artstation",tags:["concept","scene","lighting"],type:"ai",url:"https://www.artstation.com/blogs"},
+  {title:"Low-Poly Modular Kit Design for Mobile Games",excerpt:"Designing a modular architecture kit under 500 tris per piece for mobile: snapping grid rules, atlas packing strategy for a single 512×512 diffuse, and how to fake depth with vertex colour ambient occlusion.",src:"Polycount",sc:"polycount",tags:["modeling","scene"],type:"ai",url:"https://polycount.com"},
+  {title:"Stylized Texture Painting — Hand-Painted Look in Substance Painter",excerpt:"Replicating a hand-painted texture style in Substance 3D Painter: disabling PBR lighting, brush stroke fill layers, custom alpha stamps for fabric weave, and a final multiply pass to add painterly shadow depth.",src:"Adobe Substance Blog",sc:"substanceblog",tags:["texturing","character"],type:"rss",url:"https://substance3d.adobe.com"},
+  {title:"ZBrush to Engine Pipeline — Export, Decimate, and Bake",excerpt:"Full ZBrush export pipeline for game assets: Decimation Master for LODs, GoZ round-trip for retopology review, xNormal bake settings for accurate cage projection, and Marmoset Toolbag validation before engine import.",src:"80.lv",sc:"80lv",tags:["modeling","texturing"],type:"rss",url:"https://80.lv/articles"},
+  {title:"Concept Art Perspective — One, Two, and Three Point Grids",excerpt:"Using perspective grids in Photoshop and Clip Studio for concept environments: setting up 1-2-3 point grids for architecture, horizon line storytelling (high horizon = power/scale, low horizon = intimacy), and breaking perspective rules deliberately.",src:"ArtStation Blog",sc:"artstation",tags:["concept"],type:"ai",url:"https://www.artstation.com/blogs"},
+  {title:"AI Image Inpainting for Concepting — Stable Diffusion Workflow",excerpt:"Using Stable Diffusion inpainting for rapid concepting: painting rough forms, masking regions for AI regeneration, and iterating on AI suggestions while maintaining human creative direction. Covers ControlNet depth conditioning.",src:"ArtStation Blog",sc:"artstation",tags:["ai-art","concept"],type:"ai",url:"https://www.artstation.com/blogs"},
+  {title:"Game-Ready Hair Cards — Alpha, Normals, and Specular Setup",excerpt:"Building game-ready hair card systems: alpha texture baking from Xgen or Ornatrix, tangent-space normal baking for individual strands, anisotropic specular setup in Unreal's Hair shader, and LOD strip reduction strategy.",src:"80.lv",sc:"80lv",tags:["character","texturing"],type:"rss",url:"https://80.lv/articles"},
+  {title:"Colour Theory for Game Artists — Warm/Cool and Simultaneous Contrast",excerpt:"How warm/cool colour contrast creates depth in game environments: simultaneous contrast (adjacent hues shift each other's perceived temperature), complementary shadow colours in key lighting, and applying Itten's colour theory to material design.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],type:"ai",url:"https://www.artstation.com/blogs"},
+];
+
+
 ];
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
-let A = [];          // all articles
+let A = [];          // all articles (current channel)
+let channel = 'ta';  // 'ta' or 'art'
 let cat = 'all', srcF = 'all', query = '', sortBy = 'date', lang = 'en';
 let apiKey = '', trCount = 0;
 let lastCollect = null, collecting = false;
@@ -626,12 +703,12 @@ function daysAgo(d){
   const n = Math.floor((new Date()-new Date(d))/864e5);
   return n===0?'今天':n===1?'昨天':`${n}天前`;
 }
-function pickDaily(dateStr){
+function pickDaily(dateStr, pool=POOL){
   const seed = dateStr.split('-').reduce((a,b)=>a+parseInt(b),0);
   const out=[];
   for(let i=0;i<25;i++){
-    const idx=(seed*7+i*13+i*i*3)%POOL.length;
-    const a=POOL[idx];
+    const idx=(seed*7+i*13+i*i*3)%pool.length;
+    const a=pool[idx];
     if(!out.find(x=>x.title===a.title)) out.push({...a,id:`d_${dateStr}_${i}`,date:dateStr,isNew:true});
     if(out.length>=5) break;
   }
@@ -699,13 +776,7 @@ window.onunhandledrejection = function(e){
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Build source list
-  const srcListEl = document.getElementById('src-list');
-  srcListEl.innerHTML = SOURCES.map(s=>`
-    <div class="src-row">
-      <div class="src-dot" style="background:${s.type==='rss'?'#ff6b35':'#7b5fff'}"></div>
-      <span class="src-name">${s.name}</span>
-      <span class="src-type">${s.type.toUpperCase()}</span>
-    </div>`).join('');
+  updateSourceList();
 
   // Load saved state
   let saved=[], savedLastCollect=null, savedTr=0;
@@ -714,24 +785,19 @@ window.addEventListener('DOMContentLoaded', async () => {
   try{ savedTr=parseInt(store.get('ta_trCount'))||0; }catch(e){}
   trCount = savedTr;
 
-  // Merge seeds + saved
-  const map={};
-  SEEDS.forEach(a=>{ map[a.id]={...a}; });
-  saved.forEach(a=>{
-    if(!map[a.id]) map[a.id]={...a};
-    else {
-      // Only restore translations from localStorage, never overwrite url/title/tags from seed
-      if(a.title_zh){ map[a.id].title_zh=a.title_zh; map[a.id].excerpt_zh=a.excerpt_zh; }
-    }
-  });
-  A = Object.values(map);
+  // Build article list from current channel
+  rebuildArticles();
   lastCollect = savedLastCollect;
-  // Force-refresh URLs from POOL for any daily articles saved with old homepage URLs
+  // Force-refresh URLs
   const POOL_URL_MAP = {};
   POOL.forEach(p=>{ POOL_URL_MAP[p.title]=p.url; });
   SEEDS.forEach(s=>{ POOL_URL_MAP[s.title]=s.url; });
+  ART_SEEDS.forEach(s=>{ POOL_URL_MAP[s.title]=s.url; });
+  ART_TIPS.forEach(s=>{ POOL_URL_MAP[s.title]=s.url; });
   A.forEach(a=>{ if(POOL_URL_MAP[a.title]) a.url=POOL_URL_MAP[a.title]; });
 
+  // Update source list for current channel
+  updateSourceList();
   updateStats(); render();
   updateCollectStatus();
 
@@ -780,10 +846,12 @@ function render(){
     const isNew=a.isNew;
     const tZh=a.title_zh?`<div class="card-ttl-zh">${a.title_zh}</div>`:'';
     const eZh=a.excerpt_zh?`<p class="card-exc-zh">${a.excerpt_zh}</p>`:'';
-    return `<div class="card${isNew?' is-new':''}" style="animation-delay:${Math.min(i,5)*.025}s" onclick="openReader('${a.id}')">
+    const isTip = a.tip === true;
+    return `<div class="card${isNew?' is-new':''}${isTip?' is-tip':''}" style="animation-delay:${Math.min(i,5)*.025}s" onclick="openReader('${a.id}')">
       <div class="card-hd">
         ${srcBadgeHTML(a.sc,a.src)}
         ${isNew?'<span class="new-badge">NEW</span>':''}
+        ${isTip?'<span class="tip-badge">💡 TIP</span>':''}
         <div style="flex:1;min-width:0">
           <div class="card-ttl-en">${a.title}</div>
           ${tZh}
@@ -804,7 +872,11 @@ function updateStats(){
   document.getElementById('stat-tr').textContent=trCount;
   document.getElementById('stat-new').textContent=A.filter(a=>a.isNew).length;
   document.getElementById('cnt-all').textContent=A.length;
-  Object.keys(TAGS).forEach(t=>{
+  // Count by tag for current channel
+  const taCategories = ['shader','procedural','vfx','character','scene','graphics','animation','tools'];
+  const artCategories = ['concept','modeling','texturing','character','lighting','animation','ai-art','tools'];
+  const activeCats = channel==='ta' ? taCategories : artCategories;
+  activeCats.forEach(t=>{
     const el=document.getElementById('cnt-'+t);
     if(el) el.textContent=A.filter(a=>a.tags.includes(t)).length;
   });
@@ -846,6 +918,95 @@ function setSrc(s, btn){
 }
 function doFilter(){ query=document.getElementById('search-input').value; render(); }
 function doSort(v){ sortBy=v; render(); }
+function updateSourceList(){
+  const sources = channel==='ta' ? TA_SOURCES : ART_SOURCES;
+  const el = document.getElementById('src-list');
+  const hdr = document.getElementById('src-count-hdr');
+  if(hdr) hdr.textContent = `監控來源 (${sources.length})`;
+  el.innerHTML = sources.map(s=>`
+    <div class="src-row">
+      <div class="src-dot" style="background:${s.type==='rss'?'#ff6b35':'#7b5fff'}"></div>
+      <span class="src-name">${s.name}</span>
+      <span class="src-type">${s.type.toUpperCase()}</span>
+    </div>`).join('');
+}
+
+function setChannel(ch){
+  channel = ch;
+  // Update channel buttons
+  document.getElementById('ch-ta').classList.toggle('active', ch==='ta');
+  document.getElementById('ch-art').classList.toggle('active', ch==='art');
+  // Reset filters
+  cat='all'; srcF='all'; query='';
+  document.getElementById('search-input').value='';
+  // Rebuild article list
+  rebuildArticles();
+  // Rebuild sidebar categories
+  rebuildSidebar();
+  // Update feed title
+  const ttl = document.getElementById('feed-ttl-text');
+  if(ttl) ttl.textContent = ch==='ta' ? '今日精選 / Today's Feed' : '🎨 Art Tips & Tutorials';
+  // Reset all filter buttons
+  document.querySelectorAll('.sb-left .filt').forEach(b=>b.classList.remove('active'));
+  document.getElementById('cat-all').classList.add('active');
+  document.querySelectorAll('.sb-left .sb-sec:last-child .filt').forEach(b=>b.classList.remove('active'));
+  const srcAll = document.getElementById('src-all');
+  if(srcAll) srcAll.classList.add('active');
+  updateSourceList();
+  render();
+  updateStats();
+}
+
+function rebuildArticles(){
+  const map={};
+  if(channel==='ta'){
+    SEEDS.forEach(a=>{ map[a.id]={...a}; });
+  } else {
+    ART_SEEDS.forEach(a=>{ map[a.id]={...a}; });
+    ART_TIPS.forEach(a=>{ map[a.id]={...a}; });
+  }
+  // Restore saved translations
+  try{
+    const saved = JSON.parse(store.get(channel==='ta'?'ta_articles':'art_articles')||'[]');
+    saved.forEach(a=>{
+      if(!map[a.id]) map[a.id]={...a};
+      else {
+        if(a.title_zh){ map[a.id].title_zh=a.title_zh; map[a.id].excerpt_zh=a.excerpt_zh; }
+      }
+    });
+  }catch(e){}
+  // Add any daily collected articles
+  const daily = JSON.parse(store.get(channel==='ta'?'ta_daily':'art_daily')||'[]');
+  daily.forEach(a=>{ if(!map[a.id]) map[a.id]={...a}; });
+  A = Object.values(map);
+}
+
+function rebuildSidebar(){
+  const taCategories = ['shader','procedural','vfx','character','scene','graphics','animation','tools'];
+  const artCategories = ['concept','modeling','texturing','character','lighting','animation','ai-art','tools'];
+  const cats = channel==='ta' ? taCategories : artCategories;
+  const sb = document.querySelector('.sb-left');
+  // Rebuild category buttons
+  const firstSec = sb.querySelector('.sb-sec');
+  let html = '<div class="sb-hdr">分類 / Category</div>';
+  html += `<button class="filt active" id="cat-all" onclick="setCat('all',this)">
+    <div class="filt-dot" style="background:var(--muted)"></div>
+    <div class="filt-lbl"><span class="filt-en">All</span><span class="filt-zh">全部</span></div>
+    <span class="filt-cnt" id="cnt-all">0</span>
+  </button>`;
+  cats.forEach(t=>{
+    const tag = TAGS[t]||{en:t,zh:t};
+    const col = TAG_COL[t]||'#aaa';
+    const varName = t.replace('-','');
+    html += `<button class="filt" id="cat-${t}" onclick="setCat('${t}',this)">
+      <div class="filt-dot" style="background:${col}"></div>
+      <div class="filt-lbl"><span class="filt-en">${tag.en}</span><span class="filt-zh">${tag.zh}</span></div>
+      <span class="filt-cnt" id="cnt-${t}">0</span>
+    </button>`;
+  });
+  firstSec.innerHTML = html;
+}
+
 function setLang(l){
   lang=l;
   document.body.className='lang-'+l;
@@ -873,7 +1034,8 @@ async function runCollect(){
   await delay(500);
   addLog('🔍 掃描 12 個來源中...');
 
-  const candidates=pickDaily(today());
+  const pool = channel==='ta' ? POOL : ART_POOL;
+  const candidates=pickDaily(today(), pool);
   const fresh=candidates.filter(a=>!A.find(x=>x.title===a.title));
 
   for(const a of fresh){
@@ -886,7 +1048,8 @@ async function runCollect(){
   // Prepend new articles
   A = [...fresh, ...A];
   lastCollect = today();
-  store.set('ta_articles', JSON.stringify(A.slice(0,250)));
+  const saveKey = channel==='ta' ? 'ta_articles' : 'art_articles';
+  store.set(saveKey, JSON.stringify(A.slice(0,250)));
   store.set('ta_lastCollect', today());
 
   updateStats(); render(); updateCollectStatus();
@@ -927,7 +1090,8 @@ async function translateAll(){
       await delay(200);
     }catch(e){ console.warn('tr fail',a.id,e); done++; }
   }
-  store.set('ta_articles', JSON.stringify(A.slice(0,250)));
+  const saveKey = channel==='ta' ? 'ta_articles' : 'art_articles';
+  store.set(saveKey, JSON.stringify(A.slice(0,250)));
   store.set('ta_trCount', String(trCount));
   btn.textContent='✓ 全部完成';
   setTimeout(()=>{ pw.style.display='none'; btn.disabled=false; btn.textContent='✦ AI 翻譯全部文章'; },2500);
@@ -1045,6 +1209,42 @@ function getKeyPoints(a){
       'Naming conventions enforced by tools, not style guides — humans forget, scripts do not',
       'Houdini PDG can run Maya, Substance, and custom scripts as work items in one graph',
       'Version-stamp every exported asset; stale assets in builds are invisible bugs'
+    ],
+    // Art Tips key points
+    concept:[
+      'Thumbnails should be completable in under 5 minutes — if longer, you're rendering, not designing',
+      'Value structure first: establish 3 values (light, mid, dark) before adding colour',
+      'The silhouette test: your design must read clearly as a black shape at thumbnail size',
+      'Atmospheric perspective: distant objects lose contrast, saturation, and warm tones',
+      'Use a limited palette (3–5 colours) for concept thumbnails — complexity hides design problems'
+    ],
+    modeling:[
+      'Floating geometry bakes as chamfer detail at zero polygon cost on the low-poly',
+      'DynaMesh resolution of 256+ for hero organic forms; 128 for blockout stage',
+      'Boolean operations should happen on a separate DynaMesh — never on retopology mesh',
+      'Bevel width should equal 1/3 of the edge's "visual importance" — tighter for sharp-edged hero props',
+      'A clean quad-dominant cage is more important than polycount for normal bake accuracy'
+    ],
+    texturing:[
+      'Bake your cavity map at 2× target texel density then downsample — eliminates aliased edges',
+      'UV islands across material boundaries cause seam artefacts under mip filtering — always split',
+      'Smart materials should live in a shared library folder, never embedded in a single project file',
+      'Always start at 50% grey (128,128,128) base colour in Painter — evaluate detail before colour',
+      'Roughness variation is more important than albedo variation for believable PBR surfaces'
+    ],
+    lighting:[
+      'Key, fill, and rim should never share the same hue — temperature contrast creates dimension',
+      'Paint shadows before highlights — shadows establish form; highlights are surface response',
+      'A fill light should be 3–4 stops below the key light for outdoor scenes; 1–2 stops for interior',
+      'Rim lights should be the complementary colour to the key for maximum chromatic contrast',
+      'Exponential Height Fog in UE5: set density to 0.02–0.05 for believable outdoor atmosphere'
+    ],
+    "ai-art":[
+      '--cref flag in Midjourney v6 locks character identity across prompts (use --sw 50–80 for variation)',
+      'ControlNet depth conditioning preserves spatial layout while allowing style transfer',
+      'Inpainting workflow: paint rough forms, mask regions for AI regeneration, iterate on suggestions',
+      'Prompt structure for consistency: [subject], [style], [lighting], [camera], [mood] in that order',
+      'AI output is a starting point — always paint over, refine silhouettes, and fix anatomy manually'
     ]
   };
   return kp[t]||kp.tools;
@@ -1063,6 +1263,36 @@ function getVideoLinks(a){
   ];
 }
 
+// Art Tips genSections — different content for art articles
+function genArtSections(a){
+  const t = a.tags[0];
+  const base = [{h:'Overview', p:a.excerpt+' This guide covers practical workflow techniques used in professional game art production, with actionable advice you can apply immediately to your current projects.'}];
+  if(t==='concept') return [...base,
+    {h:'Workflow Breakdown', p:'Start every concept with a value-only thumbnail pass at 10% canvas size. Lock in composition, light direction, and silhouette before switching to full resolution. The 5-minute rule: if your thumbnail takes longer, you are rendering, not designing.'},
+    {h:'Colour & Mood', p:'Apply colour as a final overlay using Photoshop Hue/Saturation or a Colour layer at 30–50% opacity over your greyscale pass. This keeps value structure intact while exploring colour quickly. Warm/cool contrast between key and fill light is non-negotiable for dimensional reads.'},
+    {h:'Further Study', p:'Study masters: Craig Mullins for lighting, Feng Zhu for design language, Sparth for architectural scale. Do one 30-minute master copy per week — copy the value structure, not the subject matter.'}
+  ];
+  if(t==='modeling') return [...base,
+    {h:'Topology Strategy', p:'Block out in DynaMesh at low resolution (64–128), establish proportions and major forms. Move to medium res (256) for secondary forms and silhouette refinement. Fine detail (512+) only for hero meshes that will be baked.'},
+    {h:'Bake Preparation', p:'Your low-poly cage must match the high-poly silhouette within 0.5–1mm in world space. Use floater geometry for panel lines — they bake as chamfer detail at zero polygon cost. Explode your UV islands by at least 2px padding for mip safety.'},
+    {h:'Common Mistakes', p:'Avoid n-gons at curved surfaces — they triangulate unpredictably under tessellation. Keep poles (vertices with 5+ edges) away from deforming areas on character meshes. Mirror everything you can to halve UV space.'}
+  ];
+  if(t==='texturing') return [...base,
+    {h:'Channel Strategy', p:'Plan your texture channels before you start: Base Colour (albedo, no lighting), Roughness (surface micro-variation is the key variable), Normal (baked + hand-painted detail), and a packed ORM (Occlusion R, Roughness G, Metallic B) for engine efficiency.'},
+    {h:'Substance 3D Painter Workflow', p:'Start with a 50% grey base colour and evaluate height + cavity in greyscale before adding colour. Use Smart Materials from your library as a base, then break uniformity with manual dirt/wear layers. Roughness variation matters more than albedo variation for believable PBR.'},
+    {h:'Export & Validation', p:'Export at 2× your target resolution and let the engine mip-chain handle downsampling — this gives you anti-aliased detail at runtime. Validate in your target engine under multiple light conditions before signing off.'}
+  ];
+  if(t==='lighting') return [...base,
+    {h:'Three-Light Fundamentals', p:'Key light establishes the light direction and primary shadow. Fill light (3–4 stops below key for outdoor, 1–2 for interior) lifts shadow detail without destroying contrast. Rim light separates subject from background — use the complementary hue to your key for maximum chromatic contrast.'},
+    {h:'Real-Time Lighting in UE5', p:'Lumen uses software ray tracing by default (mesh distance fields) — switch to hardware RT only when you have GPU budget. Set your Exponential Height Fog to 0.02–0.05 density for believable outdoor atmosphere. Emissive props as fill lights are free after the initial Lumen cache warm-up.'},
+    {h:'Mood & Storytelling', p:'Light height tells a story: low angle key = drama, top-down key = oppressive/exposed, 45° key = neutral/natural. Time of day in games is defined by colour temperature: dawn (warm orange), noon (cool white), dusk (deep orange-red), night (cool blue with warm artificial fills).'}
+  ];
+  return [...base,
+    {h:'Key Principles', p:'The most important principle in game art is communication at the intended view distance. Detail that does not read from the camera's closest approach distance is waste. Design your texel density, polygon density, and silhouette detail budget based on the camera-to-asset distance in your specific game.'},
+    {h:'Production Pipeline', p:'Every asset should pass through the same validation gate: naming convention check, polycount within budget, UV layout correct, no overlapping UVs, textures match the spec sheet resolution, LODs generated and validated. Validation scripts that block submission are more reliable than style guides.'}
+  ];
+}
+
 // One-paragraph summary
 function getSummary(a, isZh){
   if(isZh && a.excerpt_zh) return a.excerpt_zh;
@@ -1073,7 +1303,7 @@ function getSummary(a, isZh){
 function openReader(id){
   const a=A.find(x=>x.id===id); if(!a) return;
   readerArt=a; rTranslated=false;
-  if(!bodyCache[id]) bodyCache[id]={secs:genSections(a)};
+  if(!bodyCache[id]) bodyCache[id]={secs:(a.ch==='art'||channel==='art')?genArtSections(a):genSections(a)};
 
   const col=SRC_COL[a.sc]||'#8be9fd';
   const sb=document.getElementById('r-src-badge');
