@@ -386,19 +386,27 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 /* ══════════════════════════════════════════════
    🚀 INTRO CHANNEL — 入門教學
    ══════════════════════════════════════════════ */
-#intro-panel{display:none;animation:fadeIn .35s ease}
+#intro-panel{display:none;animation:fadeIn .35s ease;padding:0 20px 40px;width:100%}
 #intro-panel.visible{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 
-/* hide feed/sidebar when intro is active */
-.intro-active #feed{display:none}
+/* intro-active: hide sidebars, expand main to full width */
+.intro-active .sb-left{display:none!important}
+.intro-active .sb-right{display:none!important}
+.intro-active.lang-en .layout,
+.intro-active.lang-zh .layout,
+.intro-active.lang-ja .layout,
+.intro-active .layout{grid-template-columns:1fr!important}
+.intro-active #feed{display:none!important}
 .intro-active #no-results{display:none!important}
-.intro-active .sb-left{display:none}
-.intro-active #feed-ctrl{display:none}
+.intro-active #feed-ctrl{display:none!important}
+.intro-active #collect-log{display:none!important}
+.intro-active .feed-ttl{display:none!important}
+.intro-active .feed-sub{display:none!important}
 
 /* Intro hero */
 .int-hero{
-  padding:40px 0 32px;text-align:center;
+  padding:40px 0 32px;text-align:center;max-width:860px;margin:0 auto;
   background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(0,229,160,.07),transparent 70%);
   border-bottom:1px solid var(--border);margin-bottom:32px;
 }
@@ -435,7 +443,7 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 .int-cta.sec:hover{background:rgba(0,229,160,.08)}
 
 /* Section headers */
-.int-sec{margin-bottom:40px}
+.int-sec{margin-bottom:40px;max-width:860px;margin-left:auto;margin-right:auto}
 .int-sec-lbl{
   font-family:var(--mono);font-size:.65rem;color:var(--acc);letter-spacing:.15em;
   text-transform:uppercase;margin-bottom:6px;
