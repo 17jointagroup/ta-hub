@@ -214,28 +214,32 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 ═══════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px){
   /* Hide sidebars, go single column */
-  #sidebar-left, #sidebar-right { display: none !important; }
-  #main-wrap {
-    flex-direction: column;
-    padding: 0 0 60px 0;
-    gap: 0;
+  .layout {
+    grid-template-columns: 1fr !important;
+    overflow: visible !important;
   }
-  #feed-col {
+  .sb-left, .sb-right { display: none !important; }
+  .feed {
     width: 100% !important;
     min-width: 0 !important;
-    padding: 0 10px;
+    padding: 6px 10px 70px 10px !important;
   }
   /* Header */
-  header {
-    padding: 8px 12px;
+  header { padding: 0 10px; }
+  .hdr {
+    height: auto !important;
     flex-wrap: wrap;
+    padding: 8px 0;
     gap: 6px;
   }
-  .logo { font-size: 18px !important; }
+  .logo { font-size: 17px !important; }
   .live-badge { font-size: 10px !important; }
-  /* Lang switcher in header */
+  #new-banner, .last-collect { display: none !important; }
+  /* Lang switcher */
   .lang-sw { order: 3; width: 100%; display: flex; gap: 4px; }
-  .lbtn { flex: 1; font-size: 12px !important; padding: 5px 8px !important; }
+  .lbtn { flex: 1; font-size: 12px !important; padding: 5px 6px !important; }
+  /* Search box */
+  .search-box { flex: 1; min-width: 120px; }
   /* Feed title */
   .feed-ttl { font-size: 18px !important; }
   /* Cards */
@@ -250,14 +254,14 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
     left: 0 !important;
     border-radius: 0 !important;
     top: 0 !important;
-    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
   }
-  #r-header {
-    padding: 8px 12px !important;
+  .r-topbar {
+    padding: 8px 10px !important;
     flex-wrap: wrap;
     gap: 4px;
   }
-  #r-close { order: -1; }
   #r-ext-link {
     font-size: 11px !important;
     padding: 5px 10px !important;
@@ -1072,7 +1076,8 @@ function setRL(l, doRender=true){
   if((l==='zh'||l==='ja') && readerArt){
     const id=readerArt.id||readerArt.title;
     const cache=bodyCache[id]||{};
-    if(!cache.zhSecs) {
+    const secsKey = l==='ja' ? 'jaSecs' : 'zhSecs';
+    if(!cache[secsKey]) {
       translateReader(l);
     } else {
       if(doRender&&readerArt) renderReader();
@@ -1098,8 +1103,8 @@ function renderSmartPanel(){
 
   const kp=getKeyPoints(a);
   const videos=getVideoLinks(a);
-  const summary=getSummary(a, isZh);
-  const summaryZh=a.excerpt_zh||'';
+  const summary=getSummary(a, isZh||isJa);
+  const summaryZh = isJa ? (a.excerpt_ja||'') : (a.excerpt_zh||'');
 
   // Summary
   let summaryHTML='';
@@ -1120,10 +1125,11 @@ function renderSmartPanel(){
   }
   if(isNonEn){
     const bc=bodyCache[a.id];
-    if(bc.kpZh){
-      kpHTML+=bc.kpZh.map(p=>`<li class="zh">${p}</li>`).join('');
-    } else if(rLang==='zh'){
-      kpHTML+=`<li class="zh" style="color:var(--muted);font-style:italic">點擊「⟳ 翻譯中文」取得中文重點</li>`;
+    const kpKey = isJa ? 'kpJa' : 'kpZh';
+    if(bc[kpKey]){
+      kpHTML+=bc[kpKey].map(p=>`<li class="zh">${p}</li>`).join('');
+    } else {
+      kpHTML+=`<li class="zh" style="color:var(--muted);font-style:italic">⟳ 翻譯中...</li>`;
     }
   }
 
@@ -1157,16 +1163,21 @@ function renderReaderBody(){
     'background:rgba(255,107,53,.1);color:#ff6b35;border:1px solid rgba(255,107,53,.25)':
     'background:rgba(123,95,255,.1);color:#7b5fff;border:1px solid rgba(123,95,255,.25)';
 
-  const tZh=a.title_zh
-    ?`<div class="art-t-zh">${a.title_zh}</div>`
-    :`<div class="art-t-pending">點擊「⟳ 翻譯中文」取得中文標題</div>`;
+  const isJaBody = rLang==='ja';
+  const titleKey  = isJaBody ? 'title_ja'  : 'title_zh';
+  const secsKey   = isJaBody ? 'jaSecs'    : 'zhSecs';
+  const tLabel    = isJaBody ? '日本語タイトル' : '中文標題';
+
+  const tZh = a[titleKey]
+    ?`<div class="art-t-zh">${a[titleKey]}</div>`
+    :`<div class="art-t-pending">⟳ 翻譯中...</div>`;
 
   const enBody=bc.secs.map(s=>renderSecHTML(s,false)).join('');
   let zhBody='';
-  if(bc.zhSecs){
-    zhBody=`<div class="body-zh">${bc.zhSecs.map(s=>renderSecHTML(s,true)).join('')}</div>`;
+  if(bc[secsKey]){
+    zhBody=`<div class="body-zh">${bc[secsKey].map(s=>renderSecHTML(s,true)).join('')}</div>`;
   } else {
-    zhBody=`<div class="body-zh"><div class="body-zh-hint">▸ 點擊上方「⟳ 翻譯中文」取得完整中文內文</div></div>`;
+    zhBody=`<div class="body-zh"><div class="body-zh-hint">▸ 翻譯中，請稍候...</div></div>`;
   }
 
   document.getElementById('r-body').innerHTML=`
@@ -1185,53 +1196,57 @@ function renderReaderBody(){
 }
 
 // ─── TRANSLATE (MyMemory, free, no key) ──────────────────────────────────────
-async function translateReader(targetLang){
+async function translateReader(lang){
   if(!readerArt) return;
-  const a=readerArt;
-  const errEl=document.getElementById('r-err');
+  const tl = lang || rLang;
+  const a = readerArt;
+  const errEl = document.getElementById('r-err');
   if(errEl) errEl.style.display='none';
-  // Show loading state on active tab
   const activeTab = document.querySelector('.r-tab.active');
   const origTabText = activeTab ? activeTab.textContent : '';
   if(activeTab) activeTab.textContent='⟳ 翻譯中...';
 
+  // Cache keys per language
+  const titleKey  = tl==='ja' ? 'title_ja'  : 'title_zh';
+  const excerptKey= tl==='ja' ? 'excerpt_ja': 'excerpt_zh';
+  const kpKey     = tl==='ja' ? 'kpJa'      : 'kpZh';
+  const secsKey   = tl==='ja' ? 'jaSecs'    : 'zhSecs';
+
   try{
     // 1. Title + excerpt
-    if(!a.title_zh){
-      a.title_zh = await trText(a.title, rLang);
-      a.excerpt_zh = await trText(a.excerpt, rLang);
+    if(!a[titleKey]){
+      a[titleKey]   = await trText(a.title,   tl);
+      a[excerptKey] = await trText(a.excerpt, tl);
       trCount++; document.getElementById('stat-tr').textContent=trCount;
     }
 
-    // 2. Key points (translate 5 points)
-    const bc=bodyCache[a.id];
-    if(!bc.kpZh){
-      const kp=getKeyPoints(a);
-      const zhPts=[];
+    // 2. Key points
+    const bc = bodyCache[a.id];
+    if(!bc[kpKey]){
+      const kp = getKeyPoints(a);
+      const pts = [];
       for(const pt of kp){
-        zhPts.push(await trText(pt, rLang));
+        pts.push(await trText(pt, tl));
         await delay(120);
       }
-      bc.kpZh=zhPts;
+      bc[kpKey] = pts;
     }
 
     // 3. Body sections
-    if(!bc.zhSecs){
-      // Show skeleton in body area
-      const zhEl=document.getElementById('r-body').querySelector('.body-zh');
-      if(zhEl) zhEl.innerHTML='<div class="body-translating">▸ 翻譯完整內文中，請稍候...</div>'+Array.from({length:6},(_,i)=>'<span class="skel" style="width:'+(62+i*5)+'%;animation-delay:'+(i*.08)+'s"></span>').join('');
-
-      const textSecs=bc.secs.filter(s=>s.h&&s.p);
-      const zhSecs=[];
+    if(!bc[secsKey]){
+      const zhEl = document.getElementById('r-body').querySelector('.body-zh');
+      if(zhEl) zhEl.innerHTML='<div class="body-translating">▸ 翻譯中，請稍候...</div>'+Array.from({length:6},(_,i)=>'<span class="skel" style="width:'+(62+i*5)+'%;animation-delay:'+(i*.08)+'s"></span>').join('');
+      const textSecs = bc.secs.filter(s=>s.h&&s.p);
+      const tSecs = [];
       for(const s of textSecs){
-        const zh_h=await trText(s.h, rLang);
+        const th = await trText(s.h, tl);
         await delay(80);
-        const zh_p=await trText(s.p, rLang);
+        const tp = await trText(s.p, tl);
         await delay(80);
-        zhSecs.push({h:zh_h,p:zh_p,isZh:true});
+        tSecs.push({h:th, p:tp, isZh:true});
       }
       let zi=0;
-      bc.zhSecs=bc.secs.map(s=>{ if(s.callout) return s; return zhSecs[zi++]||s; });
+      bc[secsKey] = bc.secs.map(s=>{ if(s.callout) return s; return tSecs[zi++]||s; });
     }
 
     if(activeTab) activeTab.textContent=origTabText;
@@ -1240,8 +1255,7 @@ async function translateReader(targetLang){
   }catch(e){
     console.error(e);
     if(activeTab) activeTab.textContent=origTabText;
-    errEl.style.display='block';
-    errEl.innerHTML='翻譯失敗：'+e.message+' — <button onclick="translateReader(rLang)" style="background:none;border:none;color:#ff5555;cursor:pointer;text-decoration:underline;font-size:10px">重試</button>';
+    if(errEl){ errEl.style.display='block'; errEl.innerHTML='翻譯失敗：'+e.message+' — <button onclick="translateReader(rLang)" style="background:none;border:none;color:#ff5555;cursor:pointer;text-decoration:underline;font-size:10px">重試</button>'; }
   }
 }
 </script>
