@@ -628,7 +628,7 @@ const POOL = [
   {title:"VFX & Shaders with Thomas Harle",excerpt:"VFX artist Thomas Harle (Naughty Dog, Rebellion, Epic) on approaching VFX and shaders for video games. Covers gameplay VFX, environmental FX, magic effects, reference gathering, and breaking down effects into constituent parts.",src:"80.lv",sc:"80lv",tags:["vfx","tools"],type:"rss",url:"https://80.lv/articles/vfx-shaders-with-thomas-harle"},
   {title:"Making First Steps in VFX with Procedural Tools",excerpt:"Houdini FX artist from Stormborn Studio (Dr. Strange, Avengers, Transformers) on building a VFX career, portfolio planning, Houdini's Python API and VEX scripting, and the modular FX house model for production efficiency.",src:"80.lv",sc:"80lv",tags:["vfx","procedural","tools"],type:"rss",url:"https://80.lv/articles/making-first-steps-in-vfx-with-procedural-tools/"},
   {title:"The Unity Shaders Bible Author on Technical Art",excerpt:"Fabrizio Espíndola, author of 'The Unity Shaders Bible', on 10 years as a TA, ShaderLab vs HLSL/CG, building Jettelly, and the evolution of shader tools in Unity. Second volume covering procedural shapes and math in production.",src:"80.lv",sc:"80lv",tags:["shader","tools"],type:"rss",url:"https://80.lv/articles/the-unity-shaders-bible-author-on-using-unity-for-technical-art"},
-  {title:"Making Shaders More Accessible in Unity — Amplify Shader Editor",excerpt:"Amplify Shader Editor team on building a node-based shader creation tool for Unity inspired by UE4 and Substance Designer. Covers Substance integration, precision settings, and how it's used in games like League of Legends and Rust.",src:"80.lv",sc:"80lv",tags:["shader","tools"],type:"rss",url:"https://80.lv/articles/making-shaders-more-accessible-in-unity"},
+  {title:"Making Shaders More Accessible in Unity — Amplify Shader Editor",excerpt:"Amplify Shader Editor team on building a node-based shader creation tool for Unity inspired by UE4 and Substance Designer. Covers Substance integration, precision settings, and how it is used in games like League of Legends and Rust.",src:"80.lv",sc:"80lv",tags:["shader","tools"],type:"rss",url:"https://80.lv/articles/making-shaders-more-accessible-in-unity"},
   {title:"Houdini-Powered Tool for UE5 — Accelerating Environment Creation",excerpt:"Technical Artist Matteo Vioglio's Houdini-powered UE5 tool for fast environment creation: versatile scene blocking, terrain generation, and path creation via Curves. WIP with more updates planned.",src:"80.lv",sc:"80lv",tags:["procedural","tools","scene"],type:"rss",url:"https://80.lv/articles/houdini-powered-tool-for-ue5-that-speeds-up-the-environment-creation-process"},
   {title:"2025 Recap: The Most Important 3D Software Releases",excerpt:"80.lv's annual recap of 3D software in 2025: Houdini 21 KineFX/muscle updates, Substance 3D Designer unified render engine, UE5 Procedural Vegetation Editor, Unity 6.3 LTS Shader Graph improvements, and RenderMan 27 XPU.",src:"80.lv",sc:"80lv",tags:["tools","graphics"],type:"rss",url:"https://80.lv/articles/2025-recap-the-most-important-3d-software-releases-of-the-year"},
   {title:"Unity C# and Shader Tutorials — Full Series",excerpt:"Catlike Coding's complete Unity shader and C# tutorial series: basics, procedural noise, mesh generation, rendering pipeline, flow effects, custom SRP, advanced rendering, hex maps, and movement systems.",src:"Catlike Coding",sc:"catlike",tags:["shader","graphics"],type:"rss",url:"https://catlikecoding.com/unity/tutorials/"},
@@ -639,9 +639,11 @@ const POOL = [
   {title:"Lumen Global Illumination & Reflections in UE5",excerpt:"Epic's documentation on Lumen GI and reflections: software ray tracing via mesh distance fields, surface cache, hardware RT mode, Lumen scene detail settings, and performance tuning for console and PC targets.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["graphics","scene"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine"},
   {title:"UE5 Procedural Content Generation (PCG) Framework Overview",excerpt:"Epic's guide to UE5's PCG framework: point cloud processing, hierarchical graphs, biome rule authoring, data-driven foliage placement, and hooking PCG output into Nanite Foliage for open-world environments.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["procedural","scene"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/procedural-content-generation-overview"},
   {title:"Chaos Cloth Asset Editor User Guide — UE5",excerpt:"Epic's guide to Chaos Cloth in UE5: painting constraints in the cloth tool, configuring self-collision, tuning solver iterations, and achieving stable real-time cloth simulation on hero character capes and garments.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["character","animation"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/chaos-cloth-asset-editor-user-guide"}
+];
+
 // ─── ART TIPS DATA ────────────────────────────────────────────────────────────
 const ART_SEEDS = [
-  {id:"a01",title:"The 7 Values of Colour — Painting Light from Imagination",excerpt:"James Gurney's breakdown of how artists use value structure to imply convincing light. Covers lost and found edges, form shadows vs cast shadows, and the 3-value sketch method used in concept production pipelines.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2024-03-15",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
+  {id:"a01",title:"The 7 Values of Colour — Painting Light from Imagination",excerpt:"James Gurney breakdown of how artists use value structure to imply convincing light. Covers lost and found edges, form shadows vs cast shadows, and the 3-value sketch method used in concept production pipelines.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2024-03-15",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
   {id:"a02",title:"Substance 3D Painter Smart Materials — Building a Reusable Library",excerpt:"How to build a studio-grade smart material library in Substance 3D Painter: folder structure, anchor point setup, height-blending for layered wear, and exporting multi-channel maps for Unreal and Unity in one click.",src:"Adobe Substance Blog",sc:"substanceblog",tags:["texturing"],date:"2024-06-01",type:"rss",url:"https://substance3d.adobe.com/community-blog",tip:false},
   {id:"a03",title:"Hard Surface Modeling Tips — Bevel, Boolean, and Mesh Clean-up",excerpt:"Production tips for hard surface game assets: bevel workflow for smooth normal bakes, boolean operations without topology nightmares, and the 'floater geo' technique to add detail without extra polygons on the low-poly.",src:"80.lv",sc:"80lv",tags:["modeling"],date:"2024-09-20",type:"rss",url:"https://80.lv/articles/hard-surface-modeling-tips",tip:false},
   {id:"a04",title:"Lighting a Game Scene — 3-Point Setup to HDRI Blend",excerpt:"Step-by-step guide to lighting an interior environment in UE5: starting with a 3-point directional/fill/rim setup, blending sky HDRI, adding emissive props for fill, and final LUT-based colour grading in post.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["lighting","scene"],date:"2024-11-05",type:"rss",url:"https://dev.epicgames.com/community/learning",tip:false},
@@ -657,14 +659,14 @@ const ART_SEEDS = [
 const ART_TIPS = [
   {id:"t01",title:"UV islands should never share edges across material boundaries",excerpt:"When tiling textures meet unique baked detail, UV island boundaries act as hard seams under normal map filtering. Keep separate materials on separate UV islands — even if it means splitting a mesh — to prevent seam artefacts at runtime.",src:"Polycount",sc:"polycount",tags:["texturing","modeling"],date:"2025-01-20",type:"ai",url:"https://polycount.com/discussion",tip:true},
   {id:"t02",title:"Paint shadows before highlights when doing greyscale studies",excerpt:"Shadows establish form; highlights are surface response. Painting shadows first forces you to commit to a light direction and prevents the common mistake of floating highlights with no grounding shadow to anchor them.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2025-01-18",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
-  {id:"t03",title:"Keep your hero mesh under 1% of your poly budget",excerpt:"A hero character in a current-gen open world title has a budget of ~80K triangles. Using more than 1% (~800 tris) on a single fingernail means you're robbing budget from silhouette-forming geometry elsewhere.",src:"80.lv",sc:"80lv",tags:["modeling","character"],date:"2025-01-15",type:"rss",url:"https://80.lv",tip:true},
+  {id:"t03",title:"Keep your hero mesh under 1% of your poly budget",excerpt:"A hero character in a current-gen open world title has a budget of ~80K triangles. Using more than 1% (~800 tris) on a single fingernail means you are robbing budget from silhouette-forming geometry elsewhere.",src:"80.lv",sc:"80lv",tags:["modeling","character"],date:"2025-01-15",type:"rss",url:"https://80.lv",tip:true},
   {id:"t04",title:"Use a 1-pixel black outline in your concept colour script",excerpt:"A 1px black stroke around all value shapes in a colour script forces you to check that every shape reads as a distinct value — if two adjacent shapes have the same value, the stroke disappears and the forms merge.",src:"ArtStation Blog",sc:"artstation",tags:["concept"],date:"2025-01-12",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
   {id:"t05",title:"Cavity maps should be baked at twice your target texel density",excerpt:"Cavity detail baked at 2× texel density, then downsampled, gives you anti-aliased micro-surface detail that catches specular correctly. Baking at target resolution results in aliased edges that break under area lights.",src:"Polycount",sc:"polycount",tags:["texturing"],date:"2025-01-10",type:"ai",url:"https://polycount.com",tip:true},
   {id:"t06",title:"Three-light setups: key, fill, and rim should never share the same hue",excerpt:"Key and fill lights from the same colour temperature create flat, toneless renders. Use a warm key with a cool fill (or vice-versa), and a rim with a complementary hue to the key — the contrast reads as dimensional on any display.",src:"ArtStation Blog",sc:"artstation",tags:["lighting"],date:"2025-01-08",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
   {id:"t07",title:"Midjourney style consistency: use --cref for character references",excerpt:"The --cref (character reference) flag in Midjourney v6 locks style and identity across prompts more reliably than textual description. Combine with --sw 50–80 for variation while preserving core character features in concept series.",src:"ArtStation Blog",sc:"artstation",tags:["ai-art","concept"],date:"2025-01-05",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
   {id:"t08",title:"Use floating geometry to add chamfer detail without topology cost",excerpt:"Floating (non-connected) geo slightly above a surface bakes into the normal map as a chamfer seam — zero polygon cost on the low-poly. Essential for hard-surface panel lines. Keep floaters within 0.001 world units of the base mesh for accurate bakes.",src:"Polycount",sc:"polycount",tags:["modeling","texturing"],date:"2025-01-02",type:"ai",url:"https://polycount.com",tip:true},
   {id:"t09",title:"Always block in at 50% grey before colour in Painter",excerpt:"Starting in Substance 3D Painter at 50% grey (128,128,128) for your Base Colour channel lets you evaluate height and cavity-driven detail in greyscale before committing to colour — the same principle as a traditional greyscale study.",src:"Adobe Substance Blog",sc:"substanceblog",tags:["texturing"],date:"2024-12-28",type:"rss",url:"https://substance3d.adobe.com",tip:true},
-  {id:"t10",title:"Your thumbnail pass should be completable in 5 minutes",excerpt:"If your concept thumbnail takes more than 5 minutes, you're rendering, not designing. Thumbnails are composition and silhouette decisions. Use a 2B brush at 100% opacity, no blending. Kill the rendering urge.",src:"ArtStation Blog",sc:"artstation",tags:["concept"],date:"2024-12-22",type:"ai",url:"https://www.artstation.com/blogs",tip:true}
+  {id:"t10",title:"Your thumbnail pass should be completable in 5 minutes",excerpt:"If your concept thumbnail takes more than 5 minutes, you are rendering, not designing. Thumbnails are composition and silhouette decisions. Use a 2B brush at 100% opacity, no blending. Kill the rendering urge.",src:"ArtStation Blog",sc:"artstation",tags:["concept"],date:"2024-12-22",type:"ai",url:"https://www.artstation.com/blogs",tip:true}
 ];
 
 const ART_POOL = [
@@ -676,9 +678,6 @@ const ART_POOL = [
   {title:"AI Image Inpainting for Concepting — Stable Diffusion Workflow",excerpt:"Using Stable Diffusion inpainting for rapid concepting: painting rough forms, masking regions for AI regeneration, and iterating on AI suggestions while maintaining human creative direction. Covers ControlNet depth conditioning.",src:"ArtStation Blog",sc:"artstation",tags:["ai-art","concept"],type:"ai",url:"https://www.artstation.com/blogs"},
   {title:"Game-Ready Hair Cards — Alpha, Normals, and Specular Setup",excerpt:"Building game-ready hair card systems: alpha texture baking from Xgen or Ornatrix, tangent-space normal baking for individual strands, anisotropic specular setup in Unreal's Hair shader, and LOD strip reduction strategy.",src:"80.lv",sc:"80lv",tags:["character","texturing"],type:"rss",url:"https://80.lv/articles"},
   {title:"Colour Theory for Game Artists — Warm/Cool and Simultaneous Contrast",excerpt:"How warm/cool colour contrast creates depth in game environments: simultaneous contrast (adjacent hues shift each other's perceived temperature), complementary shadow colours in key lighting, and applying Itten's colour theory to material design.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],type:"ai",url:"https://www.artstation.com/blogs"},
-];
-
-
 ];
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
@@ -744,17 +743,17 @@ function genSections(a){
   if(t==='vfx') return [...base,
     {h:'Effect Decomposition',p:"The effect is split into three layers: a hero simulation driving primary motion, a detail pass adding surface turbulence, and a compositing pass for screen-space integration. Each layer has independent LOD control and can be culled separately by the budget manager."},
     {h:'Simulation Notes',p:"Pyro and FLIP simulations should be authored at export quality, then baked to flipbook atlases at 8×8 or 16×16 for runtime playback. This approach reduces GPU memory and allows LOD control without re-simulation."},
-    {h:'Further Reading',p:"See the artist's ArtStation breakdown, the accompanying GDC or Siggraph talk, and the original source article for full node graphs and export settings."}
+    {h:'Further Reading',p:"See the artist ArtStation breakdown, the accompanying GDC or Siggraph talk, and the original source article for full node graphs and export settings."}
   ];
   if(t==='character'||t==='animation') return [...base,
     {h:'Rig Architecture',p:"The modular rig separates deformation from control: a clean deformation skeleton with minimal joints drives skinning, while a separate control rig with helper joints and correctives handles edge cases in extreme poses."},
     {h:'Performance Budget',p:"Hero characters on current-gen target 150–200 joints for the deformation skeleton. Each additional corrective blend shape costs approximately 0.1ms on PS5 — budget carefully and prefer joint-driven correctives where possible."},
-    {h:'Further Reading',p:"Refer to the source article, the Maya or Houdini project files if provided, and the studio's public GDC talk for the complete rigging pipeline and toolchain details."}
+    {h:'Further Reading',p:"Refer to the source article, the Maya or Houdini project files if provided, and the studio public GDC talk for the complete rigging pipeline and toolchain details."}
   ];
   if(t==='scene'||t==='tools') return [...base,
     {h:'Pipeline Overview',p:"Assets flow from DCC tool through an automated validation and export stage, then into the engine as USD or FBX. Each stage is gated by automated checks that catch naming errors, UV issues, and polycount violations before they reach the build."},
     {h:'Optimisation Notes',p:"World Partition streaming cells should be sized to 1–2 seconds of traversal time at typical player speed. Cells that are too small increase actor overhead; cells that are too large cause frame spikes when crossing boundaries."},
-    {h:'Further Reading',p:"See the source article, the studio's pipeline talk, and the linked GitHub or HDA repository for scripts and tool source code."}
+    {h:'Further Reading',p:"See the source article, the studio pipeline talk, and the linked GitHub or HDA repository for scripts and tool source code."}
   ];
   return base;
 }
@@ -1204,39 +1203,39 @@ function getKeyPoints(a){
     ],
     // Art Tips key points
     concept:[
-      'Thumbnails should be completable in under 5 minutes — if longer, you're rendering, not designing',
-      'Value structure first: establish 3 values (light, mid, dark) before adding colour',
-      'The silhouette test: your design must read clearly as a black shape at thumbnail size',
-      'Atmospheric perspective: distant objects lose contrast, saturation, and warm tones',
-      'Use a limited palette (3–5 colours) for concept thumbnails — complexity hides design problems'
+      "Thumbnails should be completable in under 5 minutes - if longer, you are rendering, not designing",
+      "Value structure first: establish 3 values (light, mid, dark) before adding colour",
+      "The silhouette test: your design must read clearly as a black shape at thumbnail size",
+      "Atmospheric perspective: distant objects lose contrast, saturation, and warm tones",
+      "Use a limited palette (3-5 colours) for concept thumbnails - complexity hides design problems"
     ],
     modeling:[
-      'Floating geometry bakes as chamfer detail at zero polygon cost on the low-poly',
-      'DynaMesh resolution of 256+ for hero organic forms; 128 for blockout stage',
-      'Boolean operations should happen on a separate DynaMesh — never on retopology mesh',
-      'Bevel width should equal 1/3 of the edge's "visual importance" — tighter for sharp-edged hero props',
-      'A clean quad-dominant cage is more important than polycount for normal bake accuracy'
+      "Floating geometry bakes as chamfer detail at zero polygon cost on the low-poly",
+      "DynaMesh resolution of 256+ for hero organic forms; 128 for blockout stage",
+      "Boolean operations should happen on a separate DynaMesh - never on retopology mesh",
+      "Bevel width should equal 1/3 of the edge visual importance - tighter for sharp-edged hero props",
+      "A clean quad-dominant cage is more important than polycount for normal bake accuracy"
     ],
     texturing:[
-      'Bake your cavity map at 2× target texel density then downsample — eliminates aliased edges',
-      'UV islands across material boundaries cause seam artefacts under mip filtering — always split',
-      'Smart materials should live in a shared library folder, never embedded in a single project file',
-      'Always start at 50% grey (128,128,128) base colour in Painter — evaluate detail before colour',
-      'Roughness variation is more important than albedo variation for believable PBR surfaces'
+      "Bake your cavity map at 2x target texel density then downsample - eliminates aliased edges",
+      "UV islands across material boundaries cause seam artefacts under mip filtering - always split",
+      "Smart materials should live in a shared library folder, never embedded in a single project file",
+      "Always start at 50% grey (128,128,128) base colour in Painter - evaluate detail before colour",
+      "Roughness variation is more important than albedo variation for believable PBR surfaces"
     ],
     lighting:[
-      'Key, fill, and rim should never share the same hue — temperature contrast creates dimension',
-      'Paint shadows before highlights — shadows establish form; highlights are surface response',
-      'A fill light should be 3–4 stops below the key light for outdoor scenes; 1–2 stops for interior',
-      'Rim lights should be the complementary colour to the key for maximum chromatic contrast',
-      'Exponential Height Fog in UE5: set density to 0.02–0.05 for believable outdoor atmosphere'
+      "Key, fill, and rim should never share the same hue - temperature contrast creates dimension",
+      "Paint shadows before highlights - shadows establish form; highlights are surface response",
+      "A fill light should be 3-4 stops below the key light for outdoor scenes; 1-2 stops for interior",
+      "Rim lights should be the complementary colour to the key for maximum chromatic contrast",
+      "Exponential Height Fog in UE5: set density to 0.02-0.05 for believable outdoor atmosphere"
     ],
     "ai-art":[
-      '--cref flag in Midjourney v6 locks character identity across prompts (use --sw 50–80 for variation)',
-      'ControlNet depth conditioning preserves spatial layout while allowing style transfer',
-      'Inpainting workflow: paint rough forms, mask regions for AI regeneration, iterate on suggestions',
-      'Prompt structure for consistency: [subject], [style], [lighting], [camera], [mood] in that order',
-      'AI output is a starting point — always paint over, refine silhouettes, and fix anatomy manually'
+      "--cref flag in Midjourney v6 locks character identity across prompts (use --sw 50-80 for variation)",
+      "ControlNet depth conditioning preserves spatial layout while allowing style transfer",
+      "Inpainting workflow: paint rough forms, mask regions for AI regeneration, iterate on suggestions",
+      "Prompt structure for consistency: subject, style, lighting, camera, mood in that order",
+      "AI output is a starting point - always paint over, refine silhouettes, and fix anatomy manually"
     ]
   };
   return kp[t]||kp.tools;
@@ -1280,7 +1279,7 @@ function genArtSections(a){
     {h:'Mood & Storytelling', p:'Light height tells a story: low angle key = drama, top-down key = oppressive/exposed, 45° key = neutral/natural. Time of day in games is defined by colour temperature: dawn (warm orange), noon (cool white), dusk (deep orange-red), night (cool blue with warm artificial fills).'}
   ];
   return [...base,
-    {h:'Key Principles', p:'The most important principle in game art is communication at the intended view distance. Detail that does not read from the camera's closest approach distance is waste. Design your texel density, polygon density, and silhouette detail budget based on the camera-to-asset distance in your specific game.'},
+    {h:'Key Principles', p:'The most important principle in game art is communication at the intended view distance. Detail that does not read from the camera closest approach distance is waste. Design your texel density, polygon density, and silhouette detail budget based on the camera-to-asset distance in your specific game.'},
     {h:'Production Pipeline', p:'Every asset should pass through the same validation gate: naming convention check, polycount within budget, UV layout correct, no overlapping UVs, textures match the spec sheet resolution, LODs generated and validated. Validation scripts that block submission are more reliable than style guides.'}
   ];
 }
