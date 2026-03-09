@@ -942,7 +942,7 @@ function setChannel(ch){
   const si = document.getElementById('search-input');
   if(si) si.value='';
   const ttl = document.getElementById('feed-ttl-text');
-  if(ttl) ttl.textContent = ch==='ta' ? '今日精選 / Today\'s Feed' : '🎨 Art Tips & Tutorials';
+  if(ttl) ttl.textContent = ch==='ta' ? "今日精選 / Today's Feed" : "🎨 Art Tips & Tutorials";
   rebuildSidebar();
   rebuildArticles();
   updateSourceList();
