@@ -1319,28 +1319,3 @@ async function translateReader(lang){
 <div id="mobile-filter-btn" onclick="alert('篩選功能請橫屏或使用電腦版')">☰ 篩選 / Filter</div>
 </body>
 </html>
-  #ticker { display: none !important; }
-
-  /* iOS scroll fix: let feed scroll, not body */
-  html { height: 100%; overflow: hidden; }
-  body {
-    height: 100% !important;
-    overflow: hidden !important;
-  }
-  .layout {
-    height: calc(100dvh - 56px) !important;
-    overflow: hidden !important;
-    touch-action: pan-y !important;
-  }
-  .feed {
-    height: 100% !important;
-    overflow-y: scroll !important;
-    -webkit-overflow-scrolling: touch !important;
-    -webkit-transform: translateZ(0) !important;
-    touch-action: pan-y !important;
-    padding-bottom: 80px !important;
-  }
-  /* Prevent cards from blocking scroll gesture */
-  .card {
-    touch-action: manipulation !important;
-  }
