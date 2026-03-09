@@ -1155,7 +1155,7 @@ function render(){
           <span class="show-badge" style="background:${typeCol}18;color:${typeCol};border-color:${typeCol}44">${typeLabel}</span>
           <span style="font-size:14px;margin-left:2px">${flag}</span>
           <div style="flex:1;min-width:0">
-            <div class="card-ttl-en">${a.name}</div>
+            <div class="card-ttl-en"><a href="${(a.links&&a.links[0])?a.links[0].url:'#'}" target="_blank" style="color:inherit;text-decoration:none;" onclick="event.stopPropagation()">${a.name}</a></div>
             <div class="card-role">${a.role}</div>
           </div>
         </div>
