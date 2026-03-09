@@ -216,79 +216,118 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 /* ═══════════════════════════════════════════════════════════════════
    MOBILE RESPONSIVE — 768px breakpoint
 ═══════════════════════════════════════════════════════════════════ */
-@media (max-width: 768px){
-  /* Hide sidebars, go single column */
+@media (max-width: 768px) {
+
+  /* ── COLORS: brighter for OLED ── */
+  :root {
+    --bg: #0e0e12;
+    --surf: #161620;
+    --surf2: #1e1e28;
+    --bdr: #333348;
+    --muted: #7777aa;
+  }
+
+  /* ── KILL ANIMATIONS ── */
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* ── REMOVE GPU-DRAIN EFFECTS ── */
+  header { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(14,14,18,0.99) !important; }
+  #r-overlay { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  #ticker { display: none !important; }
+
+  /* ── LAYOUT: body + html fill screen, feed scrolls ── */
+  html {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  header { flex-shrink: 0; }
   .layout {
-    grid-template-columns: 1fr !important;
-    overflow: visible !important;
+    flex: 1 !important;
+    display: flex !important;
+    overflow: hidden !important;
+    min-height: 0 !important;
+    height: auto !important;
   }
   .sb-left, .sb-right { display: none !important; }
   .feed {
+    display: block !important;
     width: 100% !important;
-    min-width: 0 !important;
-    padding: 6px 10px 70px 10px !important;
+    height: 100% !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 8px 10px 80px !important;
+    box-sizing: border-box !important;
   }
-  /* Header */
+
+  /* ── HEADER ── */
   header { padding: 0 10px; }
-  .hdr {
-    height: auto !important;
-    flex-wrap: wrap;
-    padding: 8px 0;
-    gap: 6px;
-  }
+  .hdr { height: auto !important; flex-wrap: wrap; padding: 8px 0; gap: 6px; }
   .logo { font-size: 17px !important; }
   .live-badge { font-size: 10px !important; }
   #new-banner, .last-collect { display: none !important; }
-  /* Lang switcher */
   .lang-sw { order: 3; width: 100%; display: flex; gap: 4px; }
   .lbtn { flex: 1; font-size: 12px !important; padding: 5px 6px !important; }
-  /* Search box */
   .search-box { flex: 1; min-width: 120px; }
-  /* Feed title */
-  .feed-ttl { font-size: 18px !important; }
-  /* Cards */
-  .card { padding: 12px; }
+
+  /* ── CARDS ── */
+  .card { padding: 12px; min-height: 0; }
   .card-ttl-en { font-size: 17px !important; }
   .card-ttl-zh { font-size: 14px !important; }
   .card-exc-en, .card-exc-zh { font-size: 13px !important; }
-  /* Reader panel — full screen on mobile */
+  .feed-ttl { font-size: 18px !important; }
+
+  /* ── TOUCH ── */
+  .card, .filt, .lbtn, .r-tab, .r-close, button {
+    min-height: 44px;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+  }
+
+  /* ── READER PANEL ── */
   #r-panel {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    right: 0 !important; bottom: 0 !important;
     width: 100% !important;
-    right: 0 !important;
-    left: 0 !important;
+    height: 100% !important;
     border-radius: 0 !important;
-    top: 0 !important;
-    height: 100dvh !important;
-    max-height: 100dvh !important;
+    border-left: none !important;
   }
-  .r-topbar {
-    padding: 8px 10px !important;
-    flex-wrap: wrap;
-    gap: 4px;
+  #r-body {
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 14px 12px !important;
   }
-  #r-ext-link {
-    font-size: 11px !important;
-    padding: 5px 10px !important;
-    order: 2;
-  }
+  .r-topbar { padding: 8px 10px !important; flex-wrap: wrap; gap: 4px; }
+  #r-ext-link { font-size: 11px !important; padding: 5px 10px !important; order: 2; }
   .r-tabbar { padding: 6px 10px !important; gap: 4px !important; flex-wrap: wrap; }
   .r-tab { font-size: 11px !important; padding: 5px 10px !important; }
-  /* Smart panel */
-  #r-smart { padding: 12px !important; }
+  #r-smart { padding: 12px !important; overflow-y: scroll !important; -webkit-overflow-scrolling: touch !important; }
   .section-hdr { font-size: 10px !important; }
   .summary-box { font-size: 14px !important; padding: 10px 12px !important; }
   .keypoints li { font-size: 14px !important; }
-  /* Video cards */
   #r-videos { grid-template-columns: 1fr !important; }
-  /* Article body */
-  #r-body { padding: 14px 12px !important; }
   .art-t-en { font-size: 22px !important; }
   .art-t-zh { font-size: 18px !important; }
   .sec p { font-size: 15px !important; }
   .sec h3.en { font-size: 17px !important; }
-  /* Overlay — only show when reader open (JS-controlled) */
-  /* #r-overlay display is managed by openReader/closeReader JS */
-  /* Bottom nav bar for mobile (filter toggle) */
+
+  /* ── OVERLAY ── */
+  #r-overlay { pointer-events: none; }
+  #r-overlay.active { pointer-events: auto; }
+
+  /* ── BOTTOM BAR ── */
   #mobile-filter-btn {
     display: flex !important;
     position: fixed;
@@ -298,61 +337,12 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
     padding: 10px 16px;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     font-family: 'Space Mono', monospace;
     font-size: 12px;
     color: var(--acc);
     cursor: pointer;
     z-index: 200;
   }
-}
-
-@media (max-width: 768px) {
-  :root {
-    --bg: #0e0e12;
-    --surf: #161620;
-    --surf2: #1e1e28;
-    --bdr: #333348;
-    --muted: #7777aa;
-  }
-  body { background: var(--bg) !important; }
-}
-
-@media (max-width: 768px) {
-  /* === iOS Safari essential fixes === */
-  
-  /* Disable ALL animations on mobile — prevent jank and freezes */
-  *, *::before, *::after {
-    animation-duration: 0s !important;
-    animation-delay: 0s !important;
-    transition-duration: 0s !important;
-  }
-  
-  /* Re-enable only critical transitions */
-  #r-panel { transition: none !important; }
-  
-  /* Remove backdrop filters completely — major GPU drain */
-  header { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-  #r-overlay { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-  
-  /* Touch target sizing — minimum 44px for iOS */
-  .filt, .lbtn, .r-tab, .r-close, .card {
-    min-height: 44px;
-    cursor: pointer;
-  }
-  
-  /* Prevent touch callout on buttons */
-  button, .card, .filt, .lbtn {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-  }
-  
-  /* iOS scroll momentum */
-  .feed, #r-body { -webkit-overflow-scrolling: touch; }
-  
-  /* Ensure nothing covers the page */
-  #r-overlay { pointer-events: none; }
-  #r-overlay.active { pointer-events: auto; }
 }
 
 @media (min-width: 769px){
