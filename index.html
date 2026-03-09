@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TA 魔法學院</title>
+<title>TA 魔法學院 — 20關</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -15,125 +15,75 @@
 }
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden;min-height:100vh}
-
-/* STARFIELD */
-body::before{
-  content:'';position:fixed;inset:0;z-index:-2;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%,rgba(124,111,255,.12) 0%,transparent 70%),
-    radial-gradient(ellipse 60% 40% at 80% 80%,rgba(0,229,160,.06) 0%,transparent 60%);
-}
+body::before{content:'';position:fixed;inset:0;z-index:-2;background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(124,111,255,.12) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(0,229,160,.06) 0%,transparent 60%)}
 .stars{position:fixed;inset:0;z-index:-1;pointer-events:none}
-.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle linear infinite}
 @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.7}}
 
-/* ══════════ MAP SCREEN ══════════ */
-#map{max-width:680px;margin:0 auto;padding:40px 20px 80px}
+#map{max-width:700px;margin:0 auto;padding:40px 20px 80px}
 #lesson{display:none;max-width:780px;margin:0 auto;padding:0 0 80px}
-
-.logo{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:52px}
-.logo-gem{
-  width:52px;height:52px;border-radius:16px;
-  background:linear-gradient(135deg,var(--purple),var(--acc));
-  display:flex;align-items:center;justify-content:center;font-size:1.5rem;
-  box-shadow:0 0 32px rgba(124,111,255,.35);
-}
+.logo{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:44px}
+.logo-gem{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--purple),var(--acc));display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 0 32px rgba(124,111,255,.35)}
 .logo-name{font-size:1.6rem;font-weight:900;letter-spacing:-.03em}
 .logo-name b{color:var(--acc)}
-
-.hero{text-align:center;margin-bottom:44px}
-.hero h1{font-size:clamp(1.9rem,5.5vw,3rem);font-weight:900;line-height:1.1;margin-bottom:10px}
+.hero{text-align:center;margin-bottom:36px}
+.hero h1{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;line-height:1.1;margin-bottom:10px}
 .hero h1 em{font-style:normal;background:linear-gradient(100deg,var(--acc),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero p{color:var(--muted);font-size:.95rem;font-weight:700;margin-bottom:18px}
-
+.hero p{color:var(--muted);font-size:.92rem;font-weight:700;margin-bottom:16px}
 .prog-wrap{background:var(--card);border:1px solid var(--border);border-radius:100px;height:8px;overflow:hidden}
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--purple));border-radius:100px;transition:width .7s cubic-bezier(.22,1,.36,1)}
 .prog-label{font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:6px}
 
-/* chapter cards */
+.group-lbl{font-family:var(--mono);font-size:.63rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:22px 4px 8px;display:flex;align-items:center;gap:10px}
+.group-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+
 .chapters{display:flex;flex-direction:column}
-.connector{width:2px;height:24px;background:linear-gradient(var(--border),var(--border2));margin:0 auto}
-
-.chcard{
-  background:var(--card);border:2px solid var(--border);border-radius:16px;
-  padding:18px 20px;display:flex;align-items:center;gap:16px;
-  cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;
-  position:relative;overflow:hidden;
-}
-.chcard::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 55%,rgba(255,255,255,.018));pointer-events:none}
-.chcard.locked{opacity:.38;cursor:not-allowed}
-.chcard.open:hover{border-color:var(--cc);transform:translateY(-2px) scale(1.008);box-shadow:0 8px 36px color-mix(in srgb,var(--cc) 14%,transparent)}
-.chcard.done{border-color:color-mix(in srgb,var(--cc) 38%,var(--border))}
-
-.ch-ico{
-  width:58px;height:58px;border-radius:14px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:1.7rem;
-  background:color-mix(in srgb,var(--cc) 11%,var(--panel));
-  border:1.5px solid color-mix(in srgb,var(--cc) 22%,transparent);
-  position:relative;
-}
-.ch-num{
-  position:absolute;bottom:-5px;right:-5px;
-  width:19px;height:19px;border-radius:50%;
-  background:var(--cc);color:#07080f;
-  font-size:.58rem;font-weight:900;font-family:var(--mono);
-  display:flex;align-items:center;justify-content:center;
-  border:2px solid var(--bg);
-}
+.connector{width:2px;height:18px;background:linear-gradient(var(--border),var(--border2));margin:0 auto}
+.chcard{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:15px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.chcard::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 55%,rgba(255,255,255,.015));pointer-events:none}
+.chcard.locked{opacity:.35;cursor:not-allowed}
+.chcard.open:hover{border-color:var(--cc);transform:translateY(-2px) scale(1.007);box-shadow:0 8px 32px color-mix(in srgb,var(--cc) 13%,transparent)}
+.chcard.done{border-color:color-mix(in srgb,var(--cc) 35%,var(--border))}
+.ch-ico{width:52px;height:52px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:color-mix(in srgb,var(--cc) 11%,var(--panel));border:1.5px solid color-mix(in srgb,var(--cc) 22%,transparent);position:relative}
+.ch-num{position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--cc);color:#07080f;font-size:.55rem;font-weight:900;font-family:var(--mono);display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
 .ch-body{flex:1;min-width:0}
-.ch-tag{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cc);margin-bottom:3px}
-.ch-title{font-size:.98rem;font-weight:900;margin-bottom:2px}
-.ch-desc{font-size:.8rem;color:var(--muted);font-weight:700;line-height:1.45}
-.ch-row{display:flex;align-items:center;gap:8px;margin-top:7px;flex-wrap:wrap}
+.ch-tag{font-family:var(--mono);font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cc);margin-bottom:2px}
+.ch-title{font-size:.95rem;font-weight:900;margin-bottom:2px}
+.ch-desc{font-size:.78rem;color:var(--muted);font-weight:700;line-height:1.4}
+.ch-row{display:flex;align-items:center;gap:7px;margin-top:6px;flex-wrap:wrap}
 .ch-time{font-family:var(--mono);font-size:.58rem;color:var(--muted)}
-.ch-xp{font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--yellow);background:rgba(255,203,71,.1);border:1px solid rgba(255,203,71,.2);padding:1px 7px;border-radius:4px}
-.ch-done-tag{font-family:var(--mono);font-size:.58rem;color:var(--cc)}
-
-.badge-go{width:34px;height:34px;border-radius:50%;background:var(--cc);color:#07080f;display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:900;box-shadow:0 0 16px color-mix(in srgb,var(--cc) 45%,transparent);flex-shrink:0}
-.badge-done{width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--cc) 14%,transparent);border:2px solid var(--cc);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
-.badge-lock{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.03);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--muted);flex-shrink:0}
-
-.xp-total{text-align:center;margin-top:28px;font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--yellow)}
+.ch-xp{font-family:var(--mono);font-size:.58rem;font-weight:700;color:var(--yellow);background:rgba(255,203,71,.1);border:1px solid rgba(255,203,71,.2);padding:1px 6px;border-radius:4px}
+.ch-done-tag{font-family:var(--mono);font-size:.55rem;color:var(--cc)}
+.badge-go{width:32px;height:32px;border-radius:50%;background:var(--cc);color:#07080f;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;box-shadow:0 0 14px color-mix(in srgb,var(--cc) 45%,transparent);flex-shrink:0}
+.badge-done{width:32px;height:32px;border-radius:50%;background:color-mix(in srgb,var(--cc) 14%,transparent);border:2px solid var(--cc);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.badge-lock{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.03);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--muted);flex-shrink:0}
+.xp-total{text-align:center;margin-top:24px;font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--yellow)}
 .xp-total span{font-size:.7rem;color:var(--muted);font-weight:400}
 
-/* ══════════ LESSON SCREEN ══════════ */
-.lheader{
-  display:flex;align-items:center;gap:12px;padding:18px 22px;
-  border-bottom:1px solid var(--border);
-  position:sticky;top:0;background:rgba(7,8,15,.93);backdrop-filter:blur(14px);z-index:100;
-}
-.back{width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .2s;flex-shrink:0}
+.lheader{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(7,8,15,.93);backdrop-filter:blur(14px);z-index:100}
+.back{width:34px;height:34px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .2s;flex-shrink:0}
 .back:hover{border-color:var(--lc,var(--acc));color:var(--lc,var(--acc))}
 .lprog-track{flex:1;height:7px;background:var(--card);border-radius:100px;overflow:hidden}
 .lprog-fill{height:100%;background:var(--lc,var(--acc));border-radius:100px;transition:width .4s ease}
 .lxp{font-family:var(--mono);font-size:.65rem;font-weight:700;color:var(--yellow);background:rgba(255,203,71,.1);border:1px solid rgba(255,203,71,.2);padding:4px 10px;border-radius:8px;flex-shrink:0}
-
-.swrap{padding:26px 22px}
+.swrap{padding:24px 20px}
 .step{display:none;animation:fadeUp .28s ease}
 .step.active{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-/* HOOK */
-.hook{text-align:center;padding:14px 0 22px}
-.hook-emoji{font-size:3.8rem;display:block;margin-bottom:14px;animation:bob 2.4s ease-in-out infinite}
+.hook{text-align:center;padding:12px 0 20px}
+.hook-emoji{font-size:3.6rem;display:block;margin-bottom:14px;animation:bob 2.4s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.hook-q{font-size:clamp(1.3rem,4vw,1.9rem);font-weight:900;line-height:1.2;margin-bottom:10px}
-.hook-sub{color:var(--muted);font-size:.9rem;font-weight:700;margin-bottom:24px}
-.choices{display:flex;flex-direction:column;gap:9px;max-width:420px;margin:0 auto}
-.choice{
-  background:var(--card);border:2px solid var(--border);border-radius:12px;
-  padding:13px 17px;font-size:.9rem;font-weight:800;cursor:pointer;
-  transition:all .18s;text-align:left;display:flex;align-items:center;gap:11px;
-  font-family:var(--font);color:var(--text);
-}
+.hook-q{font-size:clamp(1.2rem,4vw,1.8rem);font-weight:900;line-height:1.2;margin-bottom:10px}
+.hook-sub{color:var(--muted);font-size:.9rem;font-weight:700;margin-bottom:22px}
+.choices{display:flex;flex-direction:column;gap:9px;max-width:430px;margin:0 auto}
+.choice{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:13px 16px;font-size:.9rem;font-weight:800;cursor:pointer;transition:all .18s;text-align:left;display:flex;align-items:center;gap:10px;font-family:var(--font);color:var(--text)}
 .choice:hover{border-color:var(--lc,var(--acc));transform:translateX(3px)}
 .choice.correct{border-color:var(--acc);background:rgba(0,229,160,.07);color:var(--acc)}
 .choice.wrong{border-color:var(--red);background:rgba(255,92,92,.07);color:var(--red);animation:shake .28s ease}
 @keyframes shake{0%,100%{transform:translateX(0)}30%{transform:translateX(-7px)}70%{transform:translateX(7px)}}
-.cico{font-size:1.15rem;flex-shrink:0}
+.cico{font-size:1.1rem;flex-shrink:0}
 
-/* EXPLAIN */
-.etitle{font-size:1.18rem;font-weight:900;margin-bottom:9px}
+.etitle{font-size:1.15rem;font-weight:900;margin-bottom:9px}
 .ebody{font-size:.9rem;color:#bfc4d8;font-weight:700;line-height:1.75;margin-bottom:14px}
 .ebody strong{color:var(--text)}
 .abox{background:color-mix(in srgb,var(--lc,var(--acc)) 6%,var(--card));border:1px solid color-mix(in srgb,var(--lc,var(--acc)) 24%,transparent);border-radius:10px;padding:13px 16px;margin-bottom:14px}
@@ -141,83 +91,57 @@ body::before{
 .atext{font-size:.86rem;font-weight:700;line-height:1.55}
 code{font-family:var(--mono);color:var(--acc);font-size:.85em}
 
-/* TRY */
 .try-title{font-size:1.1rem;font-weight:900;margin-bottom:6px}
-.mission{
-  background:color-mix(in srgb,var(--lc,var(--acc)) 6%,var(--card));
-  border:1px solid color-mix(in srgb,var(--lc,var(--acc)) 24%,transparent);
-  border-left:3px solid var(--lc,var(--acc));
-  border-radius:10px;padding:11px 15px;margin-bottom:16px;
-  font-size:.86rem;font-weight:700;
-}
+.mission{background:color-mix(in srgb,var(--lc,var(--acc)) 6%,var(--card));border:1px solid color-mix(in srgb,var(--lc,var(--acc)) 24%,transparent);border-left:3px solid var(--lc,var(--acc));border-radius:10px;padding:11px 15px;margin-bottom:16px;font-size:.86rem;font-weight:700}
 .mlbl{font-family:var(--mono);font-size:.7rem;color:var(--lc,var(--acc));letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
 
-/* INTERACTIVE WIDGET */
 .widget{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .wbody{display:grid;grid-template-columns:1fr 1fr;gap:0}
 @media(max-width:540px){.wbody{grid-template-columns:1fr}}
 .wctrl{padding:16px;border-right:1px solid var(--border)}
 @media(max-width:540px){.wctrl{border-right:none;border-bottom:1px solid var(--border)}}
-.wprev{padding:14px;display:flex;align-items:center;justify-content:center;background:#040710;min-height:170px}
+.wprev{padding:14px;display:flex;align-items:center;justify-content:center;background:#040710;min-height:165px}
 canvas{border-radius:8px;display:block}
-
-.ctrl{margin-bottom:13px}
-.ctrl:last-child{margin-bottom:0}
+.ctrl{margin-bottom:12px}.ctrl:last-child{margin-bottom:0}
 .crow{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .clbl{font-size:.75rem;font-weight:700;font-family:var(--mono)}
 .cval{font-family:var(--mono);font-size:.68rem;color:var(--lc,var(--acc));font-weight:700}
 input[type=range]{width:100%;accent-color:var(--lc,var(--acc));height:4px;cursor:pointer;display:block}
-
 .swatches{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
 .sw{width:26px;height:26px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .18s}
 .sw.on{border-color:#fff;transform:scale(1.18)}
-
 .fxbtns{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
 .fxbtn{padding:4px 10px;font-size:.72rem;font-weight:800;border-radius:8px;border:1.5px solid var(--border);background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;transition:all .18s;font-family:var(--font)}
 .fxbtn.on{color:var(--lc,var(--acc));border-color:var(--lc,var(--acc));background:color-mix(in srgb,var(--lc,var(--acc)) 10%,transparent)}
-
 .wcode{background:#020509;border-top:1px solid var(--border);padding:9px 14px;font-family:var(--mono);font-size:.68rem;color:var(--acc);line-height:1.65}
-.cc{color:var(--muted)} .ck{color:var(--purple)} .cn{color:var(--orange)} .cf{color:var(--blue)}
+.cc{color:var(--muted)}.ck{color:var(--purple)}.cn{color:var(--orange)}.cf{color:var(--blue)}
 
-/* CHALLENGE */
-.cblock{
-  background:linear-gradient(135deg,color-mix(in srgb,var(--lc,var(--acc)) 7%,var(--card)),color-mix(in srgb,var(--purple) 4%,var(--card)));
-  border:1.5px solid color-mix(in srgb,var(--lc,var(--acc)) 28%,transparent);
-  border-radius:16px;padding:26px;text-align:center;
-}
-.cico2{font-size:2.8rem;display:block;margin-bottom:12px}
-.ctitle{font-size:1.15rem;font-weight:900;margin-bottom:5px}
-.cdesc{color:var(--muted);font-size:.86rem;font-weight:700;margin-bottom:18px;line-height:1.55}
-.csteps{display:flex;flex-direction:column;gap:7px;margin-bottom:16px;text-align:left}
-.cstep{display:flex;gap:9px;align-items:flex-start;background:rgba(0,0,0,.18);border-radius:9px;padding:9px 13px}
-.csnum{width:20px;height:20px;border-radius:50%;background:var(--lc,var(--acc));color:#07080f;font-size:.6rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);margin-top:1px}
-.cstxt{font-size:.83rem;font-weight:700;line-height:1.4}
-.hint{font-family:var(--mono);font-size:.7rem;background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:8px;padding:8px 13px;color:var(--acc);margin-bottom:14px;display:inline-block;word-break:break-all;white-space:pre-wrap;text-align:left}
+.cblock{background:linear-gradient(135deg,color-mix(in srgb,var(--lc,var(--acc)) 7%,var(--card)),color-mix(in srgb,var(--purple) 4%,var(--card)));border:1.5px solid color-mix(in srgb,var(--lc,var(--acc)) 28%,transparent);border-radius:16px;padding:24px;text-align:center}
+.cico2{font-size:2.6rem;display:block;margin-bottom:11px}
+.ctitle{font-size:1.12rem;font-weight:900;margin-bottom:5px}
+.cdesc{color:var(--muted);font-size:.85rem;font-weight:700;margin-bottom:16px;line-height:1.55}
+.csteps{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;text-align:left}
+.cstep{display:flex;gap:9px;align-items:flex-start;background:rgba(0,0,0,.18);border-radius:9px;padding:8px 12px}
+.csnum{width:19px;height:19px;border-radius:50%;background:var(--lc,var(--acc));color:#07080f;font-size:.58rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);margin-top:1px}
+.cstxt{font-size:.82rem;font-weight:700;line-height:1.4}
+.hint{font-family:var(--mono);font-size:.68rem;background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:8px;padding:8px 13px;color:var(--acc);margin-bottom:14px;display:block;word-break:break-all;white-space:pre-wrap;text-align:left}
 
-/* COMPLETE */
 .compblock{text-align:center;padding:18px 0}
 .companim{font-size:4rem;display:block;animation:pop .55s cubic-bezier(.22,1.9,.36,1);margin-bottom:14px}
 @keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.08)}100%{transform:scale(1)}}
-.comptitle{font-size:1.55rem;font-weight:900;margin-bottom:5px}
+.comptitle{font-size:1.5rem;font-weight:900;margin-bottom:5px}
 .compsub{color:var(--muted);font-size:.88rem;font-weight:700;margin-bottom:20px}
-.xpgain{
-  display:inline-flex;align-items:center;gap:7px;
-  background:rgba(255,203,71,.09);border:1px solid rgba(255,203,71,.28);
-  border-radius:100px;padding:7px 20px;
-  font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--yellow);
-  margin-bottom:18px;animation:glow 1.8s ease-in-out infinite;
-}
+.xpgain{display:inline-flex;align-items:center;gap:7px;background:rgba(255,203,71,.09);border:1px solid rgba(255,203,71,.28);border-radius:100px;padding:7px 20px;font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--yellow);margin-bottom:18px;animation:glow 1.8s ease-in-out infinite}
 @keyframes glow{0%,100%{box-shadow:0 0 10px rgba(255,203,71,.18)}50%{box-shadow:0 0 26px rgba(255,203,71,.38)}}
 .bdgcard{background:var(--card);border:2px solid var(--lc,var(--acc));border-radius:14px;padding:14px 22px;margin-bottom:18px;display:inline-flex;align-items:center;gap:11px}
 .bdgico{font-size:1.9rem}
 .bdgname{font-size:.88rem;font-weight:900;color:var(--lc,var(--acc))}
 .bdgdesc{font-size:.72rem;color:var(--muted);font-weight:700}
-.lpt{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:11px 14px;margin-bottom:7px;text-align:left;font-size:.83rem;font-weight:700;display:flex;align-items:flex-start;gap:7px}
+.lpt{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 14px;margin-bottom:7px;text-align:left;font-size:.82rem;font-weight:700;display:flex;align-items:flex-start;gap:7px}
 .lpico{color:var(--lc,var(--acc));flex-shrink:0}
 
-/* NAV BTNS */
 .navrow{display:flex;gap:9px;margin-top:20px;flex-wrap:wrap}
-.btn{padding:11px 26px;border-radius:100px;font-size:.9rem;font-weight:900;cursor:pointer;border:none;transition:all .2s;font-family:var(--font);display:inline-flex;align-items:center;gap:7px}
+.btn{padding:10px 24px;border-radius:100px;font-size:.88rem;font-weight:900;cursor:pointer;border:none;transition:all .2s;font-family:var(--font);display:inline-flex;align-items:center;gap:7px}
 .btn.pri{background:var(--lc,var(--acc));color:#07080f;box-shadow:0 4px 18px color-mix(in srgb,var(--lc,var(--acc)) 28%,transparent)}
 .btn.pri:hover{transform:translateY(-2px);box-shadow:0 8px 26px color-mix(in srgb,var(--lc,var(--acc)) 38%,transparent)}
 .btn.sec{background:var(--card);color:var(--text);border:1.5px solid var(--border)}
@@ -225,37 +149,27 @@ input[type=range]{width:100%;accent-color:var(--lc,var(--acc));height:4px;cursor
 .btn.ext{background:transparent;color:var(--lc,var(--acc));border:1.5px solid color-mix(in srgb,var(--lc,var(--acc)) 38%,transparent);text-decoration:none}
 .btn.ext:hover{background:color-mix(in srgb,var(--lc,var(--acc)) 8%,transparent)}
 
-/* CONFETTI */
 .cf-p{position:fixed;border-radius:2px;animation:cfall linear forwards;pointer-events:none;z-index:999}
 @keyframes cfall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(800deg);opacity:0}}
-
-/* TOAST */
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 20px;font-size:.86rem;font-weight:700;box-shadow:0 8px 28px rgba(0,0,0,.4);opacity:0;transition:all .28s;pointer-events:none;z-index:200;display:flex;align-items:center;gap:7px;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
-
-<!-- STARS -->
 <div class="stars" id="stars"></div>
 
-<!-- ═══ MAP ═══ -->
 <div id="map">
-  <div class="logo">
-    <div class="logo-gem">🎮</div>
-    <div class="logo-name">TA <b>魔法學院</b></div>
-  </div>
+  <div class="logo"><div class="logo-gem">🎮</div><div class="logo-name">TA <b>魔法學院</b></div></div>
   <div class="hero">
     <h1>學會讓遊戲<em>活起來</em>的<br>魔法技術</h1>
-    <p>6 個關卡 · 從零開始 · 瀏覽器就能玩</p>
+    <p>20 個關卡 · 從零到 PBR · 全程互動</p>
     <div class="prog-wrap"><div class="prog-fill" id="mprog" style="width:0%"></div></div>
-    <div class="prog-label" id="mprogtxt">完成 0 / 6 關</div>
+    <div class="prog-label" id="mprogtxt">完成 0 / 20 關</div>
   </div>
   <div class="chapters" id="chlist"></div>
   <div class="xp-total" id="txp">0 <span>XP 經驗值</span></div>
 </div>
 
-<!-- ═══ LESSON ═══ -->
 <div id="lesson">
   <div class="lheader">
     <div class="back" onclick="goMap()">←</div>
@@ -264,626 +178,877 @@ input[type=range]{width:100%;accent-color:var(--lc,var(--acc));height:4px;cursor
   </div>
   <div class="swrap" id="swrap"></div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ───────────────────────────────────────────────
-// STARS
-(function(){
-  const s=document.getElementById('stars');
-  for(let i=0;i<80;i++){
-    const d=document.createElement('div');
-    const sz=Math.random()*2+.5;
-    d.style.cssText=`position:absolute;border-radius:50%;background:#fff;
-      width:${sz}px;height:${sz}px;
-      left:${Math.random()*100}%;top:${Math.random()*100}%;
-      opacity:${Math.random()*.5+.1};
-      animation:twinkle ${2+Math.random()*4}s ${Math.random()*4}s linear infinite`;
-    s.appendChild(d);
-  }
-})();
+(()=>{const s=document.getElementById('stars');for(let i=0;i<80;i++){const d=document.createElement('div'),z=Math.random()*2+.5;d.style.cssText=`position:absolute;border-radius:50%;background:#fff;width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*.5+.1};animation:twinkle ${2+Math.random()*4}s ${Math.random()*4}s linear infinite`;s.appendChild(d)}})();
 
-// ───────────────────────────────────────────────
-// STATE
-const ST={
-  done:JSON.parse(localStorage.getItem('ta2_done')||'[]'),
-  xp:parseInt(localStorage.getItem('ta2_xp')||'0'),
-};
-function save(){localStorage.setItem('ta2_done',JSON.stringify(ST.done));localStorage.setItem('ta2_xp',ST.xp+'')}
+const ST={done:JSON.parse(localStorage.getItem('ta3_done')||'[]'),xp:parseInt(localStorage.getItem('ta3_xp')||'0')};
+function save(){localStorage.setItem('ta3_done',JSON.stringify(ST.done));localStorage.setItem('ta3_xp',ST.xp+'')}
 
-// ───────────────────────────────────────────────
-// CHAPTERS
 const CHS=[
-  {id:'c0',num:0,col:'#9d8fff',icon:'🌟',tag:'序章',title:'TA 是什麼？',desc:'看看遊戲裡哪些地方有 TA 的手跡，解開第一個謎題',time:'10 分鐘',xp:50},
-  {id:'c1',num:1,col:'#ffcb47',icon:'🎨',tag:'第 1 關',title:'顏色魔法 — RGB',desc:'電腦的顏色只是三個數字。學會這個你就踏入 Shader 的世界了',time:'15 分鐘',xp:80},
-  {id:'c2',num:2,col:'#00e5a0',icon:'〜',tag:'第 2 關',title:'讓東西動起來',desc:'一個叫 sin() 的函數，是遊戲裡一切「搖晃感」的秘密',time:'20 分鐘',xp:100},
-  {id:'c3',num:3,col:'#ff6b9d',icon:'✨',tag:'第 3 關',title:'粒子特效系統',desc:'一個規則重複 1000 次，就能變成爆炸、火焰、雪花',time:'20 分鐘',xp:100},
-  {id:'c4',num:4,col:'#4db8ff',icon:'🔧',tag:'第 4 關',title:'工具讓人更快',desc:'TA 寫程式不只做特效，也幫整個團隊省時間',time:'20 分鐘',xp:120},
-  {id:'c5',num:5,col:'#ff8c42',icon:'🏆',tag:'第 5 關',title:'你的第一個作品',desc:'把前面學的全部用上，做出一個會動、會發光的 Shader 球',time:'30 分鐘',xp:200},
+  {id:'c0', num:0,  col:'#9d8fff',icon:'🌟',tag:'序章',    title:'TA 是什麼？',        desc:'遊戲裡的魔法怎麼做的？認識技術美術師這個職業',        time:'10分',xp:50,  group:'🌱 基礎入門'},
+  {id:'c1', num:1,  col:'#ffcb47',icon:'🎨',tag:'第 1 關', title:'顏色魔法 — RGB',     desc:'電腦的顏色只是三個數字，學會這個就踏入 Shader 世界', time:'15分',xp:80,  group:'🌱 基礎入門'},
+  {id:'c2', num:2,  col:'#00e5a0',icon:'〜',tag:'第 2 關', title:'sin() 讓東西動起來', desc:'一個叫 sin() 的函數，是遊戲裡一切搖晃感的秘密',        time:'20分',xp:100, group:'🌱 基礎入門'},
+  {id:'c3', num:3,  col:'#ff6b9d',icon:'✨',tag:'第 3 關', title:'粒子特效系統',        desc:'一個規則重複 1000 次，就能變成爆炸、火焰、雪花',      time:'20分',xp:100, group:'🌱 基礎入門'},
+  {id:'c4', num:4,  col:'#4db8ff',icon:'🔧',tag:'第 4 關', title:'自動化工具思維',      desc:'TA 寫程式不只做特效，更幫整個團隊省時間',             time:'20分',xp:120, group:'🌱 基礎入門'},
+  {id:'c5', num:5,  col:'#ff8c42',icon:'📐',tag:'第 5 關', title:'向量：3D 的語言',     desc:'position、direction、normal——全都是向量，dot product 是光照的核心',time:'20分',xp:120,group:'📐 圖形學'},
+  {id:'c6', num:6,  col:'#e879f9',icon:'💡',tag:'第 6 關', title:'Phong 光照模型',      desc:'漫反射 + 鏡面反射 + 環境光，讓球體「看起來」3D',       time:'25分',xp:150, group:'📐 圖形學'},
+  {id:'c7', num:7,  col:'#34d399',icon:'🗺️',tag:'第 7 關', title:'UV 展開與貼圖座標',  desc:'把立體模型攤成平面的藝術，UV 怎麼讓貼圖貼到對的位置',time:'25分',xp:150, group:'📐 圖形學'},
+  {id:'c8', num:8,  col:'#fb7185',icon:'🌫️',tag:'第 8 關', title:'Perlin Noise 噪聲',   desc:'平滑的隨機——雲、地形、木紋的背後都是這個魔法',       time:'25分',xp:150, group:'📐 圖形學'},
+  {id:'c9', num:9,  col:'#a78bfa',icon:'🔢',tag:'第 9 關', title:'矩陣與座標變換',      desc:'旋轉/縮放/移動的底層都是矩陣乘法，Shader 裡的 mat2/mat4',time:'30分',xp:180,group:'📐 圖形學'},
+  {id:'c10',num:10, col:'#06b6d4',icon:'⬡', tag:'第 10 關',title:'程序化建模',          desc:'不手動做每一個，用規則讓電腦自動生成城市、森林、星球',time:'30分',xp:180, group:'⬡ 程序化'},
+  {id:'c11',num:11, col:'#f59e0b',icon:'🌿',tag:'第 11 關',title:'L-System 植物生長',  desc:'一條規則加遞迴，長出無限複雜的樹木和珊瑚',             time:'30分',xp:200, group:'⬡ 程序化'},
+  {id:'c12',num:12, col:'#10b981',icon:'🏔️',tag:'第 12 關',title:'高度圖與地形生成',   desc:'一張黑白圖就能描述整座山脈，Height Map 怎麼工作',     time:'30分',xp:200, group:'⬡ 程序化'},
+  {id:'c13',num:13, col:'#8b5cf6',icon:'🔵',tag:'第 13 關',title:'SDF 距離場',          desc:'Signed Distance Field——柔和陰影、平滑形狀合併的核心',time:'35分',xp:220, group:'⬡ 程序化'},
+  {id:'c14',num:14, col:'#ef4444',icon:'🔁',tag:'第 14 關',title:'程序化動畫',          desc:'sin/cos 讓角色走路、布料飄動，不需逐幀製作',           time:'35分',xp:220, group:'⬡ 程序化'},
+  {id:'c15',num:15, col:'#0ea5e9',icon:'🦴',tag:'第 15 關',title:'骨架 FK 與 IK',       desc:'正向/反向運動學讓角色自動貼地、抓物件',               time:'35分',xp:250, group:'🔬 進階應用'},
+  {id:'c16',num:16, col:'#d946ef',icon:'⚡',tag:'第 16 關',title:'GPU 與效能優化',      desc:'Draw Call、LOD、Instancing——讓遊戲跑得又快又漂亮',   time:'35分',xp:250, group:'🔬 進階應用'},
+  {id:'c17',num:17, col:'#f97316',icon:'🌊',tag:'第 17 關',title:'PBR 物理材質',        desc:'Metallic + Roughness + Albedo，讓材質遵守物理規則',   time:'40分',xp:280, group:'🔬 進階應用'},
+  {id:'c18',num:18, col:'#84cc16',icon:'🔦',tag:'第 18 關',title:'後製特效 Post FX',    desc:'Bloom、Tone Mapping、色調分級讓畫面有電影感',          time:'40分',xp:280, group:'🔬 進階應用'},
+  {id:'c19',num:19, col:'#fbbf24',icon:'🏆',tag:'第 19 關',title:'畢業作品：整合材質',  desc:'把 20 關學到的全部用上，做一顆完整的 PBR 材質球',     time:'60分',xp:500, group:'🏆 畢業'},
 ];
 
-// current lesson
 let curCh=null,curIdx=0;
-let wAF=null,pAF=null,fAF=null;
-function stopAFs(){[wAF,pAF,fAF].forEach(r=>{if(r)cancelAnimationFrame(r)});wAF=pAF=fAF=null}
+let afs=[];
+function stopAFs(){afs.forEach(r=>{if(r)cancelAnimationFrame(r)});afs=[];}
+function addAF(id){afs.push(id);}
 
-// ───────────────────────────────────────────────
-// MAP RENDER
 function renderMap(){
   const n=ST.done.length;
   document.getElementById('mprog').style.width=(n/CHS.length*100)+'%';
   document.getElementById('mprogtxt').textContent=`完成 ${n} / ${CHS.length} 關`;
   document.getElementById('txp').innerHTML=`${ST.xp} <span>XP 經驗值</span>`;
   const el=document.getElementById('chlist');el.innerHTML='';
+  let lastGroup='';
   CHS.forEach((ch,i)=>{
-    const done=ST.done.includes(ch.id);
-    const open=i===0||ST.done.includes(CHS[i-1].id);
-    if(i>0){const c=document.createElement('div');c.className='connector';el.appendChild(c)}
+    const done=ST.done.includes(ch.id),open=i===0||ST.done.includes(CHS[i-1].id);
+    if(ch.group!==lastGroup){
+      if(lastGroup!==''){const c=document.createElement('div');c.style.height='4px';el.appendChild(c);}
+      const g=document.createElement('div');g.className='group-lbl';g.textContent=ch.group;el.appendChild(g);lastGroup=ch.group;
+    } else if(i>0){
+      const c=document.createElement('div');c.className='connector';el.appendChild(c);
+    }
     const card=document.createElement('div');
     card.className=`chcard ${done?'done':open?'open':'locked'}`;
     card.style.setProperty('--cc',ch.col);
-    if(done||open) card.onclick=()=>startLesson(ch.id);
+    if(done||open)card.onclick=()=>startLesson(ch.id);
     const badge=done?`<div class="badge-done">✓</div>`:open?`<div class="badge-go" style="background:${ch.col}">▶</div>`:`<div class="badge-lock">🔒</div>`;
-    card.innerHTML=`
-      <div class="ch-ico">${ch.icon}<div class="ch-num">${ch.num}</div></div>
-      <div class="ch-body">
-        <div class="ch-tag">${ch.tag}</div>
-        <div class="ch-title">${ch.title}</div>
-        <div class="ch-desc">${ch.desc}</div>
-        <div class="ch-row">
-          <span class="ch-time">⏱ ${ch.time}</span>
-          <span class="ch-xp">+${ch.xp} XP</span>
-          ${done?`<span class="ch-done-tag">✓ 完成</span>`:''}
-        </div>
-      </div>
+    card.innerHTML=`<div class="ch-ico">${ch.icon}<div class="ch-num">${ch.num}</div></div>
+      <div class="ch-body"><div class="ch-tag">${ch.tag}</div><div class="ch-title">${ch.title}</div><div class="ch-desc">${ch.desc}</div>
+      <div class="ch-row"><span class="ch-time">⏱ ${ch.time}</span><span class="ch-xp">+${ch.xp} XP</span>${done?`<span class="ch-done-tag">✓ 完成</span>`:''}</div></div>
       <div>${badge}</div>`;
     el.appendChild(card);
   });
 }
 
-// ───────────────────────────────────────────────
-// STEPS DATA
-function steps(id){
-  const M={
-    // ── C0 ──────────────────────────────────────
-    c0:['hook_c0a','exp_c0','quiz_c0','done_c0'],
-    // ── C1 ──────────────────────────────────────
-    c1:['hook_c1','exp_c1','try_c1','chal_c1','done_c1'],
-    // ── C2 ──────────────────────────────────────
-    c2:['hook_c2','exp_c2','try_c2','chal_c2','done_c2'],
-    // ── C3 ──────────────────────────────────────
-    c3:['hook_c3','exp_c3','try_c3','chal_c3','done_c3'],
-    // ── C4 ──────────────────────────────────────
-    c4:['hook_c4','exp_c4','try_c4','chal_c4','done_c4'],
-    // ── C5 ──────────────────────────────────────
-    c5:['hook_c5','exp_c5','try_c5','chal_c5','done_c5'],
-  };
-  return M[id]||[];
-}
+const STEPS={
+  c0:['h_c0','e_c0','q_c0','d_c0'],
+  c1:['h_c1','e_c1','t_c1','ch_c1','d_c1'],
+  c2:['h_c2','e_c2','t_c2','ch_c2','d_c2'],
+  c3:['h_c3','e_c3','t_c3','ch_c3','d_c3'],
+  c4:['h_c4','e_c4','t_c4','ch_c4','d_c4'],
+  c5:['h_c5','e_c5','t_c5','ch_c5','d_c5'],
+  c6:['h_c6','e_c6','t_c6','ch_c6','d_c6'],
+  c7:['h_c7','e_c7','t_c7','ch_c7','d_c7'],
+  c8:['h_c8','e_c8','t_c8','ch_c8','d_c8'],
+  c9:['h_c9','e_c9','t_c9','ch_c9','d_c9'],
+  c10:['h_c10','e_c10','t_c10','ch_c10','d_c10'],
+  c11:['h_c11','e_c11','t_c11','ch_c11','d_c11'],
+  c12:['h_c12','e_c12','t_c12','ch_c12','d_c12'],
+  c13:['h_c13','e_c13','t_c13','ch_c13','d_c13'],
+  c14:['h_c14','e_c14','t_c14','ch_c14','d_c14'],
+  c15:['h_c15','e_c15','t_c15','ch_c15','d_c15'],
+  c16:['h_c16','e_c16','t_c16','ch_c16','d_c16'],
+  c17:['h_c17','e_c17','t_c17','ch_c17','d_c17'],
+  c18:['h_c18','e_c18','t_c18','ch_c18','d_c18'],
+  c19:['h_c19','e_c19','t_c19','ch_c19','d_c19'],
+};
 
-function getStep(sid){
-  const D={
-    // ════ C0 ════
-    hook_c0a:{type:'hook',emoji:'🎮',q:'這個遊戲特效是怎麼做出來的？',sub:'猜猜哪個最接近真相！',choices:[
-      {ico:'🖼️',text:'美術師手繪的一張張動畫圖片',ok:false},
-      {ico:'💻',text:'程式碼即時計算出來的',ok:true},
-      {ico:'🎥',text:'拍攝真實爆炸後剪輯進去',ok:false},
-    ]},
-    exp_c0:{type:'explain',html:`
-      <div class="etitle">✨ TA 是藝術與程式的橋樑</div>
-      <div class="ebody">遊戲裡的<strong>火焰、閃光、角色發光</strong>都不是圖片，是程式<strong>即時「算」出來的</strong>。<br><br>
-      但寫程式的工程師不懂美術，畫畫的美術師又不懂程式……<br><br>
-      <strong>Technical Artist（技術美術師）</strong>就是中間的橋樑！他們兩邊都懂一點，能把「藝術家的想像」變成「可以在遊戲跑的程式」。</div>
-      <div class="abox"><div class="albl">🍳 好比說</div>
-      <div class="atext">廚師（美術師）知道要做什麼菜，廚具工程師知道怎麼做鍋子。TA 就是「既會做菜、又能改廚具」的人！</div></div>
-      <div class="ebody">TA 的四大工作：<br>
-      • <strong>Shader</strong> — 材質（金屬感/發光）<br>
-      • <strong>VFX</strong> — 特效（爆炸/火焰/魔法）<br>
-      • <strong>Rigging</strong> — 角色骨架讓它能動<br>
-      • <strong>Tools</strong> — 自動化工具省時間</div>
-    `},
-    quiz_c0:{type:'hook',emoji:'🧠',q:'TA 最重要的特點是什麼？',sub:'用剛才學的來回答！',choices:[
-      {ico:'🎨',text:'繪畫技術比所有人都強',ok:false},
-      {ico:'💻',text:'程式寫得比所有人都快',ok:false},
-      {ico:'🌉',text:'藝術和程式都懂一點，能當橋樑',ok:true},
-    ]},
-    done_c0:{type:'done',xp:50,badge:'🌟',bname:'第一步！',bdesc:'了解 TA 是什麼',pts:['TA = 技術美術師，連接藝術家和工程師','遊戲特效是程式即時計算的，不是圖片','TA 四大工作：Shader / VFX / Rigging / Tools']},
+// ─── NOISE HELPERS ───
+function nhash(x,y){let v=Math.sin(x*127.1+y*311.7)*43758.5453;return v-Math.floor(v);}
+function nval(x,y){const ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy,ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);return nhash(ix,iy)*(1-ux)*(1-uy)+nhash(ix+1,iy)*ux*(1-uy)+nhash(ix,iy+1)*(1-ux)*uy+nhash(ix+1,iy+1)*ux*uy;}
+function fbm(x,y,oct){let v=0,a=1,t=0;for(let i=0;i<oct;i++){v+=nval(x,y)*a;t+=a;a*=.5;x*=2;y*=2;}return v/t;}
 
-    // ════ C1 ════
-    hook_c1:{type:'hook',emoji:'🔴🟢🔵',q:'電腦怎麼「知道」一個顏色是什麼？',sub:'猜猜看！',choices:[
-      {ico:'📸',text:'掃描真實世界的顏色存進去',ok:false},
-      {ico:'🔢',text:'用三個 0~255 的數字來記錄',ok:true},
-      {ico:'🌈',text:'用顏色名字（像「紅色」）來記錄',ok:false},
-    ]},
-    exp_c1:{type:'explain',html:`
-      <div class="etitle">🎨 顏色 = 三個數字</div>
-      <div class="ebody">電腦螢幕每個像素都是由<strong>三種光</strong>混合發出的：<br>
-      🔴 <strong>R（紅）</strong> 0 ~ 255<br>
-      🟢 <strong>G（綠）</strong> 0 ~ 255<br>
-      🔵 <strong>B（藍）</strong> 0 ~ 255</div>
-      <div class="abox"><div class="albl">💡 有趣的事</div>
-      <div class="atext">(255, 0, 0) = 純紅 🔴　(0, 255, 0) = 純綠 🟢<br>
-      (0, 0, 255) = 純藍 🔵　(255,255,255) = 白 ⬜　(0,0,0) = 黑 ⬛</div></div>
-      <div class="ebody">Shader 裡通常用 <strong>0~1 的小數</strong>（計算比較方便）：<br>
-      <code>vec3(1.0, 0.0, 0.0)</code> = 紅色</div>
-    `},
-    try_c1:{type:'try',mission:'拖動三個滑桿，做出你最喜歡的顏色！試著做出橘色、紫色或青色。',initFn:'initRGB'},
-    chal_c1:{type:'chal',icon:'🎯',title:'挑戰：在 Shadertoy 改顏色！',desc:'打開 Shadertoy，讓整個畫面變成你最喜歡的顏色',link:'https://www.shadertoy.com/new',
-      csteps:['打開 shadertoy.com（點按鈕）','找到 mainImage 函數裡的顏色那行','把數字改成你剛學的 RGB 值','按 ▶ 播放看結果！'],
-      hint:'fragColor = vec4(1.0, 0.5, 0.0, 1.0);',hlbl:'試試這個 → 變橘色！'},
-    done_c1:{type:'done',xp:80,badge:'🎨',bname:'顏色魔法師',bdesc:'學會了 RGB 顏色系統',pts:['顏色 = 三個數字（R/G/B），各自 0~255','在 Shader 裡改數字就能改顏色','vec3(R,G,B) 是 Shader 的顏色寫法']},
+// ─── ALL STEP DATA ───
+const DATA={
+  // ══════ C0 ══════
+  h_c0:{type:'hook',emoji:'🎮',q:'這個遊戲特效是怎麼做的？',sub:'猜猜看！',choices:[
+    {ico:'🖼️',text:'美術師手繪的一張張動畫圖片',ok:false},
+    {ico:'💻',text:'程式碼即時計算出來的',ok:true},
+    {ico:'🎥',text:'拍攝真實爆炸後剪輯進去',ok:false}]},
+  e_c0:{type:'explain',html:`<div class="etitle">✨ TA — 藝術與程式的橋樑</div>
+    <div class="ebody">遊戲裡的<strong>火焰、閃光、角色發光</strong>都不是圖片，是程式<strong>即時計算的</strong>。<br><br>工程師不懂美術，美術師不懂程式……<strong>Technical Artist（技術美術師）</strong>就是橋樑！</div>
+    <div class="abox"><div class="albl">🍳 生活比喻</div><div class="atext">廚師（美術師）知道要做什麼菜，廚具工程師知道怎麼做鍋子。TA 就是「既會做菜、又能改廚具」的人！</div></div>
+    <div class="ebody">TA 的四大工作：<br>• <strong>Shader</strong> — 材質（金屬感/發光）<br>• <strong>VFX</strong> — 特效（爆炸/火焰/魔法）<br>• <strong>Rigging</strong> — 角色骨架<br>• <strong>Tools</strong> — 自動化工具</div>`},
+  q_c0:{type:'hook',emoji:'🧠',q:'TA 最重要的特點是什麼？',sub:'用剛才學的來回答！',choices:[
+    {ico:'🎨',text:'繪畫技術比所有人都強',ok:false},
+    {ico:'💻',text:'程式寫得比所有人都快',ok:false},
+    {ico:'🌉',text:'藝術和程式都懂一點，能當橋樑',ok:true}]},
+  d_c0:{type:'done',xp:50,badge:'🌟',bname:'第一步！',bdesc:'了解 TA 是什麼',pts:['TA = 連接藝術家和工程師的橋樑','遊戲特效是程式即時計算的','TA 四大工作：Shader / VFX / Rigging / Tools']},
 
-    // ════ C2 ════
-    hook_c2:{type:'hook',emoji:'🌊',q:'為什麼遊戲裡的水面一直在「波動」？',sub:'程式是怎麼讓它動的？',choices:[
-      {ico:'🖼️',text:'很多張圖片快速播放（像翻書）',ok:false},
-      {ico:'📐',text:'數學函數讓位置隨時間自動改變',ok:true},
-      {ico:'🎥',text:'真實拍攝水面後放進去',ok:false},
-    ]},
-    exp_c2:{type:'explain',html:`
-      <div class="etitle">〜 sin() — 讓東西「呼吸」的函數</div>
-      <div class="ebody"><code>sin()</code> 是一個數學函數，輸出會在 <strong>-1 和 +1 之間不斷來回</strong>。<br><br>
-      把「時間」丟進去：<code>sin(time)</code><br>
-      結果就會隨時間一直上上下下……就像<strong>呼吸</strong>！</div>
-      <div class="abox"><div class="albl">🫁 身體比喻</div>
-      <div class="atext">胸口呼吸 = sin(time) × 呼吸幅度<br>
-      水面波浪 = sin(x + time) × 波高<br>
-      旗子飄動 = sin(y + time) × 風力<br><br>
-      <strong>所有「搖晃感」都是 sin！</strong></div></div>
-      <div class="ebody">速度和幅度可以調整：<br>
-      <code>sin(time × 速度) × 幅度</code></div>
-    `},
-    try_c2:{type:'try',mission:'調整波浪的速度、高度和數量！試著做出「慢慢呼吸的感覺」和「激烈的大浪」',initFn:'initWave'},
-    chal_c2:{type:'chal',icon:'🌊',title:'挑戰：讓顏色隨時間呼吸！',desc:'在 Shadertoy 裡，把 sin(iTime) 用在顏色上',link:'https://www.shadertoy.com/new',
-      csteps:['打開 Shadertoy，找到 fragColor 那行','用下面的程式碼替換掉','按 ▶ 看效果','試著調整數字，改變呼吸速度'],
-      hint:'fragColor = vec4(sin(iTime)*0.5+0.5, 0.3, cos(iTime)*0.5+0.5, 1.0);',hlbl:'複製這段程式碼！'},
-    done_c2:{type:'done',xp:100,badge:'〜',bname:'波浪製造者',bdesc:'掌握了 sin() 動態效果',pts:['sin() 函數輸出在 -1~+1 之間循環','sin(time) = 讓效果隨時間呼吸','速度 × 幅度控制動畫節奏']},
+  // ══════ C1 ══════
+  h_c1:{type:'hook',emoji:'🔴🟢🔵',q:'電腦怎麼「知道」一個顏色是什麼？',sub:'猜猜看！',choices:[
+    {ico:'📸',text:'掃描真實世界的顏色存進去',ok:false},
+    {ico:'🔢',text:'用三個 0~255 的數字記錄',ok:true},
+    {ico:'🌈',text:'用顏色名字（像「紅色」）記錄',ok:false}]},
+  e_c1:{type:'explain',html:`<div class="etitle">🎨 顏色 = 三個數字</div>
+    <div class="ebody">電腦螢幕每個像素由<strong>三種光</strong>混合：🔴 R（紅）0~255　🟢 G（綠）0~255　🔵 B（藍）0~255</div>
+    <div class="abox"><div class="albl">💡 有趣的事</div><div class="atext">(255,0,0)=純紅 🔴　(0,255,0)=純綠 🟢　(0,0,255)=純藍 🔵<br>(255,255,255)=白 ⬜　(0,0,0)=黑 ⬛</div></div>
+    <div class="ebody">Shader 裡用 <strong>0~1 的小數</strong>（計算方便）：<br><code>vec3(1.0, 0.0, 0.0)</code> = 紅色</div>`},
+  t_c1:{type:'try',mission:'拖動 RGB 滑桿，做出你最喜歡的顏色！試試橘色、紫色或青色。',initFn:'initRGB'},
+  ch_c1:{type:'chal',icon:'🎯',title:'挑戰：在 Shadertoy 改顏色！',desc:'打開 Shadertoy，讓整個畫面變成你最喜歡的顏色',link:'https://www.shadertoy.com/new',
+    csteps:['打開 shadertoy.com','找到 mainImage 裡的顏色那行','把數字改成你剛學的 RGB 值','按 ▶ 看結果！'],
+    hint:'fragColor = vec4(1.0, 0.5, 0.0, 1.0);\n// 試試這個 → 橘色！'},
+  d_c1:{type:'done',xp:80,badge:'🎨',bname:'顏色魔法師',bdesc:'學會了 RGB 顏色系統',pts:['顏色 = 三個數字（R/G/B），0~255','Shader 裡用 0~1 小數','vec3(R,G,B) 是 Shader 顏色寫法']},
 
-    // ════ C3 ════
-    hook_c3:{type:'hook',emoji:'💥',q:'遊戲裡的爆炸特效，是怎麼做的？',sub:'哪個說法最接近真相？',choices:[
-      {ico:'🎬',text:'每次爆炸都是預先做好的影片',ok:false},
-      {ico:'🔵',text:'數百個小點各自有速度和方向，即時計算',ok:true},
-      {ico:'🖌️',text:'美術師手動畫出每一格',ok:false},
-    ]},
-    exp_c3:{type:'explain',html:`
-      <div class="etitle">✨ 粒子系統 — 1個規則 × 1000次</div>
-      <div class="ebody">每一個「小點」（粒子）都有自己的：<br>
-      • <strong>位置</strong>（x, y）　• <strong>速度</strong>（往哪飛）<br>
-      • <strong>壽命</strong>（存在多久後消失）　• <strong>顏色</strong>（可隨時間變化）</div>
-      <div class="abox"><div class="albl">🎆 煙火比喻</div>
-      <div class="atext">你同時放出 500 個螢火蟲，每個往不同方向飛、慢慢變暗然後消失。<br>這就是爆炸粒子！TA 的工作是<strong>設計「規則」</strong>，電腦自動生成 500 個結果。</div></div>
-      <div class="ebody">不同特效只是改規則：<br>
-      • 雪花 = 往下飄 + 輕微搖晃<br>
-      • 火焰 = 往上衝 + 顏色黃→暗紅<br>
-      • 魔法 = 繞圓飛 + 閃爍</div>
-    `},
-    try_c3:{type:'try',mission:'切換三種特效，調整粒子數量和速度。注意：改哪個參數，哪裡就跟著變！點畫面可以爆炸 💥',initFn:'initParticles'},
-    chal_c3:{type:'chal',icon:'✨',title:'挑戰：設計你的「簽名特效」！',desc:'在互動區域調出你覺得最酷的特效，截圖收藏！',link:null,
-      csteps:['回到上面的「試試看」','把粒子數量/速度/類型都調到你最喜歡的','截圖保存下來','這就是你的「簽名特效」！'],
-      hint:'沒有標準答案！找到你覺得最帥的組合就對了。',hlbl:'提示'},
-    done_c3:{type:'done',xp:100,badge:'✨',bname:'特效大師',bdesc:'理解粒子系統核心原理',pts:['粒子 = 有位置/速度/壽命的小點','1個規則 × 大量粒子 = 壯觀特效','TA 設計規則，電腦自動生成結果']},
+  // ══════ C2 ══════
+  h_c2:{type:'hook',emoji:'🌊',q:'遊戲裡的水面為什麼一直在「波動」？',sub:'程式怎麼讓它動起來？',choices:[
+    {ico:'🖼️',text:'很多張圖片快速播放',ok:false},
+    {ico:'📐',text:'數學函數讓位置隨時間自動改變',ok:true},
+    {ico:'🎥',text:'真實拍攝水面後放進去',ok:false}]},
+  e_c2:{type:'explain',html:`<div class="etitle">〜 sin() — 讓東西「呼吸」的函數</div>
+    <div class="ebody"><code>sin()</code> 的輸出在 <strong>-1 和 +1 之間不斷來回</strong>。<br>把時間丟進去：<code>sin(time)</code> → 隨時間上下，就像<strong>呼吸</strong>！</div>
+    <div class="abox"><div class="albl">🫁 身體比喻</div><div class="atext">胸口呼吸 = sin(time) × 呼吸幅度<br>水面波浪 = sin(x + time) × 波高<br>旗子飄動 = sin(y + time) × 風力<br><strong>所有「搖晃感」都是 sin！</strong></div></div>
+    <div class="ebody"><code>sin(time × 速度) × 幅度</code> — 速度和幅度都可以調</div>`},
+  t_c2:{type:'try',mission:'調整速度、高度和波數，試做「慢呼吸」和「激烈大浪」！',initFn:'initWave'},
+  ch_c2:{type:'chal',icon:'🌊',title:'挑戰：讓顏色隨時間呼吸！',desc:'在 Shadertoy 把 sin(iTime) 用在顏色上',link:'https://www.shadertoy.com/new',
+    csteps:['打開 Shadertoy','找到 fragColor 那行','貼入下面的程式碼','調整數字，改變呼吸速度'],
+    hint:'fragColor = vec4(sin(iTime)*0.5+0.5, 0.3, cos(iTime)*0.5+0.5, 1.0);'},
+  d_c2:{type:'done',xp:100,badge:'〜',bname:'波浪製造者',bdesc:'掌握了 sin() 動態效果',pts:['sin() 在 -1~+1 之間循環','sin(time) 讓效果隨時間呼吸','速度 × 幅度控制動畫節奏']},
 
-    // ════ C4 ════
-    hook_c4:{type:'hook',emoji:'🔧',q:'美術師要幫 100 個角色換衣服顏色。你是 TA，你怎麼做？',sub:'選你會怎麼做的方案：',choices:[
-      {ico:'😤',text:'幫他們一個一個手動改，花 8 小時',ok:false},
-      {ico:'⚡',text:'寫個程式一次自動改好，花 30 分鐘',ok:true},
-      {ico:'🤷',text:'叫他們自己改，不關 TA 的事',ok:false},
-    ]},
-    exp_c4:{type:'explain',html:`
-      <div class="etitle">🔧 TA 的超能力：自動化工具</div>
-      <div class="ebody">TA 看到重複的工作，第一個反應不是「好煩」，而是：<br>
-      <strong>「這個可以寫程式自動做！」</strong><br><br>
-      這叫<strong>自動化（Automation）</strong>——讓電腦幫你做無聊的重複工作。</div>
-      <div class="abox"><div class="albl">🏭 工廠比喻</div>
-      <div class="atext">手工做 100 個 = 很慢很累<br>
-      做一台機器來製造 = 一開始要時間，但之後超快！<br><br>
-      TA 就是在做「製造機器」的人。</div></div>
-      <div class="ebody">TA 工具的例子：<br>
-      • <strong>批次改名工具</strong> — 一次重新命名 1000 個檔案<br>
-      • <strong>材質自動設定</strong> — 新建模型自動套好 PBR 材質<br>
-      • <strong>LOD 產生器</strong> — 自動做遠距離低精度版本<br>
-      工具通常用 <strong>Python 或 Blueprint</strong> 寫</div>
-    `},
-    try_c4:{type:'try',mission:'這個「顏色工廠」模擬 TA 的批次工具：點按鈕，看程式自動幫所有角色換顏色！',initFn:'initTool'},
-    chal_c4:{type:'chal',icon:'🤖',title:'挑戰：想出你自己的工具！',desc:'如果你是遊戲公司的 TA，你最想做什麼自動化工具？',link:null,
-      csteps:['想想遊戲開發裡，什麼事情很重複很無聊？','想像一個工具能一鍵解決這個問題','用一句話描述：「一個能自動___的工具」','沒有標準答案，發揮創意！'],
-      hint:'例：「一個能自動把所有貼圖壓縮成手機版的工具」',hlbl:'舉例'},
-    done_c4:{type:'done',xp:120,badge:'🔧',bname:'工具大師',bdesc:'理解 TA 工具開發思維',pts:['看到重複工作 → 想辦法自動化','TA 用程式幫整個團隊省時間','工具 = 最重要但最常被忽視的 TA 技能']},
+  // ══════ C3 ══════
+  h_c3:{type:'hook',emoji:'💥',q:'遊戲裡的爆炸特效是怎麼做的？',sub:'哪個最接近真相？',choices:[
+    {ico:'🎬',text:'每次爆炸都是預先做好的影片',ok:false},
+    {ico:'🔵',text:'數百個小點各自有速度和方向，即時計算',ok:true},
+    {ico:'🖌️',text:'美術師手動畫出每一格',ok:false}]},
+  e_c3:{type:'explain',html:`<div class="etitle">✨ 粒子系統 — 1個規則 × 1000次</div>
+    <div class="ebody">每個「小點」（粒子）都有：<strong>位置</strong>、<strong>速度</strong>、<strong>壽命</strong>、<strong>顏色</strong></div>
+    <div class="abox"><div class="albl">🎆 煙火比喻</div><div class="atext">同時放出 500 個螢火蟲，每個往不同方向飛、慢慢變暗消失 = 爆炸粒子！<br>TA 設計「規則」，電腦自動生成 500 個結果。</div></div>
+    <div class="ebody">不同規則 = 不同特效：<br>• 雪花 = 往下飄 + 輕微搖晃<br>• 火焰 = 往上衝 + 黃→暗紅<br>• 魔法 = 繞圓飛 + 閃爍</div>`},
+  t_c3:{type:'try',mission:'切換三種特效，調整粒子數量和速度。點畫面爆炸 💥',initFn:'initParticles'},
+  ch_c3:{type:'chal',icon:'✨',title:'挑戰：設計你的「簽名特效」！',desc:'調出你覺得最酷的特效並截圖',link:null,
+    csteps:['回到上面的「試試看」','把粒子數量/速度/類型都調到你最喜歡','截圖保存','這就是你的「簽名特效」！'],
+    hint:'沒有標準答案！找到你覺得最帥的組合就對了。'},
+  d_c3:{type:'done',xp:100,badge:'✨',bname:'特效大師',bdesc:'理解粒子系統核心原理',pts:['粒子 = 有位置/速度/壽命的小點','1個規則 × 大量粒子 = 壯觀特效','TA 設計規則，電腦生成結果']},
 
-    // ════ C5 ════
-    hook_c5:{type:'hook',emoji:'🏆',q:'你已經學了 4 關！現在把所有技術合起來用。',sub:'你的第一個作品會用到哪些？',choices:[
-      {ico:'🎉',text:'RGB + sin動畫 + 粒子特效，全都用上！',ok:true},
-      {ico:'🤔',text:'只用其中一個就好了',ok:false},
-      {ico:'😅',text:'等我學精通了再說',ok:false},
-    ]},
-    exp_c5:{type:'explain',html:`
-      <div class="etitle">🏆 整合：你的第一個 Shader</div>
-      <div class="ebody">Shader 是「描述每個像素要長什麼樣子」的程式。<br>
-      在 <strong>Shadertoy</strong> 這個網站可以直接在瀏覽器寫 Shader，不需要安裝任何東西！</div>
-      <div class="abox"><div class="albl">🖌️ 回顧你學的</div>
-      <div class="atext">🎨 第1關：<code>vec3(R,G,B)</code> 控制顏色<br>
-      〜 第2關：<code>sin(iTime)</code> 讓效果呼吸<br>
-      ✨ 第3關：粒子 = 用規則生成很多小點<br>
-      🔧 第4關：TA 思維 = 用程式解決問題<br><br>
-      把這些用在一個 Shader 裡，就是你的作品！</div></div>
-      <div class="ebody">下一步：在 Shadertoy 做出一個<strong>顏色會呼吸的發光球</strong>，這就是你的第一份 TA 作品！</div>
-    `},
-    try_c5:{type:'try',mission:'調整出你最滿意的最終效果，然後去 Shadertoy 做出相同的作品！',initFn:'initFinal'},
-    chal_c5:{type:'chal',icon:'🚀',title:'最終挑戰：發布你的第一個作品！',desc:'在 Shadertoy 貼入這段程式碼，做出你的第一個 Shader，分享給朋友！',link:'https://www.shadertoy.com/new',
-      csteps:['打開 shadertoy.com/new（點按鈕）','把下面全部貼進去（替換原本的）','按 ▶ 看效果，試著調整數字','點右上角 Save 儲存，複製連結分享！'],
-      hint:`void mainImage(out vec4 o, vec2 u){
+  // ══════ C4 ══════
+  h_c4:{type:'hook',emoji:'🔧',q:'美術師要幫 100 個角色換衣服顏色，你是 TA 怎麼做？',sub:'選你的方案：',choices:[
+    {ico:'😤',text:'一個一個手動改，花 8 小時',ok:false},
+    {ico:'⚡',text:'寫程式一次自動改好，花 30 分鐘',ok:true},
+    {ico:'🤷',text:'叫他們自己改，不關 TA 的事',ok:false}]},
+  e_c4:{type:'explain',html:`<div class="etitle">🔧 TA 的超能力：自動化</div>
+    <div class="ebody">TA 看到重複工作，第一反應：<strong>「這個可以寫程式自動做！」</strong></div>
+    <div class="abox"><div class="albl">🏭 工廠比喻</div><div class="atext">手工做 100 個 = 很慢<br>做一台機器 = 一開始要時間，之後超快！<br>TA 就是「做機器」的人。</div></div>
+    <div class="ebody">TA 工具例子：<br>• <strong>批次改名</strong> — 一次重命名 1000 個檔案<br>• <strong>材質自動設定</strong> — 新建模型自動套 PBR<br>• <strong>LOD 產生器</strong> — 自動做低精度版本<br>通常用 <strong>Python / Blueprint</strong> 寫</div>`},
+  t_c4:{type:'try',mission:'這個「顏色工廠」模擬 TA 批次工具：點按鈕，看程式自動換顏色！',initFn:'initTool'},
+  ch_c4:{type:'chal',icon:'🤖',title:'挑戰：想出你的工具！',desc:'如果你是 TA，你最想做什麼自動化工具？',link:null,
+    csteps:['想想遊戲開發裡什麼事情很重複？','想像一個工具能一鍵解決','用一句話：「一個能自動___的工具」','沒標準答案，發揮創意！'],
+    hint:'例：「一個能自動把所有貼圖壓縮成手機版的工具」'},
+  d_c4:{type:'done',xp:120,badge:'🔧',bname:'工具大師',bdesc:'理解 TA 工具開發思維',pts:['看到重複工作 → 想辦法自動化','TA 用程式幫整個團隊省時間','工具 = TA 最重要的技能之一']},
+
+  // ══════ C5: 向量 ══════
+  h_c5:{type:'hook',emoji:'🎯',q:'3D 遊戲裡，角色「看向」某個方向是怎麼記錄的？',sub:'方向要用什麼表示？',choices:[
+    {ico:'🧭',text:'用文字寫「往北」、「往東」',ok:false},
+    {ico:'🔢',text:'三個數字 (x, y, z) 描述一個箭頭',ok:true},
+    {ico:'📐',text:'用角度（0~360度）',ok:false}]},
+  e_c5:{type:'explain',html:`<div class="etitle">📐 向量 — 3D 世界的共同語言</div>
+    <div class="ebody"><strong>向量（Vector）</strong>= 有方向的箭頭，用 <code>vec3(x, y, z)</code> 表示。<br>在 3D 遊戲裡，幾乎所有東西都是向量：</div>
+    <div class="abox"><div class="albl">📦 向量的用途</div><div class="atext">• 位置：物體在哪裡？<code>vec3(1,2,3)</code><br>• 方向：朝哪裡看？<code>normalize(vec3(0,0,-1))</code><br>• 法線（Normal）：表面朝哪個方向（光照核心）<br>• 速度：往哪飛多快</div></div>
+    <div class="ebody">兩個關鍵運算：<br>• <code>length(v)</code> — 向量的長度<br>• <code>dot(a, b)</code> — <strong>點積</strong>：測量兩方向有多「相似」，光照計算的靈魂！<br><br><code>dot(法線, 光方向) = 1</code> → 正對著光，最亮<br><code>dot(法線, 光方向) = 0</code> → 垂直，沒有光</div>`},
+  t_c5:{type:'try',mission:'拖動滑桿改變兩個向量的角度，觀察點積（dot product）怎麼變化！',initFn:'initVector'},
+  ch_c5:{type:'chal',icon:'🎯',title:'挑戰：用點積算亮度',desc:'在 Shadertoy 用 dot product 讓球體有光照感',link:'https://www.shadertoy.com/new',
+    csteps:['打開 Shadertoy，貼入下面程式碼','按 ▶ 看到發光的球','調整光源方向 vec3(.8,.6,.4)','觀察 dot product 如何控制明暗'],
+    hint:`void mainImage(out vec4 o,vec2 u){
   vec2 p=(u-iResolution.xy*.5)/iResolution.y;
-  float d=length(p);
-  float glow=.06/d;
-  vec3 col=vec3(sin(iTime)*.5+.5,.3,cos(iTime)*.5+.5);
-  o=vec4(col*glow,1.);
-}`,hlbl:'複製這段程式碼！'},
-    done_c5:{type:'done',xp:200,badge:'🚀',bname:'TA 新星',bdesc:'完成所有入門課程！',pts:['Shader = 描述每個像素的程式','Shadertoy 是練習/分享 Shader 的最好地方','你已經有了 TA 的基礎思維！']},
-  };
-  return D[sid];
+  if(length(p)>.4){o=vec4(.05,.05,.1,1.);return;}
+  vec3 n=normalize(vec3(p,sqrt(.16-dot(p,p))));
+  vec3 l=normalize(vec3(.8,.6,.4));
+  float bright=max(dot(n,l),0.);
+  o=vec4(vec3(.2,.5,1.)*bright,1.);
+}`},
+  d_c5:{type:'done',xp:120,badge:'📐',bname:'向量掌握者',bdesc:'理解 3D 空間向量',pts:['向量 = 有方向的箭頭，(x,y,z) 表示','dot product 測量兩方向相似度','法線 + 光方向的 dot = 光照強度']},
+
+  // ══════ C6: Phong 光照 ══════
+  h_c6:{type:'hook',emoji:'💡',q:'為什麼金屬球和塑膠球放在同樣光下，看起來完全不同？',sub:'材質的差異是怎麼做的？',choices:[
+    {ico:'🎨',text:'美術師用不同顏色畫上去',ok:false},
+    {ico:'🔢',text:'反光方式不同，由光照數學決定',ok:true},
+    {ico:'📷',text:'掃描真實物體照片貼上去',ok:false}]},
+  e_c6:{type:'explain',html:`<div class="etitle">💡 Phong 光照 — 讓球體「看起來」3D</div>
+    <div class="ebody">光打到物體有兩種反射：<br>• <strong>漫反射（Diffuse）</strong>：光往所有方向散，像粗糙木頭<br>• <strong>鏡面反射（Specular）</strong>：光往特定角度彈，像鏡子</div>
+    <div class="abox"><div class="albl">🎱 材質差異</div><div class="atext">塑膠球 = 多漫反射 + 少鏡面 → 霧霧的<br>金屬球 = 少漫反射 + 多鏡面 → 亮閃閃<br>玻璃球 = 有折射 → 另一個故事...</div></div>
+    <div class="ebody"><strong>Phong 公式</strong>：<br><code>光照 = 環境光 + 漫反射 + 鏡面反射</code><br><br>漫反射 = <code>dot(法線, 光方向)</code><br>鏡面 = <code>pow(dot(反射方向, 視角), 光澤度)</code><br><br>光澤度（shininess）越高，亮點越小越集中</div>`},
+  t_c6:{type:'try',mission:'調整漫反射、鏡面強度和光澤度，從塑膠感調到金屬感！',initFn:'initLighting'},
+  ch_c6:{type:'chal',icon:'💡',title:'挑戰：做一個金屬球 Shader！',desc:'在 Shadertoy 用 Phong 光照做出有光澤感的球',link:'https://www.shadertoy.com/new',
+    csteps:['打開 Shadertoy，貼入程式碼','按 ▶ 看發光球','調整 shininess 數字（32→128）','觀察它怎麼從塑膠變金屬'],
+    hint:`void mainImage(out vec4 o,vec2 u){
+  vec2 p=(u-iResolution.xy*.5)/iResolution.y;
+  float d=length(p);if(d>.4){o=vec4(.05,.05,.1,1.);return;}
+  vec3 n=normalize(vec3(p,sqrt(.16-dot(p,p))));
+  vec3 l=normalize(vec3(.8,.6,.4));
+  float diff=max(dot(n,l),0.);
+  float spec=pow(max(dot(reflect(-l,n),vec3(0,0,1)),0.),32.);
+  o=vec4(vec3(.1,.3,.6)*diff+spec,1.);
+}`},
+  d_c6:{type:'done',xp:150,badge:'💡',bname:'光照工程師',bdesc:'理解 Phong 光照模型',pts:['漫反射 = 光散向各方，dot product 計算','鏡面反射 = 光往特定角彈，pow 控制光澤','光照 = 環境光 + 漫反射 + 鏡面反射']},
+
+  // ══════ C7: UV ══════
+  h_c7:{type:'hook',emoji:'🗺️',q:'把橘子皮剝下來攤平，這是什麼技術的比喻？',sub:'貼圖怎麼貼到 3D 模型上？',choices:[
+    {ico:'🎨',text:'直接在 3D 模型上畫圖',ok:false},
+    {ico:'📦',text:'UV 展開——把 3D 表面攤成 2D 平面',ok:true},
+    {ico:'📷',text:'從不同角度拍照後合成',ok:false}]},
+  e_c7:{type:'explain',html:`<div class="etitle">🗺️ UV 座標 — 把 3D 攤成 2D</div>
+    <div class="ebody">每個 3D 頂點都有對應的 2D 座標叫 <strong>UV</strong>（U=橫、V=縱）。<br>U: 0=貼圖左 → 1=貼圖右　　V: 0=貼圖下 → 1=貼圖上</div>
+    <div class="abox"><div class="albl">🌍 地球儀比喻</div><div class="atext">把地球儀表面剝下來攤平 = 世界地圖<br>3D 模型的 UV 展開就是同樣的事！<br><br>展開好不好，決定貼圖有沒有「拉伸感」</div></div>
+    <div class="ebody">Shader 裡的 UV：<br><code>vec2 uv = fragCoord / iResolution.xy;</code><br><br>uv 可以用來做各種程序化圖案：<br>• <code>mod(uv * scale, 1.0)</code> → 重複圖案<br>• <code>floor(uv * scale)</code> → 棋盤格、磚塊</div>`},
+  t_c7:{type:'try',mission:'調整 UV 縮放和圖案類型，看看不同的程序化貼圖效果！',initFn:'initUV'},
+  ch_c7:{type:'chal',icon:'🗺️',title:'挑戰：做棋盤格 Shader！',desc:'用 UV 數學在 Shadertoy 做出棋盤格',link:'https://www.shadertoy.com/new',
+    csteps:['打開 Shadertoy，貼入程式碼','調整 scale 數字讓格子變大小','試把 mod 改成 sin 看效果','想想：磚牆紋路怎麼做？'],
+    hint:`void mainImage(out vec4 o,vec2 u){
+  vec2 uv=u/iResolution.xy*8.;
+  float checker=mod(floor(uv.x)+floor(uv.y),2.);
+  o=vec4(vec3(checker*.85+.1),1.);
+}`},
+  d_c7:{type:'done',xp:150,badge:'🗺️',bname:'UV 大師',bdesc:'理解 UV 座標與貼圖',pts:['UV = 3D 表面對應到 2D 貼圖的座標','U 橫向、V 縱向，各自 0~1','Shader 裡可用 UV 做程序化圖案']},
+
+  // ══════ C8: Noise ══════
+  h_c8:{type:'hook',emoji:'🌫️',q:'雲朵、地形、木紋有那種「自然不規則感」，是怎麼做的？',sub:'完全隨機？還是有規律的隨機？',choices:[
+    {ico:'🎲',text:'完全隨機，每次都不一樣',ok:false},
+    {ico:'🌊',text:'有規律的隨機——噪聲函數',ok:true},
+    {ico:'🖼️',text:'美術師手動畫出不規則紋路',ok:false}]},
+  e_c8:{type:'explain',html:`<div class="etitle">🌫️ Perlin Noise — 有靈魂的隨機</div>
+    <div class="ebody"><strong>Perlin Noise</strong> 是「平滑的隨機」：相鄰的點值很接近，不會突然跳變，整體有自然感。</div>
+    <div class="abox"><div class="albl">🌲 自然界比喻</div><div class="atext">大理石花紋、木頭年輪、雲朵形狀、山脈起伏……<br>這些都能用噪聲函數產生！<br><br>完全隨機 → 電視雜訊（醜）<br>Perlin Noise → 自然紋路（美）</div></div>
+    <div class="ebody">應用：<br>• 地形：<code>noise(x,z) = 高度</code><br>• 雲朵：多層噪聲疊加（<strong>FBM — 分形布朗運動</strong>）<br>• 水面：噪聲讓頂點位置抖動<br>• 溶解特效：<code>if(noise > threshold) discard;</code></div>`},
+  t_c8:{type:'try',mission:'調整噪聲縮放、層數和樣式，看看能做出什麼紋路！',initFn:'initNoise'},
+  ch_c8:{type:'chal',icon:'🌫️',title:'挑戰：用噪聲做地形！',desc:'在 Shadertoy 用噪聲函數做出山脈橫截面',link:'https://www.shadertoy.com/new',
+    csteps:['打開 Shadertoy，貼入程式碼','調整地形縮放和海平面','觀察 fbm 多層疊加的效果','試做出「熱帶島嶼」的剪影'],
+    hint:`float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1)),f.x),f.y);}
+void mainImage(out vec4 o,vec2 u){
+  vec2 uv=u/iResolution.xy;
+  float h=noise(uv*4.)*noise(uv*8.)*.5+.3;
+  float land=step(uv.y,h);
+  o=vec4(mix(vec3(.1,.3,.7),vec3(.2,.6,.2),land),1.);
+}`},
+  d_c8:{type:'done',xp:150,badge:'🌫️',bname:'噪聲煉金術師',bdesc:'理解 Perlin Noise 原理',pts:['噪聲 = 平滑的隨機，相鄰點值接近','FBM = 多層噪聲疊加，更豐富自然','應用：地形/雲/水面/溶解特效']},
+
+  // ══════ C9: 矩陣 ══════
+  h_c9:{type:'hook',emoji:'🔢',q:'3D 軟體裡的「移動/旋轉/縮放」，底層是什麼運算？',sub:'幾乎所有 3D 變換都靠同一種數學工具！',choices:[
+    {ico:'➕',text:'加法和減法',ok:false},
+    {ico:'📊',text:'矩陣乘法',ok:true},
+    {ico:'🔄',text:'遞迴函數',ok:false}]},
+  e_c9:{type:'explain',html:`<div class="etitle">🔢 矩陣 — 3D 變換的通用工具</div>
+    <div class="ebody"><strong>矩陣（Matrix）</strong>= 一個「變換食譜」：把點乘以矩陣，得到變換後的新位置。</div>
+    <div class="abox"><div class="albl">🍳 矩陣能做什麼？</div><div class="atext">• <strong>平移</strong>（Translation）— 移動位置<br>• <strong>旋轉</strong>（Rotation）— 繞軸旋轉<br>• <strong>縮放</strong>（Scale）— 放大縮小<br><br>把矩陣相乘 = 一次做所有變換！<br><code>TRS = 平移 × 旋轉 × 縮放</code></div></div>
+    <div class="ebody">2D 旋轉矩陣（繞 Z 軸）：<br><code>mat2(cos(a), -sin(a), sin(a), cos(a))</code><br><br>3D 用 <code>mat4</code> 做完整的平移+旋轉+縮放<br>GPU 每幀對每個頂點做矩陣乘法——這就是渲染管線！</div>`},
+  t_c9:{type:'try',mission:'拖動滑桿旋轉/縮放矩形，觀察矩陣數值怎麼變！',initFn:'initMatrix'},
+  ch_c9:{type:'chal',icon:'🔢',title:'挑戰：旋轉的棋盤格！',desc:'用旋轉矩陣讓 Shadertoy 的圖案旋轉',link:'https://www.shadertoy.com/new',
+    csteps:['打開 Shadertoy，貼入程式碼','按 ▶ 看棋盤格旋轉','試著讓旋轉速度加倍（iTime*2）','試著讓它反向旋轉'],
+    hint:`mat2 rot(float a){return mat2(cos(a),-sin(a),sin(a),cos(a));}
+void mainImage(out vec4 o,vec2 u){
+  vec2 uv=(u-iResolution.xy*.5)/iResolution.y;
+  uv=rot(iTime)*uv;
+  float c=mod(floor(uv.x*6.)+floor(uv.y*6.),2.);
+  o=vec4(vec3(c*.8+.1),1.);
+}`},
+  d_c9:{type:'done',xp:180,badge:'🔢',bname:'矩陣大師',bdesc:'理解座標變換與矩陣',pts:['矩陣 = 描述空間變換的工具','移動/旋轉/縮放都是矩陣乘法','Shader 裡 mat2/mat4 實現各種變換']},
+
+  // ══════ C10: 程序化建模 ══════
+  h_c10:{type:'hook',emoji:'⬡',q:'遊戲裡有一片森林有 10000 棵樹，TA 是一棵一棵做出來的嗎？',sub:'10000 棵樹，你會怎麼做？',choices:[
+    {ico:'😰',text:'一棵一棵手動建模，花幾個月',ok:false},
+    {ico:'⚡',text:'寫規則讓電腦自動生成',ok:true},
+    {ico:'♻️',text:'只做一棵，複製貼上 10000 次',ok:false}]},
+  e_c10:{type:'explain',html:`<div class="etitle">⬡ 程序化建模 — 用規則生成世界</div>
+    <div class="ebody"><strong>程序化建模（Procedural Modeling）</strong>：寫規則讓電腦自動生成，而不是手動做每一個。</div>
+    <div class="abox"><div class="albl">🌆 城市生成例子</div><div class="atext">手動：做 200 棟建築 → 6 個月<br>程序化：<br>① 規則：高度 = random(20m~80m)<br>② 規則：窗戶間距 = 2m<br>③ 執行 → 自動生成 200 棟不同建築！</div></div>
+    <div class="ebody">工具：<br>• <strong>Houdini</strong> — 業界最強程序化工具<br>• <strong>Geometry Nodes</strong>（Blender 內建）<br>• 自己寫 Python/C++<br><br>常見應用：地形、植被、建築、紋路、動畫</div>`},
+  t_c10:{type:'try',mission:'調整規則參數，看電腦自動生成不同的「城市剪影」！',initFn:'initProcedural'},
+  ch_c10:{type:'chal',icon:'⬡',title:'挑戰：設計你的程序化規則！',desc:'想像一個程序化系統，設計它的規則',link:null,
+    csteps:['選一個場景：城市/森林/海洋/星空','列出 3 條規則（每條含隨機範圍）','想想哪條規則讓它看起來更自然','關鍵：少量規則 × 隨機 = 豐富結果'],
+    hint:'例：樹的規則：\n高度 = random(3m~15m)\n枝幹角度 = random(20°~60°)\n葉子密度 = random(稀~密)'},
+  d_c10:{type:'done',xp:180,badge:'⬡',bname:'世界建造者',bdesc:'理解程序化建模',pts:['程序化 = 寫規則讓電腦自動生成內容','少量規則 × 隨機參數 = 豐富多樣','Houdini 和 Geometry Nodes 是主要工具']},
+
+  // ══════ C11: L-System ══════
+  h_c11:{type:'hook',emoji:'🌿',q:'植物的枝幹為什麼看起來那麼自然？有什麼規律？',sub:'想想樹是怎麼長大的',choices:[
+    {ico:'🎲',text:'完全隨機，沒有規律',ok:false},
+    {ico:'🔄',text:'遞迴規則：每個枝幹都長出更小的枝幹',ok:true},
+    {ico:'🖌️',text:'美術師手動畫每條枝幹',ok:false}]},
+  e_c11:{type:'explain',html:`<div class="etitle">🌿 L-System — 遞迴長出植物</div>
+    <div class="ebody"><strong>L-System</strong>（Lindenmayer System）是用文字規則描述遞迴生長的系統，1968 年由生物學家發明。</div>
+    <div class="abox"><div class="albl">🌱 超簡單例子</div><div class="atext">起始：<code>F</code>（前進畫線）<br>規則：<code>F → F[+F]F[-F]F</code><br>（F=前進，+=左轉，-=右轉，[]=保存/恢復位置）<br><br>第1代展開 → 第2代展開 → 幾代後長成一棵樹！</div></div>
+    <div class="ebody">這就是「分形」的基礎：<br>簡單規則 → 無限複雜的結構<br>樹、蕨類、珊瑚、雪花，都能用 L-System 生成</div>`},
+  t_c11:{type:'try',mission:'調整分支角度和深度，看 L-System 長出不同形狀的植物！',initFn:'initLSystem'},
+  ch_c11:{type:'chal',icon:'🌿',title:'挑戰：找出最像真實植物的設定！',desc:'試不同角度和深度，找到最自然的組合',link:null,
+    csteps:['回到「試試看」','把深度調到 4 或 5','試不同分支角度（10°~45°）','找到你覺得最像真實樹木的組合！'],
+    hint:'深度越高 → 細節越豐富，計算也越慢\n角度約 25~30° 最像自然植物'},
+  d_c11:{type:'done',xp:200,badge:'🌿',bname:'植物生成師',bdesc:'理解 L-System 遞迴原理',pts:['L-System = 文字規則描述遞迴生長','簡單規則重複 → 複雜自然結構','分形：自相似，放大縮小都是同樣的規律']},
+
+  // ══════ C12: 高度圖 ══════
+  h_c12:{type:'hook',emoji:'🏔️',q:'遊戲裡的地形（山脈、峽谷、平原）是怎麼做的？',sub:'地形數據怎麼儲存？',choices:[
+    {ico:'🖌️',text:'美術師用 3D 軟體一山一山捏',ok:false},
+    {ico:'🖼️',text:'一張黑白圖片就能描述整個地形高度',ok:true},
+    {ico:'📍',text:'把真實地形測量後輸入進去',ok:false}]},
+  e_c12:{type:'explain',html:`<div class="etitle">🏔️ 高度圖 — 一張圖描述整個地形</div>
+    <div class="ebody"><strong>Height Map（高度圖）</strong>：灰階圖片，<br>亮色（白）= 高（山頂）　暗色（黑）= 低（谷底）</div>
+    <div class="abox"><div class="albl">📊 技術細節</div><div class="atext">8 位元 → 256 個高度等級<br>16 位元 → 65536 個高度等級（更細膩）<br><br>引擎讀取流程：<br>像素亮度值 → 頂點高度 → 地形完成！</div></div>
+    <div class="ebody">生成方式：<br>• 手繪（美術師控制地形）<br>• 噪聲函數（隨機自然地形）<br>• 真實衛星數據（DEM 數字高程模型）<br><br>TA 工作：讓地形生成自動化、設定 LOD 層級</div>`},
+  t_c12:{type:'try',mission:'調整噪聲參數，生成不同風格地形！試做平原、山地、島嶼',initFn:'initTerrain'},
+  ch_c12:{type:'chal',icon:'🏔️',title:'挑戰：設計你的世界地形！',desc:'調出你最喜歡的地形，截圖保存',link:null,
+    csteps:['在「試試看」調整所有參數','試試熱帶島嶼（低矮山丘 + 高海平面）','試試喜馬拉雅山（高大山脈 + 低海平面）','找到你最喜歡的設定！'],
+    hint:'山脈：高頻率 + 高振幅\n島嶼：低頻率 + 海平面設高'},
+  d_c12:{type:'done',xp:200,badge:'🏔️',bname:'地形設計師',bdesc:'理解高度圖與地形生成',pts:['高度圖 = 灰階圖，亮度代表高度','噪聲函數生成自然地形','TA 負責讓地形生成自動化']},
+
+  // ══════ C13: SDF ══════
+  h_c13:{type:'hook',emoji:'🔵',q:'圓形碰撞偵測、柔和陰影、字體渲染……這些不同的東西有同一種底層技術，是什麼？',sub:'這個技術讓形狀的邊緣可以「軟化」',choices:[
+    {ico:'📐',text:'三角形多邊形做很多面',ok:false},
+    {ico:'📏',text:'SDF — 記錄「到最近表面的距離」',ok:true},
+    {ico:'🎨',text:'模糊濾鏡直接蓋上去',ok:false}]},
+  e_c13:{type:'explain',html:`<div class="etitle">🔵 SDF — Signed Distance Field</div>
+    <div class="ebody">對空間每一個點，記錄它距離最近表面的距離：<br>• <code>d > 0</code> = 在表面外面<br>• <code>d = 0</code> = 剛好在表面上<br>• <code>d < 0</code> = 在表面裡面</div>
+    <div class="abox"><div class="albl">🎯 圓形 SDF 超簡單</div><div class="atext"><code>float d = length(p) - radius;</code><br>就這樣！只需計算「點到圓心的距離」<br><br>有了 SDF 你能做：<br>• 柔和邊緣：<code>smoothstep()</code><br>• 發光效果：<code>0.01 / abs(d)</code><br>• 形狀合併：<code>smooth min</code><br>• Ray Marching：不需要 3D 模型！</div></div>
+    <div class="ebody">Shadertoy 上那些炫酷的 3D 場景，很多都是 SDF + Ray Marching 做的</div>`},
+  t_c13:{type:'try',mission:'調整形狀的 SDF 參數，看圓形、方形、合併效果！',initFn:'initSDF'},
+  ch_c13:{type:'chal',icon:'🔵',title:'挑戰：SDF 發光圓形！',desc:'在 Shadertoy 用 SDF 做一個發光圓',link:'https://www.shadertoy.com/new',
+    csteps:['打開 Shadertoy，貼入程式碼','調整 radius 大小','試讓圓形有柔和發光邊緣','想想：兩個圓怎麼「平滑合併」？'],
+    hint:`void mainImage(out vec4 o,vec2 u){
+  vec2 p=(u-iResolution.xy*.5)/iResolution.y;
+  float d=length(p)-.3;
+  float fill=smoothstep(.01,-.01,d);
+  float glow=.015/abs(d);
+  vec3 col=vec3(.2,.6,1.)*fill+vec3(.1,.3,.8)*glow;
+  o=vec4(col,1.);
+}`},
+  d_c13:{type:'done',xp:220,badge:'🔵',bname:'距離場術士',bdesc:'理解 SDF 的原理與應用',pts:['SDF = 每個點到最近表面的距離','正值=外面，負值=裡面，零=表面','smoothstep 柔和邊緣，1/d 做發光']},
+
+  // ══════ C14: 程序化動畫 ══════
+  h_c14:{type:'hook',emoji:'🔁',q:'角色走路動畫，TA 有方法讓它不需要動畫師就「自動算出來」？',sub:'想想走路的規律性',choices:[
+    {ico:'🖼️',text:'一幀一幀手動調整，需要動畫師',ok:false},
+    {ico:'📐',text:'用數學函數描述週期動作，自動計算',ok:true},
+    {ico:'🎥',text:'拍真人動作後動作捕捉轉換',ok:false}]},
+  e_c14:{type:'explain',html:`<div class="etitle">🔁 程序化動畫 — 數學讓角色動起來</div>
+    <div class="ebody"><strong>程序化動畫</strong>：用數學函數描述動作規律，不需手動製作每一幀。</div>
+    <div class="abox"><div class="albl">🦵 走路的數學</div><div class="atext">左腳 = <code>sin(time) × 步幅</code><br>右腳 = <code>sin(time + π) × 步幅</code>（錯開半個週期）<br>身體上下 = <code>abs(sin(time)) × 彈跳</code><br>手臂 = <code>-sin(time) × 擺幅</code>（跟腳反方向）</div></div>
+    <div class="ebody">應用場景：<br>• <strong>程序化走路</strong>：sin/cos 控制各關節<br>• <strong>布料飄動</strong>：Vertex Shader 用噪聲抖動頂點<br>• <strong>IK 腳踩地形</strong>：腳自動貼地面<br>• <strong>Wiggle 動畫</strong>：After Effects 裡的噪聲動畫</div>`},
+  t_c14:{type:'try',mission:'調整步幅和速度，看程序化走路動畫怎麼變！',initFn:'initProcAnim'},
+  ch_c14:{type:'chal',icon:'🔁',title:'挑戰：讓旗子飄動！',desc:'在 Shadertoy 用 sin + UV 讓旗子飄起來',link:'https://www.shadertoy.com/new',
+    csteps:['打開 Shadertoy，貼入程式碼','調整風力和波浪速度','試做大風 vs 微風效果','觀察 uv.x 控制「固定端」的效果'],
+    hint:`void mainImage(out vec4 o,vec2 u){
+  vec2 uv=u/iResolution.xy;
+  float wave=sin(uv.x*8.+iTime*3.)*.05*uv.x;
+  uv.y+=wave;
+  vec3 col=uv.x<.5?vec3(1.,.15,.15):vec3(.15,.15,1.);
+  float pole=step(.495,uv.x)*step(uv.x,.505);
+  o=vec4(mix(col,vec3(1.),pole),1.);
+}`},
+  d_c14:{type:'done',xp:220,badge:'🔁',bname:'動畫工程師',bdesc:'理解程序化動畫原理',pts:['sin/cos 的週期性 = 循環動作的基礎','走路 = 兩條腿各差半個 sin 週期','程序化動畫可讓角色自動適應地形']},
+
+  // ══════ C15: Rigging / IK ══════
+  h_c15:{type:'hook',emoji:'🦴',q:'角色要拾起地上的東西，動畫師怎麼最快調出正確姿勢？',sub:'手要到達某個位置，肩膀/手肘/手腕要怎麼自動算？',choices:[
+    {ico:'😤',text:'每根骨頭一個一個手動旋轉',ok:false},
+    {ico:'⚡',text:'告訴電腦「手要到哪」，讓它自己算骨頭角度',ok:true},
+    {ico:'📹',text:'動作捕捉每一個動作',ok:false}]},
+  e_c15:{type:'explain',html:`<div class="etitle">🦴 FK vs IK — 骨架的兩種控制方式</div>
+    <div class="ebody"><strong>FK（正向運動學）</strong>：從根到末端，一節一節旋轉<br>肩 → 手肘 → 手腕，動畫師控制每個關節<br><br><strong>IK（反向運動學）</strong>：告訴末端要去哪，電腦反推各關節角度<br>「手腕到達這裡」→ 自動算肩/肘/腕</div>
+    <div class="abox"><div class="albl">🤖 為什麼 IK 很重要？</div><div class="atext">腳踩不平地形 → IK 讓腳自動貼地<br>拾取物品 → IK 讓手自動抓到目標<br>攀爬 → IK 讓手腳自動抓牆壁<br><br>沒有 IK，這些都要手動做每一格！</div></div>
+    <div class="ebody">TA 在 Rigging 的工作：<br>• 設計高效骨架結構<br>• 設定 IK 控制器和約束<br>• 寫自動化 Rigging 腳本（Python/MEL）</div>`},
+  t_c15:{type:'try',mission:'拖動末端「手部目標」，看 IK 如何自動計算手臂彎曲！',initFn:'initRigging'},
+  ch_c15:{type:'chal',icon:'🦴',title:'挑戰：觀察 IK 的限制！',desc:'把目標拖到手臂搆不到的地方，看發生什麼',link:null,
+    csteps:['把目標拖到很遠的地方','觀察手臂如何盡力延伸','拖回近處，觀察彎曲方式','思考：真實遊戲怎麼處理「搆不到」的情況？'],
+    hint:'IK 搆不到時：手臂完全伸直\n真實遊戲：設定影響範圍，超出才切換 FK'},
+  d_c15:{type:'done',xp:250,badge:'🦴',bname:'骨架工程師',bdesc:'理解 FK 與 IK 系統',pts:['FK = 從根到末端控制每個關節','IK = 告訴末端位置，反推關節角度','IK 讓角色自動適應環境（踩地/拾取）']},
+
+  // ══════ C16: GPU 優化 ══════
+  h_c16:{type:'hook',emoji:'⚡',q:'同樣場景，A 遊戲跑 120 FPS，B 遊戲跑 20 FPS，差在哪？',sub:'兩個場景看起來一樣，效能卻差那麼多',choices:[
+    {ico:'💻',text:'電腦 CPU 速度不同',ok:false},
+    {ico:'🎨',text:'美術品質不同，精細的就慢',ok:false},
+    {ico:'⚙️',text:'技術優化不同：Draw Call、LOD、Culling',ok:true}]},
+  e_c16:{type:'explain',html:`<div class="etitle">⚡ GPU 優化 — 讓遊戲跑得更快</div>
+    <div class="ebody">GPU 負責渲染畫面，TA 的目標是讓 GPU 工作更有效率。</div>
+    <div class="abox"><div class="albl">⚙️ 三大優化工具</div><div class="atext"><strong>Draw Call</strong>：每次叫 GPU 畫一個物件 = 1 次 Draw Call<br>越少越好！合批（Batching）= 多物件合成一次<br><br><strong>LOD</strong>（Level of Detail）：遠的物件用低精度模型<br><br><strong>Culling</strong>（剔除）：看不到的不畫<br>Frustum Culling / Occlusion Culling</div></div>
+    <div class="ebody">TA 優化流程：<br>① Profiler 找瓶頸<br>② 減少 Draw Call（合批、GPU Instancing）<br>③ 設定 LOD 層級<br>④ 優化 Shader 複雜度<br>⑤ 壓縮貼圖</div>`},
+  t_c16:{type:'try',mission:'調整 Draw Call 數量和優化設定，看 FPS 計數器怎麼變化！',initFn:'initGPU'},
+  ch_c16:{type:'chal',icon:'⚡',title:'挑戰：找出效能殺手！',desc:'分析下面這個場景哪裡最浪費效能',link:null,
+    csteps:['場景：10000 個小石頭，各自 Draw Call','草地：每根草都是獨立物件','天空盒：解析度 8192×8192','全場景沒有 Culling，全部都畫'],
+    hint:'最大問題：Draw Call 太多（10000 個石頭）\n解法：GPU Instancing → 10000 個石頭 = 1 次 Draw Call！'},
+  d_c16:{type:'done',xp:250,badge:'⚡',bname:'效能優化師',bdesc:'理解 GPU 渲染優化',pts:['Draw Call 越少越好，合批是關鍵','LOD 讓遠處物件降低精度','Culling 讓看不見的東西不消耗資源']},
+
+  // ══════ C17: PBR ══════
+  h_c17:{type:'hook',emoji:'🌊',q:'為什麼現代遊戲的材質那麼真實，跟以前的遊戲差那麼多？',sub:'秘密是一套叫 PBR 的系統',choices:[
+    {ico:'🎨',text:'美術師畫得越來越好',ok:false},
+    {ico:'🔬',text:'根據真實物理規則計算光如何與材質互動',ok:true},
+    {ico:'📷',text:'直接用照片當貼圖',ok:false}]},
+  e_c17:{type:'explain',html:`<div class="etitle">🌊 PBR — 物理基礎渲染</div>
+    <div class="ebody"><strong>PBR（Physically Based Rendering）</strong>：讓材質遵守現實世界的物理規則。</div>
+    <div class="abox"><div class="albl">🔑 PBR 三大參數</div><div class="atext"><strong>Albedo（底色）</strong>：材質本身的顏色，不含光照<br><br><strong>Metallic（金屬度）</strong>：0=非金屬，1=純金屬<br>金屬的反射有顏色，非金屬沒有<br><br><strong>Roughness（粗糙度）</strong>：0=鏡面，1=完全不反光<br>控制反射的清晰度</div></div>
+    <div class="ebody">為什麼 PBR 更好？<br>• 在不同光照環境下都「物理正確」<br>• 美術師只要設定物理屬性，不用猜光照<br>• Unity / Unreal 全都用 PBR<br>• 材質可以複用在不同場景</div>`},
+  t_c17:{type:'try',mission:'調整 Metallic 和 Roughness，從塑膠調到金屬，從磨砂調到鏡面！',initFn:'initPBR'},
+  ch_c17:{type:'chal',icon:'🌊',title:'挑戰：識別 PBR 參數！',desc:'根據 PBR 參數，猜猜這是什麼材質',link:null,
+    csteps:['Metallic=1.0, Roughness=0.05 → 是什麼？','Metallic=0.0, Roughness=0.9 → 是什麼？','Metallic=0.0, Roughness=0.05 → 是什麼？','在「試試看」驗證你的答案！'],
+    hint:'答案（順序打亂）：\n拋光金屬 / 乾土地 / 光面塑膠'},
+  d_c17:{type:'done',xp:280,badge:'🌊',bname:'材質科學家',bdesc:'理解 PBR 物理材質',pts:['Albedo = 不含光照的純顏色','Metallic 控制金屬感','Roughness 0=鏡面，1=磨砂']},
+
+  // ══════ C18: Post FX ══════
+  h_c18:{type:'hook',emoji:'🔦',q:'電影和遊戲的畫面感覺差那麼多，「電影感」是怎麼做出來的？',sub:'渲染完成後，還會再做一道處理',choices:[
+    {ico:'🎥',text:'用更昂貴的相機拍攝',ok:false},
+    {ico:'✨',text:'後製特效（Post Processing）：對最終畫面再加一層處理',ok:true},
+    {ico:'🖥️',text:'更高解析度，畫面自然更好',ok:false}]},
+  e_c18:{type:'explain',html:`<div class="etitle">🔦 後製特效 Post Processing</div>
+    <div class="ebody"><strong>Post FX</strong> 是在整個場景渲染完後，對最終畫面的全畫面處理。</div>
+    <div class="abox"><div class="albl">✨ 常見後製效果</div><div class="atext"><strong>Bloom（泛光）</strong>：亮的地方往外溢出光暈 → 真實光源感<br><br><strong>Tone Mapping（色調映射）</strong>：把 HDR 高動態範圍壓縮回螢幕能顯示的範圍 → 亮暗細節保留<br><br><strong>DOF（景深）</strong>：焦點外的東西模糊 → 電影鏡頭感<br><br><strong>Color Grading（色彩分級）</strong>：整體色調調整（暖/冷/電影風）</div></div>
+    <div class="ebody">TA 的工作：設定後製效果參數、寫自定義後製 Shader、讓後製不影響效能</div>`},
+  t_c18:{type:'try',mission:'開關不同後製效果，對比有沒有後製的視覺差異！',initFn:'initPostFX'},
+  ch_c18:{type:'chal',icon:'🔦',title:'挑戰：調出電影感色調！',desc:'在後製互動區，調出你最喜歡的「電影感」',link:null,
+    csteps:['開啟 Bloom，調整強度','試試暖色調或冷色調','調整對比度','截圖比較：有後製 vs 沒有後製'],
+    hint:'恐怖片：低飽和度 + 青色調 + 高 Bloom\n動作片：高對比 + 暖色調'},
+  d_c18:{type:'done',xp:280,badge:'🔦',bname:'電影調色師',bdesc:'理解後製特效原理',pts:['Post FX 對最終畫面做全畫面處理','Bloom 亮點光暈，Tone Mapping 保留動態範圍','Color Grading 決定畫面整體氣氛']},
+
+  // ══════ C19: 畢業 ══════
+  h_c19:{type:'hook',emoji:'🏆',q:'你完成了 19 關！現在把所有知識整合到一個作品裡。',sub:'畢業作品需要哪些技術？',choices:[
+    {ico:'🎉',text:'RGB + 光照 + PBR + sin 動畫 + 噪聲 + 後製，全都要！',ok:true},
+    {ico:'🤔',text:'只用其中幾個就夠了',ok:false},
+    {ico:'😅',text:'先等我都學精通再做',ok:false}]},
+  e_c19:{type:'explain',html:`<div class="etitle">🏆 整合：你的 TA 畢業作品</div>
+    <div class="ebody">你已經學了 20 關的技術！</div>
+    <div class="abox"><div class="albl">📋 你的技術清單</div><div class="atext">🎨 RGB + 向量 + 矩陣<br>💡 Phong 光照（漫反射 + 鏡面）<br>🌊 PBR（Metallic + Roughness）<br>🌫️ Perlin Noise（紋理 + 地形）<br>🔵 SDF（形狀 + 柔和邊緣）<br>〜 sin 動畫（呼吸 + 波動）<br>✨ 粒子特效<br>🔦 Post FX（Bloom + 色調）</div></div>
+    <div class="ebody">畢業作品：一顆<strong>完整的 PBR 材質球</strong><br>• PBR 材質（金屬 + 粗糙度）<br>• Phong 光照（漫反射 + 鏡面 + Rim Light）<br>• sin 動畫（呼吸發光）<br>• Noise 紋理（表面細節）<br>• Bloom 後製效果</div>`},
+  t_c19:{type:'try',mission:'調整所有參數，設計你的最終材質球！每個參數都學過了 🎓',initFn:'initFinal'},
+  ch_c19:{type:'chal',icon:'🚀',title:'最終挑戰：發布你的 Shader！',desc:'在 Shadertoy 發布展示你所學的 Shader，分享給朋友！',link:'https://www.shadertoy.com/new',
+    csteps:['打開 Shadertoy，貼入下面完整程式碼','按 ▶ 看效果，調整你喜歡的參數','點右上角 Save，幫作品取名字','複製連結，分享給朋友！'],
+    hint:`// TA 魔法學院 畢業 Shader
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}
+void mainImage(out vec4 o,vec2 u){
+  vec2 p=(u-iResolution.xy*.5)/iResolution.y;
+  if(length(p)>.42){float g=.008/length(p);o=vec4(vec3(.1,.3,.8)*g*sin(iTime)*.5+.5,1.);return;}
+  vec3 n=normalize(vec3(p,sqrt(.18-dot(p,p))));
+  vec3 l=normalize(vec3(.8,.6,.4)),v=vec3(0,0,1);
+  float diff=max(dot(n,l),0.);
+  float spec=pow(max(dot(reflect(-l,n),v),0.),48.);
+  float rim=pow(1.-max(dot(n,v),0.),.8);
+  float pulse=sin(iTime*1.5)*.5+.5;
+  float nz=noise(p*6.+iTime*.2)*.4+.6;
+  vec3 base=mix(vec3(.05,.15,.4),vec3(.3,.7,1.),pulse)*nz;
+  vec3 col=base*diff+vec3(.9,.95,1.)*spec+vec3(.2,.4,1.)*rim*.4;
+  o=vec4(col,1.);
+}`},
+  d_c19:{type:'done',xp:500,badge:'🏆',bname:'TA 畢業生 🎓',bdesc:'完成全部 20 個關卡！',pts:['你理解了 TA 的完整技術棧','從 RGB 到 PBR，從向量到矩陣，從粒子到程序化','這是 TA 入門的基礎，繼續往前走吧！']},
+};
+return DATA[sid];
 }
 
-// ───────────────────────────────────────────────
-// LESSON FLOW
+// ─── ENGINE ───
 function startLesson(id){
   curCh=CHS.find(c=>c.id===id);curIdx=0;stopAFs();
-  document.getElementById('lesson').style.setProperty('--lc',curCh.col);
-  document.getElementById('lprog').style.background=curCh.col;
+  const lesson=document.getElementById('lesson');
+  lesson.style.setProperty('--lc',curCh.col);
   document.getElementById('lxpbadge').textContent=`+${curCh.xp} XP`;
   document.getElementById('map').style.display='none';
-  document.getElementById('lesson').style.display='block';
+  lesson.style.display='block';
   window.scrollTo(0,0);renderStep();
 }
 function renderStep(){
-  const sid=steps(curCh.id)[curIdx];
-  if(!sid)return;
-  const pct=(curIdx/steps(curCh.id).length)*100;
-  document.getElementById('lprog').style.width=pct+'%';
+  const sid=STEPS[curCh.id][curIdx];if(!sid)return;
+  document.getElementById('lprog').style.width=(curIdx/STEPS[curCh.id].length*100)+'%';
   const sw=document.getElementById('swrap');sw.innerHTML='';
   const d=document.createElement('div');d.className='step active';
   const s=getStep(sid);if(!s){nextStep();return;}
-
   if(s.type==='hook'){
-    d.innerHTML=`<div class="hook">
-      <span class="hook-emoji">${s.emoji}</span>
-      <div class="hook-q">${s.q}</div>
-      <div class="hook-sub">${s.sub}</div>
-      <div class="choices">${s.choices.map(c=>`<div class="choice" onclick="answer(this,${c.ok})"><span class="cico">${c.ico}</span>${c.text}</div>`).join('')}</div>
-    </div>`;
+    d.innerHTML=`<div class="hook"><span class="hook-emoji">${s.emoji}</span><div class="hook-q">${s.q}</div><div class="hook-sub">${s.sub}</div><div class="choices">${s.choices.map(c=>`<div class="choice" onclick="answer(this,${c.ok})"><span class="cico">${c.ico}</span>${c.text}</div>`).join('')}</div></div>`;
   } else if(s.type==='explain'){
     d.innerHTML=s.html+`<div class="navrow"><button class="btn pri" onclick="nextStep()">明白了！繼續 →</button></div>`;
   } else if(s.type==='try'){
-    d.innerHTML=`<div class="try-title">⚡ 試試看</div>
-      <div class="mission"><div class="mlbl">🎯 任務</div>${s.mission}</div>
-      <div id="trybox"></div>
-      <div class="navrow" style="margin-top:16px"><button class="btn pri" onclick="nextStep()">完成！繼續 →</button></div>`;
+    d.innerHTML=`<div class="try-title">⚡ 試試看</div><div class="mission"><div class="mlbl">🎯 任務</div>${s.mission}</div><div id="trybox"></div><div class="navrow" style="margin-top:16px"><button class="btn pri" onclick="nextStep()">完成！繼續 →</button></div>`;
     setTimeout(()=>{if(window[s.initFn])window[s.initFn]();},50);
   } else if(s.type==='chal'){
-    d.innerHTML=`<div class="cblock">
-      <span class="cico2">${s.icon}</span>
-      <div class="ctitle">${s.title}</div>
-      <div class="cdesc">${s.desc}</div>
-      <div class="csteps">${s.csteps.map((t,i)=>`<div class="cstep"><div class="csnum">${i+1}</div><div class="cstxt">${t}</div></div>`).join('')}</div>
-      <div class="hint">${s.hlbl}：<br>${s.hint}</div>
-      ${s.link?`<a href="${s.link}" target="_blank" class="btn ext" style="display:inline-flex;margin-bottom:12px">🚀 去試試看</a>`:''}
-      <div class="navrow" style="justify-content:center"><button class="btn pri" onclick="nextStep()">✓ 我完成了！</button></div>
-    </div>`;
+    d.innerHTML=`<div class="cblock"><span class="cico2">${s.icon}</span><div class="ctitle">${s.title}</div><div class="cdesc">${s.desc}</div><div class="csteps">${s.csteps.map((t,i)=>`<div class="cstep"><div class="csnum">${i+1}</div><div class="cstxt">${t}</div></div>`).join('')}</div><div class="hint">${s.hint}</div>${s.link?`<a href="${s.link}" target="_blank" class="btn ext" style="display:inline-flex;margin-bottom:12px">🚀 去試試看</a>`:''}<div class="navrow" style="justify-content:center"><button class="btn pri" onclick="nextStep()">✓ 我完成了！</button></div></div>`;
   } else if(s.type==='done'){
-    d.innerHTML=`<div class="compblock">
-      <span class="companim">${s.badge}</span>
-      <div class="comptitle">🎉 關卡完成！</div>
-      <div class="compsub">${curCh.title}</div>
-      <div class="xpgain">⭐ +${s.xp} XP 獲得！</div>
-      <div class="bdgcard"><div class="bdgico">${s.badge}</div><div><div class="bdgname">${s.bname}</div><div class="bdgdesc">${s.bdesc}</div></div></div>
-      <div style="text-align:left;width:100%;max-width:380px">
-        <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:7px;letter-spacing:.1em">📝 這關你學到了：</div>
-        ${s.pts.map(p=>`<div class="lpt"><span class="lpico">✓</span>${p}</div>`).join('')}
-      </div>
-      <div class="navrow" style="justify-content:center;flex-wrap:wrap">
-        <button class="btn pri" onclick="finishLesson()">回到地圖 🗺️</button>
-        ${curCh.num<5?`<button class="btn sec" onclick="nextChapter()">下一關 →</button>`:''}
-      </div>
-    </div>`;
+    d.innerHTML=`<div class="compblock"><span class="companim">${s.badge}</span><div class="comptitle">🎉 關卡完成！</div><div class="compsub">${curCh.title}</div><div class="xpgain">⭐ +${s.xp} XP！</div><div class="bdgcard"><div class="bdgico">${s.badge}</div><div><div class="bdgname">${s.bname}</div><div class="bdgdesc">${s.bdesc}</div></div></div><div style="text-align:left;width:100%;max-width:380px"><div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:7px;letter-spacing:.1em">📝 這關你學到了：</div>${s.pts.map(p=>`<div class="lpt"><span class="lpico">✓</span>${p}</div>`).join('')}</div><div class="navrow" style="justify-content:center;flex-wrap:wrap"><button class="btn pri" onclick="finishLesson()">回到地圖 🗺️</button>${curCh.num<19?`<button class="btn sec" onclick="nextChapter()">下一關 →</button>`:''}</div></div>`;
     setTimeout(()=>confetti(curCh.col),180);
   }
   sw.appendChild(d);window.scrollTo(0,0);
 }
 function answer(el,ok){
   if(el.classList.contains('correct')||el.classList.contains('wrong'))return;
-  if(ok){
-    // lock all, mark correct
-    el.parentElement.querySelectorAll('.choice').forEach(b=>b.style.pointerEvents='none');
-    el.classList.add('correct');el.innerHTML='✓ '+el.innerHTML;
-    setTimeout(nextStep,900);
-  } else {
-    el.classList.add('wrong');
-    setTimeout(()=>el.classList.remove('wrong'),550);
-  }
+  if(ok){el.parentElement.querySelectorAll('.choice').forEach(b=>b.style.pointerEvents='none');el.classList.add('correct');el.innerHTML='✓ '+el.innerHTML;setTimeout(nextStep,900);}
+  else{el.classList.add('wrong');setTimeout(()=>el.classList.remove('wrong'),550);}
 }
-function nextStep(){stopAFs();curIdx++;if(curIdx>=steps(curCh.id).length)curIdx=steps(curCh.id).length-1;renderStep();}
-function finishLesson(){
-  if(!ST.done.includes(curCh.id)){ST.done.push(curCh.id);ST.xp+=curCh.xp;save();showToast(`🎉 +${curCh.xp} XP！`);}
-  goMap();
-}
+function nextStep(){stopAFs();curIdx++;if(curIdx>=STEPS[curCh.id].length)curIdx=STEPS[curCh.id].length-1;renderStep();}
+function finishLesson(){if(!ST.done.includes(curCh.id)){ST.done.push(curCh.id);ST.xp+=curCh.xp;save();showToast(`🎉 +${curCh.xp} XP！`);}goMap();}
 function nextChapter(){finishLesson();setTimeout(()=>{const n=curCh.num+1;if(n<CHS.length)startLesson(CHS[n].id);},80);}
 function goMap(){stopAFs();document.getElementById('lesson').style.display='none';document.getElementById('map').style.display='block';window.scrollTo(0,0);renderMap();}
 
-// ───────────────────────────────────────────────
-// INTERACTIVE: RGB
-function initRGB(){
+// ─── WIDGETS ───
+// C1 RGB
+window.initRGB=()=>{
   const el=document.getElementById('trybox');if(!el)return;
-  el.innerHTML=`<div class="widget">
-    <div class="wbody">
-      <div class="wctrl">
-        <div class="ctrl"><div class="crow"><span class="clbl">🔴 R 紅色</span><span class="cval" id="rv">180</span></div><input type="range" min="0" max="255" value="180" id="rsl" oninput="uRGB()"></div>
-        <div class="ctrl"><div class="crow"><span class="clbl">🟢 G 綠色</span><span class="cval" id="gv">100</span></div><input type="range" min="0" max="255" value="100" id="gsl" oninput="uRGB()"></div>
-        <div class="ctrl"><div class="crow"><span class="clbl">🔵 B 藍色</span><span class="cval" id="bv">240</span></div><input type="range" min="0" max="255" value="240" id="bsl" oninput="uRGB()"></div>
-        <div class="ctrl"><div class="clbl" style="margin-bottom:5px">快選</div>
-        <div class="swatches">
-          <div class="sw" style="background:#ff5555" onclick="sRGB(255,85,85)"></div>
-          <div class="sw" style="background:#ff8c42" onclick="sRGB(255,140,66)"></div>
-          <div class="sw" style="background:#ffcb47" onclick="sRGB(255,203,71)"></div>
-          <div class="sw" style="background:#00e5a0" onclick="sRGB(0,229,160)"></div>
-          <div class="sw" style="background:#4db8ff" onclick="sRGB(77,184,255)"></div>
-          <div class="sw" style="background:#b47fff" onclick="sRGB(180,127,255)"></div>
-          <div class="sw" style="background:#ff6b9d" onclick="sRGB(255,107,157)"></div>
-        </div></div>
-      </div>
-      <div class="wprev"><canvas id="rgbcv" width="180" height="155"></canvas></div>
-    </div>
-    <div class="wcode"><span class="cc">// Shader 程式碼</span><br>
-    <span class="ck">vec3</span> color = <span class="cf">vec3</span>(<span class="cn" id="rc">0.71</span>, <span class="cn" id="gc">0.39</span>, <span class="cn" id="bc">0.94</span>);</div>
-  </div>`;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">🔴 R</span><span class="cval" id="rv">180</span></div><input type="range" min="0" max="255" value="180" id="rsl" oninput="uRGB()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🟢 G</span><span class="cval" id="gv">100</span></div><input type="range" min="0" max="255" value="100" id="gsl" oninput="uRGB()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🔵 B</span><span class="cval" id="bv">240</span></div><input type="range" min="0" max="255" value="240" id="bsl" oninput="uRGB()"></div>
+    <div class="ctrl"><div class="clbl" style="margin-bottom:5px">快選</div><div class="swatches">
+      <div class="sw" style="background:#ff5555" onclick="sRGB(255,85,85)"></div>
+      <div class="sw" style="background:#ff8c42" onclick="sRGB(255,140,66)"></div>
+      <div class="sw" style="background:#ffcb47" onclick="sRGB(255,203,71)"></div>
+      <div class="sw" style="background:#00e5a0" onclick="sRGB(0,229,160)"></div>
+      <div class="sw" style="background:#4db8ff" onclick="sRGB(77,184,255)"></div>
+      <div class="sw" style="background:#b47fff" onclick="sRGB(180,127,255)"></div>
+    </div></div></div>
+    <div class="wprev"><canvas id="rgbcv" width="175" height="150"></canvas></div></div>
+    <div class="wcode"><span class="cc">// Shader 顏色</span><br><span class="ck">vec3</span> col=<span class="cf">vec3</span>(<span class="cn" id="rc">0.71</span>,<span class="cn" id="gc">0.39</span>,<span class="cn" id="bc">0.94</span>);</div></div>`;
   uRGB();
-}
-window.sRGB=(r,g,b)=>{document.getElementById('rsl').value=r;document.getElementById('gsl').value=g;document.getElementById('bsl').value=b;uRGB();}
+};
+window.sRGB=(r,g,b)=>{document.getElementById('rsl').value=r;document.getElementById('gsl').value=g;document.getElementById('bsl').value=b;uRGB();};
 window.uRGB=()=>{
   const r=+document.getElementById('rsl').value,g=+document.getElementById('gsl').value,b=+document.getElementById('bsl').value;
-  ['rv','gv','bv'].forEach((id,i)=>document.getElementById(id).textContent=[r,g,b][i]);
-  ['rc','gc','bc'].forEach((id,i)=>document.getElementById(id).textContent=([r,g,b][i]/255).toFixed(2));
+  document.getElementById('rv').textContent=r;document.getElementById('gv').textContent=g;document.getElementById('bv').textContent=b;
+  document.getElementById('rc').textContent=(r/255).toFixed(2);document.getElementById('gc').textContent=(g/255).toFixed(2);document.getElementById('bc').textContent=(b/255).toFixed(2);
   const cv=document.getElementById('rgbcv');if(!cv)return;
-  const ctx=cv.getContext('2d');ctx.fillStyle='#040810';ctx.fillRect(0,0,180,155);
-  const sg=ctx.createRadialGradient(62,52,4,88,77,66);
+  const ctx=cv.getContext('2d');ctx.fillStyle='#040810';ctx.fillRect(0,0,175,150);
+  const sg=ctx.createRadialGradient(60,50,4,87,75,64);
   sg.addColorStop(0,'rgba(255,255,255,.88)');sg.addColorStop(.22,`rgb(${r},${g},${b})`);sg.addColorStop(1,`rgb(${r*.12|0},${g*.12|0},${b*.12|0})`);
-  ctx.beginPath();ctx.arc(88,77,66,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
-  ctx.shadowColor=`rgb(${r},${g},${b})`;ctx.shadowBlur=28;
-  ctx.beginPath();ctx.arc(88,77,66,0,Math.PI*2);ctx.strokeStyle=`rgba(${r},${g},${b},.38)`;ctx.lineWidth=1.5;ctx.stroke();
-  ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,.2)';ctx.font='8.5px "Space Mono"';ctx.fillText(`rgb(${r},${g},${b})`,6,149);
-}
+  ctx.beginPath();ctx.arc(87,75,63,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+  ctx.shadowColor=`rgb(${r},${g},${b})`;ctx.shadowBlur=24;ctx.beginPath();ctx.arc(87,75,63,0,Math.PI*2);ctx.strokeStyle=`rgba(${r},${g},${b},.3)`;ctx.lineWidth=1.5;ctx.stroke();ctx.shadowBlur=0;
+  ctx.fillStyle='rgba(255,255,255,.18)';ctx.font='8px "Space Mono"';ctx.fillText(`rgb(${r},${g},${b})`,5,144);
+};
 
-// ───────────────────────────────────────────────
-// INTERACTIVE: WAVE
-let wSp=2,wAmp=35,wCnt=2,wCol='#00e5a0',wT=0;
+// C2 Wave
+let wSp=2,wAmp=35,wCnt=2,wCol='#00e5a0';
 window.initWave=()=>{
   const el=document.getElementById('trybox');if(!el)return;
-  el.innerHTML=`<div class="widget">
-    <div class="wbody">
-      <div class="wctrl">
-        <div class="ctrl"><div class="crow"><span class="clbl">⚡ 速度</span><span class="cval" id="wspv">2</span>x</div><input type="range" min="1" max="8" value="2" id="wspsl" oninput="uWave()"></div>
-        <div class="ctrl"><div class="crow"><span class="clbl">📏 高度（振幅）</span><span class="cval" id="wampv">35</span></div><input type="range" min="5" max="70" value="35" id="wampsl" oninput="uWave()"></div>
-        <div class="ctrl"><div class="crow"><span class="clbl">🌊 波數</span><span class="cval" id="wcntv">2</span></div><input type="range" min="1" max="8" value="2" id="wcntsl" oninput="uWave()"></div>
-        <div class="ctrl"><div class="clbl" style="margin-bottom:5px">顏色</div>
-        <div class="swatches">
-          <div class="sw on" style="background:#00e5a0" onclick="sWCol('#00e5a0',this)"></div>
-          <div class="sw" style="background:#7c6fff" onclick="sWCol('#7c6fff',this)"></div>
-          <div class="sw" style="background:#ff6b9d" onclick="sWCol('#ff6b9d',this)"></div>
-          <div class="sw" style="background:#ffcb47" onclick="sWCol('#ffcb47',this)"></div>
-          <div class="sw" style="background:#4db8ff" onclick="sWCol('#4db8ff',this)"></div>
-        </div></div>
-      </div>
-      <div class="wprev"><canvas id="wavcv" width="200" height="155"></canvas></div>
-    </div>
-    <div class="wcode"><span class="cc">// 波浪公式</span><br>
-    <span class="ck">float</span> y = <span class="cf">sin</span>(x * <span class="cn" id="wcc">2.0</span> + iTime * <span class="cn" id="wsc">2.0</span>) * <span class="cn" id="wac">35.0</span>;</div>
-  </div>`;
-  wT=0;drawWave();
-}
-window.sWCol=(c,el)=>{wCol=c;document.querySelectorAll('#trybox .sw').forEach(s=>s.classList.remove('on'));el.classList.add('on');}
-window.uWave=()=>{
-  wSp=+document.getElementById('wspsl').value;wAmp=+document.getElementById('wampsl').value;wCnt=+document.getElementById('wcntsl').value;
-  document.getElementById('wspv').textContent=wSp;document.getElementById('wampv').textContent=wAmp;document.getElementById('wcntv').textContent=wCnt;
-  document.getElementById('wcc').textContent=wCnt+'.0';document.getElementById('wsc').textContent=wSp+'.0';document.getElementById('wac').textContent=wAmp+'.0';
-}
-function drawWave(){
-  const cv=document.getElementById('wavcv');if(!cv){wAF=null;return;}
-  const ctx=cv.getContext('2d'),W=200,H=155;
-  ctx.clearRect(0,0,W,H);ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);
-  wT+=.016*wSp;
-  const ri=parseInt(wCol.slice(1,3),16),gi=parseInt(wCol.slice(3,5),16),bi=parseInt(wCol.slice(5,7),16);
-  for(let l=0;l<3;l++){
-    const a=1-l*.28,amp=wAmp*(1-l*.2);
-    ctx.beginPath();ctx.moveTo(0,H/2);
-    for(let x=0;x<=W;x+=2)ctx.lineTo(x,H/2+Math.sin((x/W)*Math.PI*2*wCnt+wT+l*.7)*amp);
-    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
-    ctx.fillStyle=`rgba(${ri},${gi},${bi},${a*.11})`;ctx.fill();
-    ctx.beginPath();ctx.moveTo(0,H/2);
-    for(let x=0;x<=W;x+=2)ctx.lineTo(x,H/2+Math.sin((x/W)*Math.PI*2*wCnt+wT+l*.7)*amp);
-    ctx.strokeStyle=`rgba(${ri},${gi},${bi},${a*.78})`;ctx.lineWidth=2-l*.4;ctx.stroke();
-  }
-  wAF=requestAnimationFrame(drawWave);
-}
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">⚡ 速度</span><span class="cval" id="wspv">2</span>x</div><input type="range" min="1" max="8" value="2" id="wspsl" oninput="uWave()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">📏 高度</span><span class="cval" id="wampv">35</span></div><input type="range" min="5" max="70" value="35" id="wampsl" oninput="uWave()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🌊 波數</span><span class="cval" id="wcntv">2</span></div><input type="range" min="1" max="8" value="2" id="wcntsl" oninput="uWave()"></div>
+    <div class="ctrl"><div class="clbl" style="margin-bottom:5px">顏色</div><div class="swatches">
+      <div class="sw on" style="background:#00e5a0" onclick="sWCol('#00e5a0',this)"></div>
+      <div class="sw" style="background:#7c6fff" onclick="sWCol('#7c6fff',this)"></div>
+      <div class="sw" style="background:#ff6b9d" onclick="sWCol('#ff6b9d',this)"></div>
+      <div class="sw" style="background:#ffcb47" onclick="sWCol('#ffcb47',this)"></div>
+    </div></div></div>
+    <div class="wprev"><canvas id="wavcv" width="195" height="150"></canvas></div></div>
+    <div class="wcode"><span class="ck">float</span> y=<span class="cf">sin</span>(x*<span class="cn" id="wcc">2.0</span>+t*<span class="cn" id="wsc">2.0</span>)*<span class="cn" id="wac">35.0</span>;</div></div>`;
+  let wT=0;
+  window.sWCol=(c,btn)=>{wCol=c;document.querySelectorAll('#trybox .sw').forEach(b=>b.classList.remove('on'));btn.classList.add('on');};
+  window.uWave=()=>{wSp=+document.getElementById('wspsl').value;wAmp=+document.getElementById('wampsl').value;wCnt=+document.getElementById('wcntsl').value;document.getElementById('wspv').textContent=wSp;document.getElementById('wampv').textContent=wAmp;document.getElementById('wcntv').textContent=wCnt;document.getElementById('wcc').textContent=wCnt+'.0';document.getElementById('wsc').textContent=wSp+'.0';document.getElementById('wac').textContent=wAmp+'.0';};
+  (function loop(){const cv=document.getElementById('wavcv');if(!cv)return;wT+=.016*wSp;const ctx=cv.getContext('2d'),W=195,H=150;ctx.clearRect(0,0,W,H);ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);const ri=parseInt(wCol.slice(1,3),16),gi=parseInt(wCol.slice(3,5),16),bi=parseInt(wCol.slice(5,7),16);for(let l=0;l<3;l++){const a=1-l*.28,amp=wAmp*(1-l*.2);ctx.beginPath();ctx.moveTo(0,H/2);for(let x=0;x<=W;x+=2)ctx.lineTo(x,H/2+Math.sin((x/W)*Math.PI*2*wCnt+wT+l*.7)*amp);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fillStyle=`rgba(${ri},${gi},${bi},${a*.1})`;ctx.fill();ctx.beginPath();ctx.moveTo(0,H/2);for(let x=0;x<=W;x+=2)ctx.lineTo(x,H/2+Math.sin((x/W)*Math.PI*2*wCnt+wT+l*.7)*amp);ctx.strokeStyle=`rgba(${ri},${gi},${bi},${a*.75})`;ctx.lineWidth=2-l*.4;ctx.stroke();}addAF(requestAnimationFrame(loop));})();
+};
 
-// ───────────────────────────────────────────────
-// INTERACTIVE: PARTICLES
+// C3 Particles
 let pPs=[],pFx='snow',pCnt=60,pSpd=2;
 window.initParticles=()=>{
   const el=document.getElementById('trybox');if(!el)return;
-  el.innerHTML=`<div class="widget">
-    <div class="wbody">
-      <div class="wctrl">
-        <div class="ctrl"><div class="crow"><span class="clbl">💫 粒子數量</span><span class="cval" id="pcv">60</span></div><input type="range" min="10" max="200" value="60" id="pcsl" oninput="uPart()"></div>
-        <div class="ctrl"><div class="crow"><span class="clbl">⚡ 速度</span><span class="cval" id="psv">2</span></div><input type="range" min="1" max="6" value="2" id="pssl" oninput="uPart()"></div>
-        <div class="ctrl"><div class="clbl" style="margin-bottom:5px">特效類型</div>
-        <div class="fxbtns">
-          <button class="fxbtn on" onclick="sPFx('snow',this)">❄ 雪花</button>
-          <button class="fxbtn" onclick="sPFx('fire',this)">🔥 火焰</button>
-          <button class="fxbtn" onclick="sPFx('magic',this)">✨ 魔法</button>
-        </div></div>
-        <div style="margin-top:8px;font-size:.72rem;color:var(--muted);font-weight:700">💡 點右邊畫面爆炸！</div>
-      </div>
-      <div class="wprev" style="cursor:crosshair"><canvas id="partcv" width="200" height="155"></canvas></div>
-    </div>
-    <div class="wcode"><span class="cc">// 每個粒子</span><br>
-    <span class="ck">particle</span>.pos += <span class="ck">particle</span>.velocity * dt;<br>
-    <span class="ck">particle</span>.life -= <span class="cn">0.01</span>;</div>
-  </div>`;
-  setTimeout(()=>{
-    const cv=document.getElementById('partcv');
-    if(cv)cv.addEventListener('click',e=>{
-      const r=cv.getBoundingClientRect();
-      const mx=(e.clientX-r.left)*(200/r.width),my=(e.clientY-r.top)*(155/r.height);
-      const pool={snow:['#8be9fd','#fff'],fire:['#ff6b35','#fbbf24','#ff4757'],magic:['#7c6fff','#ff6b9d','#00e5a0']};
-      const cl=(pool[pFx]||pool.magic);
-      for(let i=0;i<22;i++){const a=Math.random()*Math.PI*2,s=Math.random()*4+1.5;pPs.push({x:mx,y:my,vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:Math.random()*3+1,col:cl[Math.floor(Math.random()*cl.length)],life:1,fade:.022});}
-    });
-  },60);
-  pPs=[];drawParticles();
-}
-window.uPart=()=>{pCnt=+document.getElementById('pcsl').value;pSpd=+document.getElementById('pssl').value;document.getElementById('pcv').textContent=pCnt;document.getElementById('psv').textContent=pSpd;}
-window.sPFx=(f,btn)=>{pFx=f;pPs=[];document.querySelectorAll('.fxbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
-function mkP(W,H){
-  const pool={snow:['#8be9fd','#a8d8ea','#fff'],fire:['#ff6b35','#ff9f43','#fbbf24','#ff4757'],magic:['#7c6fff','#ff6b9d','#00e5a0','#4db8ff']};
-  const col=(pool[pFx]||pool.snow)[Math.floor(Math.random()*(pool[pFx]||pool.snow).length)];
-  if(pFx==='snow')return{x:Math.random()*W,y:-8,vx:(Math.random()-.5)*pSpd,vy:Math.random()*pSpd+.5,r:Math.random()*2.5+.5,col,life:1,fade:0};
-  if(pFx==='fire')return{x:W/2+(Math.random()-.5)*50,y:H-8,vx:(Math.random()-.5)*pSpd*1.5,vy:-(Math.random()*pSpd+1),r:Math.random()*3+.8,col,life:1,fade:.02+Math.random()*.018};
-  return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*pSpd,vy:(Math.random()-.5)*pSpd,r:Math.random()*2.5+.5,col,life:1,fade:.006+Math.random()*.008};
-}
-function h2r(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
-function drawParticles(){
-  const cv=document.getElementById('partcv');if(!cv){pAF=null;return;}
-  const ctx=cv.getContext('2d'),W=200,H=155;
-  ctx.fillStyle='rgba(4,8,16,.17)';ctx.fillRect(0,0,W,H);
-  while(pPs.length<pCnt)pPs.push(mkP(W,H));
-  pPs=pPs.filter(p=>{
-    if(pFx==='snow'){p.x+=p.vx;p.y+=p.vy;if(p.y>H+8)return false;}
-    else if(pFx==='fire'){p.x+=p.vx;p.y+=p.vy;p.life-=p.fade;p.r*=.996;if(p.life<=0||p.r<.2)return false;}
-    else{p.x+=p.vx;p.y+=p.vy;p.life-=p.fade;if(p.life<=0)return false;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;}
-    const [ri,gi,bi]=h2r(p.col);
-    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(${ri},${gi},${bi},${p.life})`;
-    ctx.shadowColor=p.col;ctx.shadowBlur=p.r*3;ctx.fill();ctx.shadowBlur=0;return true;
-  });
-  pAF=requestAnimationFrame(drawParticles);
-}
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">💫 粒子數</span><span class="cval" id="pcv">60</span></div><input type="range" min="10" max="200" value="60" id="pcsl" oninput="uPart()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">⚡ 速度</span><span class="cval" id="psv">2</span></div><input type="range" min="1" max="6" value="2" id="pssl" oninput="uPart()"></div>
+    <div class="ctrl"><div class="clbl" style="margin-bottom:5px">特效類型</div><div class="fxbtns"><button class="fxbtn on" onclick="sPFx('snow',this)">❄ 雪</button><button class="fxbtn" onclick="sPFx('fire',this)">🔥 火</button><button class="fxbtn" onclick="sPFx('magic',this)">✨ 魔法</button></div></div>
+    <div style="margin-top:8px;font-size:.72rem;color:var(--muted);font-weight:700">💡 點畫面爆炸！</div></div>
+    <div class="wprev" style="cursor:crosshair"><canvas id="partcv" width="195" height="150"></canvas></div></div>
+    <div class="wcode"><span class="ck">p</span>.pos+=<span class="ck">p</span>.vel*dt; <span class="ck">p</span>.life-=<span class="cn">0.01</span>;</div></div>`;
+  setTimeout(()=>{const cv=document.getElementById('partcv');if(cv)cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(),mx=(e.clientX-r.left)*(195/r.width),my=(e.clientY-r.top)*(150/r.height);const pool={snow:['#8be9fd','#fff'],fire:['#ff6b35','#fbbf24','#ff4757'],magic:['#7c6fff','#ff6b9d','#00e5a0']};const cl=pool[pFx]||pool.magic;for(let i=0;i<22;i++){const a=Math.random()*Math.PI*2,sp=Math.random()*4+1.5;pPs.push({x:mx,y:my,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:Math.random()*3+1,col:cl[cl.length*Math.random()|0],life:1,fade:.022});}});},60);
+  pPs=[];
+  window.uPart=()=>{pCnt=+document.getElementById('pcsl').value;pSpd=+document.getElementById('pssl').value;document.getElementById('pcv').textContent=pCnt;document.getElementById('psv').textContent=pSpd;};
+  window.sPFx=(f,btn)=>{pFx=f;pPs=[];document.querySelectorAll('.fxbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');};
+  function h2r(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+  function mkP(W,H){const pool={snow:['#8be9fd','#a8d8ea','#fff'],fire:['#ff6b35','#ff9f43','#fbbf24','#ff4757'],magic:['#7c6fff','#ff6b9d','#00e5a0','#4db8ff']};const c=(pool[pFx]||pool.snow)[Math.random()*(pool[pFx]||pool.snow).length|0];if(pFx==='snow')return{x:Math.random()*W,y:-8,vx:(Math.random()-.5)*pSpd,vy:Math.random()*pSpd+.5,r:Math.random()*2.5+.5,col:c,life:1,fade:0};if(pFx==='fire')return{x:W/2+(Math.random()-.5)*50,y:H-8,vx:(Math.random()-.5)*pSpd*1.5,vy:-(Math.random()*pSpd+1),r:Math.random()*3+.8,col:c,life:1,fade:.02+Math.random()*.018};return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*pSpd,vy:(Math.random()-.5)*pSpd,r:Math.random()*2.5+.5,col:c,life:1,fade:.006+Math.random()*.008};}
+  (function loop(){const cv=document.getElementById('partcv');if(!cv)return;const ctx=cv.getContext('2d'),W=195,H=150;ctx.fillStyle='rgba(4,8,16,.17)';ctx.fillRect(0,0,W,H);while(pPs.length<pCnt)pPs.push(mkP(W,H));pPs=pPs.filter(p=>{if(pFx==='snow'){p.x+=p.vx;p.y+=p.vy;if(p.y>H+8)return false;}else if(pFx==='fire'){p.x+=p.vx;p.y+=p.vy;p.life-=p.fade;p.r*=.996;if(p.life<=0||p.r<.2)return false;}else{p.x+=p.vx;p.y+=p.vy;p.life-=p.fade;if(p.life<=0)return false;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;}const[ri,gi,bi]=h2r(p.col);ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${ri},${gi},${bi},${p.life})`;ctx.shadowColor=p.col;ctx.shadowBlur=p.r*3;ctx.fill();ctx.shadowBlur=0;return true;});addAF(requestAnimationFrame(loop));})();
+};
 
-// ───────────────────────────────────────────────
-// INTERACTIVE: TOOL SIMULATOR
+// C4 Tool
 window.initTool=()=>{
   const el=document.getElementById('trybox');if(!el)return;
-  const OBJ=[
-    {n:'戰士盔甲',c:'#888',done:false},{n:'法師長袍',c:'#555',done:false},
-    {n:'弓箭手皮甲',c:'#777',done:false},{n:'聖騎士鎧甲',c:'#999',done:false},
-    {n:'忍者裝束',c:'#333',done:false},{n:'海盜大衣',c:'#666',done:false},
-  ];
+  const OBJ=[{n:'戰士盔甲',c:'#888'},{n:'法師長袍',c:'#555'},{n:'弓箭手皮甲',c:'#777'},{n:'聖騎士鎧甲',c:'#999'},{n:'忍者裝束',c:'#333'},{n:'海盜大衣',c:'#666'}];
   let log=[],running=false;
   function render(){
-    el.innerHTML=`<div class="widget">
-      <div class="wbody" style="grid-template-columns:1fr 1fr">
-        <div class="wctrl">
-          <div class="clbl" style="margin-bottom:7px">🔧 選擇要執行的工具：</div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <button onclick="runT('red')" class="btn pri" style="font-size:.76rem;padding:7px 13px;border-radius:8px;justify-content:flex-start;background:#ff5555;color:#fff">🎨 批次換成紅色系</button>
-            <button onclick="runT('gold')" class="btn pri" style="font-size:.76rem;padding:7px 13px;border-radius:8px;justify-content:flex-start;background:#ffcb47;color:#07080f">🏆 批次換成金色系</button>
-            <button onclick="runT('reset')" class="btn sec" style="font-size:.76rem;padding:7px 13px;border-radius:8px;justify-content:flex-start">↺ 重置</button>
-          </div>
-          <div style="margin-top:10px;background:rgba(0,0,0,.32);border-radius:8px;padding:9px;min-height:76px;font-family:var(--mono);font-size:.62rem;line-height:1.75;color:#445">
-            <span style="color:var(--acc)">> 執行日誌</span><br>
-            ${log.join('<br>')}
-          </div>
-        </div>
-        <div class="wprev" style="flex-direction:column;gap:5px;padding:11px;align-items:flex-start;overflow-y:auto">
-          ${OBJ.map(o=>`<div style="display:flex;align-items:center;gap:7px;width:100%">
-            <div style="width:22px;height:22px;border-radius:5px;background:${o.c};border:1.5px solid rgba(255,255,255,.1);flex-shrink:0;transition:background .35s"></div>
-            <span style="font-size:.73rem;font-weight:700">${o.n}</span>
-            ${o.done?'<span style="font-family:var(--mono);font-size:.5rem;color:var(--acc);margin-left:auto">✓</span>':''}
-          </div>`).join('')}
-        </div>
-      </div>
-      <div class="wcode"><span class="cc">// TA 工具（Python）</span><br>
-      <span class="ck">for</span> obj <span class="ck">in</span> all_objects:<br>&nbsp;&nbsp;obj.material.color = new_color</div>
-    </div>`;
-    window.runT=(type)=>{
-      if(running)return;running=true;log=[];OBJ.forEach(o=>o.done=false);
-      const cols={red:['#cc2222','#dd3344','#ff4455','#ee2233','#cc3333','#dd2244'],gold:['#cc8800','#ddaa00','#ffcc11','#eeaa22','#ccbb00','#ddcc11'],reset:['#888','#555','#777','#999','#333','#666']};
-      const tgt=cols[type]||cols.reset,lbl=type==='red'?'紅色系':type==='gold'?'金色系':'原始色';
-      let i=0;log.push(`⚡ 開始批次處理... (${OBJ.length} 個)`);render();
-      const iv=setInterval(()=>{
-        if(i>=OBJ.length){clearInterval(iv);running=false;log.push(`✅ 完成！共 ${OBJ.length} 個`);render();return;}
-        OBJ[i].c=tgt[i];OBJ[i].done=true;log.push(`→ ${OBJ[i].n} → ${lbl}`);if(log.length>6)log.shift();i++;render();
-      },340);
-    };
-  }
+    el.innerHTML=`<div class="widget"><div class="wbody" style="grid-template-columns:1fr 1fr"><div class="wctrl"><div class="clbl" style="margin-bottom:7px">🔧 選擇工具</div><div style="display:flex;flex-direction:column;gap:6px">
+      <button onclick="runT('red')" style="padding:7px 12px;font-size:.75rem;font-weight:900;border-radius:8px;border:none;background:#ff5555;color:#fff;cursor:pointer;text-align:left">🎨 批次換紅色系</button>
+      <button onclick="runT('gold')" style="padding:7px 12px;font-size:.75rem;font-weight:900;border-radius:8px;border:none;background:#ffcb47;color:#07080f;cursor:pointer;text-align:left">🏆 批次換金色系</button>
+      <button onclick="runT('reset')" class="btn sec" style="font-size:.75rem;padding:7px 12px;border-radius:8px">↺ 重置</button></div>
+      <div style="margin-top:9px;background:rgba(0,0,0,.32);border-radius:8px;padding:8px;min-height:70px;font-family:var(--mono);font-size:.6rem;line-height:1.75;color:#445"><span style="color:var(--acc)">> 執行日誌</span><br>${log.join('<br>')}</div></div>
+      <div class="wprev" style="flex-direction:column;gap:5px;padding:10px;align-items:flex-start">${OBJ.map(o=>`<div style="display:flex;align-items:center;gap:7px;width:100%"><div style="width:20px;height:20px;border-radius:4px;background:${o.c};border:1.5px solid rgba(255,255,255,.1);flex-shrink:0;transition:background .35s"></div><span style="font-size:.72rem;font-weight:700">${o.n}</span></div>`).join('')}</div></div>
+      <div class="wcode"><span class="cc">// Python 批次工具</span><br><span class="ck">for</span> obj <span class="ck">in</span> all_objects: obj.color=new_col</div></div>`;
+    window.runT=(type)=>{if(running)return;running=true;log=[];const cols={red:['#cc2222','#dd3344','#ff4455','#ee2233','#cc3333','#dd2244'],gold:['#cc8800','#ddaa00','#ffcc11','#eeaa22','#ccbb00','#ddcc11'],reset:['#888','#555','#777','#999','#333','#666']};const tgt=cols[type]||cols.reset;let i=0;log.push(`⚡ 開始 (${OBJ.length} 個)`);render();const iv=setInterval(()=>{if(i>=OBJ.length){clearInterval(iv);running=false;log.push('✅ 完成');render();return;}OBJ[i].c=tgt[i];log.push(`→ ${OBJ[i].n}`);if(log.length>6)log.shift();i++;render();},340);};}
   render();
-}
+};
 
-// ───────────────────────────────────────────────
-// INTERACTIVE: FINAL
-let fT=0,fSp=1.5,fGl=0.06,fR=180,fG=80,fB=220;
+// C5 Vector dot product
+window.initVector=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">→ 箭頭A 角度</span><span class="cval" id="va">0°</span></div><input type="range" min="0" max="360" value="0" id="vasl" oninput="uVec()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">→ 箭頭B 角度</span><span class="cval" id="vb">45°</span></div><input type="range" min="0" max="360" value="45" id="vbsl" oninput="uVec()"></div>
+    <div style="margin-top:12px;background:rgba(0,0,0,.3);border-radius:8px;padding:10px">
+      <div class="clbl" style="margin-bottom:4px">dot product 結果</div>
+      <div id="dotres" style="font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--acc)">1.00</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:3px">1.0=同向 0=垂直 -1=反向</div>
+    </div></div>
+    <div class="wprev"><canvas id="veccv" width="175" height="150"></canvas></div></div>
+    <div class="wcode"><span class="ck">float</span> brightness=<span class="cf">dot</span>(normal,lightDir);</div></div>`;
+  window.uVec=()=>{
+    const a=+document.getElementById('vasl').value*Math.PI/180,b=+document.getElementById('vbsl').value*Math.PI/180;
+    document.getElementById('va').textContent=+document.getElementById('vasl').value+'°';
+    document.getElementById('vb').textContent=+document.getElementById('vbsl').value+'°';
+    const ax=Math.cos(a),ay=-Math.sin(a),bx=Math.cos(b),by=-Math.sin(b);
+    const dot=ax*bx+ay*by;
+    const dr=document.getElementById('dotres');dr.textContent=dot.toFixed(2);dr.style.color=dot>0?'var(--acc)':dot<0?'var(--red)':'var(--muted)';
+    const cv=document.getElementById('veccv');if(!cv)return;
+    const ctx=cv.getContext('2d'),W=175,H=150,cx=W/2,cy=H/2,len=55;
+    ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(cx,cy,len,0,Math.PI*2);ctx.stroke();
+    const drawArr=(dx,dy,col,lbl)=>{ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+dx*len,cy+dy*len);ctx.stroke();ctx.fillStyle=col;ctx.font='bold 10px Nunito';ctx.fillText(lbl,cx+dx*len+4,cy+dy*len+4);};
+    drawArr(ax,ay,'#4db8ff','A');drawArr(bx,by,'#ff6b9d','B');
+    const ab=Math.max(dot,0);ctx.strokeStyle=`rgba(255,203,71,${ab*.8})`;ctx.lineWidth=ab*4+.5;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+ax*len*ab,cy+ay*len*ab);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='8px "Space Mono"';ctx.fillText(`dot=${dot.toFixed(2)}`,5,H-8);
+  };
+  uVec();
+};
+
+// C6 Lighting
+window.initLighting=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let diff=0.8,spec=0.6,sh=32,la=45;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">☀️ 漫反射</span><span class="cval" id="dv">0.8</span></div><input type="range" min="0" max="100" value="80" id="dsl" oninput="uL()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">✨ 鏡面反射</span><span class="cval" id="sv">0.6</span></div><input type="range" min="0" max="100" value="60" id="ssl2" oninput="uL()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">💎 光澤度</span><span class="cval" id="shv">32</span></div><input type="range" min="1" max="128" value="32" id="shsl" oninput="uL()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🌞 光源角度</span><span class="cval" id="lav">45°</span></div><input type="range" min="0" max="360" value="45" id="lasl" oninput="uL()"></div></div>
+    <div class="wprev"><canvas id="litcv" width="175" height="150"></canvas></div></div>
+    <div class="wcode"><span class="ck">float</span> d=<span class="cf">dot</span>(n,l)*<span class="cn" id="dc2">0.80</span>;<br><span class="ck">float</span> s=<span class="cf">pow</span>(rdotv,<span class="cn" id="shc">32</span>)*<span class="cn" id="sc2">0.60</span>;</div></div>`;
+  window.uL=()=>{diff=+document.getElementById('dsl').value/100;spec=+document.getElementById('ssl2').value/100;sh=+document.getElementById('shsl').value;la=+document.getElementById('lasl').value;document.getElementById('dv').textContent=diff.toFixed(2);document.getElementById('sv').textContent=spec.toFixed(2);document.getElementById('shv').textContent=sh;document.getElementById('lav').textContent=la+'°';document.getElementById('dc2').textContent=diff.toFixed(2);document.getElementById('shc').textContent=sh;document.getElementById('sc2').textContent=spec.toFixed(2);};
+  (function loop(){const cv=document.getElementById('litcv');if(!cv)return;const ctx=cv.getContext('2d'),W=175,H=150;ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);const lr=la*Math.PI/180,lx=Math.cos(lr),ly=-Math.sin(lr),R=60;for(let px=-R;px<=R;px+=2)for(let py=-R;py<=R;py+=2){if(px*px+py*py>R*R)continue;const nx=px/R,ny=py/R,nz=Math.sqrt(Math.max(0,1-nx*nx-ny*ny));const lm=Math.sqrt(lx*lx+ly*ly+.25);const lnx=lx/lm,lny=ly/lm,lnz=.5/lm;const d=Math.max(nx*lnx+ny*lny+nz*lnz,0)*diff;const rv=2*(nx*lnx+ny*lny+nz*lnz);const rx=rv*nx-lnx,ry=rv*ny-lny,rz=rv*nz-lnz;const s2=Math.pow(Math.max(-rz,0),sh)*spec;const br=d+s2+.05;ctx.fillStyle=`rgb(${Math.min((0.2+br)*255,255)|0},${Math.min((0.4+br*.8)*255,255)|0},${Math.min((0.8+br*.2)*255,255)|0})`;ctx.fillRect(W/2+px,H/2+py,2,2);}addAF(requestAnimationFrame(loop));})();
+};
+
+// C7 UV pattern
+window.initUV=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let uvS=4,uvM='checker';
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">🔢 縮放</span><span class="cval" id="uvs">4</span></div><input type="range" min="1" max="16" value="4" id="uvssl" oninput="uUV()"></div>
+    <div class="ctrl"><div class="clbl" style="margin-bottom:5px">圖案</div><div class="fxbtns">
+      <button class="fxbtn on" onclick="sUV('checker',this)">棋盤</button>
+      <button class="fxbtn" onclick="sUV('stripe',this)">條紋</button>
+      <button class="fxbtn" onclick="sUV('uv',this)">UV圖</button>
+      <button class="fxbtn" onclick="sUV('circle',this)">圓環</button>
+    </div></div></div>
+    <div class="wprev"><canvas id="uvcv" width="175" height="150"></canvas></div></div>
+    <div class="wcode"><span class="ck">vec2</span> uv=fragCoord/<span class="cf">iRes</span>.xy*<span class="cn" id="uvsc">4.0</span>;<br><span class="ck">float</span> v=<span class="cf">mod</span>(<span class="cf">floor</span>(uv.x)+<span class="cf">floor</span>(uv.y),<span class="cn">2.</span>);</div></div>`;
+  window.sUV=(m,btn)=>{uvM=m;document.querySelectorAll('#trybox .fxbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');uUV();};
+  window.uUV=()=>{uvS=+document.getElementById('uvssl').value;document.getElementById('uvs').textContent=uvS;document.getElementById('uvsc').textContent=uvS+'.0';const cv=document.getElementById('uvcv');if(!cv)return;const ctx=cv.getContext('2d'),W=175,H=150;ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);for(let x=0;x<W;x++)for(let y=0;y<H;y++){const u=(x/W)*uvS,v=(1-y/H)*uvS;let r=0,g=0,b=0;if(uvM==='checker'){const c=(Math.floor(u)+Math.floor(v))%2;r=g=b=c?210:30;}else if(uvM==='stripe'){const c=(Math.floor(u))%2;r=g=b=c?210:30;}else if(uvM==='uv'){r=x/W*255;g=y/H*255;b=128;}else{const du=((u%1)-.5)*2,dv=((v%1)-.5)*2,d=Math.sqrt(du*du+dv*dv);const c=(Math.floor(d*2))%2;r=g=b=c?200:40;}ctx.fillStyle=`rgb(${r|0},${g|0},${b|0})`;ctx.fillRect(x,y,1,1);}};
+  uUV();
+};
+
+// C8 Noise
+window.initNoise=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let nS=4,nO=3,nM='gray';
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">🔭 縮放</span><span class="cval" id="nscv">4</span></div><input type="range" min="1" max="12" value="4" id="nscsl" oninput="uN()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">📚 層數(Octave)</span><span class="cval" id="nocv">3</span></div><input type="range" min="1" max="6" value="3" id="nocsl" oninput="uN()"></div>
+    <div class="ctrl"><div class="clbl" style="margin-bottom:5px">樣式</div><div class="fxbtns">
+      <button class="fxbtn on" onclick="sNM('gray',this)">灰階</button>
+      <button class="fxbtn" onclick="sNM('terrain',this)">地形</button>
+      <button class="fxbtn" onclick="sNM('cloud',this)">雲朵</button>
+      <button class="fxbtn" onclick="sNM('marble',this)">大理石</button>
+    </div></div></div>
+    <div class="wprev"><canvas id="noisecv" width="175" height="150"></canvas></div></div>
+    <div class="wcode"><span class="ck">for</span>(int i=0;i&lt;<span class="cn" id="noccode">3</span>;i++){n+=<span class="cf">noise</span>(p)*amp;p*=<span class="cn">2.</span>;amp*=<span class="cn">.5</span>;}</div></div>`;
+  window.sNM=(m,btn)=>{nM=m;document.querySelectorAll('#trybox .fxbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');uN();};
+  window.uN=()=>{nS=+document.getElementById('nscsl').value;nO=+document.getElementById('nocsl').value;document.getElementById('nscv').textContent=nS;document.getElementById('nocv').textContent=nO;document.getElementById('noccode').textContent=nO;const cv=document.getElementById('noisecv');if(!cv)return;const ctx=cv.getContext('2d'),W=175,H=150,id=ctx.createImageData(W,H);for(let x=0;x<W;x++)for(let y=0;y<H;y++){const n=fbm(x/W*nS,y/H*nS,nO);const i2=(y*W+x)*4;if(nM==='gray'){id.data[i2]=id.data[i2+1]=id.data[i2+2]=n*255|0;}else if(nM==='terrain'){if(n<.3){id.data[i2]=20;id.data[i2+1]=60;id.data[i2+2]=140;}else if(n<.5){id.data[i2]=80;id.data[i2+1]=160;id.data[i2+2]=80;}else if(n<.75){id.data[i2]=120;id.data[i2+1]=90;id.data[i2+2]=60;}else{id.data[i2]=id.data[i2+1]=id.data[i2+2]=220;}}else if(nM==='cloud'){const c=Math.max(0,n-.3)/.7;id.data[i2]=id.data[i2+1]=id.data[i2+2]=(200+c*55)|0;}else{const marble=Math.sin(x/W*8+n*6)*.5+.5;id.data[i2]=id.data[i2+1]=(marble*200+30)|0;id.data[i2+2]=(marble*180+40)|0;}id.data[i2+3]=255;}ctx.putImageData(id,0,0);};
+  uN();
+};
+
+// C9 Matrix
+window.initMatrix=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let mA=0,mSx=1,mSy=1;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">🔄 旋轉角度</span><span class="cval" id="mav">0°</span></div><input type="range" min="0" max="360" value="0" id="masl" oninput="uM()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">↔ 縮放 X</span><span class="cval" id="msx">1.0</span></div><input type="range" min="10" max="200" value="100" id="msxsl" oninput="uM()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">↕ 縮放 Y</span><span class="cval" id="msy">1.0</span></div><input type="range" min="10" max="200" value="100" id="msysl" oninput="uM()"></div>
+    <div style="margin-top:10px;background:rgba(0,0,0,.3);border-radius:6px;padding:8px;font-family:var(--mono);font-size:.6rem;color:#888;line-height:1.8">mat = [<br>&nbsp;<span class="cn" id="m00">1.00</span>,<span class="cn" id="m01">0.00</span>,<br>&nbsp;<span class="cn" id="m10">0.00</span>,<span class="cn" id="m11">1.00</span><br>]</div></div>
+    <div class="wprev"><canvas id="matcv" width="175" height="150"></canvas></div></div>
+    <div class="wcode"><span class="ck">mat2</span> r=<span class="ck">mat2</span>(<span class="cf">cos</span>(a),<span class="cf">-sin</span>(a),<span class="cf">sin</span>(a),<span class="cf">cos</span>(a));</div></div>`;
+  window.uM=()=>{mA=+document.getElementById('masl').value*Math.PI/180;mSx=+document.getElementById('msxsl').value/100;mSy=+document.getElementById('msysl').value/100;document.getElementById('mav').textContent=+document.getElementById('masl').value+'°';document.getElementById('msx').textContent=mSx.toFixed(1);document.getElementById('msy').textContent=mSy.toFixed(1);const ca=Math.cos(mA),sa=Math.sin(mA);document.getElementById('m00').textContent=(ca*mSx).toFixed(2);document.getElementById('m01').textContent=(-sa*mSx).toFixed(2);document.getElementById('m10').textContent=(sa*mSy).toFixed(2);document.getElementById('m11').textContent=(ca*mSy).toFixed(2);const cv=document.getElementById('matcv');if(!cv)return;const ctx=cv.getContext('2d'),W=175,H=150,cx=W/2,cy=H/2;ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;for(let i=-4;i<=4;i++){ctx.beginPath();ctx.moveTo(cx+i*20,0);ctx.lineTo(cx+i*20,H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,cy+i*16);ctx.lineTo(W,cy+i*16);ctx.stroke();}const pts=[[-40,-30],[40,-30],[40,30],[-40,30]];ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=1;ctx.beginPath();pts.forEach(([x,y],i)=>{i===0?ctx.moveTo(cx+x,cy+y):ctx.lineTo(cx+x,cy+y);});ctx.closePath();ctx.stroke();ctx.strokeStyle='var(--acc)';ctx.lineWidth=2;ctx.beginPath();pts.forEach(([x,y],i)=>{const ca=Math.cos(mA),sa=Math.sin(mA),nx=(ca*x-sa*y)*mSx,ny=(sa*x+ca*y)*mSy;i===0?ctx.moveTo(cx+nx,cy+ny):ctx.lineTo(cx+nx,cy+ny);});ctx.closePath();ctx.stroke();};
+  uM();
+};
+
+// C10 Procedural city
+window.initProcedural=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let seed=42,density=0.7,hMax=80;
+  function drawCity(){const cv=document.getElementById('proccv');if(!cv)return;const ctx=cv.getContext('2d'),W=195,H=150;ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);const sky=ctx.createLinearGradient(0,0,0,H*.6);sky.addColorStop(0,'#0a0a1e');sky.addColorStop(1,'#1a1040');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H*.8);const bW=10,gap=3,cols=Math.floor(W/(bW+gap));for(let i=0;i<cols;i++){const r=(Math.sin((seed+i)*9301+49297)*.5+.5);if(r>density)continue;const h=(Math.sin((seed+i)*6731+7351)*.5+.5)*hMax;const bH=h/hMax*(H*.62);const x=i*(bW+gap);const dk=20+(r*40)|0;ctx.fillStyle=`rgb(${dk},${dk},${dk+15})`;ctx.fillRect(x,H-bH,bW,bH);for(let wy=H-bH+4;wy<H-4;wy+=7)for(let wx=x+2;wx<x+bW-2;wx+=4)if(Math.sin((seed+i*10+wy+wx)*234.5)>.3){ctx.fillStyle=`rgba(255,220,100,${.3+Math.random()*.3})`;ctx.fillRect(wx,wy,2,3);}}ctx.fillStyle='rgba(255,203,71,.15)';ctx.font='8px "Space Mono"';ctx.fillText(`seed:${seed} density:${(density*100|0)}%`,4,H-5);}
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">🏙️ 建築密度</span><span class="cval" id="pdv">70%</span></div><input type="range" min="10" max="100" value="70" id="pdsl" oninput="uPrc()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🏢 最大高度</span><span class="cval" id="phv">80m</span></div><input type="range" min="20" max="150" value="80" id="phsl" oninput="uPrc()"></div>
+    <button onclick="reSeed()" class="btn sec" style="font-size:.75rem;padding:6px 14px;border-radius:8px;margin-top:8px">🎲 重新生成</button></div>
+    <div class="wprev"><canvas id="proccv" width="195" height="150"></canvas></div></div>
+    <div class="wcode">h=<span class="cf">rand</span>(seed+i)*(<span class="cn" id="hmcode">80</span>-15)+15;</div></div>`;
+  window.uPrc=()=>{density=+document.getElementById('pdsl').value/100;hMax=+document.getElementById('phsl').value;document.getElementById('pdv').textContent=(density*100|0)+'%';document.getElementById('phv').textContent=hMax+'m';document.getElementById('hmcode').textContent=hMax;drawCity();};
+  window.reSeed=()=>{seed=Math.random()*10000|0;drawCity();};
+  drawCity();
+};
+
+// C11 L-System
+window.initLSystem=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let depth=4,angle=25;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">🌿 遞迴深度</span><span class="cval" id="ldv">4</span></div><input type="range" min="1" max="6" value="4" id="ldsl" oninput="uLS()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">📐 分支角度</span><span class="cval" id="lav2">25°</span></div><input type="range" min="5" max="60" value="25" id="lasl2" oninput="uLS()"></div>
+    <div style="margin-top:8px;font-size:.7rem;color:var(--muted);font-weight:700">規則：F → F[+F]F[-F]F</div></div>
+    <div class="wprev"><canvas id="lscv" width="195" height="150"></canvas></div></div>
+    <div class="wcode"><span class="cn">"F"</span> → <span class="cn">"F[+F]F[-F]F"</span></div></div>`;
+  function expand(s,d){if(d===0)return s;let r='';for(const c of s){if(c==='F')r+=expand('F[+F]F[-F]F',d-1);else r+=c;}return r;}
+  function drawLS(){const cv=document.getElementById('lscv');if(!cv)return;const ctx=cv.getContext('2d'),W=195,H=150;ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);const str=expand('F',Math.min(depth,5));let x=W/2,y=H-8,a=-Math.PI/2,len=H*.58/Math.pow(3,depth),stack=[];ctx.strokeStyle='var(--acc)';ctx.lineWidth=Math.max(.5,2-depth*.3);for(const c of str){if(c==='F'){const nx=x+Math.cos(a)*len,ny=y+Math.sin(a)*len;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(nx,ny);ctx.stroke();x=nx;y=ny;}else if(c==='+')a+=angle*Math.PI/180;else if(c==='-')a-=angle*Math.PI/180;else if(c==='[')stack.push({x,y,a});else if(c===']'){const s=stack.pop();x=s.x;y=s.y;a=s.a;}}}
+  window.uLS=()=>{depth=+document.getElementById('ldsl').value;angle=+document.getElementById('lasl2').value;document.getElementById('ldv').textContent=depth;document.getElementById('lav2').textContent=angle+'°';drawLS();};
+  drawLS();
+};
+
+// C12 Terrain heightmap
+window.initTerrain=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let tS=3,tO=4,tSea=0.35;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">🔭 縮放</span><span class="cval" id="tsv">3</span></div><input type="range" min="1" max="8" value="3" id="tssl" oninput="uT()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">📚 細節層數</span><span class="cval" id="tov">4</span></div><input type="range" min="1" max="6" value="4" id="tosl" oninput="uT()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🌊 海平面</span><span class="cval" id="tsev">35%</span></div><input type="range" min="0" max="70" value="35" id="tsesl" oninput="uT()"></div></div>
+    <div class="wprev"><canvas id="terrcv" width="195" height="150"></canvas></div></div>
+    <div class="wcode">h=<span class="cf">fbm</span>(uv*<span class="cn" id="tscode">3.0</span>);</div></div>`;
+  window.uT=()=>{tS=+document.getElementById('tssl').value;tO=+document.getElementById('tosl').value;tSea=+document.getElementById('tsesl').value/100;document.getElementById('tsv').textContent=tS;document.getElementById('tov').textContent=tO;document.getElementById('tsev').textContent=(tSea*100|0)+'%';document.getElementById('tscode').textContent=tS+'.0';const cv=document.getElementById('terrcv');if(!cv)return;const ctx=cv.getContext('2d'),W=195,H=150,id=ctx.createImageData(W,H);for(let x=0;x<W;x++)for(let y=0;y<H;y++){const h=fbm(x/W*tS,y/H*tS,tO);const i2=(y*W+x)*4;if(h<tSea){id.data[i2]=20;id.data[i2+1]=60;id.data[i2+2]=(120+h/tSea*80)|0;}else if(h<tSea+.08){id.data[i2]=210;id.data[i2+1]=190;id.data[i2+2]=150;}else if(h<tSea+.35){id.data[i2]=40+(h-tSea)*200|0;id.data[i2+1]=100+(h-tSea)*120|0;id.data[i2+2]=40;}else if(h<tSea+.55){id.data[i2]=100;id.data[i2+1]=80;id.data[i2+2]=60;}else{id.data[i2]=id.data[i2+1]=id.data[i2+2]=(200+(h-.9)*200)|0;}id.data[i2+3]=255;}ctx.putImageData(id,0,0);};
+  uT();
+};
+
+// C13 SDF
+window.initSDF=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let sR=0.3,sSm=0.02,sMode='circle';
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">⭕ 半徑</span><span class="cval" id="srv">0.30</span></div><input type="range" min="5" max="80" value="30" id="srsl" oninput="uSDF()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">✨ 邊緣柔化</span><span class="cval" id="ssv">0.02</span></div><input type="range" min="1" max="20" value="2" id="sssl" oninput="uSDF()"></div>
+    <div class="ctrl"><div class="clbl" style="margin-bottom:5px">形狀</div><div class="fxbtns">
+      <button class="fxbtn on" onclick="sSDF('circle',this)">⭕ 圓</button>
+      <button class="fxbtn" onclick="sSDF('box',this)">⬜ 方</button>
+      <button class="fxbtn" onclick="sSDF('merge',this)">∞ 合併</button>
+    </div></div></div>
+    <div class="wprev"><canvas id="sdfcv" width="195" height="150"></canvas></div></div>
+    <div class="wcode"><span class="ck">float</span> d=<span class="cf">length</span>(p)-<span class="cn" id="srcode">0.30</span>;<br><span class="ck">float</span> c=<span class="cf">smoothstep</span>(<span class="cn" id="sscode">0.02</span>,<span class="cn">-0.01</span>,d);</div></div>`;
+  window.sSDF=(m,btn)=>{sMode=m;document.querySelectorAll('#trybox .fxbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');uSDF();};
+  window.uSDF=()=>{sR=+document.getElementById('srsl').value/100;sSm=+document.getElementById('sssl').value/100;document.getElementById('srv').textContent=sR.toFixed(2);document.getElementById('ssv').textContent=sSm.toFixed(2);document.getElementById('srcode').textContent=sR.toFixed(2);document.getElementById('sscode').textContent=sSm.toFixed(2);const cv=document.getElementById('sdfcv');if(!cv)return;const ctx=cv.getContext('2d'),W=195,H=150,id=ctx.createImageData(W,H);const ar=W/H;const ss=(v,a,b)=>Math.max(0,Math.min(1,(v-a)/(b-a)));for(let x=0;x<W;x++)for(let y=0;y<H;y++){const px=(x/W-.5)*ar*2,py=(1-y/H-.5)*2;let d;if(sMode==='circle')d=Math.sqrt(px*px+py*py)-sR;else if(sMode==='box'){const qx=Math.abs(px)-sR*.8,qy=Math.abs(py)-sR*.8;d=Math.sqrt(Math.max(qx,0)**2+Math.max(qy,0)**2)+Math.min(Math.max(qx,qy),0);}else{const d1=Math.sqrt((px-.25)**2+py**2)-sR*.7,d2=Math.sqrt((px+.25)**2+py**2)-sR*.7,k=sSm*4+.02;d=-(Math.log(Math.exp(-d1/k)+Math.exp(-d2/k))*k);}const fill=ss(d,sSm,-0.01),glow=Math.min(.035/Math.abs(d+.001),1);const i2=(y*W+x)*4;id.data[i2]=(fill*.3+glow*.4)*255|0;id.data[i2+1]=(fill*.7+glow*.6)*255|0;id.data[i2+2]=(fill+glow*.8)*255|0;id.data[i2+3]=255;}ctx.putImageData(id,0,0);};
+  uSDF();
+};
+
+// C14 Procedural animation (walking stickman)
+window.initProcAnim=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let paSpd=2,paStr=30,paBob=5,paT=0;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">🚶 速度</span><span class="cval" id="paspv">2</span></div><input type="range" min="1" max="8" value="2" id="paspsl" oninput="uPA()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">👣 步幅</span><span class="cval" id="pastv">30°</span></div><input type="range" min="10" max="60" value="30" id="pastsl" oninput="uPA()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">⬆ 上下抖動</span><span class="cval" id="pabv">5</span></div><input type="range" min="0" max="20" value="5" id="pabsl" oninput="uPA()"></div>
+    <div style="margin-top:8px;font-size:.7rem;color:var(--muted);font-weight:700">左腳=sin(t) 右腳=sin(t+π)</div></div>
+    <div class="wprev"><canvas id="panimcv" width="195" height="150"></canvas></div></div>
+    <div class="wcode">leftLeg=<span class="cf">sin</span>(t)*stride;<br>rightLeg=<span class="cf">sin</span>(t+PI)*stride;</div></div>`;
+  window.uPA=()=>{paSpd=+document.getElementById('paspsl').value;paStr=+document.getElementById('pastsl').value;paBob=+document.getElementById('pabsl').value;document.getElementById('paspv').textContent=paSpd;document.getElementById('pastv').textContent=paStr+'°';document.getElementById('pabv').textContent=paBob;};
+  (function loop(){const cv=document.getElementById('panimcv');if(!cv)return;paT+=.02*paSpd;const ctx=cv.getContext('2d'),W=195,H=150;ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);for(let fi=0;fi<3;fi++){const ox=40+fi*58;const bob=Math.abs(Math.sin(paT+fi*1.1))*paBob;const ll=Math.sin(paT+fi*1.1)*paStr*Math.PI/180,rl=Math.sin(paT+fi*1.1+Math.PI)*paStr*Math.PI/180;const la=Math.sin(paT+fi*1.1+Math.PI)*paStr*Math.PI/360,ra=Math.sin(paT+fi*1.1)*paStr*Math.PI/360;const cy=80-bob;ctx.strokeStyle='#4db8ff';ctx.lineWidth=3;ctx.fillStyle='#4db8ff';ctx.beginPath();ctx.arc(ox,cy-22,9,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(ox,cy-13);ctx.lineTo(ox,cy+10);ctx.stroke();ctx.beginPath();ctx.moveTo(ox,cy-5);ctx.lineTo(ox+Math.sin(la)*20,cy+Math.cos(la)*20);ctx.stroke();ctx.beginPath();ctx.moveTo(ox,cy-5);ctx.lineTo(ox+Math.sin(ra)*20,cy+Math.cos(ra)*20);ctx.stroke();ctx.beginPath();ctx.moveTo(ox,cy+10);ctx.lineTo(ox+Math.sin(ll)*28,cy+10+Math.cos(ll)*28);ctx.stroke();ctx.beginPath();ctx.moveTo(ox,cy+10);ctx.lineTo(ox+Math.sin(rl)*28,cy+10+Math.cos(rl)*28);ctx.stroke();}ctx.fillStyle='rgba(255,255,255,.15)';ctx.font='8px "Space Mono"';ctx.fillText(`t=${paT.toFixed(1)}`,5,H-8);addAF(requestAnimationFrame(loop));})();
+};
+
+// C15 IK Rigging
+window.initRigging=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let tx=150,ty=80,segLen=55;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div style="font-size:.78rem;font-weight:800;margin-bottom:10px">🦴 IK 骨架模擬</div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🦵 臂段長度</span><span class="cval" id="ikav">55</span></div><input type="range" min="20" max="80" value="55" id="ikasl" oninput="uIK()"></div>
+    <div style="margin-top:10px;background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-family:var(--mono);font-size:.65rem;line-height:1.8;color:var(--acc)" id="ik-info">拖動右側圓點！</div>
+    <div style="margin-top:8px;font-size:.7rem;color:var(--muted);font-weight:700">💡 在預覽區拖動</div></div>
+    <div class="wprev" style="cursor:grab"><canvas id="ikcv" width="195" height="150"></canvas></div></div>
+    <div class="wcode"><span class="ck">float</span> a=<span class="cf">acos</span>(cosAngle);<br>elbow=shoulder+<span class="cf">rot</span>(a)*segLen;</div></div>`;
+  window.uIK=()=>{segLen=+document.getElementById('ikasl').value;document.getElementById('ikav').textContent=segLen;drawIK();};
+  function drawIK(){const cv=document.getElementById('ikcv');if(!cv)return;const ctx=cv.getContext('2d'),W=195,H=150;ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);const ox=30,oy=H/2,l1=segLen,l2=segLen;const dx=tx-ox,dy=ty-oy,dist=Math.sqrt(dx*dx+dy*dy),maxR=l1+l2;const cl=Math.min(dist,maxR*.99),cdx=dx/dist*cl,cdy=dy/dist*cl,ctX=ox+cdx,ctY=oy+cdy;const cosA=(l1*l1+cl*cl-l2*l2)/(2*l1*cl),a=Math.acos(Math.min(Math.max(cosA,-1),1));const bA=Math.atan2(ctY-oy,ctX-ox),eA=bA-a;const ex=ox+Math.cos(eA)*l1,ey=oy+Math.sin(eA)*l1;ctx.strokeStyle='rgba(77,184,255,.2)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(ox,oy,maxR,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#4db8ff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ex,ey);ctx.stroke();ctx.strokeStyle='#00e5a0';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ctX,ctY);ctx.stroke();[[ox,oy,'#4db8ff'],[ex,ey,'#4db8ff'],[ctX,ctY,'#00e5a0']].forEach(([x,y,c])=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();});ctx.strokeStyle='rgba(255,107,157,.5)';ctx.setLineDash([3,3]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(ctX,ctY);ctx.lineTo(tx,ty);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(255,107,157,.8)';ctx.beginPath();ctx.arc(tx,ty,7,0,Math.PI*2);ctx.fill();document.getElementById('ik-info').textContent=`上臂角: ${(eA*180/Math.PI).toFixed(0)}°\n前臂角: ${(Math.atan2(ctY-ey,ctX-ex)*180/Math.PI).toFixed(0)}°\n到目標: ${dist.toFixed(0)}px`;}
+  const cv=document.getElementById('ikcv');if(cv){const move=e=>{const r=cv.getBoundingClientRect(),t=e.touches?e.touches[0]:e;tx=(t.clientX-r.left)*(195/r.width);ty=(t.clientY-r.top)*(150/r.height);drawIK();};cv.addEventListener('mousemove',move);cv.addEventListener('touchmove',e=>{e.preventDefault();move(e);},{passive:false});}
+  drawIK();
+};
+
+// C16 GPU performance sim
+window.initGPU=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let dc=100,lod=0,cull=false,inst=false;
+  function fps(){let b=60;b-=dc*.08;if(lod===0)b-=12;if(lod===1)b-=6;if(cull)b+=14;if(inst)b+=dc*.07;return Math.max(5,Math.min(165,b|0));}
+  function render(){const f=fps();el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">📦 Draw Calls</span><span class="cval" id="dcv">${dc}</span></div><input type="range" min="1" max="500" value="${dc}" id="dcsl" oninput="uGPU()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🏔️ LOD 等級</span><span class="cval" id="lodv">${['無','2層','3層','4層'][lod]}</span></div><input type="range" min="0" max="3" value="${lod}" step="1" id="lodsl" oninput="uGPU()"></div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+      <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;font-weight:800;cursor:pointer"><input type="checkbox" ${cull?'checked':''} onchange="tCull(this)"> Frustum Culling</label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;font-weight:800;cursor:pointer"><input type="checkbox" ${inst?'checked':''} onchange="tInst(this)"> GPU Instancing</label>
+    </div></div>
+    <div class="wprev" style="flex-direction:column;gap:8px">
+      <div style="font-family:var(--mono);font-size:2.2rem;font-weight:700;color:${f>50?'var(--acc)':f>25?'var(--yellow)':'var(--red)'}">${f} FPS</div>
+      <div style="width:160px;height:8px;background:var(--border);border-radius:100px;overflow:hidden"><div style="width:${Math.min(100,f/60*100)}%;height:100%;background:${f>50?'var(--acc)':f>25?'var(--yellow)':'var(--red)'};border-radius:100px"></div></div>
+      <div style="font-size:.68rem;color:var(--muted);font-weight:700">DC: ${inst?'1(Instanced)':dc} | LOD: ${['無','2層','3層','4層'][lod]}</div>
+    </div></div>
+    <div class="wcode">drawCalls → <span class="cn">1</span> (<span class="cf">GPU Instancing</span>);</div></div>`;
+    window.uGPU=()=>{dc=+document.getElementById('dcsl').value;lod=+document.getElementById('lodsl').value;document.getElementById('dcv').textContent=dc;document.getElementById('lodv').textContent=['無','2層','3層','4層'][lod];render();};
+    window.tCull=(cb)=>{cull=cb.checked;render();};window.tInst=(cb)=>{inst=cb.checked;render();};}
+  render();
+};
+
+// C17 PBR
+window.initPBR=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let pM=0.1,pR=0.5,pBR=64,pBG=128,pBB=192,pT=0;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">🔩 金屬度</span><span class="cval" id="pmv">0.1</span></div><input type="range" min="0" max="100" value="10" id="pmsl" oninput="uPBR()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🪨 粗糙度</span><span class="cval" id="prv">0.5</span></div><input type="range" min="0" max="100" value="50" id="prsl" oninput="uPBR()"></div>
+    <div class="ctrl"><div class="clbl" style="margin-bottom:5px">底色(Albedo)</div><div class="swatches">
+      <div class="sw on" style="background:#4080c0" onclick="sPBR(64,128,192,this)"></div>
+      <div class="sw" style="background:#c06040" onclick="sPBR(192,96,64,this)"></div>
+      <div class="sw" style="background:#c0c030" onclick="sPBR(192,192,48,this)"></div>
+      <div class="sw" style="background:#40c040" onclick="sPBR(64,192,64,this)"></div>
+      <div class="sw" style="background:#e0e0e0" onclick="sPBR(224,224,224,this)"></div>
+    </div></div></div>
+    <div class="wprev"><canvas id="pbrcv" width="175" height="150"></canvas></div></div>
+    <div class="wcode">metallic=<span class="cn" id="pmcode">0.1</span>; roughness=<span class="cn" id="prcode">0.5</span>;</div></div>`;
+  window.sPBR=(r,g,b,btn2)=>{pBR=r;pBG=g;pBB=b;document.querySelectorAll('#trybox .sw').forEach(s=>s.classList.remove('on'));btn2.classList.add('on');};
+  window.uPBR=()=>{pM=+document.getElementById('pmsl').value/100;pR=+document.getElementById('prsl').value/100;document.getElementById('pmv').textContent=pM.toFixed(2);document.getElementById('prv').textContent=pR.toFixed(2);document.getElementById('pmcode').textContent=pM.toFixed(2);document.getElementById('prcode').textContent=pR.toFixed(2);};
+  (function loop(){const cv=document.getElementById('pbrcv');if(!cv)return;pT+=.012;const ctx=cv.getContext('2d'),W=175,H=150,id=ctx.createImageData(W,H);const cx=W/2,cy=H/2,R=62;const lx=Math.cos(.8+Math.sin(pT)*.3),ly=.5,lm=Math.sqrt(lx*lx+ly*ly+.25),lnx=lx/lm,lny=ly/lm,lnz=.5/lm;for(let x=0;x<W;x++)for(let y=0;y<H;y++){const px=(x-cx)/R,py=(y-cy)/R;const i2=(y*W+x)*4;if(px*px+py*py>1){id.data[i2]=4;id.data[i2+1]=4;id.data[i2+2]=12;id.data[i2+3]=255;continue;}const nz=Math.sqrt(1-px*px-py*py);const dv=px*lnx+py*lny+nz*lnz;const diff=Math.max(dv,0);const rx=2*dv*px-lnx,ry=2*dv*py-lny,rz=2*dv*nz-lnz;const spec=Math.pow(Math.max(rz,0),Math.max(1,2/Math.max(pR,.01)*.5));const rim=Math.pow(1-nz,.8)*.4;const mf=pBR/255*(1-pM)*.2+pM*.9;const gf=pBG/255*(1-pM)*.2+pM*.7;const bf=pBB/255*(1-pM)*.2+pM*.6;const sT=pM;const br=(pBR/255*diff*(1-sT)+spec*(1-pR)*(1+pBR/255*sT)+rim*pBR/255)*255;const bg=(pBG/255*diff*(1-sT)+spec*(1-pR)*(1+pBG/255*sT)+rim*pBG/255)*255;const bb=(pBB/255*diff*(1-sT)+spec*(1-pR)*(1+pBB/255*sT)+rim*pBB/255)*255;id.data[i2]=Math.min(br+10,255);id.data[i2+1]=Math.min(bg+10,255);id.data[i2+2]=Math.min(bb+12,255);id.data[i2+3]=255;}ctx.putImageData(id,0,0);addAF(requestAnimationFrame(loop));})();
+};
+
+// C18 Post FX
+window.initPostFX=()=>{
+  const el=document.getElementById('trybox');if(!el)return;
+  let bloom=0.5,contrast=1.0,warm=0,cool=0;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">✨ Bloom</span><span class="cval" id="blv">0.5</span></div><input type="range" min="0" max="100" value="50" id="blsl" oninput="uPFX()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🎞️ 對比度</span><span class="cval" id="ctv">1.0</span></div><input type="range" min="50" max="200" value="100" id="ctsl" oninput="uPFX()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🔆 暖色調</span><span class="cval" id="wv">0</span></div><input type="range" min="-50" max="50" value="0" id="wsl" oninput="uPFX()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🌊 冷色調</span><span class="cval" id="cv2">0</span></div><input type="range" min="-50" max="50" value="0" id="csl2" oninput="uPFX()"></div></div>
+    <div class="wprev"><canvas id="pfxcv" width="195" height="150"></canvas></div></div>
+    <div class="wcode">col=<span class="cf">tonemap</span>(col*contrast+bloom);</div></div>`;
+  window.uPFX=()=>{bloom=+document.getElementById('blsl').value/100;contrast=+document.getElementById('ctsl').value/100;warm=+document.getElementById('wsl').value/100;cool=+document.getElementById('csl2').value/100;document.getElementById('blv').textContent=bloom.toFixed(2);document.getElementById('ctv').textContent=contrast.toFixed(1);document.getElementById('wv').textContent=+document.getElementById('wsl').value;document.getElementById('cv2').textContent=+document.getElementById('csl2').value;drawPFX();};
+  function drawPFX(){const cv=document.getElementById('pfxcv');if(!cv)return;const ctx=cv.getContext('2d'),W=195,H=150,id=ctx.createImageData(W,H);for(let x=0;x<W;x++)for(let y=0;y<H;y++){const u=x/W,v=1-y/H;const ns=fbm(u*5,v*5,3),sun=Math.max(0,1-Math.sqrt((u-.75)**2+(v-.75)**2)/.25),sky=v*.4+ns*.1;let r=sky*.4+sun*.8,g=sky*.6+sun*.7,b2=sky+sun*.5;if(v<.35){r=ns*.3+.1;g=ns*.5+.2;b2=ns*.1;}r=(r-.5)*contrast+.5;g=(g-.5)*contrast+.5;b2=(b2-.5)*contrast+.5;r+=bloom*sun*.8;g+=bloom*sun*.5;b2+=bloom*sun*.3;r+=warm*.15;g+=warm*.05;b2-=warm*.1;r-=cool*.1;g+=cool*.05;b2+=cool*.2;const i2=(y*W+x)*4;id.data[i2]=Math.min(Math.max(r*255,0),255);id.data[i2+1]=Math.min(Math.max(g*255,0),255);id.data[i2+2]=Math.min(Math.max(b2*255,0),255);id.data[i2+3]=255;}ctx.putImageData(id,0,0);}
+  drawPFX();
+};
+
+// C19 Final composite PBR sphere
 window.initFinal=()=>{
   const el=document.getElementById('trybox');if(!el)return;
-  el.innerHTML=`<div class="widget">
-    <div class="wbody">
-      <div class="wctrl">
-        <div class="ctrl"><div class="crow"><span class="clbl">🔴 R</span><span class="cval" id="frv">180</span></div><input type="range" min="0" max="255" value="180" id="frsl" oninput="uFinal()"></div>
-        <div class="ctrl"><div class="crow"><span class="clbl">🟢 G</span><span class="cval" id="fgv">80</span></div><input type="range" min="0" max="255" value="80" id="fgsl" oninput="uFinal()"></div>
-        <div class="ctrl"><div class="crow"><span class="clbl">🔵 B</span><span class="cval" id="fbv">220</span></div><input type="range" min="0" max="255" value="220" id="fbsl" oninput="uFinal()"></div>
-        <div class="ctrl"><div class="crow"><span class="clbl">〜 呼吸速度</span><span class="cval" id="fspv">1.5</span></div><input type="range" min="1" max="8" value="3" id="fspsl" oninput="uFinal()"></div>
-        <div class="ctrl"><div class="crow"><span class="clbl">✨ 光暈</span><span class="cval" id="fglv">0.06</span></div><input type="range" min="2" max="12" value="6" id="fglsl" oninput="uFinal()"></div>
-      </div>
-      <div class="wprev"><canvas id="fincv" width="200" height="160"></canvas></div>
-    </div>
-    <div class="wcode"><span class="cc">// 整合 Shader</span><br>
-    <span class="ck">vec3</span> col = <span class="cf">vec3</span>(<span class="cn" id="frc">0.71</span>,<span class="cn" id="fgc">0.31</span>,<span class="cn" id="fbc">0.86</span>) * <span class="cf">sin</span>(iTime * <span class="cn" id="fspc">1.5</span>);<br>
-    <span class="ck">float</span> glow = <span class="cn" id="fglc">0.06</span> / dist;</div>
-  </div>`;
-  fT=0;drawFinal();
-}
-window.uFinal=()=>{
-  fR=+document.getElementById('frsl').value;fG=+document.getElementById('fgsl').value;fB=+document.getElementById('fbsl').value;
-  fSp=+document.getElementById('fspsl').value/2;fGl=+document.getElementById('fglsl').value/100;
-  document.getElementById('frv').textContent=fR;document.getElementById('fgv').textContent=fG;document.getElementById('fbv').textContent=fB;
-  document.getElementById('fspv').textContent=fSp.toFixed(1);document.getElementById('fglv').textContent=fGl.toFixed(2);
-  document.getElementById('frc').textContent=(fR/255).toFixed(2);document.getElementById('fgc').textContent=(fG/255).toFixed(2);document.getElementById('fbc').textContent=(fB/255).toFixed(2);
-  document.getElementById('fspc').textContent=fSp.toFixed(1);document.getElementById('fglc').textContent=fGl.toFixed(2);
-}
-function drawFinal(){
-  const cv=document.getElementById('fincv');if(!cv){fAF=null;return;}
-  const ctx=cv.getContext('2d'),W=200,H=160;
-  ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);fT+=.016*fSp;
-  const pulse=Math.sin(fT)*.5+.5;
-  const r=fR*pulse|0,g=fG*pulse|0,b=fB*pulse|0;
-  const bg=ctx.createRadialGradient(100,80,0,100,80,88);
-  bg.addColorStop(0,`rgba(${r},${g},${b},${fGl*8})`);bg.addColorStop(.5,`rgba(${r},${g},${b},${fGl*2})`);bg.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-  const sg=ctx.createRadialGradient(78,62,3,100,80,64);
-  sg.addColorStop(0,'rgba(255,255,255,.85)');sg.addColorStop(.22,`rgb(${r},${g},${b})`);sg.addColorStop(1,`rgb(${r*.1|0},${g*.1|0},${b*.1|0})`);
-  ctx.beginPath();ctx.arc(100,80,63,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
-  ctx.shadowColor=`rgb(${r},${g},${b})`;ctx.shadowBlur=28+pulse*18;
-  ctx.beginPath();ctx.arc(100,80,63,0,Math.PI*2);ctx.strokeStyle=`rgba(${r},${g},${b},${.28+pulse*.3})`;ctx.lineWidth=2;ctx.stroke();ctx.shadowBlur=0;
-  for(let i=0;i<6;i++){
-    const a=fT+i*(Math.PI*2/6),rad=74+Math.sin(fT*1.4+i)*8;
-    const px=100+Math.cos(a)*rad,py=80+Math.sin(a)*rad*.5;
-    ctx.beginPath();ctx.arc(px,py,1.8+pulse*1.4,0,Math.PI*2);
-    ctx.fillStyle=`rgba(${r},${g},${b},${.38+pulse*.48})`;ctx.shadowColor=`rgb(${r},${g},${b})`;ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
-  }
-  ctx.fillStyle='rgba(255,255,255,.14)';ctx.font='8px "Space Mono"';ctx.fillText(`sin=${Math.sin(fT).toFixed(2)}`,6,153);
-  fAF=requestAnimationFrame(drawFinal);
-}
+  let fR=100,fG=140,fB=220,fM=0.3,fRo=0.3,fSp=1.5,fT=0;
+  el.innerHTML=`<div class="widget"><div class="wbody"><div class="wctrl">
+    <div class="ctrl"><div class="crow"><span class="clbl">🔴 R</span><span class="cval" id="frv">100</span></div><input type="range" min="0" max="255" value="100" id="frsl" oninput="uF()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🟢 G</span><span class="cval" id="fgv">140</span></div><input type="range" min="0" max="255" value="140" id="fgsl" oninput="uF()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🔵 B</span><span class="cval" id="fbv">220</span></div><input type="range" min="0" max="255" value="220" id="fbsl" oninput="uF()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">🔩 金屬度</span><span class="cval" id="fmv">0.3</span></div><input type="range" min="0" max="100" value="30" id="fmsl" oninput="uF()"></div>
+    <div class="ctrl"><div class="crow"><span class="clbl">〜 呼吸速度</span><span class="cval" id="fspv">1.5</span></div><input type="range" min="1" max="8" value="3" id="fspsl" oninput="uF()"></div></div>
+    <div class="wprev"><canvas id="fincv" width="195" height="165"></canvas></div></div>
+    <div class="wcode"><span class="cc">// 整合所有技術</span><br>col=PBR(metal,rough)*<span class="cf">sin</span>(t)+<span class="cf">noise</span>(uv)+bloom;</div></div>`;
+  window.uF=()=>{fR=+document.getElementById('frsl').value;fG=+document.getElementById('fgsl').value;fB=+document.getElementById('fbsl').value;fM=+document.getElementById('fmsl').value/100;fSp=+document.getElementById('fspsl').value/2;document.getElementById('frv').textContent=fR;document.getElementById('fgv').textContent=fG;document.getElementById('fbv').textContent=fB;document.getElementById('fmv').textContent=fM.toFixed(2);document.getElementById('fspv').textContent=fSp.toFixed(1);};
+  (function loop(){const cv=document.getElementById('fincv');if(!cv)return;fT+=.016*fSp;const ctx=cv.getContext('2d'),W=195,H=165,id=ctx.createImageData(W,H);const pulse=Math.sin(fT)*.5+.5;const cx=W/2,cy=H/2,R=68;const lx=Math.cos(fT*.25),ly=.5,lm=Math.sqrt(lx*lx+ly*ly+.25),lnx=lx/lm,lny=ly/lm,lnz=.5/lm;for(let x=0;x<W;x++)for(let y=0;y<H;y++){const px=(x-cx)/R,py=(y-cy)/R;const i2=(y*W+x)*4;if(px*px+py*py>1){const g=.015/Math.sqrt(Math.max(px*px+py*py-.9,.001))*pulse;id.data[i2]=Math.min(fR/3*g,255);id.data[i2+1]=Math.min(fG/3*g,255);id.data[i2+2]=Math.min(fB/3*g*1.4,255);id.data[i2+3]=255;continue;}const nz=Math.sqrt(1-px*px-py*py);const nv=fbm(px*3+fT*.1,py*3+fT*.08,3)*.3+.7;const dv=px*lnx+py*lny+nz*lnz;const diff=Math.max(dv,0)*nv;const spec=Math.pow(Math.max(2*dv*nz-lnz,0),32)*(1-fM*.5);const rim=Math.pow(1-nz,.8)*.3*pulse;const bR=(fR/255*diff+spec+rim)*255+8,bG=(fG/255*diff+spec*.9+rim)*255+8,bB=(fB/255*diff+spec+rim*1.2)*255+12;id.data[i2]=Math.min(bR,255);id.data[i2+1]=Math.min(bG,255);id.data[i2+2]=Math.min(bB,255);id.data[i2+3]=255;}ctx.putImageData(id,0,0);ctx.fillStyle='rgba(255,255,255,.12)';ctx.font='7px "Space Mono"';ctx.fillText(`sin=${Math.sin(fT).toFixed(2)} metal=${fM.toFixed(2)}`,5,H-5);addAF(requestAnimationFrame(loop));})();
+};
 
-// ───────────────────────────────────────────────
-// CONFETTI + TOAST
-function confetti(col){
-  const cs=[col,'#ffcb47','#ffffff','#7c6fff','#ff6b9d'];
-  for(let i=0;i<65;i++){
-    const e=document.createElement('div');e.className='cf-p';
-    e.style.cssText=`left:${Math.random()*100}vw;top:-10px;background:${cs[i%cs.length]};animation-duration:${1.4+Math.random()*2.2}s;animation-delay:${Math.random()*.9}s;transform:rotate(${Math.random()*360}deg);width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;`;
-    document.body.appendChild(e);setTimeout(()=>e.remove(),4000);
-  }
-}
+// ─── UTILS ───
+function confetti(col){const cs=[col,'#ffcb47','#ffffff','#7c6fff','#ff6b9d'];for(let i=0;i<65;i++){const e=document.createElement('div');e.className='cf-p';e.style.cssText=`left:${Math.random()*100}vw;top:-10px;background:${cs[i%cs.length]};animation-duration:${1.4+Math.random()*2.2}s;animation-delay:${Math.random()*.9}s;transform:rotate(${Math.random()*360}deg);width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;`;document.body.appendChild(e);setTimeout(()=>e.remove(),4000);}}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
 
-// ───────────────────────────────────────────────
-// INIT
 renderMap();
 </script>
 </body>
