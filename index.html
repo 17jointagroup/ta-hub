@@ -64,6 +64,24 @@ header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:
 .ch-btn.active{background:var(--surf2);color:var(--txt);}
 .ch-btn.active.ch-ta{color:#00e5a0;}
 .ch-btn.active.ch-art{color:#f7c948;}
+.ch-btn.active.ch-show{color:#c084fc;}
+/* Showcase channel */
+.card.is-showcase{border-left-color:rgba(192,132,252,.4);}
+.card.is-showcase:hover{border-left-color:#c084fc;}
+.show-badge{background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.3);border-radius:2px;padding:1px 6px;font-size:9px;font-family:"Space Mono",monospace;flex-shrink:0;}
+.card-role{font-size:10px;color:var(--muted);font-family:"Space Mono",monospace;margin-top:2px;letter-spacing:.04em;}
+.card-links{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.card-link{font-size:10px;color:var(--acc);text-decoration:none;border:1px solid rgba(0,229,160,.25);padding:2px 8px;border-radius:2px;font-family:"Space Mono",monospace;transition:all .15s;}
+.card-link:hover{background:rgba(0,229,160,.08);border-color:var(--acc);}
+.card-link.yt{color:#ff6b6b;border-color:rgba(255,107,107,.25);}
+.card-link.yt:hover{background:rgba(255,107,107,.08);border-color:#ff6b6b;}
+.card-link.as{color:#f7c948;border-color:rgba(247,201,72,.25);}
+.card-link.as:hover{background:rgba(247,201,72,.08);border-color:#f7c948;}
+.card-link.gh{color:#8be9fd;border-color:rgba(139,233,253,.25);}
+.card-link.gh:hover{background:rgba(139,233,253,.08);border-color:#8be9fd;}
+.card-link.web{color:#c084fc;border-color:rgba(192,132,252,.25);}
+.card-link.web:hover{background:rgba(192,132,252,.08);border-color:#c084fc;}
+.spec-pill{display:inline-block;font-size:9px;padding:1px 6px;border-radius:2px;font-family:"Space Mono",monospace;margin-right:3px;}
 .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:.15em;color:var(--acc);display:flex;align-items:center;gap:8px;}
 .logo-dot{width:8px;height:8px;background:var(--acc);border-radius:50%;animation:pulse 2s ease-in-out infinite;}
 .live-badge{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);border:1px solid var(--bdr);padding:3px 8px;border-radius:2px;white-space:nowrap;}
@@ -392,6 +410,7 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
     <div class="ch-sw">
       <button class="ch-btn ch-ta active" id="ch-ta" onclick="setChannel('ta')">⚙ TA</button>
       <button class="ch-btn ch-art" id="ch-art" onclick="setChannel('art')">🎨 Art Tips</button>
+      <button class="ch-btn ch-show" id="ch-show" onclick="setChannel('show')">✦ Showcase</button>
     </div>
     <div class="live-badge">LIVE <b id="article-count">● 15 篇</b></div>
     <div id="new-banner"></div>
@@ -513,7 +532,7 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
       <div class="sb-hdr">今日統計</div>
       <div class="stats-grid">
         <div class="stat-box"><span class="stat-n" id="stat-total">0</span><span class="stat-l">文章</span></div>
-        <div class="stat-box"><span class="stat-n">12</span><span class="stat-l">來源</span></div>
+        <div class="stat-box"><span class="stat-n" id="stat-src">12</span><span class="stat-l">來源</span></div>
         <div class="stat-box"><span class="stat-n" id="stat-tr">0</span><span class="stat-l">已翻譯</span></div>
         <div class="stat-box"><span class="stat-n" id="stat-new">0</span><span class="stat-l">今日新增</span></div>
       </div>
@@ -568,14 +587,18 @@ const TAGS = {
   // Art Tips channel
   concept:{en:"Concept Art",zh:"概念設計",ch:"art"}, modeling:{en:"Modeling",zh:"3D建模",ch:"art"},
   texturing:{en:"Texturing",zh:"貼圖材質",ch:"art"}, lighting:{en:"Lighting",zh:"燈光",ch:"art"},
-  "ai-art":{en:"AI Tools",zh:"AI工具",ch:"art"}
+  "ai-art":{en:"AI Tools",zh:"AI工具",ch:"art"},
+  // Showcase channel
+  rigging:{en:"Rigging / Anim",zh:"綁定動畫",ch:"show"},
+  generalist:{en:"Generalist TA",zh:"全方位TA",ch:"show"}
 };
 const TAG_COL = {
   // TA
   shader:"#ff6b35",procedural:"#7b5fff",vfx:"#00d4ff",character:"#ff3d9a",
   scene:"#50fa7b",graphics:"#ffb86c",animation:"#ff79c6",tools:"#8be9fd",
   // Art Tips
-  concept:"#f7c948",modeling:"#4ecdc4",texturing:"#ff9f43",lighting:"#a29bfe","ai-art":"#fd79a8"
+  concept:"#f7c948",modeling:"#4ecdc4",texturing:"#ff9f43",lighting:"#a29bfe","ai-art":"#fd79a8",
+  rigging:"#ff79c6",generalist:"#00d4ff"
 };
 const SRC_COL = {
   gdc:"#ff6b35",siggraph:"#7b5fff",unrealblog:"#00d4ff",unityblog:"#50fa7b",
@@ -679,6 +702,276 @@ const ART_POOL = [
   {title:"Game-Ready Hair Cards — Alpha, Normals, and Specular Setup",excerpt:"Building game-ready hair card systems: alpha texture baking from Xgen or Ornatrix, tangent-space normal baking for individual strands, anisotropic specular setup in Unreal's Hair shader, and LOD strip reduction strategy.",src:"80.lv",sc:"80lv",tags:["character","texturing"],type:"rss",url:"https://80.lv/articles"},
   {title:"Colour Theory for Game Artists — Warm/Cool and Simultaneous Contrast",excerpt:"How warm/cool colour contrast creates depth in game environments: simultaneous contrast (adjacent hues shift each other's perceived temperature), complementary shadow colours in key lighting, and applying Itten's colour theory to material design.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],type:"ai",url:"https://www.artstation.com/blogs"},
 ];
+
+// ─── SHOWCASE DATA ─────────────────────────────────────────────────────────────
+// Real TA portfolios, showreels, breakdowns — for people learning what TA work looks like
+const SHOW_CATS = {
+  shader:   {en:"Shader / VFX",   zh:"Shader / 特效",  col:"#ff6b35"},
+  procedural:{en:"Procedural",    zh:"程序化",          col:"#7b5fff"},
+  rigging:  {en:"Rigging / Anim", zh:"綁定 / 動畫",     col:"#ff79c6"},
+  tools:    {en:"Tools / Pipeline",zh:"工具 / 流程",    col:"#8be9fd"},
+  graphics: {en:"Graphics / Rendering", zh:"渲染 / 圖形",col:"#ffb86c"},
+  generalist:{en:"Generalist TA", zh:"全方位 TA",       col:"#00d4ff"},
+};
+
+const SHOWCASE = [
+  // ── Shader / VFX ───────────────────────────────────────────────────────────
+  {
+    id:"sh01",
+    name:"Wolf van Veen",
+    role:"Shader & VFX Technical Artist",
+    company:"AAA Freelance (Mortal Kombat, F1, MultiVersus)",
+    country:"NL",
+    excerpt:"10+ years as Shader and VFX TA. Work spans AAA titles including Mortal Kombat 1, Clockwork Revolution, and F1 2021. Specializes in HLSL shaders, Unreal VFX, and Blueprint systems. Portfolio shows full breakdown of real-time effects from production.",
+    tags:["shader"],
+    links:[
+      {label:"Portfolio",url:"https://wolfvanveen.art/",cls:"web"},
+    ],
+    type:"portfolio",
+    date:"2024-01-01",
+    sc:"portfolio",src:"Portfolio"
+  },
+  {
+    id:"sh02",
+    name:"John O'Really",
+    role:"Lead Technical Artist",
+    company:"Poncle — Vampire Survivors, Cult of the Lamb",
+    country:"UK",
+    excerpt:"Lead TA at Poncle, shipped Vampire Survivors and Cult of the Lamb Woolhaven DLC. Covers real-time shaders, VFX, post-processing, mocap, procedural generation, and rendering optimisation. Blog has detailed written breakdowns of every technique.",
+    tags:["shader","procedural"],
+    links:[
+      {label:"Portfolio",url:"https://johno.re",cls:"web"},
+    ],
+    type:"portfolio",
+    date:"2024-01-01",
+    sc:"portfolio",src:"Portfolio"
+  },
+  {
+    id:"sh03",
+    name:"Arthur Tasquin",
+    role:"Technical Artist — Procedural Shaders",
+    company:"Nodevember Challenge",
+    country:"FR",
+    excerpt:"30 fully procedural shaders in 30 days — Nodevember challenge. Each shader built in Blender or Substance Designer with zero textures. ArtStation post includes Twitter breakdown threads for every entry. Great reference for learning node-based shader thinking.",
+    tags:["shader","procedural"],
+    links:[
+      {label:"ArtStation",url:"https://www.artstation.com/artwork/oOGeqW",cls:"as"},
+    ],
+    type:"showreel",
+    date:"2023-12-01",
+    sc:"artstation",src:"ArtStation"
+  },
+  {
+    id:"sh04",
+    name:"Jason Yong",
+    role:"Technical Artist — Houdini + UE",
+    company:"Independent",
+    country:"SG",
+    excerpt:"Technical Art Showreel 2022 covering Houdini OTLs, a Python-based Substance-to-Unreal importer (open source on GitHub), and weapon generator tool. Good example of combining tool dev with engine integration in a compact showreel.",
+    tags:["tools","procedural"],
+    links:[
+      {label:"ArtStation",url:"https://www.artstation.com/artwork/lxxlWz",cls:"as"},
+      {label:"GitHub",url:"https://github.com/tov952/WPN_GENERATOR_PY",cls:"gh"},
+    ],
+    type:"showreel",
+    date:"2022-06-01",
+    sc:"artstation",src:"ArtStation"
+  },
+  // ── Procedural ─────────────────────────────────────────────────────────────
+  {
+    id:"sh05",
+    name:"Francisco Murias",
+    role:"Lead Technical Artist",
+    company:"Homeworld 3, Project Fantasy",
+    country:"PT",
+    excerpt:"Lead TA on Homeworld 3 (Blackbird Interactive). Responsibilities covered shader dev, post-processing, procedural content generation, destruction systems, custom volumetric rendering, and tool development. Portfolio includes HLSL Shadertoy experiments, Python tools, and Houdini Digital Assets.",
+    tags:["procedural","shader","tools"],
+    links:[
+      {label:"Portfolio",url:"https://franciscomurias.github.io/",cls:"web"},
+    ],
+    type:"portfolio",
+    date:"2024-10-01",
+    sc:"portfolio",src:"Portfolio"
+  },
+  {
+    id:"sh06",
+    name:"Callum Shute",
+    role:"Emerging VFX / Procedural Artist",
+    company:"The Rookies — Student Showcase",
+    country:"UK",
+    excerpt:"Student portfolio from Falmouth University featuring procedural terrain generation and particle simulations in Houdini. Good example of what a strong entry-level TA/FX portfolio looks like — shows the process, not just the result.",
+    tags:["procedural","shader"],
+    links:[
+      {label:"The Rookies",url:"https://www.therookies.co/entries/39393",cls:"web"},
+    ],
+    type:"portfolio",
+    date:"2023-07-01",
+    sc:"rookies",src:"The Rookies"
+  },
+  {
+    id:"sh07",
+    name:"Oday Abuzaeed",
+    role:"Technical Artist — Procedural Animation",
+    company:"Independent R&D",
+    country:"INT",
+    excerpt:"R&D breakdown of procedural animated shader techniques — how to drive surface animation entirely through shader math without simulation. ArtStation post includes a detailed node graph breakdown and process video.",
+    tags:["shader","procedural"],
+    links:[
+      {label:"ArtStation",url:"https://www.artstation.com/artwork/y4qoAR",cls:"as"},
+    ],
+    type:"breakdown",
+    date:"2023-04-01",
+    sc:"artstation",src:"ArtStation"
+  },
+  // ── Tools / Pipeline ────────────────────────────────────────────────────────
+  {
+    id:"sh08",
+    name:"Edward Jaworenko",
+    role:"Technical Artist — Tools Focus",
+    company:"Independent",
+    country:"US",
+    excerpt:"Technical Art Demo Reel focused entirely on tool development: automation scripts, pipeline tools, and editor utilities. Proves the point that a TA showreel does not need flashy VFX — clean tool UX and time-saving automation are equally impressive to studios.",
+    tags:["tools"],
+    links:[
+      {label:"ArtStation",url:"https://www.artstation.com/artwork/ykd9L8",cls:"as"},
+    ],
+    type:"showreel",
+    date:"2022-03-01",
+    sc:"artstation",src:"ArtStation"
+  },
+  {
+    id:"sh09",
+    name:"Matthew Lowe",
+    role:"Technical Artist — Rigging, Shaders, UE",
+    company:"TechArtAlchemy",
+    country:"US",
+    excerpt:"Portfolio at TechArtAlchemy.com covering character rigging, Unreal Engine integration, Unity shader development, and animation systems. Good generalist TA portfolio that clearly separates technical specializations with breakdowns for each.",
+    tags:["rigging","shader","tools"],
+    links:[
+      {label:"Portfolio",url:"https://www.techartalchemy.com/",cls:"web"},
+    ],
+    type:"portfolio",
+    date:"2024-01-01",
+    sc:"portfolio",src:"Portfolio"
+  },
+  {
+    id:"sh10",
+    name:"Massive Entertainment",
+    role:"TA Team — Portfolio Tips (Ubisoft)",
+    company:"Ubisoft Massive",
+    country:"SE",
+    excerpt:"Official blog post from Ubisoft Massive TA team: top 5 TA portfolio tips from people who hire. Key advice: lead and end with your specialization, show fewer but polished pieces, always explain WHY a tool exists not just what it does.",
+    tags:["tools","generalist"],
+    links:[
+      {label:"Read Article",url:"https://www.massive.se/blog/news/my-top-5-portfolio-tips-technical-art/",cls:"web"},
+    ],
+    type:"guide",
+    date:"2020-07-09",
+    sc:"massive",src:"Ubisoft Massive Blog"
+  },
+  // ── Rigging / Animation ─────────────────────────────────────────────────────
+  {
+    id:"sh11",
+    name:"Ben Morgan",
+    role:"Rigging Technical Artist",
+    company:"Bungie",
+    country:"US",
+    excerpt:"Rigging TA at Bungie. ArtStation blog post covers technical direction for rigging and animation — modular rig architecture, constraint systems, SDK-driven correctives, and how rigging TAs interface with both animators and engine programmers.",
+    tags:["rigging"],
+    links:[
+      {label:"ArtStation Blog",url:"https://www.artstation.com/benmorgan/blog/XrXO/technical-direction-for-rigging-and-animation",cls:"as"},
+    ],
+    type:"breakdown",
+    date:"2023-01-01",
+    sc:"artstation",src:"ArtStation"
+  },
+  {
+    id:"sh12",
+    name:"益遊數位 (Yoozoo) — TA Job Posting",
+    role:"Technical Artist — Rigging & Animation",
+    company:"益遊數位股份有限公司 (Taiwan)",
+    country:"TW",
+    excerpt:"Real job posting from a Taiwan studio hiring Rigging TA. Requirements include Maya rigging, blend shapes, cloth simulation, and engine export. Good reference for what Taiwanese studios actually expect from a rigging-focused TA portfolio.",
+    tags:["rigging","tools"],
+    links:[
+      {label:"104 Job Post",url:"https://www.104.com.tw/jb/104i/job/view?j=6odvw",cls:"web"},
+    ],
+    type:"guide",
+    date:"2023-11-01",
+    sc:"104",src:"104人力銀行"
+  },
+  // ── Graphics / Rendering ────────────────────────────────────────────────────
+  {
+    id:"sh13",
+    name:"Guilherme Casagrandi — HardcoreFX",
+    role:"VFX Technical Director & Pipeline TD",
+    company:"HardcoreFX (Brazil) — Netflix, Call of Duty, Coca-Cola",
+    country:"BR",
+    excerpt:"Annie Award-nominated VFX TD from Brazil. YouTube channel covers USD-based Houdini pipelines, GridMarkets render automation, and Python scripting for pipeline tools. Real production pipeline from a studio that has shipped for Netflix and AAA game trailers.",
+    tags:["procedural","tools","graphics"],
+    links:[
+      {label:"YouTube",url:"https://www.youtube.com/@HardcoreFX",cls:"yt"},
+    ],
+    type:"showreel",
+    date:"2025-01-01",
+    sc:"youtube",src:"YouTube"
+  },
+  {
+    id:"sh14",
+    name:"ArtStation — Technical Art Channel",
+    role:"Curated TA Work from Global Artists",
+    company:"ArtStation",
+    country:"INT",
+    excerpt:"ArtStation dedicated Technical Art channel — curated projects focusing on rigging, skinning, simulations, shading, and effects. Best source for browsing real TA portfolio work across all specializations. Filter by newest to see current industry standard.",
+    tags:["generalist","shader","rigging"],
+    links:[
+      {label:"ArtStation",url:"https://www.artstation.com/channels/technical_art",cls:"as"},
+    ],
+    type:"guide",
+    date:"2025-01-01",
+    sc:"artstation",src:"ArtStation"
+  },
+  // ── Generalist ─────────────────────────────────────────────────────────────
+  {
+    id:"sh15",
+    name:"Ben Cloward",
+    role:"Technical Artist — Shader Specialist",
+    company:"Senior TA (BioWare, etc.)",
+    country:"US",
+    excerpt:"One of the most well-known TA portfolio sites. Ben Cloward has been sharing shader tutorials and portfolio work for 20+ years. Covers PBR materials, toon shading, environment shaders, and Unity/Unreal workflows. A benchmark example of a clear, well-organized TA portfolio.",
+    tags:["shader","graphics","generalist"],
+    links:[
+      {label:"Portfolio",url:"https://www.bencloward.com/portfolio.shtml",cls:"web"},
+      {label:"YouTube",url:"https://www.youtube.com/@BenCloward",cls:"yt"},
+    ],
+    type:"portfolio",
+    date:"2024-01-01",
+    sc:"portfolio",src:"Portfolio"
+  },
+  {
+    id:"sh16",
+    name:"Polycount Wiki — New Grad TA Portfolio Review",
+    role:"Community Review Thread",
+    company:"Polycount Forum",
+    country:"INT",
+    excerpt:"Polycount community thread reviewing a new grad TA portfolio. Brutal honest feedback from industry vets: show the breakdown process not just the result, label every thumbnail clearly, do not dilute with pure art pieces. Essential read before building your first TA portfolio.",
+    tags:["generalist","tools"],
+    links:[
+      {label:"Read Thread",url:"https://polycount.com/discussion/234341/portfolio-for-technical-artist-new-grad",cls:"web"},
+    ],
+    type:"guide",
+    date:"2023-11-07",
+    sc:"polycount",src:"Polycount"
+  },
+];
+
+const SHOW_SOURCES = [
+  {name:"ArtStation",type:"ai"},{name:"Personal Portfolios",type:"ai"},
+  {name:"YouTube Showreels",type:"ai"},{name:"The Rookies",type:"ai"},
+  {name:"Polycount Forum",type:"ai"},{name:"Studio Blogs",type:"rss"},
+  {name:"104人力銀行",type:"rss"},{name:"GitHub",type:"ai"},
+];
+
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let A = [];          // all articles (current channel)
@@ -846,6 +1139,34 @@ function render(){
     const tZh=a.title_zh?`<div class="card-ttl-zh">${a.title_zh}</div>`:'';
     const eZh=a.excerpt_zh?`<p class="card-exc-zh">${a.excerpt_zh}</p>`:'';
     const isTip = a.tip === true;
+    const isShow = a.isShowcase === true;
+    // Showcase card: special layout with name, role, links
+    if(isShow){
+      const typeLabel = a.type==='portfolio'?'作品集':a.type==='showreel'?'Showreel':a.type==='breakdown'?'Breakdown':'指南';
+      const typeCols = {portfolio:'#c084fc',showreel:'#00d4ff',breakdown:'#ff9f43',guide:'#50fa7b'};
+      const typeCol = typeCols[a.type]||'#c084fc';
+      const flagMap = {TW:'🇹🇼',US:'🇺🇸',UK:'🇬🇧',NL:'🇳🇱',PT:'🇵🇹',FR:'🇫🇷',SE:'🇸🇪',BR:'🇧🇷',SG:'🇸🇬',INT:'🌐'};
+      const flag = flagMap[a.country]||'🌐';
+      const linksHTML = (a.links||[]).map(l=>
+        `<a href="${l.url}" target="_blank" class="card-link ${l.cls}" onclick="event.stopPropagation()">${l.label}</a>`
+      ).join('');
+      return `<div class="card is-showcase" style="animation-delay:${Math.min(i,5)*.025}s">
+        <div class="card-hd">
+          <span class="show-badge" style="background:${typeCol}18;color:${typeCol};border-color:${typeCol}44">${typeLabel}</span>
+          <span style="font-size:14px;margin-left:2px">${flag}</span>
+          <div style="flex:1;min-width:0">
+            <div class="card-ttl-en">${a.name}</div>
+            <div class="card-role">${a.role}</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--acc);font-family:'Space Mono',monospace;margin-bottom:6px;opacity:.7">${a.company}</div>
+        <div class="card-exc-en">${a.excerpt}</div>
+        <div class="card-ft" style="flex-wrap:wrap;gap:6px">
+          ${a.tags.map(t=>tagPillHTML(t)).join('')}
+        </div>
+        <div class="card-links">${linksHTML}</div>
+      </div>`;
+    }
     return `<div class="card${isNew?' is-new':''}${isTip?' is-tip':''}" style="animation-delay:${Math.min(i,5)*.025}s" onclick="openReader('${a.id}')">
       <div class="card-hd">
         ${srcBadgeHTML(a.sc,a.src)}
@@ -874,7 +1195,8 @@ function updateStats(){
   // Count by tag for current channel
   const taCategories = ['shader','procedural','vfx','character','scene','graphics','animation','tools'];
   const artCategories = ['concept','modeling','texturing','character','lighting','animation','ai-art','tools'];
-  const activeCats = channel==='ta' ? taCategories : artCategories;
+  const showCategories = ['shader','procedural','rigging','tools','graphics','generalist'];
+  const activeCats = channel==='ta' ? taCategories : channel==='show' ? showCategories : artCategories;
   // Update cnt-all
   const cntAll = document.getElementById('cnt-all');
   if(cntAll) cntAll.textContent = A.length;
@@ -882,6 +1204,11 @@ function updateStats(){
     const el=document.getElementById('cnt-'+t);
     if(el) el.textContent=A.filter(a=>a.tags.includes(t)).length;
   });
+  const srcEl = document.getElementById('stat-src');
+  if(srcEl){
+    const srcs = channel==='ta' ? TA_SOURCES : channel==='show' ? SHOW_SOURCES : ART_SOURCES;
+    srcEl.textContent = srcs.length;
+  }
 }
 
 function updateCollectStatus(){
@@ -921,7 +1248,7 @@ function setSrc(s, btn){
 function doFilter(){ query=document.getElementById('search-input').value; render(); }
 function doSort(v){ sortBy=v; render(); }
 function updateSourceList(){
-  const sources = channel==='ta' ? TA_SOURCES : ART_SOURCES;
+  const sources = channel==='ta' ? TA_SOURCES : channel==='show' ? SHOW_SOURCES : ART_SOURCES;
   const el = document.getElementById('src-list');
   const hdr = document.getElementById('src-count-hdr');
   if(hdr) hdr.textContent = `監控來源 (${sources.length})`;
@@ -953,6 +1280,8 @@ function rebuildArticles(){
   const map={};
   if(channel==='ta'){
     SEEDS.forEach(a=>{ map[a.id]={...a}; });
+  } else if(channel==='show'){
+    SHOWCASE.forEach(a=>{ map[a.id]={...a,isShowcase:true}; });
   } else {
     ART_SEEDS.forEach(a=>{ map[a.id]={...a}; });
     ART_TIPS.forEach(a=>{ map[a.id]={...a}; });
@@ -976,7 +1305,8 @@ function rebuildArticles(){
 function rebuildSidebar(){
   const taCategories = ['shader','procedural','vfx','character','scene','graphics','animation','tools'];
   const artCategories = ['concept','modeling','texturing','character','lighting','animation','ai-art','tools'];
-  const cats = channel==='ta' ? taCategories : artCategories;
+  const showCategories = ['shader','procedural','rigging','tools','graphics','generalist'];
+  const cats = channel==='ta' ? taCategories : channel==='show' ? showCategories : artCategories;
   const firstSec = document.getElementById('cat-sec');
   if(!firstSec) return;
   let html = '<div class="sb-hdr">分類 / Category</div>';
@@ -1039,7 +1369,8 @@ async function runCollect(){
   // Prepend new articles
   A = [...fresh, ...A];
   lastCollect = today();
-  const saveKey = channel==='ta' ? 'ta_articles' : 'art_articles';
+  const saveKey = channel==='ta' ? 'ta_articles' : channel==='art' ? 'art_articles' : null;
+  if(!saveKey) return;
   store.set(saveKey, JSON.stringify(A.slice(0,250)));
   store.set('ta_lastCollect', today());
 
