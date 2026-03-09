@@ -1262,13 +1262,21 @@ function updateSourceList(){
 
 function setChannel(ch){
   channel = ch;
-  document.getElementById('ch-ta').classList.toggle('active', ch==='ta');
-  document.getElementById('ch-art').classList.toggle('active', ch==='art');
+  // Update all 3 channel buttons
+  ['ta','art','show'].forEach(id=>{
+    const el = document.getElementById('ch-'+id);
+    if(el) el.classList.toggle('active', id===ch);
+  });
   cat='all'; srcF='all'; query='';
   const si = document.getElementById('search-input');
   if(si) si.value='';
+  // Feed title
   const ttl = document.getElementById('feed-ttl-text');
-  if(ttl) ttl.textContent = ch==='ta' ? "今日精選 / Today's Feed" : "🎨 Art Tips & Tutorials";
+  if(ttl){
+    if(ch==='ta')   ttl.textContent = '今日精選 / Today Feed';
+    else if(ch==='show') ttl.textContent = '✦ TA 作品展示 / Showcase';
+    else            ttl.textContent = '🎨 Art Tips & Tutorials';
+  }
   rebuildSidebar();
   rebuildArticles();
   updateSourceList();
@@ -1623,7 +1631,7 @@ function getSummary(a, isZh){
 
 // ─── READER OPEN / CLOSE ──────────────────────────────────────────────────────
 function openReader(id){
-  const a=A.find(x=>x.id===id); if(!a) return;
+  const a=A.find(x=>x.id===id); if(!a||a.isShowcase) return;
   readerArt=a; rTranslated=false;
   if(!bodyCache[id]) bodyCache[id]={secs:(a.ch==='art'||channel==='art')?genArtSections(a):genSections(a)};
 
