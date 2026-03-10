@@ -723,27 +723,23 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
 
   <!-- Hero -->
   <div class="int-hero">
-    <div class="int-badge">🎮 TA 魔法工廠 · 入門課程</div>
+    <div class="int-badge">🎮 TA 魔法學院 · 20 關互動課程</div>
     <div class="int-title">遊戲裡的魔法<br>是怎麼做的？</div>
-    <div class="int-sub">火焰、光影、會動的角色——這些都是「技術美術師」的傑作。你也可以做到！</div>
-    <div class="int-q-row">
-      <div class="int-q">🔥 遊戲裡的火焰是真的嗎？<span class="qa"> → 不是！是 Shader 程式畫的</span></div>
-      <div class="int-q">💇 角色頭髮為什麼這麼真實？<span class="qa"> → TA 用物理模擬做的</span></div>
-      <div class="int-q">🌲 森林幾萬棵樹，誰種的？<span class="qa"> → 程式自動生成</span></div>
-    </div>
+    <div class="int-sub">火焰、光影、會動的角色——背後都是同一種技術。<br>這門課帶你從零開始，親手做出來。</div>
     <div class="int-cta-row">
-      <button class="int-cta" onclick="openCourse()" style="cursor:pointer;border:none">🎓 開始 20 關課程</button>
+      <button class="int-cta" onclick="openCourse()" style="cursor:pointer;border:none">🎓 開始學習</button>
       <a href="#int-demo" class="int-cta sec" onclick="document.getElementById('int-demo').scrollIntoView({behavior:'smooth'});return false">⚡ 先玩看看</a>
     </div>
-    <div style="font-size:.78rem;color:#475569;font-weight:600;margin-top:12px">不需要任何基礎 · 20 個關卡 · 從 RGB 到 PBR</div>
+    <div style="font-size:.75rem;color:#3a4a60;font-weight:700;margin-top:10px">不需要任何基礎 · 前 10 關免費 · 全程互動</div>
   </div>
 
-  <!-- What is TA -->
-  <div class="int-sec" id="int-what">
-    <div class="int-sec-lbl">🧩 Level 0 — 認識 TA</div>
-    <div class="int-sec-title">Technical Artist 是做什麼的？</div>
-    <div class="int-sec-sub">TA = 「懂程式的藝術家」＋「懂美術的工程師」</div>
-
+  <!-- Step 1: 一個問題 -->
+  <div class="int-sec">
+    <div class="int-sec-lbl" style="justify-content:center;text-align:center">這個問題困惑過很多人</div>
+    <div style="text-align:center;font-size:clamp(1.1rem,4vw,1.5rem);font-weight:900;margin-bottom:6px;line-height:1.3">
+      工程師寫程式，美術師畫圖——<br>那<em style="font-style:normal;color:var(--acc)">遊戲的特效和材質</em>是誰做的？
+    </div>
+    <div style="text-align:center;color:var(--muted);font-size:.85rem;font-weight:700;margin-bottom:24px">（不是工程師，也不是美術師）</div>
     <div class="int-compare">
       <div class="int-cmp">
         <div class="int-cmp-lbl bad">⚠ 沒有 TA</div>
@@ -759,68 +755,20 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
         <div class="int-cmp-desc"><strong>發光材質</strong>、粒子特效、角色活了！</div>
       </div>
     </div>
-
-    <div class="int-roles">
-      <div class="int-role" style="--rc:#ff6b35">
-        <span class="int-role-icon">✨</span>
-        <div class="int-role-name">Shader 魔法師</div>
-        <div class="int-role-desc">用程式碼「畫」出材質：金屬反光、水面波紋、火焰顏色</div>
-        <span class="int-role-tag">HLSL / GLSL</span>
-      </div>
-      <div class="int-role" style="--rc:#a78bfa">
-        <span class="int-role-icon">🔧</span>
-        <div class="int-role-name">工具打造者</div>
-        <div class="int-role-desc">寫程式讓美術師「一鍵完成」原本幾小時的手動工作</div>
-        <span class="int-role-tag">Python / MEL</span>
-      </div>
-      <div class="int-role" style="--rc:#38bdf8">
-        <span class="int-role-icon">🌊</span>
-        <div class="int-role-name">特效設計師</div>
-        <div class="int-role-desc">爆炸、火焰、魔法光球——VFX 讓遊戲充滿衝擊感</div>
-        <span class="int-role-tag">Houdini / Niagara</span>
-      </div>
-      <div class="int-role" style="--rc:#f472b6">
-        <span class="int-role-icon">🦴</span>
-        <div class="int-role-name">角色骨架師</div>
-        <div class="int-role-desc">建立骨架系統，讓角色跑、跳、揮劍——動作自然流暢</div>
-        <span class="int-role-tag">Rigging / Skinning</span>
+    <div style="background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.15);border-radius:14px;padding:18px 20px;margin-top:4px;text-align:center">
+      <div style="font-size:1.05rem;font-weight:900;margin-bottom:6px">答案是 <span style="color:var(--acc)">Technical Artist（TA）</span></div>
+      <div style="font-size:.85rem;color:var(--muted);font-weight:700;line-height:1.65">
+        「懂程式的藝術家」＋「懂美術的工程師」<br>
+        用程式碼畫出材質、做出特效、讓整個遊戲世界有質感
       </div>
     </div>
   </div>
 
-  <!-- Quest Map -->
-  <div class="int-sec">
-    <div class="int-sec-lbl">🗺 學習地圖</div>
-    <div class="int-sec-title">20 個關卡，從零到 PBR</div>
-    <div class="int-sec-sub">四大難度區塊，每關 10~60 分鐘，全程互動</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <div style="background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.2);border-radius:12px;padding:14px">
-        <div style="font-size:.7rem;font-weight:800;color:var(--acc);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">🌱 基礎入門 (0–4)</div>
-        <div style="font-size:.8rem;color:#bfc4d8;font-weight:700;line-height:1.6">TA 概念 · RGB · sin 動畫<br>粒子特效 · 自動化工具</div>
-      </div>
-      <div style="background:rgba(255,140,66,.07);border:1px solid rgba(255,140,66,.2);border-radius:12px;padding:14px">
-        <div style="font-size:.7rem;font-weight:800;color:#ff8c42;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">📐 圖形學 (5–9)</div>
-        <div style="font-size:.8rem;color:#bfc4d8;font-weight:700;line-height:1.6">向量 · Phong 光照 · UV<br>Perlin Noise · 矩陣變換</div>
-      </div>
-      <div style="background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.2);border-radius:12px;padding:14px">
-        <div style="font-size:.7rem;font-weight:800;color:#06b6d4;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">⬡ 程序化 (10–14)</div>
-        <div style="font-size:.8rem;color:#bfc4d8;font-weight:700;line-height:1.6">程序化建模 · L-System<br>高度圖 · SDF · 程序化動畫</div>
-      </div>
-      <div style="background:rgba(217,70,239,.07);border:1px solid rgba(217,70,239,.2);border-radius:12px;padding:14px">
-        <div style="font-size:.7rem;font-weight:800;color:#d946ef;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">🔬 進階應用 (15–19)</div>
-        <div style="font-size:.8rem;color:#bfc4d8;font-weight:700;line-height:1.6">IK 骨架 · GPU 優化 · PBR<br>後製 Post FX · 畢業作品</div>
-      </div>
-    </div>
-    <div style="text-align:center">
-      <button onclick="openCourse()" style="background:var(--acc);color:#07080f;border:none;border-radius:100px;padding:13px 36px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:var(--font);box-shadow:0 4px 20px rgba(0,229,160,.3);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">🎓 進入課程</button>
-    </div>
-  </div>
-
-  <!-- Interactive Demo -->
+  <!-- Step 2: 馬上動手玩 -->
   <div class="int-sec" id="int-demo">
-    <div class="int-sec-lbl">⚡ 馬上試試看</div>
-    <div class="int-sec-title">現在就動手玩</div>
-    <div class="int-sec-sub">不需要安裝任何東西，在這個頁面就能體驗 TA 在做的事</div>
+    <div class="int-sec-lbl">不用安裝任何東西</div>
+    <div class="int-sec-title" style="margin-bottom:4px">TA 在做的事，你現在就能玩</div>
+    <div class="int-sec-sub" style="margin-bottom:16px">拖動滑桿，感受程式碼控制畫面的感覺</div>
     <div class="int-demo">
       <div class="int-demo-tabs">
         <button class="int-demo-tab active" onclick="iSwitchDemo('icolor')">🎨 顏色魔法</button>
@@ -873,52 +821,92 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
         <div class="int-canvas-wrap"><canvas id="icv-part" width="220" height="180"></canvas><div class="int-canvas-hint">點擊爆炸</div></div>
       </div>
     </div>
-  </div>
-
-  <!-- Challenge -->
-  <div class="int-sec">
-    <div class="int-challenge">
-      <div class="int-ch-title">🏆 第一個挑戰任務</div>
-      <div class="int-ch-sub">完成這三步，你就是入門 TA 了！</div>
-      <div class="int-ch-steps">
-        <div class="int-ch-step"><div class="int-ch-num">1</div>打開 Shadertoy.com</div>
-        <div class="int-ch-step"><div class="int-ch-num">2</div>找到 iTime 這個變數</div>
-        <div class="int-ch-step"><div class="int-ch-num">3</div>讓顏色隨時間改變</div>
+    <!-- 玩過之後的引導 -->
+    <div style="margin-top:16px;background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.12);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:1.4rem">💡</span>
+      <div>
+        <div style="font-size:.85rem;font-weight:900;margin-bottom:2px">剛才你控制的，就是 Shader 的基礎</div>
+        <div style="font-size:.78rem;color:var(--muted);font-weight:700">這門課會帶你從這裡出發，一路做到 PBR 材質球</div>
       </div>
-      <div class="int-ch-hint">vec3(sin(iTime), 0.5, cos(iTime))</div>
-      <a href="https://www.shadertoy.com/new" target="_blank" class="int-cta">🚀 去 Shadertoy 試試看</a>
     </div>
   </div>
 
-  <!-- Next Steps -->
+  <!-- Step 3: 課程地圖 -->
   <div class="int-sec">
-    <div class="int-sec-lbl">🎯 學完之後</div>
-    <div class="int-sec-title">繼續往前走</div>
-    <div class="int-next">
-      <a href="https://www.shadertoy.com" target="_blank" class="int-next-card">
-        <div class="int-next-icon">🌐</div>
-        <div class="int-next-title">Shadertoy</div>
-        <div class="int-next-desc">全世界 TA 分享 Shader 的地方，看別人的 code 是最快的學習</div>
-        <div class="int-next-arr">→ 免費</div>
-      </a>
-      <a href="https://p5js.org" target="_blank" class="int-next-card">
-        <div class="int-next-icon">🎨</div>
-        <div class="int-next-title">p5.js</div>
-        <div class="int-next-desc">用 JavaScript 畫畫，零基礎可學，有中文資源</div>
-        <div class="int-next-arr">→ 免費，有中文</div>
-      </a>
-      <a href="https://www.blender.org" target="_blank" class="int-next-card">
-        <div class="int-next-icon">🟠</div>
-        <div class="int-next-title">Blender</div>
-        <div class="int-next-desc">免費 3D 軟體，學完基本操作就能試 Shader Node</div>
-        <div class="int-next-arr">→ 免費下載</div>
-      </a>
-      <div class="int-next-card" onclick="setChannel('ta')" style="cursor:pointer">
-        <div class="int-next-icon">📚</div>
-        <div class="int-next-title">TA HUB 深入閱讀</div>
-        <div class="int-next-desc">看真正的 TA 在做什麼，找到你有興趣的方向</div>
-        <div class="int-next-arr">→ 回到 TA 頻道</div>
+    <div class="int-sec-lbl">接下來你會學到</div>
+    <div class="int-sec-title" style="margin-bottom:4px">20 關，每關一個新魔法</div>
+    <div class="int-sec-sub" style="margin-bottom:18px">按順序解鎖，前 10 關完全免費</div>
+
+    <!-- Timeline style -->
+    <div style="display:flex;flex-direction:column;gap:0">
+
+      <div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:18px;position:relative">
+        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(0,229,160,.15);border:2px solid var(--acc);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;color:var(--acc);font-family:var(--mono)">0–4</div>
+          <div style="width:2px;flex:1;background:linear-gradient(var(--acc),rgba(255,140,66,.4));min-height:32px;margin-top:4px"></div>
+        </div>
+        <div style="padding-top:6px">
+          <div style="font-size:.7rem;font-weight:800;color:var(--acc);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px">🌱 基礎入門 · 免費</div>
+          <div style="font-size:.88rem;font-weight:900;margin-bottom:4px">搞懂 TA 在做什麼</div>
+          <div style="font-size:.78rem;color:var(--muted);font-weight:700;line-height:1.6">RGB 顏色 · sin() 動畫 · 粒子特效 · 自動化工具</div>
+        </div>
       </div>
+
+      <div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:18px;position:relative">
+        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,140,66,.12);border:2px solid #ff8c42;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;color:#ff8c42;font-family:var(--mono)">5–9</div>
+          <div style="width:2px;flex:1;background:linear-gradient(rgba(255,140,66,.4),rgba(6,182,212,.4));min-height:32px;margin-top:4px"></div>
+        </div>
+        <div style="padding-top:6px">
+          <div style="font-size:.7rem;font-weight:800;color:#ff8c42;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px">📐 圖形學核心 · 免費</div>
+          <div style="font-size:.88rem;font-weight:900;margin-bottom:4px">光影背後的數學</div>
+          <div style="font-size:.78rem;color:var(--muted);font-weight:700;line-height:1.6">向量 · Phong 光照 · UV 展開 · Perlin Noise · 矩陣變換</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:18px;position:relative">
+        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(6,182,212,.1);border:2px solid rgba(6,182,212,.5);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:900;color:#06b6d4;font-family:var(--mono)">10–14</div>
+          <div style="width:2px;flex:1;background:linear-gradient(rgba(6,182,212,.4),rgba(217,70,239,.4));min-height:32px;margin-top:4px"></div>
+        </div>
+        <div style="padding-top:6px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <div style="font-size:.7rem;font-weight:800;color:#06b6d4;letter-spacing:.08em;text-transform:uppercase">⬡ 程序化系統</div>
+            <span style="background:linear-gradient(135deg,#ffcb47,#ff8c42);color:#07080f;font-size:.52rem;font-weight:900;padding:2px 6px;border-radius:4px;font-family:var(--mono)">PRO</span>
+          </div>
+          <div style="font-size:.88rem;font-weight:900;margin-bottom:4px">讓電腦自動生成世界</div>
+          <div style="font-size:.78rem;color:var(--muted);font-weight:700;line-height:1.6">城市生成 · L-System 植物 · 高度圖地形 · SDF · 程序化動畫</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(217,70,239,.1);border:2px solid rgba(217,70,239,.4);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:900;color:#d946ef;font-family:var(--mono)">15–19</div>
+        </div>
+        <div style="padding-top:6px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <div style="font-size:.7rem;font-weight:800;color:#d946ef;letter-spacing:.08em;text-transform:uppercase">🔬 進階 + 畢業作品</div>
+            <span style="background:linear-gradient(135deg,#ffcb47,#ff8c42);color:#07080f;font-size:.52rem;font-weight:900;padding:2px 6px;border-radius:4px;font-family:var(--mono)">PRO</span>
+          </div>
+          <div style="font-size:.88rem;font-weight:900;margin-bottom:4px">做出業界用的技術</div>
+          <div style="font-size:.78rem;color:var(--muted);font-weight:700;line-height:1.6">IK 骨架 · GPU 優化 · PBR 材質 · Post FX · 完整畢業 Shader</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Step 4: 單一 CTA -->
+  <div class="int-sec" style="padding-bottom:0">
+    <div style="background:linear-gradient(135deg,rgba(0,229,160,.08),rgba(124,111,255,.05));border:1px solid rgba(0,229,160,.2);border-radius:18px;padding:28px 24px;text-align:center">
+      <div style="font-size:2rem;margin-bottom:10px">🎮</div>
+      <div style="font-size:1.1rem;font-weight:900;margin-bottom:6px">準備好了嗎？</div>
+      <div style="font-size:.84rem;color:var(--muted);font-weight:700;margin-bottom:20px;line-height:1.6">
+        前 10 關免費，不需要帳號，打開就能學<br>
+        學完再決定要不要繼續 Pro 進階關卡
+      </div>
+      <button onclick="openCourse()" style="background:var(--acc);color:#07080f;border:none;border-radius:100px;padding:14px 40px;font-size:1rem;font-weight:900;cursor:pointer;font-family:var(--font);box-shadow:0 4px 22px rgba(0,229,160,.32);transition:all .2s;display:inline-block" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(0,229,160,.45)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 22px rgba(0,229,160,.32)'">🎓 開始免費學習</button>
+      <div style="font-size:.7rem;color:#2a3550;margin-top:10px;font-weight:700">← 左邊 TA HUB 頻道有更多 TA 資源</div>
     </div>
   </div>
 
@@ -940,7 +928,6 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
       <div style="font-size:.68rem;color:#3a4060;margin-top:8px;font-weight:700">免費訂閱，推出時第一個知道</div>
     </div>
   </div>
-
 </div><!-- #intro-panel -->
 
 <!-- 課程 Overlay -->
