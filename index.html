@@ -932,12 +932,16 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
 
 <!-- 課程 Overlay -->
 <div id="course-overlay" style="display:none;position:fixed;inset:0;z-index:1000;background:#07080f;overflow-y:auto">
-  <div style="position:sticky;top:0;z-index:10;background:rgba(7,8,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid #1d2035;padding:12px 18px;display:flex;align-items:center;gap:12px">
-    <button onclick="closeCourse()" style="width:36px;height:36px;border-radius:9px;background:#131520;border:1px solid #1d2035;color:#e8eaf2;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">←</button>
+  <div id="course-topbar" style="position:sticky;top:0;z-index:10;background:rgba(7,8,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid #1d2035;padding:12px 18px;display:flex;align-items:center;gap:12px">
+    <button onclick="closeCourse()" style="width:36px;height:36px;border-radius:9px;background:#131520;border:1px solid #1d2035;color:#e8eaf2;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">←</button>
     <span style="font-weight:900;font-size:.95rem">🎮 TA 魔法學院</span>
     <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:.65rem;color:#4a5070">← 回到 TA HUB</span>
   </div>
-  <iframe id="course-frame" src="" style="width:100%;height:calc(100vh - 56px);border:none" allow="autoplay"></iframe>
+  <div id="course-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(100vh - 56px);gap:16px;color:#4a5070">
+    <div style="width:40px;height:40px;border:3px solid #1d2035;border-top-color:#00e5a0;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+    <div style="font-size:.85rem;font-weight:700">載入課程中…</div>
+  </div>
+  <div id="course-content" style="display:none"></div>
 </div>
 
 <!-- 訂閱通知 Modal -->
@@ -1698,15 +1702,62 @@ function updateSourceList(){
     </div>`).join('');
 }
 
-// ─── COURSE OVERLAY ───
-function openCourse(){
-  const o=document.getElementById('course-overlay');
-  const f=document.getElementById('course-frame');
-  if(!f.src||f.src==='about:blank'||f.src===''){
-    f.src='ta-course.html';
+// ─── COURSE OVERLAY (fetch inject) ───
+let _courseLoaded = false;
+async function openCourse(){
+  const o = document.getElementById('course-overlay');
+  o.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  
+  if(_courseLoaded) return;
+  
+  const loading = document.getElementById('course-loading');
+  const content = document.getElementById('course-content');
+  loading.style.display = 'flex';
+  content.style.display = 'none';
+  
+  try {
+    const res = await fetch('ta-course.html');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const html = await res.text();
+    
+    // Extract body content
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    const bodyContent = bodyMatch ? bodyMatch[1] : html;
+    
+    // Extract and inject styles
+    const styleMatches = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)];
+    styleMatches.forEach(m => {
+      const s = document.createElement('style');
+      s.textContent = m[1];
+      s.setAttribute('data-course', '1');
+      document.head.appendChild(s);
+    });
+    
+    // Set content
+    content.innerHTML = bodyContent;
+    
+    // Extract and run scripts in order
+    const scripts = content.querySelectorAll('script');
+    for(const oldScript of scripts){
+      const s = document.createElement('script');
+      if(oldScript.src) { s.src = oldScript.src; }
+      else { s.textContent = oldScript.textContent; }
+      oldScript.parentNode.replaceChild(s, oldScript);
+    }
+    
+    _courseLoaded = true;
+    loading.style.display = 'none';
+    content.style.display = 'block';
+    
+  } catch(err) {
+    loading.innerHTML = `<div style="text-align:center;padding:40px">
+      <div style="font-size:2rem;margin-bottom:12px">⚠️</div>
+      <div style="font-weight:900;margin-bottom:8px">無法載入課程</div>
+      <div style="font-size:.8rem;color:#4a5070;margin-bottom:16px">${err.message}</div>
+      <a href="ta-course.html" target="_blank" style="background:var(--acc,#00e5a0);color:#07080f;padding:10px 24px;border-radius:100px;font-weight:900;text-decoration:none;font-size:.88rem">在新分頁開啟課程 →</a>
+    </div>`;
   }
-  o.style.display='block';
-  document.body.style.overflow='hidden';
 }
 function closeCourse(){
   document.getElementById('course-overlay').style.display='none';
