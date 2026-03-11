@@ -1734,7 +1734,7 @@ async function openCourseAndUnlock(){
     setTimeout(()=>clearInterval(tryOpen), 8000);
   });
 }
-function openCourse(){
+async function openCourse(){
   const o = document.getElementById('course-overlay');
   o.style.display = 'block';
   document.body.style.overflow = 'hidden';
