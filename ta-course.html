@@ -260,8 +260,11 @@ const GUMROAD_PRODUCT_ID = 'tahub-pro'; // ← 你的 Gumroad 商品 ID
 // ── Gumroad License Key 驗證 ──
 // 格式：XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX（Gumroad 自動產生）
 function isValidGumroadKey(key){
-  // Gumroad license key 格式驗證（8-4-4-4-12 hex 或類似格式）
-  return /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i.test(key);
+  // Gumroad license key 格式：8-8-8-8 hex（例：82551613-AC7044F1-B6EC0902-2FDFD75B）
+  // 也接受標準 UUID 格式 8-4-4-4-12
+  if(/^[0-9A-F]{8}-[0-9A-F]{8}-[0-9A-F]{8}-[0-9A-F]{8}$/i.test(key)) return true;
+  if(/^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i.test(key)) return true;
+  return false;
 }
 
 const PRO = {
@@ -277,7 +280,7 @@ async function verifyGumroadKey(licenseKey){
     const res = await fetch('https://api.gumroad.com/v2/licenses/verify', {
       method: 'POST',
       headers: {'Content-Type':'application/x-www-form-urlencoded'},
-      body: `product_id=${encodeURIComponent(GUMROAD_PRODUCT_ID)}&license_key=${encodeURIComponent(licenseKey)}&increment_uses_count=false`
+      body: `product_permalink=${encodeURIComponent(GUMROAD_PRODUCT_ID)}&license_key=${encodeURIComponent(licenseKey)}&increment_uses_count=false`
     });
     const data = await res.json();
     return data.success === true;
