@@ -333,49 +333,34 @@ function openPW(chId){
 }
 function closePW(){ document.getElementById('pw-modal').style.display='none'; }
 
-async function redeemToken(){
+function redeemToken(){
   const inp = document.getElementById('pw-token');
   const err = document.getElementById('pw-err');
-  const btn = document.querySelector('.pw-token-btn');
   const raw = inp.value.trim().toUpperCase();
   if(!raw){ inp.classList.add('err'); return; }
   
   inp.classList.remove('err','ok');
+  err.style.display='none';
   
-  // 格式先檢查
+  // 格式驗證：Gumroad key 格式正確即解鎖
   if(!isValidGumroadKey(raw)){
     inp.classList.add('err');
-    err.textContent = '序號格式不正確，請確認複製完整';
+    err.textContent = '序號格式不正確，請確認複製完整（格式：XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX）';
     err.style.display='block';
     setTimeout(()=>inp.classList.remove('err'),600);
     return;
   }
   
-  // 顯示驗證中狀態
-  btn.textContent = '驗證中…';
-  btn.disabled = true;
-  err.style.display='none';
-  
-  const ok = await verifyGumroadKey(raw);
-  btn.textContent = '解鎖';
-  btn.disabled = false;
-  
-  if(ok){
-    inp.classList.add('ok');
-    PRO.set(raw);
-    showProBar();
-    setTimeout(()=>{
-      closePW();
-      renderMap();
-      showToast('🎉 Pro 已解鎖！全部 20 關開放');
-      if(typeof confetti==='function') confetti('#ffcb47');
-    }, 600);
-  } else {
-    inp.classList.add('err');
-    err.textContent = '序號無效或已使用，請確認後再試';
-    err.style.display='block';
-    setTimeout(()=>inp.classList.remove('err'),600);
-  }
+  // 格式正確 → 解鎖
+  inp.classList.add('ok');
+  PRO.set(raw);
+  showProBar();
+  setTimeout(()=>{
+    closePW();
+    renderMap();
+    showToast('🎉 Pro 已解鎖！全部 20 關開放');
+    if(typeof confetti==='function') confetti('#ffcb47');
+  }, 600);
 }
 
 // ══════════════════════════════════════

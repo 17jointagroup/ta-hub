@@ -1584,9 +1584,9 @@ function render(){
   arts.sort((a,b)=>{
     if(a.isNew&&!b.isNew) return -1;
     if(!a.isNew&&b.isNew) return 1;
-    if(sortBy==='date')   return b.date.localeCompare(a.date);
-    if(sortBy==='source') return a.src.localeCompare(b.src);
-    return a.title.localeCompare(b.title);
+    if(sortBy==='date')   return (b.date||'').localeCompare(a.date||'');
+    if(sortBy==='source') return (a.src||'').localeCompare(b.src||'');
+    return (a.title||'').localeCompare(b.title||'');
   });
 
   document.getElementById('feed-sub').textContent=`顯示 ${arts.length} 篇，共 ${A.length} 篇`;
@@ -1860,7 +1860,7 @@ function rebuildArticles(){
   if(channel==='ta'){
     SEEDS.forEach(a=>{ map[a.id]={...a}; });
     // Also add POOL articles (give them IDs if missing)
-    POOL.forEach((a,i)=>{ const id=a.id||('pool_'+i); if(!map[id]) map[id]={...a,id}; });
+    POOL.forEach((a,i)=>{ const id=a.id||('pool_'+i); if(!map[id]) map[id]={...a, id, date: a.date||'2025-01-01'}; });
   } else if(channel==='show'){
     SHOWCASE.forEach(a=>{ map[a.id]={...a,isShowcase:true}; });
   } else {
