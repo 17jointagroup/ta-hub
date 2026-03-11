@@ -1859,6 +1859,8 @@ function rebuildArticles(){
   const map={};
   if(channel==='ta'){
     SEEDS.forEach(a=>{ map[a.id]={...a}; });
+    // Also add POOL articles (give them IDs if missing)
+    POOL.forEach((a,i)=>{ const id=a.id||('pool_'+i); if(!map[id]) map[id]={...a,id}; });
   } else if(channel==='show'){
     SHOWCASE.forEach(a=>{ map[a.id]={...a,isShowcase:true}; });
   } else {
