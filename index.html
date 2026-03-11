@@ -1747,7 +1747,7 @@ async function openCourse(){
   content.style.display = 'none';
   
   try {
-    const res = await fetch('ta-course.html');
+    const res = await fetch('ta-course.html?v=' + Date.now());
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const html = await res.text();
     
