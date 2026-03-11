@@ -211,7 +211,7 @@ input[type=range]{width:100%;accent-color:var(--lc,var(--acc));height:4px;cursor
     <a href="#" id="pw-buy-link" class="pw-buy" target="_blank">💳 立即解鎖</a>
     <div style="margin:16px 0 0"><div class="pw-divider">已有序號嗎？</div></div>
     <div class="pw-token-wrap">
-      <input class="pw-token-input" id="pw-token" type="text" placeholder="貼上你的授權序號" autocomplete="off" onkeydown="if(event.key==='Enter')redeemToken()">
+      <input class="pw-token-input" id="pw-token" type="text" placeholder="貼上 Gumroad 序號（格式：XXXXXXXX-XXXX-...）" autocomplete="off" onkeydown="if(event.key==='Enter')redeemToken()">
       <button class="pw-token-btn" onclick="redeemToken()">解鎖</button>
     </div>
     <div class="pw-err" id="pw-err">序號不正確，請再確認一次</div>
@@ -251,70 +251,17 @@ input[type=range]{width:100%;accent-color:var(--lc,var(--acc));height:4px;cursor
 // 免費關卡：c0–c4（前5關）
 const FREE_CHAPTERS = ['c0','c1','c2','c3','c4','c5','c6','c7','c8','c9'];
 const PRO_LOCK_FROM = 10; // c10 以後需要 Pro
+const GUMROAD_PRODUCT_ID = 'tahub-pro'; // ← 你的 Gumroad 商品 ID
 
 // ── Token 列表（SHA-256 hash）──
-// 原始序號示例：TAHUB-XXXX-XXXX
-// 用法：把真實序號的 hash 加入這個列表
-// 產生 hash: https://emn178.github.io/online-tools/sha256.html
-// 示例序號「TAHUB-2025-DEMO」的 hash：
-const VALID_TOKEN_HASHES = new Set([
-  '038c63d2fb7dafe63a4ff181718fcb9e60a92c14a1a7059d0fdd710afae7e67b', // #01 TAHUB-Q4JR-8R7J-5CE8
-  '0f4479c9ebcfd3afe29ab8daaa39f09ac5eb2168b74454cf95513850929cecb3', // #02 TAHUB-YELL-6NIW-LSOH
-  '422dd4e640dba45ba4afc8ee56ddb27145adb6529008c1aee31d40f058285a74', // #03 TAHUB-68DH-8EIO-0YOF
-  '027ec403ac0fba6b7ef795ac22c2213b30543c7a348b67d22e48247ad43b3256', // #04 TAHUB-9N9E-HG1Y-Y1AE
-  '7de5f07d5309108d6c98c89792d9986ed253d83526d5c56461239a6adcadb83a', // #05 TAHUB-CE95-WPN7-E3PW
-  'd2ea8b68d6502a25f77b1386d384fef5859a81bbf017c76b29f7fec98950acaa', // #06 TAHUB-4NZB-4516-DLW1
-  '593bb7a0443964284c077a85001bb260a0e2b27046394b99663b4450a02a2d29', // #07 TAHUB-ES3F-8CNF-X64D
-  'f2f8013754dbb1860f83a65363bf6a3ce260a55152dfebc8e860436248439328', // #08 TAHUB-EYTM-H4PO-WEUG
-  'cc77a61f8bc8f123543276321b2de109523c6854cf727f542e02db60596fbeb6', // #09 TAHUB-J4VL-FXEY-K30W
-  '0ce359be96659d85ce2e4c1af527adbcfe6d57c4fd77be59da174fef30c4b8b5', // #10 TAHUB-DWPU-ZAOH-H6IV
-  '60e6abe18d9f69855c94f1197ff281ecb84f9cce3eab0291442d9f8588bb4f40', // #11 TAHUB-RF3R-ZSCO-I3V1
-  '5c03b9b3c732d36842d17878ab5a9679d80596b58d0bbde68a951d4bdf3d67fa', // #12 TAHUB-NFA1-VO0X-HLY0
-  'fae4ed48b93ce4d7c6b4e030be9cfc8857c0e99f9863f2543fd7499716ebeca3', // #13 TAHUB-ZKVR-8DEA-8XKW
-  'a6b72fb14f7a9d332e032e0c5ff3ab7a0668609f44bbd7918ac3cf73321d06dc', // #14 TAHUB-RUWH-LE9W-WAHE
-  '9e91fbf1f6352d229abbbc45364f0e0903c3615c95679fdfd56e5a1b6ae0d244', // #15 TAHUB-SUME-E1CI-8NX9
-  '7e2df79c7915b7abf8db071f98ea3cb37853fc5afec98a38c1466d802f4be81d', // #16 TAHUB-H51G-VJJ2-KGL4
-  '7ddb60c001660edaefe005de0f8f36c7cdc3ae228ad4f2d461913b2ccfd29612', // #17 TAHUB-NA90-ZXTA-CTCB
-  'a8f1bddc3ea61f8bb708067a49b4f3a784959df612a0b6bd37db3ad37b1fd76f', // #18 TAHUB-T5EW-53TM-TC30
-  'f4348a4dddc4bd22b0fcfe0f1e7b2e1202a24d1b41dec1d62a755c18fd1bebb4', // #19 TAHUB-D2X6-W8P5-UG3T
-  '28267aefe91c61f4c1fa67d1958fc2107ea15fd08e774701abf3b6a8afcb30bb', // #20 TAHUB-UQ5A-YODB-FJOR
-  '2ed73f0ac60f58f7ae9d7cce1236f22766789f3bda858225a85bf89d81280d1d', // #21 TAHUB-3QJA-R6IN-3YMA
-  '41c54012fee82ad0fcf7b5f60c39757d9cbee790db6432deba95e3689d7b1b13', // #22 TAHUB-JHAO-SDSU-0DGT
-  '3ad0ad52d57beae6629ec13bb68dfa26eefe4702148cb7107f473b5802d1d75a', // #23 TAHUB-PQGA-4F6J-C53P
-  '93f2e61c7d219099a7ddab622bcdbf82cee32bd27d849801a5dc63aed55d9c39', // #24 TAHUB-E9R1-BZVF-RABI
-  '21ac9254caba3ca396f1b24c8fec499cac8d1912bdc057dcce9c5a2725c6ea28', // #25 TAHUB-LM4I-5Y4W-90IK
-  '4298acde65c1fcd4f8fce570afe042cb6e50d3734996acecd81b267cd5713a2d', // #26 TAHUB-G51V-VPGQ-PKQJ
-  'f501010ed713a75b344bddebe38224df91193cfca952d429e77a99f45a28eece', // #27 TAHUB-G3UT-QGDL-DI99
-  '304d756b78dac0c19bac68227679d1514c34eb4de5a3bb0d2ac97154a2fcd2bb', // #28 TAHUB-Q65Z-G6QT-AL9P
-  '3bc6ab08259dbdb97a8fe6563957527cb7a421d10657d7ea91ebb4fc5df48f98', // #29 TAHUB-ZSPM-LTIA-JZFE
-  '52507eab3e7100d21979f497dd87aff97e8432defd03ba308a5f343078075f2f', // #30 TAHUB-JQ31-8DL9-39PH
-  '5976962656ea359a43e6b1745ac0eee1aa965c2f48df6875acf16af0e0bc2093', // #31 TAHUB-UDGI-TJE4-JSYX
-  'f3e9c2804654fa8fa55ee61ede08fa697c75f6de09aa4e7800b72741fc809dcc', // #32 TAHUB-N67A-116W-ERM2
-  'b09b607163d789be747202539c274d5c30d49378d12effd617b8b51e74e20a7c', // #33 TAHUB-2PT9-VS2K-86SN
-  'a50a25db98d4cc2ba17731a540b9e1b3c94bb607b5d01cdc1d54f6ab0f68631d', // #34 TAHUB-M7OO-MZB6-D7RX
-  '591579e174b1214d825761b4b8500012a4eea2c6166ac1beb4a24a26a4a2bf36', // #35 TAHUB-LEAK-5O2U-4RM6
-  '09d5ec0aa3471ab7ce16b4c10480967bd326f3f09ef9c20cd94d1cbed397bc24', // #36 TAHUB-XDAG-GSQD-K9UJ
-  '7b10211dac768fa1c519b060b4c42d750e965f35728073dcd4dbb5f70536329c', // #37 TAHUB-JWA1-G7HV-2BK2
-  'ad70ef4831f04c861003b7c7fd1d494fa6f2dd3c8ca514e0f17a84936aa2a36c', // #38 TAHUB-V01T-VH59-9SVN
-  '23f43200b9e7341fe746c77ccd45a3f2319a6e9c6bf20bb8a310db82ac927b8f', // #39 TAHUB-U1CX-ONH0-GI8P
-  '07b26b1c126c9b6f814735fb2d93085672a67395f91ce96f305976f33c5c8d1c', // #40 TAHUB-G1SC-5FNK-NCXN
-  'ddc5e8cbcc0d2bb90611ea589939b215263456dcb529eeb42c45373fd10f2e09', // #41 TAHUB-1CJ1-F3AO-XP8E
-  '2056c30a60a0b237cdef1145fba7647274b78b30f7951139248ac1a1eecb893e', // #42 TAHUB-W2VX-DQTB-YHS5
-  'd736bc923d4e506e40829a6903da500d062dc7fa6a161a9dba682244928e1554', // #43 TAHUB-0954-75TZ-3M92
-  '609d9b49c23895c4bdf71c13b71c084031054b1cd56a94fb50b78828e6cfec6c', // #44 TAHUB-5E5N-AFTS-L0I8
-  '4b3b38462a159d44d513bb3c5527c2aad4afc9621b679dfc03f8a144c5f18d10', // #45 TAHUB-56YG-UMHI-WRQA
-  '6ff6ab080ab0e6bc22029a5f81af771a0e252d116310ea067ecd40f982efba68', // #46 TAHUB-G72K-94FG-469U
-  'e92e05b788efc6232d4c2615e054bdb3e60de0fa52e29cf5d093aefe2426db5a', // #47 TAHUB-K8L5-GDH8-CQX1
-  '683f41673994961f19bebd054d52b860b1f91d2596e9454159cd2799536c7b68', // #48 TAHUB-C8LW-N5O9-MYC7
-  '1d2fa1fdc4cb3656243ee553abc028c9b660e72bed0de46fb3a5373e22ab7836', // #49 TAHUB-T1VL-DWZ9-ITCZ
-  'fb961d1c960a8f813861d3bc5480d7f29eab4d4f01981c676ab0c0aa389458e5', // #50 TAHUB-FS3H-3P6Y-U0WP
-  // 之後新增：把新序號的 SHA-256 hash 貼在這裡
-]);
+// ── 序號驗證改由 Gumroad API 處理 ──
 
 // ── Token 驗證 ──
-async function sha256(msg){
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+// ── Gumroad License Key 驗證 ──
+// 格式：XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX（Gumroad 自動產生）
+function isValidGumroadKey(key){
+  // Gumroad license key 格式驗證（8-4-4-4-12 hex 或類似格式）
+  return /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i.test(key);
 }
 
 const PRO = {
@@ -324,15 +271,32 @@ const PRO = {
   clear(){ localStorage.removeItem('ta3_pro_token'); }
 };
 
-// 啟動時驗證已存 token 是否仍有效
+// 呼叫 Gumroad API 驗證 license key
+async function verifyGumroadKey(licenseKey){
+  try {
+    const res = await fetch('https://api.gumroad.com/v2/licenses/verify', {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: `product_id=${encodeURIComponent(GUMROAD_PRODUCT_ID)}&license_key=${encodeURIComponent(licenseKey)}&increment_uses_count=false`
+    });
+    const data = await res.json();
+    return data.success === true;
+  } catch(e) {
+    return false;
+  }
+}
+
+// 啟動時驗證已存 token
 async function initPro(){
   if(!PRO.active) return;
-  const h = await sha256(PRO.token);
-  if(!VALID_TOKEN_HASHES.has(h)){
-    PRO.clear(); // token 已失效
-  } else {
-    showProBar();
+  const key = PRO.token;
+  // 格式檢查
+  if(!isValidGumroadKey(key)){
+    PRO.clear();
+    return;
   }
+  // 驗證成功直接顯示（避免每次載入都打 API）
+  showProBar();
 }
 
 function showProBar(){
@@ -360,7 +324,7 @@ function openPW(chId){
   document.getElementById('pw-token').classList.remove('err','ok');
   // 這裡可以設定購買連結
   // ⬇ 把你的 Gumroad 商品頁面 URL 貼在這裡
-  const GUMROAD_URL = 'https://gumroad.com/l/你的商品ID'; // ← 改這行
+  const GUMROAD_URL = `https://lintsch.gumroad.com/l/${GUMROAD_PRODUCT_ID}`;
   document.getElementById('pw-buy-link').href = GUMROAD_URL;
   setTimeout(()=>document.getElementById('pw-token').focus(),100);
 }
@@ -369,13 +333,31 @@ function closePW(){ document.getElementById('pw-modal').style.display='none'; }
 async function redeemToken(){
   const inp = document.getElementById('pw-token');
   const err = document.getElementById('pw-err');
+  const btn = document.querySelector('.pw-token-btn');
   const raw = inp.value.trim().toUpperCase();
   if(!raw){ inp.classList.add('err'); return; }
   
   inp.classList.remove('err','ok');
-  const h = await sha256(raw);
   
-  if(VALID_TOKEN_HASHES.has(h)){
+  // 格式先檢查
+  if(!isValidGumroadKey(raw)){
+    inp.classList.add('err');
+    err.textContent = '序號格式不正確，請確認複製完整';
+    err.style.display='block';
+    setTimeout(()=>inp.classList.remove('err'),600);
+    return;
+  }
+  
+  // 顯示驗證中狀態
+  btn.textContent = '驗證中…';
+  btn.disabled = true;
+  err.style.display='none';
+  
+  const ok = await verifyGumroadKey(raw);
+  btn.textContent = '解鎖';
+  btn.disabled = false;
+  
+  if(ok){
     inp.classList.add('ok');
     PRO.set(raw);
     showProBar();
@@ -383,11 +365,11 @@ async function redeemToken(){
       closePW();
       renderMap();
       showToast('🎉 Pro 已解鎖！全部 20 關開放');
-      // 小撒花
       if(typeof confetti==='function') confetti('#ffcb47');
     }, 600);
   } else {
     inp.classList.add('err');
+    err.textContent = '序號無效或已使用，請確認後再試';
     err.style.display='block';
     setTimeout(()=>inp.classList.remove('err'),600);
   }

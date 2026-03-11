@@ -915,17 +915,37 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
     <div style="background:linear-gradient(135deg,rgba(124,111,255,.1),rgba(0,229,160,.06));border:1px solid rgba(124,111,255,.25);border-radius:18px;padding:24px;text-align:center;position:relative;overflow:hidden">
       <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(124,111,255,.08),transparent);pointer-events:none"></div>
       <div style="font-size:1.8rem;margin-bottom:10px">⭐</div>
-      <div style="font-size:1rem;font-weight:900;margin-bottom:6px">TA HUB Pro — 即將推出</div>
+      <div style="font-size:1rem;font-weight:900;margin-bottom:6px">TA HUB Pro — 解鎖進階 10 關</div>
       <div style="font-size:.82rem;color:#7c85a0;font-weight:700;margin-bottom:16px;line-height:1.6">
-        進階課程 · 獨家作品集評析 · 求職資源 · 優先提問
+        程序化系統 · 進階應用 · PBR 材質 · 畢業作品<br>一次付費，永久存取全部 20 關
       </div>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">
-        <div style="background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;color:var(--acc)">📚 進階課程內容</div>
-        <div style="background:rgba(124,111,255,.1);border:1px solid rgba(124,111,255,.2);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;color:#9d8fff">🔍 作品集深度評析</div>
-        <div style="background:rgba(255,203,71,.1);border:1px solid rgba(255,203,71,.2);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;color:#ffcb47">💼 TA 求職資源庫</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px">
+        <div style="background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;color:var(--acc)">⬡ 程序化建模 (5關)</div>
+        <div style="background:rgba(124,111,255,.1);border:1px solid rgba(124,111,255,.2);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;color:#9d8fff">🔬 進階應用 (4關)</div>
+        <div style="background:rgba(255,203,71,.1);border:1px solid rgba(255,203,71,.2);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;color:#ffcb47">🏆 畢業作品</div>
       </div>
-      <button onclick="showSubModal()" style="background:linear-gradient(135deg,#7c6fff,#00e5a0);color:#07080f;border:none;border-radius:100px;padding:11px 28px;font-size:.88rem;font-weight:900;cursor:pointer;font-family:var(--font)">📬 搶先通知我</button>
-      <div style="font-size:.68rem;color:#3a4060;margin-top:8px;font-weight:700">免費訂閱，推出時第一個知道</div>
+      <!-- 主要購買按鈕 -->
+      <a id="hub-buy-btn" href="https://lintsch.gumroad.com/l/tahub-pro" target="_blank"
+         style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ffcb47,#ff8c42);color:#07080f;border:none;border-radius:100px;padding:14px 36px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:var(--font);box-shadow:0 4px 22px rgba(255,203,71,.3);text-decoration:none;transition:all .2s;margin-bottom:10px"
+         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(255,203,71,.45)'"
+         onmouseout="this.style.transform='';this.style.boxShadow='0 4px 22px rgba(255,203,71,.3)'">
+        💳 立即購買 Pro
+      </a>
+      <div style="font-size:.72rem;color:#4a5570;font-weight:700;margin-bottom:14px">買完收到序號 → 貼入課程即解鎖</div>
+      <!-- 已有序號？ -->
+      <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:4px">
+        <div style="height:1px;width:40px;background:#1d2035"></div>
+        <span style="font-size:.68rem;color:#3a4060;font-weight:700">已有序號？</span>
+        <div style="height:1px;width:40px;background:#1d2035"></div>
+      </div>
+      <button onclick="openCourseAndUnlock()" style="background:transparent;border:1px solid rgba(255,203,71,.25);color:#ffcb47;border-radius:100px;padding:9px 22px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:var(--font);transition:all .2s;margin-top:6px"
+              onmouseover="this.style.borderColor='rgba(255,203,71,.6)'"
+              onmouseout="this.style.borderColor='rgba(255,203,71,.25)'">
+        🔑 輸入序號解鎖
+      </button>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid #0f1525">
+        <button onclick="showSubModal()" style="background:transparent;border:none;color:#3a4060;font-size:.7rem;font-weight:700;cursor:pointer;font-family:var(--font)">📬 還沒決定？先訂閱通知</button>
+      </div>
     </div>
   </div>
 </div><!-- #intro-panel -->
@@ -1704,7 +1724,17 @@ function updateSourceList(){
 
 // ─── COURSE OVERLAY (fetch inject) ───
 let _courseLoaded = false;
-async function openCourse(){
+async function openCourseAndUnlock(){
+  openCourse().then(()=>{
+    // 等課程載入後開啟 paywall
+    const tryOpen = setInterval(()=>{
+      const pw = document.getElementById('pw-modal');
+      if(pw){ clearInterval(tryOpen); pw.style.display='flex'; }
+    }, 300);
+    setTimeout(()=>clearInterval(tryOpen), 8000);
+  });
+}
+function openCourse(){
   const o = document.getElementById('course-overlay');
   o.style.display = 'block';
   document.body.style.overflow = 'hidden';
