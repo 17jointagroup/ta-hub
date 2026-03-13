@@ -166,6 +166,12 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 <header>
   <button class="back-btn" onclick="history.back()">← 返回</button>
   <span class="header-title">🏰 召喚之塔</span>
+  <div style="display:flex;gap:6px;margin-left:16px;flex-wrap:wrap">
+    <span style="font-size:.68rem;font-weight:800;color:var(--txt2);align-self:center;letter-spacing:.05em">下一塔 →</span>
+    <a href="opengl-tower2.html" style="background:rgba(255,217,61,.1);border:1px solid rgba(255,217,61,.3);color:#ffd93d;padding:4px 12px;border-radius:100px;font-size:.75rem;font-weight:900;text-decoration:none;font-family:var(--font);transition:.2s" onmouseover="this.style.background='rgba(255,217,61,.2)'" onmouseout="this.style.background='rgba(255,217,61,.1)'">💡 塔2 光之塔</a>
+    <a href="opengl-tower3.html" style="background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.28);color:#00e5a0;padding:4px 12px;border-radius:100px;font-size:.75rem;font-weight:900;text-decoration:none;font-family:var(--font);transition:.2s" onmouseover="this.style.background='rgba(0,229,160,.18)'" onmouseout="this.style.background='rgba(0,229,160,.08)'">🗿 塔3 模型之塔</a>
+    <a href="opengl-tower4.html" style="background:rgba(199,146,234,.08);border:1px solid rgba(199,146,234,.28);color:#c792ea;padding:4px 12px;border-radius:100px;font-size:.75rem;font-weight:900;text-decoration:none;font-family:var(--font);transition:.2s" onmouseover="this.style.background='rgba(199,146,234,.18)'" onmouseout="this.style.background='rgba(199,146,234,.08)'">⚔️ 塔4 進階術式</a>
+  </div>
   <div class="xp-bar">
     <span>⚡ XP</span>
     <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
