@@ -610,7 +610,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
       <button class="ch-btn ch-art" id="ch-art" onclick="setChannel('art')">🎨 Art Tips</button>
       <button class="ch-btn ch-show" id="ch-show" onclick="setChannel('show')">✦ Showcase</button>
       <button class="ch-btn ch-intro" id="ch-intro" onclick="setChannel('intro')">🚀 入門</button>
-      <a href="opengl-tower1.html" class="ch-btn" style="color:#a89ffa;text-decoration:none">🏰 OpenGL</a>
+      <a href="javascript:void(0)" class="ch-btn" style="color:#a89ffa;text-decoration:none" onclick="goOpenGL()">🏰 OpenGL</a>
     </div>
     <div class="live-badge">LIVE <b id="article-count">● 15 篇</b></div>
     <div id="new-banner"></div>
@@ -732,7 +732,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
       <a href="#int-demo" class="int-cta sec" onclick="document.getElementById('int-demo').scrollIntoView({behavior:'smooth'});return false">⚡ 先玩看看</a>
     </div>
     <div style="margin-top:12px">
-      <a href="opengl-tower1.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(124,109,250,.12);border:1px solid rgba(124,109,250,.35);color:#a89ffa;border-radius:100px;padding:9px 20px;font-size:.82rem;font-weight:900;text-decoration:none;font-family:var(--font);transition:all .2s" onmouseover="this.style.background='rgba(124,109,250,.22)'" onmouseout="this.style.background='rgba(124,109,250,.12)'">
+      <a href="javascript:void(0)" onclick="goOpenGL()" style="display:inline-flex;align-items:center;gap:8px;background:rgba(124,109,250,.12);border:1px solid rgba(124,109,250,.35);color:#a89ffa;border-radius:100px;padding:9px 20px;font-size:.82rem;font-weight:900;text-decoration:none;font-family:var(--font);transition:all .2s" onmouseover="this.style.background='rgba(124,109,250,.22)'" onmouseout="this.style.background='rgba(124,109,250,.12)'">
         🏰 新課程：召喚之塔 — OpenGL 從零開始 →
       </a>
     </div>
@@ -2488,6 +2488,15 @@ async function translateReader(lang){
     console.error(e);
     if(activeTab) activeTab.textContent=origTabText;
     if(errEl){ errEl.style.display='block'; errEl.innerHTML='翻譯失敗：'+e.message+' — <button onclick="translateReader(rLang)" style="background:none;border:none;color:#ff5555;cursor:pointer;text-decoration:underline;font-size:10px">重試</button>'; }
+  }
+}
+
+function goOpenGL(){
+  // If player data exists → go to map, else → create character first
+  if(localStorage.getItem('player_data')){
+    window.location.href='opengl-map.html';
+  } else {
+    window.location.href='character.html';
   }
 }
 </script>
