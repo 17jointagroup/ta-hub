@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>✨ 創造角色 — OpenGL 魔法王國</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0a1e;--card:#16112e;--border:#2a1f4a;--acc:#a78bfa;--acc2:#34d399;--txt:#ede9ff;--txt2:#6b5a90;--font:'Nunito',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--txt);font-family:var(--font);min-height:100vh}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;border-radius:50%;background:#d4aaff;animation:tw var(--d,3s) var(--dl,0s) infinite}
+@keyframes tw{0%,100%{opacity:.06}50%{opacity:.7}}
+.wrap{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:20px 16px 48px}
+h1{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:4px;background:linear-gradient(135deg,#a78bfa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{text-align:center;color:var(--txt2);font-size:.8rem;margin-bottom:18px}
+.preview-box{background:var(--card);border:2px solid var(--border);border-radius:24px;padding:18px 12px;display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.char-svg-wrap{flex-shrink:0;width:110px;height:128px;filter:drop-shadow(0 4px 12px rgba(167,139,250,.3))}
+.preview-info{flex:1}
+.preview-name{font-size:1.1rem;font-weight:900;color:var(--txt);margin-bottom:4px}
+.preview-class{font-size:.8rem;font-weight:800;color:var(--acc);margin-bottom:10px}
+.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.ms{background:var(--bg);border-radius:7px;padding:4px 8px;display:flex;justify-content:space-between;align-items:center}
+.ms-l{font-size:.62rem;font-weight:800;color:var(--txt2);letter-spacing:.04em}
+.ms-v{font-size:.78rem;font-weight:900;font-family:monospace}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:12px}
+.card-title{font-size:.7rem;font-weight:900;color:var(--txt2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.name-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--txt);font-size:.95rem;font-family:var(--font);font-weight:800;outline:none;-webkit-appearance:none;-webkit-text-fill-color:var(--txt)}
+.name-input:focus{border-color:var(--acc)}
+.gender-row{display:flex;gap:7px;margin-top:10px}
+.gbtn{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:9px 4px;color:var(--txt2);font-family:var(--font);font-size:.8rem;font-weight:800;cursor:pointer;text-align:center;transition:.15s;-webkit-appearance:none}
+.gbtn.on{background:rgba(167,139,250,.12);border-color:var(--acc);color:var(--acc)}
+.class-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ccrd{background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;transition:.15s;-webkit-appearance:none;width:100%}
+.ccrd.on{border-color:var(--acc);background:rgba(167,139,250,.1)}
+.ci{font-size:1.9rem;margin-bottom:5px;display:block}
+.cn{font-size:.8rem;font-weight:900;color:var(--txt);margin-bottom:3px}
+.cd{font-size:.62rem;color:var(--txt2);line-height:1.4;margin-bottom:6px}
+.cbg{display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
+.cb{font-size:.58rem;font-weight:800;padding:1px 5px;border-radius:100px;background:rgba(167,139,250,.1);color:var(--acc)}
+.color-rows{display:flex;flex-direction:column;gap:11px}
+.crow{display:flex;align-items:center;gap:10px}
+.clbl{font-size:.74rem;font-weight:800;color:var(--txt2);min-width:38px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:.15s;flex-shrink:0;-webkit-appearance:none}
+.chip.on{border-color:white;transform:scale(1.2);box-shadow:0 0 8px rgba(255,255,255,.3)}
+.start-btn{width:100%;background:linear-gradient(135deg,#a78bfa,#34d399);color:#0e0a1e;border:none;border-radius:100px;padding:16px;font-family:var(--font);font-size:1.05rem;font-weight:900;cursor:pointer;-webkit-appearance:none;letter-spacing:.03em;margin-top:6px;transition:.2s}
+.start-btn:active{opacity:.85;transform:scale(.98)}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="wrap">
+  <h1>✨ 創造你的角色</h1>
+  <p class="sub">踏上 OpenGL 魔法王國的冒險！</p>
+
+  <div class="preview-box">
+    <div class="char-svg-wrap">
+      <svg id="cSVG" viewBox="0 0 110 128" width="110" height="128" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="preview-info">
+      <div class="preview-name" id="pName">冒險者</div>
+      <div class="preview-class" id="pClass">🧙 魔法師</div>
+      <div class="mini-stats" id="pStats"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👤 角色名稱 &amp; 性別</div>
+    <input class="name-input" id="charName" type="text" placeholder="輸入你的名字..." maxlength="10" autocorrect="off" spellcheck="false">
+    <div class="gender-row">
+      <button class="gbtn on" id="g-male"   onclick="setG('male')"  >👦 男孩</button>
+      <button class="gbtn"    id="g-female" onclick="setG('female')">👧 女孩</button>
+      <button class="gbtn"    id="g-other"  onclick="setG('other')" >🌟 其他</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚔️ 選擇職業</div>
+    <div class="class-grid">
+      <button class="ccrd on" id="cls-mage"    onclick="setCls('mage')"   ><span class="ci">🧙</span><div class="cn">魔法師</div><div class="cd">理解力強<br>著色器天才</div><div class="cbg"><span class="cb">INT↑↑</span><span class="cb">MP↑</span></div></button>
+      <button class="ccrd"    id="cls-warrior" onclick="setCls('warrior')"><span class="ci">⚔️</span><div class="cn">劍士</div><div class="cd">攻擊力強<br>快速通關</div><div class="cbg"><span class="cb">ATK↑↑</span><span class="cb">DEF↑</span></div></button>
+      <button class="ccrd"    id="cls-archer"  onclick="setCls('archer')" ><span class="ci">🏹</span><div class="cn">弓手</div><div class="cd">速度最快<br>效率達人</div><div class="cbg"><span class="cb">SPD↑↑</span><span class="cb">ATK↑</span></div></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎨 外觀設定</div>
+    <div class="color-rows">
+      <div class="crow"><span class="clbl">膚色</span><div class="chips" id="skinChips"></div></div>
+      <div class="crow"><span class="clbl">髮色</span><div class="chips" id="hairChips"></div></div>
+      <div class="crow"><span class="clbl">服裝</span><div class="chips" id="outfitChips"></div></div>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="startAdventure()">⚡ 開始冒險！</button>
+</div>
+
+<script>
+const SKINS=['#fde8d0','#f5cba7','#e8a87c','#c8855a','#8d5524','#5c3317'];
+const HAIRS=['#f5e6c8','#e8c97a','#c87820','#6b3a1f','#2a1a08','#111','#e8396a','#7c6dfa'];
+const OUTFITS=['#7c6dfa','#00d4ff','#ff4757','#ff9f43','#2ed573','#ff6b9d','#a78bfa','#ffd700'];
+const CLS_STATS={mage:{atk:8,def:6,int:16,spd:8,hp:80,mp:80},warrior:{atk:16,def:12,int:6,spd:8,hp:120,mp:40},archer:{atk:12,def:8,int:10,spd:16,hp:90,mp:60}};
+const CLS_COL={mage:'#a78bfa',warrior:'#ff4757',archer:'#2ed573'};
+const CLS_NAME={mage:'🧙 魔法師',warrior:'⚔️ 劍士',archer:'🏹 弓手'};
+
+let si=2,hi=3,oi=0,gender='male',cls='mage';
+
+function mkStars(){const c=document.getElementById('stars');for(let i=0;i<80;i++){const s=document.createElement('div');s.className='star';s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${Math.random()<.25?2:1}px;height:${Math.random()<.25?2:1}px;--d:${2+Math.random()*5}s;--dl:${Math.random()*5}s`;c.appendChild(s);}}
+mkStars();
+
+function buildChips(){
+  [['skin',SKINS,si],['hair',HAIRS,hi],['outfit',OUTFITS,oi]].forEach(([t,arr,sel])=>{
+    document.getElementById(t+'Chips').innerHTML=arr.map((c,i)=>`<button class="chip${i===sel?' on':''}" style="background:${c}" onclick="setCol('${t}',${i})"></button>`).join('');
+  });
+}
+function setCol(t,i){if(t==='skin')si=i;else if(t==='hair')hi=i;else oi=i;buildChips();draw();}
+function setG(g){gender=g;['male','female','other'].forEach(x=>document.getElementById('g-'+x).classList.toggle('on',x===g));
+  if(g==='male'){hi=3;oi=0;}else if(g==='female'){hi=0;oi=5;}else{hi=7;oi=6;}
+  buildChips();draw();
+}
+function setCls(c){cls=c;['mage','warrior','archer'].forEach(x=>document.getElementById('cls-'+x).classList.toggle('on',x===c));
+  document.getElementById('pClass').textContent=CLS_NAME[c];updateStats();draw();
+}
+function updateStats(){
+  const s=CLS_STATS[cls];const cc=CLS_COL[cls];
+  document.getElementById('pStats').innerHTML=[['ATK',s.atk,cc],['DEF',s.def,'#60a5fa'],['INT',s.int,'#a78bfa'],['SPD',s.spd,'#34d399']].map(([l,v,c])=>`<div class="ms"><span class="ms-l">${l}</span><span class="ms-v" style="color:${c}">${v}</span></div>`).join('');
+}
+
+function draw(){
+  const s=SKINS[si],h=HAIRS[hi],o=OUTFITS[oi];
+  // darken outfit for legs
+  const od=shadeColor(o,-40);
+  const hat=cls==='mage'?
+    `<polygon points="55,3 39,27 71,27" fill="${o}"/><rect x="35" y="24" width="40" height="7" rx="3.5" fill="${o}"/><circle cx="55" cy="3" r="3" fill="#ffd700"/>`:
+    cls==='warrior'?
+    `<rect x="30" y="11" width="50" height="17" rx="8.5" fill="#8899aa"/><rect x="22" y="22" width="14" height="12" rx="4" fill="#778899"/><rect x="74" y="22" width="14" height="12" rx="4" fill="#778899"/>`:
+    `<ellipse cx="55" cy="15" rx="28" ry="12" fill="${h}"/><ellipse cx="71" cy="8" rx="3.5" ry="9" fill="#e8a87c" transform="rotate(28 71 8)"/>`;
+  const weapon=cls==='mage'?
+    `<g transform="translate(92,68) rotate(-25)"><rect x="-2.5" y="-20" width="5" height="28" rx="2.5" fill="#ffd700"/><polygon points="0,-28 -5,-17 5,-17" fill="#89ddff"/><circle cx="0" cy="-28" r="3.5" fill="white" opacity=".8"/></g>`:
+    cls==='warrior'?
+    `<g transform="translate(92,70)"><rect x="-2" y="-24" width="4.5" height="32" rx="1.5" fill="#c0c8d8"/><rect x="-8" y="-5" width="16" height="4.5" rx="2" fill="#aabbcc"/></g>`:
+    `<g transform="translate(93,68)"><path d="M3,-18 Q12,0 3,18" stroke="#8B5E3C" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M3,-18 L3,18" stroke="#ddd" stroke-width="1" stroke-dasharray="2,3"/></g>`;
+  const hB=gender==='female'?
+    `<ellipse cx="55" cy="20" rx="30" ry="13" fill="${h}"/><rect x="24" y="28" width="11" height="34" rx="5.5" fill="${h}"/><rect x="75" y="28" width="11" height="34" rx="5.5" fill="${h}"/>`:
+    gender==='other'?
+    `<ellipse cx="55" cy="20" rx="30" ry="13" fill="${h}"/><rect x="25" y="28" width="10" height="20" rx="5" fill="${h}"/><rect x="75" y="28" width="10" height="20" rx="5" fill="${h}"/>`:
+    `<ellipse cx="55" cy="20" rx="30" ry="13" fill="${h}"/>`;
+  const hF=gender==='female'?
+    `<path d="M27,24 Q36,13 50,17 Q42,24 38,30" fill="${h}"/><path d="M62,17 Q76,13 83,24" fill="${h}" stroke="${h}" stroke-width="1"/>`:
+    `<path d="M28,24 Q38,13 52,18 Q44,24 40,30" fill="${h}"/><path d="M64,18 Q76,13 82,24" fill="${h}" stroke="${h}" stroke-width="1"/>`;
+
+  document.getElementById('cSVG').innerHTML=`
+<ellipse cx="55" cy="124" rx="21" ry="5" fill="rgba(0,0,0,.16)"/>
+<rect x="39" y="97" width="13" height="24" rx="6.5" fill="${od}"/>
+<rect x="58" y="97" width="13" height="24" rx="6.5" fill="${od}"/>
+<rect x="26" y="65" width="58" height="37" rx="13" fill="${o}"/>
+<circle cx="26" cy="72" r="7.5" fill="${o}"/><circle cx="84" cy="72" r="7.5" fill="${o}"/>
+<rect x="11" y="69" width="16" height="26" rx="8" fill="${o}"/>
+<circle cx="19" cy="97" r="8" fill="${s}"/>
+<rect x="83" y="69" width="16" height="26" rx="8" fill="${o}"/>
+<circle cx="91" cy="97" r="8" fill="${s}"/>
+${weapon}
+<rect x="46" y="58" width="18" height="11" fill="${s}"/>
+${hB}
+<circle cx="55" cy="40" r="30" fill="${s}"/>
+<ellipse cx="25" cy="40" rx="5.5" ry="7" fill="${s}"/>
+<ellipse cx="85" cy="40" rx="5.5" ry="7" fill="${s}"/>
+${hat}${hF}
+<ellipse cx="43" cy="39" rx="7" ry="8" fill="white"/>
+<ellipse cx="67" cy="39" rx="7" ry="8" fill="white"/>
+<circle cx="44" cy="40" r="5" fill="#1a1035"/>
+<circle cx="68" cy="40" r="5" fill="#1a1035"/>
+<circle cx="46" cy="37.5" r="2" fill="white"/>
+<circle cx="70" cy="37.5" r="2" fill="white"/>
+<ellipse cx="30" cy="50" rx="8" ry="4.5" fill="rgba(255,130,130,.28)"/>
+<ellipse cx="80" cy="50" rx="8" ry="4.5" fill="rgba(255,130,130,.28)"/>
+<path d="M47 54 Q55 62 63 54" stroke="#cc7070" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+}
+
+function shadeColor(col,amt){let c=col.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];let r=Math.max(0,Math.min(255,parseInt(c.substr(0,2),16)+amt));let g=Math.max(0,Math.min(255,parseInt(c.substr(2,2),16)+amt));let b=Math.max(0,Math.min(255,parseInt(c.substr(4,2),16)+amt));return`#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;}
+
+document.getElementById('charName').addEventListener('input',function(){document.getElementById('pName').textContent=this.value||'冒險者';});
+
+function startAdventure(){
+  const name=document.getElementById('charName').value.trim()||'冒險者';
+  const s=CLS_STATS[cls];
+  const p={name,gender,class:cls,
+    appearance:{skin:SKINS[si],hair:HAIRS[hi],outfit:OUTFITS[oi]},
+    level:1,xp:0,xpNext:500,
+    hp:s.hp,hpMax:s.hp,mp:s.mp,mpMax:s.mp,
+    stats:{atk:s.atk,def:s.def,int:s.int,spd:s.spd},
+    equipment:{weapon:null,armor:null,hat:null,accessory:null},
+    unlockedItems:[],
+    titles:['初學者'],currentTitle:'初學者',
+    created:Date.now()};
+  localStorage.setItem('player_data',JSON.stringify(p));
+  window.location.href='opengl-map.html';
+}
+
+buildChips();draw();updateStats();
+</script>
+</body></html>
