@@ -133,6 +133,20 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 .fw-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .fw{position:absolute;border-radius:50%;animation:fwFly var(--d,.8s) var(--dl,0s) ease-out forwards}
 @keyframes fwFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx,0px),var(--ty,-80px)) scale(0);opacity:0}}
+
+/* ── Font size boost ── */
+html{font-size:17px}
+.lesson-title{font-size:1.05rem!important}
+.lesson-sub{font-size:.85rem!important}
+.story-box{font-size:1rem!important;line-height:1.9!important}
+.quiz-q{font-size:.98rem!important;line-height:1.7!important}
+.opt{font-size:.95rem!important}
+.done-btn{font-size:1rem!important}
+.xp-pill{font-size:.78rem!important}
+.tab{font-size:.85rem!important}
+.school-badge{font-size:.84rem!important}
+.code-wrap pre{font-size:.82rem!important}
+.map-title{font-size:.82rem!important}
 </style>
 </head>
 <body>
@@ -141,9 +155,7 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 <div class="orb" style="width:250px;height:250px;background:rgba(127,255,176,.04);bottom:10%;right:0%;--d:25s;--tx:-60px;--ty:-40px"></div>
 
 <header>
-  <a href="opengl-tower2.html" class="back-btn">← 城堡2</a>
   <a href="opengl-map.html" class="back-btn">🗺️ 地圖</a>
-  <a href="opengl-tower4.html" class="back-btn">城堡4 →</a>
   <a href="index.html" class="back-btn">🏠 首頁</a>
   <span class="header-title">🗿 模型之城</span>
   <div class="xp-bar">
@@ -152,18 +164,6 @@ input[type=range]{flex:1;accent-color:var(--acc)}
     <span class="xp-total" id="xp-total">0/330</span>
   </div>
 </header>
-<div style="position:sticky;top:52px;z-index:99;background:rgba(6,5,5,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);padding:6px 16px;display:flex;align-items:center;gap:8px;overflow-x:auto;white-space:nowrap;scrollbar-width:none">
-  <span style="font-size:.65rem;font-weight:800;color:#554433;letter-spacing:.06em;flex-shrink:0">城堡列表</span>
-  <a href="opengl-tower1.html" style="background:rgba(255,100,100,.1);border:1px solid rgba(255,100,100,.28);color:#ff6464;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,100,100,.1)'" onmouseout="this.style.background='rgba(255,100,100,.1)'">🗼 城堡1</a>
-  <a href="opengl-tower2.html" style="background:rgba(255,217,61,.1);border:1px solid rgba(255,217,61,.3);color:#ffd93d;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,217,61,.1)'" onmouseout="this.style.background='rgba(255,217,61,.1)'">💡 城堡2</a>
-  <span style="background:rgba(0,229,160,0.22);border:1px solid #00e5a0;color:#00e5a0;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;font-family:var(--font);flex-shrink:0;opacity:1">🗿 城堡3 ◀</span>
-  <a href="opengl-tower4.html" style="background:rgba(199,146,234,.08);border:1px solid rgba(199,146,234,.28);color:#c792ea;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(199,146,234,.08)'" onmouseout="this.style.background='rgba(199,146,234,.08)'">⚔️ 城堡4</a>
-  <a href="opengl-tower5.html" style="background:rgba(255,159,67,.08);border:1px solid rgba(255,159,67,.28);color:#ff9f43;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,159,67,.08)'" onmouseout="this.style.background='rgba(255,159,67,.08)'">🌟 城堡5</a>
-  <a href="opengl-tower6.html" style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.28);color:#00d4ff;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(0,212,255,.08)'" onmouseout="this.style.background='rgba(0,212,255,.08)'">⚗️ 城堡6</a>
-  <a href="opengl-tower7.html" style="background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.28);color:#ff4757;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,71,87,.08)'" onmouseout="this.style.background='rgba(255,71,87,.08)'">⚔️ 城堡7</a>
-  <a href="opengl-tower8.html" style="background:rgba(179,136,255,.08);border:1px solid rgba(179,136,255,.28);color:#b388ff;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(179,136,255,.08)'" onmouseout="this.style.background='rgba(179,136,255,.08)'">🌌 城堡8</a>
-  <a href="opengl-tower9.html" style="background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.35);color:#ffd700;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,215,0,.08)'" onmouseout="this.style.background='rgba(255,215,0,.08)'">★ 城堡9</a>
-</div>
 
 <section class="hero">
   <div class="tower-badge">🗿 城堡3 · 模型之城 · 3D Models</div>
