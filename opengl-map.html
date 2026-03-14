@@ -76,6 +76,19 @@ canvas{display:block;position:absolute;top:0;left:0;pointer-events:none}
 /* Level up */
 .lut{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120px);background:linear-gradient(135deg,#c084fc,#34d399);color:#04020e;border-radius:100px;padding:10px 22px;font-size:.88rem;font-weight:900;z-index:300;transition:transform .45s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 28px rgba(192,132,252,.45)}
 .lut.show{transform:translateX(-50%) translateY(0)}
+
+/* Map font boost */
+.cn-name{font-size:.72rem!important}
+.cn-sub{font-size:.6rem!important}
+.cn-pct{font-size:.62rem!important}
+.stars{font-size:.65rem!important}
+.cn-bubble{padding:7px 12px!important}
+.hud .pn{font-size:.92rem!important}
+.hud .lv{font-size:.66rem!important}
+.sptl{font-size:.85rem!important}
+.eq-nm{font-size:.62rem!important}
+.eq-st{font-size:.6rem!important}
+.fsv{font-size:1.15rem!important}
 </style>
 </head>
 <body>
@@ -211,6 +224,117 @@ function drawIsoBox(ctx,sx,sy,bw,bh,bz,topC,leftC,rightC){
   ctx.beginPath();ctx.moveTo(sx,sy+hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx+hw,sy+wallH);ctx.lineTo(sx,sy+hh+wallH);ctx.closePath();ctx.fillStyle=rightC;ctx.fill();ctx.stroke();
 }
 
+
+// ── 9 Unique Castle Designs ──
+function drawCastle(ctx, sx, sy, castleIdx, col, unlocked, done, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const r = parseInt(col.substr(1,2),16), g = parseInt(col.substr(3,2),16), b = parseInt(col.substr(5,2),16);
+  const topC=col, leftC=`rgb(${Math.floor(r*.55)},${Math.floor(g*.55)},${Math.floor(b*.55)})`, rightC=`rgb(${Math.floor(r*.38)},${Math.floor(g*.38)},${Math.floor(b*.38)})`;
+  const BY = sy - CELL_H/2;
+  const S = 2.0; // 2x scale
+
+  function box(x,y,bw,bh,bz,t,l,ri){drawIsoBox(ctx,x,y,bw*S,bh*S,bz*S,t,l,ri);}
+
+  switch(castleIdx){
+    case 0:{ // 召喚之城 - Classic keep
+      box(sx,BY-4,28,16,5,'#8899aa','#556677','#445566');
+      box(sx,BY-6,24,14,25,topC,leftC,rightC);
+      [[-10,-5],[10,-5],[-10,5],[10,5]].forEach(([dx,dy])=>{
+        box(sx+dx*S,BY-6+dy*S,9,5,30,topC,leftC,rightC);
+        box(sx+dx*S,BY-6+dy*S-30*S,11,6,4,topC,leftC,rightC);
+      });
+      box(sx,BY-6,16,9,36,topC,leftC,rightC);
+      ctx.beginPath();ctx.moveTo(sx,BY-42*S);ctx.lineTo(sx+10*S,BY-36*S);ctx.lineTo(sx,BY-33*S);ctx.lineTo(sx-10*S,BY-36*S);ctx.closePath();ctx.fillStyle='#7c3aed';ctx.fill();
+      break;}
+    case 1:{ // 光之城 - Lighthouse tower
+      box(sx,BY-4,30,17,4,'#7a7a6a','#5a5a4a','#4a4a3a');
+      box(sx,BY-8,19,11,40,topC,leftC,rightC);
+      box(sx,BY-8-23*S,23,13,10,topC,leftC,rightC);
+      box(sx,BY-8-35*S,19,11,10,topC,leftC,rightC);
+      ctx.save();ctx.globalAlpha*=.95;
+      ctx.beginPath();ctx.ellipse(sx,BY-8-45*S,11*S,8*S,0,Math.PI,0);ctx.fillStyle='rgba(255,220,50,.9)';ctx.fill();
+      if(unlocked){ctx.save();ctx.globalAlpha=.3;const lg=ctx.createRadialGradient(sx,BY-8-45*S,0,sx,BY-8-45*S,40);lg.addColorStop(0,'#ffd700');lg.addColorStop(1,'transparent');ctx.fillStyle=lg;ctx.beginPath();ctx.arc(sx,BY-8-45*S,40,0,Math.PI*2);ctx.fill();ctx.restore();}
+      ctx.restore();
+      break;}
+    case 2:{ // 模型之城 - Wide fortress
+      box(sx,BY-4,40,23,6,'#667788','#445566','#334455');
+      box(sx,BY-10,36,20,18,topC,leftC,rightC);
+      for(let d=-14;d<=14;d+=7){box(sx+d*S,BY-10-18*S+d*S*.2,5,3,6,topC,leftC,rightC);}
+      [[-14,0],[14,0]].forEach(([dx])=>{box(sx+dx*S,BY-10,12,7,26,topC,leftC,rightC);box(sx+dx*S,BY-10-26*S,14,8,4,topC,leftC,rightC);});
+      break;}
+    case 3:{ // 術式之城 - Magic spire
+      box(sx,BY-4,26,15,4,'#6644aa','#442288','#331166');
+      box(sx,BY-8,18,10,44,topC,leftC,rightC);
+      box(sx,BY-8-44*S,10,6,12,topC,leftC,rightC);
+      ctx.beginPath();ctx.moveTo(sx,BY-8-56*S-8);ctx.lineTo(sx+6*S,BY-8-56*S+8);ctx.lineTo(sx-6*S,BY-8-56*S+8);ctx.closePath();ctx.fillStyle='#a78bfa';ctx.fill();
+      ctx.save();ctx.globalAlpha=.5;ctx.strokeStyle='#c084fc';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(sx,BY-8-30*S,15*S,5*S,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+      break;}
+    case 4:{ // 光輝之城 - Palace with domes
+      box(sx,BY-4,40,23,5,'#7a6020','#5a4010','#3a2808');
+      box(sx,BY-9,31,18,22,topC,leftC,rightC);
+      ctx.beginPath();ctx.ellipse(sx,BY-9-22*S,16*S,12*S,0,Math.PI,0);ctx.fillStyle=topC;ctx.fill();ctx.strokeStyle=leftC;ctx.lineWidth=1.5;ctx.stroke();
+      [[-16,4],[16,4]].forEach(([dx])=>{box(sx+dx*S,BY-5,14,8,16,topC,leftC,rightC);ctx.beginPath();ctx.ellipse(sx+dx*S,BY-5-16*S,7*S,5*S,0,Math.PI,0);ctx.fillStyle=topC;ctx.fill();});
+      ctx.beginPath();ctx.arc(sx,BY-9-34*S,5,0,Math.PI*2);ctx.fillStyle='#ffd700';ctx.fill();
+      break;}
+    case 5:{ // 物理之城 - Observatory
+      box(sx,BY-4,36,21,6,'#334455','#223344','#1a2a3a');
+      box(sx,BY-10,30,17,20,topC,leftC,rightC);
+      ctx.beginPath();ctx.ellipse(sx,BY-10-20*S,18*S,13*S,0,Math.PI,0);ctx.fillStyle=`rgba(${r},${g},${b},.88)`;ctx.fill();ctx.strokeStyle=leftC;ctx.lineWidth=2;ctx.stroke();
+      box(sx+7*S,BY-10-18*S,5,3,10,'#0891b2','#065f80','#044060');
+      ctx.save();ctx.globalAlpha=.45;ctx.fillStyle='#7dd3fc';ctx.beginPath();ctx.roundRect(sx-2,BY-10-33*S,5,12,2);ctx.fill();ctx.restore();
+      ctx.strokeStyle='#334455';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(sx-13*S,BY-10);ctx.lineTo(sx-13*S,BY-10-13*S);ctx.stroke();
+      break;}
+    case 6:{ // 競技之城 - Battle fortress
+      box(sx,BY-4,43,25,7,'#3a0808','#280606','#1a0404');
+      box(sx,BY-11,33,19,25,topC,leftC,rightC);
+      box(sx,BY-11,15,9,28,leftC,rightC,`rgba(${Math.floor(r*.2)},${Math.floor(g*.2)},${Math.floor(b*.2)},1)`);
+      ctx.save();ctx.globalAlpha=.85;ctx.fillStyle='#0a0000';ctx.beginPath();ctx.ellipse(sx,BY-11-18*S,4*S,6*S,0,Math.PI,0);ctx.fill();ctx.restore();
+      for(let d=-14;d<=14;d+=8){if(Math.abs(d)>3)box(sx+d*S,BY-11-25*S+d*S*.08,4,2.5,5,topC,leftC,rightC);}
+      [[-11,-2],[11,-2]].forEach(([dx])=>{ctx.strokeStyle='#a0a0a0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sx+dx*S,BY-11-33*S);ctx.lineTo(sx+dx*S,BY-11-42*S);ctx.stroke();ctx.fillStyle='#dc2626';ctx.beginPath();ctx.moveTo(sx+dx*S,BY-11-42*S);ctx.lineTo(sx+dx*S+7*S,BY-11-36*S);ctx.lineTo(sx+dx*S,BY-11-30*S);ctx.closePath();ctx.fill();});
+      break;}
+    case 7:{ // 秘境之城 - Ancient ruins
+      box(sx,BY-4,30,17,5,'#1a0a30','#120620','#0a0418');
+      box(sx,BY-9,22,13,34,topC,leftC,rightC);
+      box(sx-5*S,BY-9-34*S,8,5,12,topC,leftC,rightC);
+      box(sx+6*S,BY-9-34*S,7,4,9,topC,leftC,rightC);
+      // Floating diamond crystal
+      ctx.save();ctx.translate(sx,BY-9-52*S);ctx.rotate(Math.PI/4);ctx.fillStyle='rgba(179,136,255,.88)';ctx.beginPath();ctx.moveTo(0,-6*S);ctx.lineTo(4*S,0);ctx.lineTo(0,6*S);ctx.lineTo(-4*S,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#c084fc';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+      if(unlocked){ctx.save();ctx.globalAlpha=.18;const mg=ctx.createRadialGradient(sx,BY-9-40*S,0,sx,BY-9-40*S,50);mg.addColorStop(0,'#b388ff');mg.addColorStop(1,'transparent');ctx.fillStyle=mg;ctx.beginPath();ctx.arc(sx,BY-9-40*S,50,0,Math.PI*2);ctx.fill();ctx.restore();}
+      break;}
+    case 8:{ // 終極城堡 - Grand palace
+      box(sx,BY-4,50,29,7,'#5a4a10','#3a3008','#28200a');
+      box(sx,BY-11,41,24,28,topC,leftC,rightC);
+      [[-16,-8],[16,-8],[-16,8],[16,8]].forEach(([dx,dy])=>{
+        box(sx+dx*S,BY-11+dy*S,11,6,36,topC,leftC,rightC);
+        ctx.beginPath();ctx.moveTo(sx+dx*S,BY-11+dy*S-36*S);ctx.lineTo(sx+dx*S+7*S,BY-11+dy*S-36*S+8);ctx.lineTo(sx+dx*S,BY-11+dy*S-36*S+14);ctx.lineTo(sx+dx*S-7*S,BY-11+dy*S-36*S+8);ctx.closePath();ctx.fillStyle='#ca8a04';ctx.fill();
+      });
+      box(sx,BY-11,22,13,45,topC,leftC,rightC);
+      ctx.beginPath();ctx.ellipse(sx,BY-11-45*S,14*S,10*S,0,Math.PI,0);ctx.fillStyle='#ffd700';ctx.fill();ctx.strokeStyle='#ca8a04';ctx.lineWidth=2;ctx.stroke();
+      ctx.strokeStyle='#ffd700';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx,BY-11-55*S-5);ctx.lineTo(sx,BY-11-45*S);ctx.stroke();
+      ctx.beginPath();ctx.arc(sx,BY-11-56*S,4,0,Math.PI*2);ctx.fillStyle='white';ctx.fill();
+      if(done){ctx.save();ctx.globalAlpha=.15;const ag=ctx.createRadialGradient(sx,BY-11-40*S,0,sx,BY-11-40*S,90);ag.addColorStop(0,'#ffd700');ag.addColorStop(1,'transparent');ctx.fillStyle=ag;ctx.beginPath();ctx.arc(sx,BY-11-40*S,90,0,Math.PI*2);ctx.fill();ctx.restore();}
+      break;}
+  }
+  // Flag
+  const poleYs=[36,45,30,56,38,38,44,42,62];
+  const poleY = BY - poleYs[castleIdx]*S - 10;
+  if(unlocked){
+    ctx.strokeStyle=done?'#ffd700':'rgba(220,220,220,.7)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(sx,poleY);ctx.lineTo(sx,poleY-18);ctx.stroke();
+    ctx.fillStyle=done?'#ffd700':col;ctx.beginPath();ctx.moveTo(sx,poleY-18);ctx.lineTo(sx+12,poleY-12);ctx.lineTo(sx,poleY-6);ctx.closePath();ctx.fill();
+  }
+  // Castle number badge
+  const bx=sx+13*S,by_=BY-7*S;
+  ctx.beginPath();ctx.arc(bx,by_,12,0,Math.PI*2);
+  ctx.fillStyle=unlocked?col:'rgba(30,20,50,.8)';ctx.fill();
+  ctx.strokeStyle=unlocked?'rgba(255,255,255,.5)':'rgba(100,80,140,.3)';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle=unlocked?'white':'rgba(255,255,255,.3)';
+  ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(castleIdx+1,bx,by_);
+  ctx.restore();
+}
+
 // ─── Draw Map ───
 function drawMap(){
   const canvas=document.getElementById('mc');
@@ -306,31 +430,14 @@ function drawMap(){
     drawIsoBox(ctx,sx,sy-CELL_H/2-36,24,14,12,`#34a028`,`rgba(25,80,18,.8)`,`rgba(18,60,15,.8)`);
   });
 
-  // ── Castles (3D buildings) ──
+  // ── Castles ──
   CPOS_G.forEach(([gx,gy],idx)=>{
     const c=C[idx];
     const done=getDone(c)>=c.tot;
     const unlocked=idx===0||(getDone(C[idx-1])>=C[idx-1].tot);
     const[sx,sy]=g2s(gx,gy,0);
-    
-    // Parse color
-    const col=c.col;
-    const r=parseInt(col.substr(1,2),16),g2=parseInt(col.substr(3,2),16),b=parseInt(col.substr(5,2),16);
-    const topC=col;
-    const leftC=`rgba(${Math.floor(r*.6)},${Math.floor(g2*.6)},${Math.floor(b*.6)},1)`;
-    const rightC=`rgba(${Math.floor(r*.45)},${Math.floor(g2*.45)},${Math.floor(b*.45)},1)`;
-    
-    const alpha=unlocked?1:0.35;
-    ctx.save();ctx.globalAlpha=alpha;
-    
-    // Base/foundation
-    drawIsoBox(ctx,sx,sy-CELL_H/2-2,52,30,8,'#555566','#333344','#222233');
-    // Main tower body
-    drawIsoBox(ctx,sx,sy-CELL_H/2-10,44,26,42,topC,leftC,rightC);
-    // Top battlements
-    [-18,-6,6,18].forEach(dx=>{
-      drawIsoBox(ctx,sx+dx*0.6,sy-CELL_H/2-52-dx*.15,10,6,10,topC,leftC,rightC);
-    });
+    drawCastle(ctx,sx,sy,idx,c.col,unlocked,done,unlocked?1:0.28);
+  });
     // Flag pole
     ctx.strokeStyle=done?'#ffd700':'rgba(255,255,255,.4)';ctx.lineWidth=2;
     ctx.beginPath();ctx.moveTo(sx,sy-CELL_H/2-52);ctx.lineTo(sx,sy-CELL_H/2-70);ctx.stroke();
@@ -362,7 +469,7 @@ function renderNodes(hi){
     const cls2=`cn${done?' done':unlocked?' unlocked':' locked'}`;
     const d=document.createElement('div');
     d.className=cls2;
-    d.style.cssText=`left:${sx}px;top:${sy-CELL_H/2-72}px;--cc:${c.col}`;
+    d.style.cssText=`left:${sx}px;top:${sy-CELL_H/2-130}px;--cc:${c.col}`;
     d.innerHTML=`<div class="cn-bubble">
       <span class="cn-icon">${unlocked?c.em:'🔒'}</span>
       <div class="cn-name">${c.name}</div>
