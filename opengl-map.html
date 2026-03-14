@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🗺️ OpenGL 魔法王國</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--font:'Nunito',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{font-family:var(--font);overflow:hidden;height:100%;background:#1a1240;touch-action:pan-y}
+/* ── HUD ── */
+.hud{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(14,10,30,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(167,139,250,.18);padding:10px 14px;display:flex;align-items:center;gap:10px}
+.avatar-hud{width:38px;height:38px;border-radius:50%;overflow:hidden;border:2px solid #a78bfa;flex-shrink:0;background:#16112e;display:flex;align-items:center;justify-content:center}
+.player-info{flex:1;min-width:0}
+.player-name-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.p-name{font-size:.85rem;font-weight:900;color:#ede9ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv-badge{background:linear-gradient(135deg,#a78bfa,#34d399);color:#0e0a1e;font-size:.6rem;font-weight:900;padding:1px 7px;border-radius:100px;flex-shrink:0}
+.bars{display:flex;flex-direction:column;gap:3px}
+.bar-row{display:flex;align-items:center;gap:5px}
+.bar-lbl{font-size:.58rem;font-weight:800;color:#6b5a90;min-width:18px;letter-spacing:.04em}
+.bar-bg{flex:1;height:5px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+.bar-fill{height:100%;border-radius:100px;transition:width .5s ease}
+.hf{background:linear-gradient(90deg,#ff4757,#ff6b81)}
+.mf{background:linear-gradient(90deg,#667eea,#764ba2)}
+.xf{background:linear-gradient(90deg,#f7971e,#ffd200)}
+.hud-btn{background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.25);color:#a78bfa;border-radius:10px;padding:6px 10px;font-size:.7rem;font-weight:800;cursor:pointer;flex-shrink:0;-webkit-appearance:none}
+/* ── MAP SCROLL AREA ── */
+.map-scroll{position:fixed;top:68px;bottom:70px;left:0;right:0;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.map-world{position:relative;width:100%;height:920px}
+/* ── BACKGROUND LAYERS ── */
+.sky{position:absolute;inset:0;background:linear-gradient(180deg,#0a0518 0%,#1a1240 18%,#2d1b69 35%,#3d4a9e 55%,#4a7fc1 72%,#6db3d9 88%,#a8d5e2 100%)}
+.ground{position:absolute;bottom:0;left:0;right:0;height:180px;background:linear-gradient(180deg,#2d5a27 0%,#3a7a30 30%,#4a9040 100%);border-radius:60% 60% 0 0/20% 20% 0 0}
+.ground2{position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(180deg,#3a7a30,#2d5a27)}
+/* ── CLOUDS ── */
+.cloud{position:absolute;opacity:.55;animation:drift var(--cd,40s) var(--cdl,0s) linear infinite}
+@keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(110vw)}}
+.cblob{position:absolute;background:rgba(255,255,255,.85);border-radius:50%}
+/* ── MOUNTAINS ── */
+.mt{position:absolute;bottom:150px;clip-path:polygon(0% 100%,50% 0%,100% 100%);background:linear-gradient(180deg,#4a5568,#2d3748)}
+.mt-snow{position:absolute;bottom:150px;clip-path:polygon(35% 100%,50% 0%,65% 100%);background:#e2e8f0}
+/* ── PATH ── */
+.path-svg{position:absolute;inset:0;overflow:visible}
+/* ── CASTLE NODES ── */
+.castle-node{position:absolute;transform:translate(-50%,-50%);cursor:pointer;text-align:center;transition:transform .2s}
+.castle-node:active{transform:translate(-50%,-50%) scale(.93)}
+.castle-node.locked{opacity:.45;cursor:not-allowed}
+.c-ring{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;border:3px solid rgba(255,255,255,.15);box-shadow:0 4px 20px rgba(0,0,0,.4);transition:.2s;position:relative}
+.c-ring.unlocked{animation:glow-pulse 2s ease infinite}
+.c-ring.done{border-color:rgba(255,215,0,.7);box-shadow:0 0 20px rgba(255,215,0,.35)}
+@keyframes glow-pulse{0%,100%{box-shadow:0 4px 20px rgba(0,0,0,.4)}50%{box-shadow:0 0 28px rgba(167,139,250,.6),0 4px 20px rgba(0,0,0,.4)}}
+.c-name{font-size:.66rem;font-weight:900;color:#ede9ff;margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,.8);white-space:nowrap}
+.c-stars{font-size:.55rem;margin-top:2px;letter-spacing:1px}
+.c-lock{position:absolute;top:-4px;right:-4px;background:#1a1240;border:1.5px solid rgba(255,255,255,.2);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.65rem}
+.c-prog{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);border-radius:100px;padding:1px 7px;font-size:.55rem;font-weight:800;white-space:nowrap;color:#a0f0ff}
+/* ── DECORATIONS ── */
+.deco{position:absolute;font-size:1.4rem;pointer-events:none;user-select:none}
+.deco.bob{animation:bob 2s ease infinite alternate}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
+/* ── BOTTOM STATS PANEL ── */
+.stats-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(14,10,30,.95);backdrop-filter:blur(14px);border-top:1px solid rgba(167,139,250,.18);transition:height .35s cubic-bezier(.4,0,.2,1);height:70px;overflow:hidden}
+.stats-panel.open{height:260px}
+.panel-tab{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer}
+.panel-tab-left{display:flex;align-items:center;gap:10px;font-size:.8rem;font-weight:800;color:#a78bfa}
+.panel-tab-arrow{color:#6b5a90;font-size:.8rem;transition:.25s}
+.stats-panel.open .panel-tab-arrow{transform:rotate(180deg)}
+.panel-body{padding:0 16px 16px;overflow-y:auto;height:190px}
+.equip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.equip-slot{background:rgba(167,139,250,.06);border:1px dashed rgba(167,139,250,.2);border-radius:12px;padding:10px 4px;text-align:center;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.equip-slot.filled{border-style:solid;border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.1)}
+.es-icon{font-size:1.4rem}
+.es-name{font-size:.58rem;font-weight:800;color:#a78bfa}
+.es-stat{font-size:.55rem;color:#34d399}
+.es-empty{font-size:.65rem;color:#3a2f5a;font-weight:800}
+.full-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.fs{background:rgba(255,255,255,.04);border-radius:10px;padding:8px 4px;text-align:center;border:1px solid rgba(255,255,255,.06)}
+.fs-v{font-size:1.1rem;font-weight:900;font-family:monospace}
+.fs-l{font-size:.58rem;color:#6b5a90;font-weight:800;letter-spacing:.04em;margin-top:2px}
+/* ── LEVEL UP TOAST ── */
+.lvup{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(135deg,#a78bfa,#34d399);color:#0e0a1e;border-radius:100px;padding:10px 24px;font-size:.9rem;font-weight:900;z-index:200;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.lvup.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="avatar-hud">
+    <svg id="hudAvatar" viewBox="0 0 110 128" width="34" height="34" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div class="player-info">
+    <div class="player-name-row">
+      <span class="p-name" id="hudName">冒險者</span>
+      <span class="lv-badge" id="hudLv">Lv.1</span>
+      <span style="font-size:.65rem;color:#a78bfa;font-weight:800" id="hudTitle">初學者</span>
+    </div>
+    <div class="bars">
+      <div class="bar-row"><span class="bar-lbl">HP</span><div class="bar-bg"><div class="bar-fill hf" id="hpBar" style="width:100%"></div></div><span style="font-size:.58rem;color:#ff6b81;font-weight:800;min-width:42px;text-align:right" id="hpTxt">100/100</span></div>
+      <div class="bar-row"><span class="bar-lbl">XP</span><div class="bar-bg"><div class="bar-fill xf" id="xpBar" style="width:0%"></div></div><span style="font-size:.58rem;color:#ffd200;font-weight:800;min-width:42px;text-align:right" id="xpTxt">0/500</span></div>
+    </div>
+  </div>
+  <button class="hud-btn" onclick="goHome()">🏠</button>
+</div>
+
+<!-- MAP -->
+<div class="map-scroll" id="mapScroll">
+<div class="map-world" id="mapWorld">
+  <div class="sky"></div>
+
+  <!-- Stars in sky -->
+  <div id="skyStars"></div>
+
+  <!-- Mountains -->
+  <div class="mt" style="width:120px;height:120px;left:5%;bottom:155px"></div>
+  <div class="mt" style="width:80px;height:80px;left:18%;bottom:158px"></div>
+  <div class="mt" style="width:160px;height:150px;left:35%;bottom:152px"></div>
+  <div class="mt" style="width:100px;height:100px;left:55%;bottom:157px"></div>
+  <div class="mt" style="width:130px;height:130px;left:68%;bottom:153px"></div>
+  <div class="mt-snow" style="width:120px;height:120px;left:5%;bottom:155px"></div>
+  <div class="mt-snow" style="width:160px;height:150px;left:35%;bottom:152px"></div>
+  <div class="mt-snow" style="width:130px;height:130px;left:68%;bottom:153px"></div>
+
+  <!-- Clouds -->
+  <div class="cloud" style="top:40px;--cd:50s;--cdl:0s"><div class="cblob" style="width:60px;height:30px;left:0;top:10px"></div><div class="cblob" style="width:40px;height:40px;left:15px;top:0"></div><div class="cblob" style="width:50px;height:25px;left:30px;top:12px"></div></div>
+  <div class="cloud" style="top:80px;--cd:70s;--cdl:-25s"><div class="cblob" style="width:80px;height:35px;left:0;top:12px"></div><div class="cblob" style="width:50px;height:45px;left:20px;top:0"></div><div class="cblob" style="width:60px;height:30px;left:42px;top:14px"></div></div>
+  <div class="cloud" style="top:160px;--cd:55s;--cdl:-10s"><div class="cblob" style="width:55px;height:28px;left:0;top:8px"></div><div class="cblob" style="width:38px;height:36px;left:12px;top:0"></div><div class="cblob" style="width:45px;height:24px;left:28px;top:10px"></div></div>
+  <div class="cloud" style="top:230px;--cd:65s;--cdl:-38s"><div class="cblob" style="width:70px;height:32px;left:0;top:10px"></div><div class="cblob" style="width:46px;height:42px;left:18px;top:0"></div></div>
+
+  <!-- Ground -->
+  <div class="ground"></div>
+  <div class="ground2"></div>
+
+  <!-- Path SVG -->
+  <svg class="path-svg" id="pathSVG" width="100%" height="920" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="pathGlow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <!-- Path will be drawn by JS -->
+  </svg>
+
+  <!-- Decorations -->
+  <div class="deco bob" style="left:8%;top:740px">🌳</div>
+  <div class="deco" style="left:80%;top:760px">🌳</div>
+  <div class="deco bob" style="left:15%;top:680px">🌿</div>
+  <div class="deco" style="left:70%;top:640px">🌲</div>
+  <div class="deco bob" style="left:5%;top:580px">🌲</div>
+  <div class="deco" style="left:85%;top:520px">🌲</div>
+  <div class="deco bob" style="left:20%;top:440px">🌲</div>
+  <div class="deco" style="left:75%;top:380px">🌲</div>
+  <div class="deco bob" style="left:10%;top:300px">❄️</div>
+  <div class="deco" style="left:82%;top:260px">❄️</div>
+  <div class="deco bob" style="left:25%;top:180px">⛄</div>
+  <div class="deco" style="left:65%;top:140px">🏔️</div>
+  <div class="deco bob" style="left:40%;top:820px">🌻</div>
+  <div class="deco" style="left:55%;top:790px">🌺</div>
+
+  <!-- Castle nodes will be injected by JS -->
+  <div id="castleLayer"></div>
+
+  <!-- Player character on map -->
+  <div id="playerPin" style="position:absolute;transform:translate(-50%,-100%);z-index:50;text-align:center;transition:top .8s cubic-bezier(.34,1.56,.64,1),left .8s cubic-bezier(.34,1.56,.64,1)">
+    <svg id="playerMapSVG" viewBox="0 0 110 128" width="48" height="56" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 4px 12px rgba(167,139,250,.6))"></svg>
+    <div style="font-size:.6rem;font-weight:900;color:#a78bfa;background:rgba(14,10,30,.8);border-radius:100px;padding:1px 7px;margin-top:2px;white-space:nowrap" id="playerPinName">冒險者</div>
+    <div style="width:8px;height:8px;background:#a78bfa;border-radius:50%;margin:2px auto 0;box-shadow:0 0 8px #a78bfa;animation:blink 1s infinite"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- Stats Panel -->
+<div class="stats-panel" id="statsPanel">
+  <div class="panel-tab" onclick="togglePanel()">
+    <div class="panel-tab-left">
+      <span>⚔️ 裝備 &amp; 能力值</span>
+      <span id="panelStatSummary" style="font-size:.7rem;color:#6b5a90"></span>
+    </div>
+    <span class="panel-tab-arrow">▲</span>
+  </div>
+  <div class="panel-body">
+    <div class="equip-grid" id="equipGrid"></div>
+    <div class="full-stats" id="fullStats"></div>
+  </div>
+</div>
+
+<div class="lvup" id="lvupToast">🎉 等級提升！</div>
+
+<style>@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}</style>
+
+<script>
+// ─── Castle data ───
+const CASTLES=[
+  {id:1,name:'城堡1\n召喚之塔',emoji:'🗼',color:'#7c6dfa',bg:'rgba(124,109,250,.18)',key:'tower1_done',xpTotal:820,lessons:9,reward:{slot:'weapon',name:'召喚法杖',icon:'🪄',stat:'INT+3',bonus:{int:3}}},
+  {id:2,name:'城堡2\n光之塔',  emoji:'💡',color:'#ffd93d',bg:'rgba(255,217,61,.18)', key:'tower2_done',xpTotal:660,lessons:6,reward:{slot:'hat',name:'光明王冠',icon:'👑',stat:'INT+2,SPD+2',bonus:{int:2,spd:2}}},
+  {id:3,name:'城堡3\n模型之塔',emoji:'🗿',color:'#00e5a0',bg:'rgba(0,229,160,.16)',  key:'tower3_done',xpTotal:330,lessons:3,reward:{slot:'accessory',name:'立體護目鏡',icon:'🥽',stat:'INT+2',bonus:{int:2}}},
+  {id:4,name:'城堡4\n術式塔',  emoji:'⚔️',color:'#c792ea',bg:'rgba(199,146,234,.16)',key:'tower4_done',xpTotal:1020,lessons:11,reward:{slot:'armor',name:'術式護甲',icon:'🛡️',stat:'DEF+4,INT+3',bonus:{def:4,int:3}}},
+  {id:5,name:'城堡5\n光照塔',  emoji:'🌟',color:'#ff9f43',bg:'rgba(255,159,67,.16)', key:'tower5_done',xpTotal:800,lessons:8,reward:{slot:'accessory',name:'光之戒指',icon:'💍',stat:'INT+4',bonus:{int:4}}},
+  {id:6,name:'城堡6\n物理塔',  emoji:'⚗️',color:'#00d4ff',bg:'rgba(0,212,255,.16)', key:'tower6_done',xpTotal:910,lessons:9,reward:{slot:'armor',name:'PBR護甲',icon:'🦺',stat:'DEF+5,ATK+2',bonus:{def:5,atk:2}}},
+  {id:7,name:'城堡7\n競技場',  emoji:'🔥',color:'#ff4757',bg:'rgba(255,71,87,.16)',  key:'tower7_done',xpTotal:870,lessons:9,reward:{slot:'hat',name:'戰鬥頭盔',icon:'⛑️',stat:'ATK+3,SPD+3',bonus:{atk:3,spd:3}}},
+  {id:8,name:'城堡8\n秘境塔',  emoji:'🌌',color:'#b388ff',bg:'rgba(179,136,255,.16)',key:'tower8_done',xpTotal:1050,lessons:8,reward:{slot:'weapon',name:'古代法杖',icon:'🔮',stat:'INT+7',bonus:{int:7}}},
+  {id:9,name:'城堡9\n終極城堡',emoji:'★',color:'#ffd700',bg:'rgba(255,215,0,.18)', key:'tower9_done',xpTotal:1100,lessons:8,reward:{slot:'accessory',name:'終極王冠',icon:'👑',stat:'ALL+5',bonus:{atk:5,def:5,int:5,spd:5}}},
+];
+
+const LEVEL_XP=[0,300,700,1200,1800,2500,3400,4400,5600,7000,8500];
+const TITLES=['初學者','OpenGL 學徒','著色器術士','渲染騎士','圖形學大師','終極魔法師'];
+function getTitle(lv){return TITLES[Math.min(Math.floor((lv-1)/2),TITLES.length-1)];}
+
+// Castle positions (left%, top in px) — winding path from bottom to top
+const CPOS=[
+  [50,  840],  // 城堡1 - START (bottom center)
+  [72,  740],  // 城堡2
+  [32,  640],  // 城堡3
+  [65,  540],  // 城堡4
+  [28,  450],  // 城堡5
+  [68,  360],  // 城堡6
+  [30,  275],  // 城堡7
+  [68,  190],  // 城堡8
+  [50,  100],  // 城堡9 - FINAL (top center)
+];
+
+let player=null,mapW=360;
+
+function loadPlayer(){
+  const raw=localStorage.getItem('player_data');
+  if(!raw){window.location.href='character.html';return;}
+  player=JSON.parse(raw);
+}
+
+function getTotalXP(){
+  let xp=0;
+  CASTLES.forEach(c=>{
+    const done=JSON.parse(localStorage.getItem(c.key)||'[]');
+    // Get XP per lesson from tower data (approximate from xpTotal/lessons)
+    if(done.length>0){const perLesson=c.xpTotal/c.lessons;xp+=done.length*perLesson;}
+  });
+  return Math.round(xp);
+}
+
+function getLevel(xp){
+  for(let i=LEVEL_XP.length-1;i>=0;i--){if(xp>=LEVEL_XP[i])return i+1;}return 1;
+}
+
+function getCastleDone(c){return JSON.parse(localStorage.getItem(c.key)||'[]]').filter(x=>x).length;}
+
+function getUnlockedEquipment(){
+  const eq={weapon:null,armor:null,hat:null,accessory:null};
+  CASTLES.forEach(c=>{
+    const done=getCastleDone(c);
+    if(done>=c.lessons&&c.reward){
+      // Castle completed - unlock reward (last one wins per slot)
+      const r=c.reward;eq[r.slot]={name:r.name,icon:r.icon,stat:r.stat,bonus:r.bonus,castle:c.id};
+    }
+  });
+  return eq;
+}
+
+function calcTotalStats(baseStats,equipment){
+  const s={...baseStats};
+  Object.values(equipment).forEach(item=>{
+    if(item&&item.bonus)Object.entries(item.bonus).forEach(([k,v])=>{if(s[k]!==undefined)s[k]+=v;});
+  });
+  return s;
+}
+
+function drawCharSVG(targetId,p){
+  const skin=p.appearance.skin,hair=p.appearance.hair,outfit=p.appearance.outfit;
+  const shadeColor=(col,amt)=>{let c=col.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];let r=Math.max(0,Math.min(255,parseInt(c.substr(0,2),16)+amt));let g=Math.max(0,Math.min(255,parseInt(c.substr(2,2),16)+amt));let b=Math.max(0,Math.min(255,parseInt(c.substr(4,2),16)+amt));return`#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;};
+  const od=shadeColor(outfit,-40);
+  const cls=p.class||'mage';
+  const hat=cls==='mage'?`<polygon points="55,3 39,27 71,27" fill="${outfit}"/><rect x="35" y="24" width="40" height="7" rx="3.5" fill="${outfit}"/><circle cx="55" cy="3" r="3" fill="#ffd700"/>`:cls==='warrior'?`<rect x="30" y="11" width="50" height="17" rx="8.5" fill="#8899aa"/><rect x="22" y="22" width="14" height="12" rx="4" fill="#778899"/><rect x="74" y="22" width="14" height="12" rx="4" fill="#778899"/>`:
+  `<ellipse cx="55" cy="15" rx="28" ry="12" fill="${hair}"/><ellipse cx="71" cy="8" rx="3.5" ry="9" fill="#e8a87c" transform="rotate(28 71 8)"/>`;
+  const weapon=cls==='mage'?`<g transform="translate(92,68) rotate(-25)"><rect x="-2.5" y="-20" width="5" height="28" rx="2.5" fill="#ffd700"/><polygon points="0,-28 -5,-17 5,-17" fill="#89ddff"/><circle cx="0" cy="-28" r="3.5" fill="white" opacity=".8"/></g>`:cls==='warrior'?`<g transform="translate(92,70)"><rect x="-2" y="-24" width="4.5" height="32" rx="1.5" fill="#c0c8d8"/><rect x="-8" y="-5" width="16" height="4.5" rx="2" fill="#aabbcc"/></g>`:
+  `<g transform="translate(93,68)"><path d="M3,-18 Q12,0 3,18" stroke="#8B5E3C" stroke-width="2.5" fill="none" stroke-linecap="round"/></g>`;
+  const g=p.gender||'male';
+  const hB=g==='female'?`<ellipse cx="55" cy="20" rx="30" ry="13" fill="${hair}"/><rect x="24" y="28" width="11" height="34" rx="5.5" fill="${hair}"/><rect x="75" y="28" width="11" height="34" rx="5.5" fill="${hair}"/>`:
+  `<ellipse cx="55" cy="20" rx="30" ry="13" fill="${hair}"/>`;
+  const hF=g==='female'?`<path d="M27,24 Q36,13 50,17 Q42,24 38,30" fill="${hair}"/><path d="M62,17 Q76,13 83,24" fill="${hair}" stroke="${hair}" stroke-width="1"/>`:
+  `<path d="M28,24 Q38,13 52,18 Q44,24 40,30" fill="${hair}"/><path d="M64,18 Q76,13 82,24" fill="${hair}" stroke="${hair}" stroke-width="1"/>`;
+  const svg=`<ellipse cx="55" cy="124" rx="21" ry="5" fill="rgba(0,0,0,.16)"/>
+<rect x="39" y="97" width="13" height="24" rx="6.5" fill="${od}"/>
+<rect x="58" y="97" width="13" height="24" rx="6.5" fill="${od}"/>
+<rect x="26" y="65" width="58" height="37" rx="13" fill="${outfit}"/>
+<circle cx="26" cy="72" r="7.5" fill="${outfit}"/><circle cx="84" cy="72" r="7.5" fill="${outfit}"/>
+<rect x="11" y="69" width="16" height="26" rx="8" fill="${outfit}"/>
+<circle cx="19" cy="97" r="8" fill="${skin}"/>
+<rect x="83" y="69" width="16" height="26" rx="8" fill="${outfit}"/>
+<circle cx="91" cy="97" r="8" fill="${skin}"/>
+${weapon}
+<rect x="46" y="58" width="18" height="11" fill="${skin}"/>
+${hB}
+<circle cx="55" cy="40" r="30" fill="${skin}"/>
+<ellipse cx="25" cy="40" rx="5.5" ry="7" fill="${skin}"/>
+<ellipse cx="85" cy="40" rx="5.5" ry="7" fill="${skin}"/>
+${hat}${hF}
+<ellipse cx="43" cy="39" rx="7" ry="8" fill="white"/>
+<ellipse cx="67" cy="39" rx="7" ry="8" fill="white"/>
+<circle cx="44" cy="40" r="5" fill="#1a1035"/>
+<circle cx="68" cy="40" r="5" fill="#1a1035"/>
+<circle cx="46" cy="37.5" r="2" fill="white"/>
+<circle cx="70" cy="37.5" r="2" fill="white"/>
+<ellipse cx="30" cy="50" rx="8" ry="4.5" fill="rgba(255,130,130,.28)"/>
+<ellipse cx="80" cy="50" rx="8" ry="4.5" fill="rgba(255,130,130,.28)"/>
+<path d="M47 54 Q55 62 63 54" stroke="#cc7070" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  document.getElementById(targetId).innerHTML=svg;
+}
+
+function drawPath(){
+  const mw=document.getElementById('mapWorld').offsetWidth||360;
+  const pts=CPOS.map(([lp,top])=>[mw*lp/100,top]);
+  let d=`M ${pts[0][0]} ${pts[0][1]}`;
+  for(let i=1;i<pts.length;i++){
+    const [x0,y0]=pts[i-1],[x1,y1]=pts[i];
+    const cx=(x0+x1)/2,cy=(y0+y1)/2;
+    d+=` Q ${x0} ${cy} ${x1} ${y1}`;
+  }
+  const svg=document.getElementById('pathSVG');
+  svg.innerHTML=`<defs><filter id="pGlow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <path d="${d}" stroke="rgba(139,90,43,.5)" stroke-width="22" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="${d}" stroke="#c8a876" stroke-width="18" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1,28" stroke-dashoffset="0"/>
+  <path d="${d}" stroke="rgba(255,220,150,.25)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#pGlow)"/>`;
+}
+
+function renderCastles(totalXP){
+  const mw=document.getElementById('mapWorld').offsetWidth||360;
+  const layer=document.getElementById('castleLayer');layer.innerHTML='';
+  let highestUnlocked=0;
+  CASTLES.forEach((c,idx)=>{
+    const done=getCastleDone(c);
+    const isDone=done>=c.lessons;
+    const isUnlocked=idx===0||(getCastleDone(CASTLES[idx-1])>=CASTLES[idx-1].lessons);
+    if(isUnlocked)highestUnlocked=idx;
+    const [lp,top]=CPOS[idx];
+    const left=mw*lp/100;
+    const pct=Math.round(done/c.lessons*100);
+    const starCount=isDone?3:done>0?Math.ceil(done/c.lessons*2):0;
+    const stars='⭐'.repeat(starCount)+'☆'.repeat(3-starCount);
+    const div=document.createElement('div');
+    div.className=`castle-node${(!isUnlocked)?' locked':''}`;
+    div.style.cssText=`left:${left}px;top:${top}px`;
+    div.innerHTML=`<div class="c-ring${isDone?' done':isUnlocked?' unlocked':''}" style="background:${c.bg};border-color:${isDone?'rgba(255,215,0,.7)':isUnlocked?c.color+'88':'rgba(255,255,255,.1)'};box-shadow:${isDone?'0 0 20px '+c.color+'55,':''}0 4px 16px rgba(0,0,0,.5)">
+      <span style="font-size:${c.emoji==='★'?'1.6rem':'1.5rem'};${isDone?'filter:drop-shadow(0 0 8px '+c.color+')'  :''}">${isDone?c.emoji:isUnlocked?c.emoji:'🔒'}</span>
+      ${!isUnlocked?'<div class="c-lock">🔒</div>':''}
+      ${isUnlocked&&!isDone?`<div class="c-prog">${pct}%</div>`:''}
+    </div>
+    <div class="c-name">${c.name.replace('\n','<br>')}</div>
+    <div class="c-stars">${stars}</div>`;
+    if(isUnlocked){div.addEventListener('click',()=>gotoCastle(c.id));}
+    layer.appendChild(div);
+  });
+  return highestUnlocked;
+}
+
+function positionPlayer(highestUnlocked){
+  const mw=document.getElementById('mapWorld').offsetWidth||360;
+  const [lp,top]=CPOS[highestUnlocked];
+  const pin=document.getElementById('playerPin');
+  pin.style.left=(mw*lp/100)+'px';
+  pin.style.top=(top-10)+'px';
+  document.getElementById('playerPinName').textContent=player.name;
+  // Scroll to player position
+  const scroll=document.getElementById('mapScroll');
+  const targetScroll=top-200;
+  setTimeout(()=>scroll.scrollTo({top:Math.max(0,targetScroll),behavior:'smooth'}),300);
+}
+
+function updateHUD(totalXP,level,equipment){
+  const baseStats=player.stats||{atk:8,def:6,int:10,spd:8};
+  const totalStats=calcTotalStats(baseStats,equipment);
+  const title=getTitle(level);
+  const xpNext=LEVEL_XP[Math.min(level,LEVEL_XP.length-1)]||9999;
+  const xpPrev=LEVEL_XP[Math.max(level-1,0)]||0;
+  const xpPct=Math.min(100,Math.round((totalXP-xpPrev)/(xpNext-xpPrev)*100));
+  document.getElementById('hudName').textContent=player.name;
+  document.getElementById('hudLv').textContent=`Lv.${level}`;
+  document.getElementById('hudTitle').textContent=title;
+  document.getElementById('hpBar').style.width=Math.round(player.hp/player.hpMax*100)+'%';
+  document.getElementById('hpTxt').textContent=`${player.hp}/${player.hpMax}`;
+  document.getElementById('xpBar').style.width=xpPct+'%';
+  document.getElementById('xpTxt').textContent=`${totalXP}/${xpNext}`;
+  document.getElementById('panelStatSummary').textContent=`ATK ${totalStats.atk}  INT ${totalStats.int}  DEF ${totalStats.def}  SPD ${totalStats.spd}`;
+  // Equip grid
+  const slots=[['weapon','武器'],['armor','防具'],['hat','頭盔'],['accessory','飾品']];
+  document.getElementById('equipGrid').innerHTML=slots.map(([s,l])=>{
+    const item=equipment[s];
+    return item?`<div class="equip-slot filled"><div class="es-icon">${item.icon}</div><div class="es-name">${item.name}</div><div class="es-stat">${item.stat}</div></div>`:
+    `<div class="equip-slot"><div class="es-empty">${l}</div><div style="font-size:.6rem;color:#2d2350;margin-top:4px">空槽</div></div>`;
+  }).join('');
+  // Full stats
+  document.getElementById('fullStats').innerHTML=[
+    ['ATK',totalStats.atk,'#ff4757'],['DEF',totalStats.def,'#60a5fa'],
+    ['INT',totalStats.int,'#a78bfa'],['SPD',totalStats.spd,'#34d399'],
+  ].map(([l,v,c])=>`<div class="fs"><div class="fs-v" style="color:${c}">${v}</div><div class="fs-l">${l}</div></div>`).join('');
+}
+
+function makeSkyStars(){
+  const cont=document.getElementById('skyStars');
+  for(let i=0;i<60;i++){
+    const s=document.createElement('div');
+    const sz=Math.random()<.15?3:Math.random()<.4?2:1;
+    s.style.cssText=`position:absolute;border-radius:50%;background:#fff;width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*50}%;opacity:${.3+Math.random()*.5}`;
+    cont.appendChild(s);
+  }
+}
+
+function togglePanel(){document.getElementById('statsPanel').classList.toggle('open');}
+function goHome(){window.location.href='index.html';}
+function gotoCastle(n){window.location.href=`opengl-tower${n}.html`;}
+
+function init(){
+  loadPlayer();
+  if(!player)return;
+  makeSkyStars();
+  drawCharSVG('hudAvatar',player);
+  drawCharSVG('playerMapSVG',player);
+  const totalXP=getTotalXP();
+  const level=getLevel(totalXP);
+  const equipment=getUnlockedEquipment();
+  // Check level up
+  const prevLevel=player.level||1;
+  if(level>prevLevel){
+    player.level=level;
+    localStorage.setItem('player_data',JSON.stringify(player));
+    setTimeout(()=>{
+      const t=document.getElementById('lvupToast');
+      t.textContent=`🎉 升到 Lv.${level}！獲得稱號：${getTitle(level)}`;
+      t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
+    },800);
+  }
+  setTimeout(()=>{
+    drawPath();
+    const hi=renderCastles(totalXP);
+    positionPlayer(hi);
+    updateHUD(totalXP,level,equipment);
+  },50);
+}
+
+window.addEventListener('resize',()=>{drawPath();});
+init();
+</script>
+</body>
+</html>
