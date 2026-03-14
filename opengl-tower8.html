@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌌 秘境古塔 — OpenGL 魔法學院</title>
+<title>🌌 秘境之城 — OpenGL 魔法王國</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -121,10 +121,11 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 <div class="orb" style="width:450px;height:450px;background:rgba(179,136,255,.06);top:-5%;left:-10%;--d:25s;--tx:80px;--ty:70px"></div>
 <div class="orb" style="width:300px;height:300px;background:rgba(234,128,252,.04);bottom:0%;right:0%;--d:20s;--tx:-60px;--ty:-50px"></div>
 <header>
-  <a href="opengl-tower7.html" class="back-btn">&#8592; 塔7</a>
-  <a href="opengl-tower9.html" class="back-btn">塔9 &#8594;</a>
+  <a href="opengl-tower7.html" class="back-btn">&#8592; 城堡7</a>
+  <a href="opengl-map.html" class="back-btn">🗺️ 地圖</a>
+  <a href="opengl-tower9.html" class="back-btn">城堡9 &#8594;</a>
   <a href="index.html" class="back-btn">&#127968; 首頁</a>
-  <span class="header-title">&#127756; 秘境古塔</span>
+  <span class="header-title">&#127756; 秘境之城</span>
   <div class="xp-bar">
     <span style="color:var(--txt2)">&#9889;</span>
     <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
@@ -132,19 +133,19 @@ input[type=range]{flex:1;accent-color:var(--acc)}
   </div>
 </header>
 <div style="position:sticky;top:52px;z-index:99;background:rgba(6,5,5,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);padding:6px 16px;display:flex;align-items:center;gap:8px;overflow-x:auto;white-space:nowrap;scrollbar-width:none">
-  <span style="font-size:.65rem;font-weight:800;color:#554433;letter-spacing:.06em;flex-shrink:0">塔列表</span>
-  <a href="opengl-tower1.html" style="background:rgba(255,100,100,.1);border:1px solid rgba(255,100,100,.28);color:#ff6464;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,100,100,.1)'" onmouseout="this.style.background='rgba(255,100,100,.1)'">🗼 塔1</a>
-  <a href="opengl-tower2.html" style="background:rgba(255,217,61,.1);border:1px solid rgba(255,217,61,.3);color:#ffd93d;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,217,61,.1)'" onmouseout="this.style.background='rgba(255,217,61,.1)'">💡 塔2</a>
-  <a href="opengl-tower3.html" style="background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.28);color:#00e5a0;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(0,229,160,.08)'" onmouseout="this.style.background='rgba(0,229,160,.08)'">🗿 塔3</a>
-  <a href="opengl-tower4.html" style="background:rgba(199,146,234,.08);border:1px solid rgba(199,146,234,.28);color:#c792ea;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(199,146,234,.08)'" onmouseout="this.style.background='rgba(199,146,234,.08)'">⚔️ 塔4</a>
-  <a href="opengl-tower5.html" style="background:rgba(255,159,67,.08);border:1px solid rgba(255,159,67,.28);color:#ff9f43;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,159,67,.08)'" onmouseout="this.style.background='rgba(255,159,67,.08)'">🌟 塔5</a>
-  <a href="opengl-tower6.html" style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.28);color:#00d4ff;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(0,212,255,.08)'" onmouseout="this.style.background='rgba(0,212,255,.08)'">⚗️ 塔6</a>
-  <a href="opengl-tower7.html" style="background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.28);color:#ff4757;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,71,87,.08)'" onmouseout="this.style.background='rgba(255,71,87,.08)'">⚔️ 塔7</a>
-  <span style="background:rgba(179,136,255,0.22);border:1px solid #b388ff;color:#b388ff;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;font-family:var(--font);flex-shrink:0;opacity:1">🌌 塔8 ◀</span>
-  <a href="opengl-tower9.html" style="background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.35);color:#ffd700;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,215,0,.08)'" onmouseout="this.style.background='rgba(255,215,0,.08)'">★ 塔9</a>
+  <span style="font-size:.65rem;font-weight:800;color:#554433;letter-spacing:.06em;flex-shrink:0">城堡列表</span>
+  <a href="opengl-tower1.html" style="background:rgba(255,100,100,.1);border:1px solid rgba(255,100,100,.28);color:#ff6464;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,100,100,.1)'" onmouseout="this.style.background='rgba(255,100,100,.1)'">🗼 城堡1</a>
+  <a href="opengl-tower2.html" style="background:rgba(255,217,61,.1);border:1px solid rgba(255,217,61,.3);color:#ffd93d;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,217,61,.1)'" onmouseout="this.style.background='rgba(255,217,61,.1)'">💡 城堡2</a>
+  <a href="opengl-tower3.html" style="background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.28);color:#00e5a0;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(0,229,160,.08)'" onmouseout="this.style.background='rgba(0,229,160,.08)'">🗿 城堡3</a>
+  <a href="opengl-tower4.html" style="background:rgba(199,146,234,.08);border:1px solid rgba(199,146,234,.28);color:#c792ea;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(199,146,234,.08)'" onmouseout="this.style.background='rgba(199,146,234,.08)'">⚔️ 城堡4</a>
+  <a href="opengl-tower5.html" style="background:rgba(255,159,67,.08);border:1px solid rgba(255,159,67,.28);color:#ff9f43;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,159,67,.08)'" onmouseout="this.style.background='rgba(255,159,67,.08)'">🌟 城堡5</a>
+  <a href="opengl-tower6.html" style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.28);color:#00d4ff;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(0,212,255,.08)'" onmouseout="this.style.background='rgba(0,212,255,.08)'">⚗️ 城堡6</a>
+  <a href="opengl-tower7.html" style="background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.28);color:#ff4757;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,71,87,.08)'" onmouseout="this.style.background='rgba(255,71,87,.08)'">⚔️ 城堡7</a>
+  <span style="background:rgba(179,136,255,0.22);border:1px solid #b388ff;color:#b388ff;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;font-family:var(--font);flex-shrink:0;opacity:1">🌌 城堡8 ◀</span>
+  <a href="opengl-tower9.html" style="background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.35);color:#ffd700;padding:3px 11px;border-radius:100px;font-size:.72rem;font-weight:900;text-decoration:none;font-family:var(--font);flex-shrink:0;transition:.2s" onmouseover="this.style.background='rgba(255,215,0,.08)'" onmouseout="this.style.background='rgba(255,215,0,.08)'">★ 城堡9</a>
 </div>
 <section class="hero">
-  <div class="tower-badge">&#127756; 塔8 · 秘境古塔 · Advanced & Modern OpenGL</div>
+  <div class="tower-badge">🌌 城堡8 · 秘境之城 · Advanced & Modern OpenGL</div>
   <h1>超越傳統的<span>魔法禁術</span></h1>
   <p>Compute Shader、Raymarching、體積霧、SSR、TAA — OpenGL 最前沿的黑魔法，讓你的渲染技術超越 99% 的程式員 🔮</p>
   <div class="stats-row">
@@ -183,8 +184,8 @@ quiz:{q:'為什麼 Weighted Blended OIT 的近似值通常可以接受？',opts:
 story:'<span class="be">🌐</span>為什麼天空是藍色的？<br>為什麼夕陽是橘紅色的？<br>答案是<span class="hl">大氣散射</span>！<br><br><span class="hl2">瑞利散射（Rayleigh）</span>：<br>空氣分子散射<span class="hl">短波長</span>（藍色）更多！<br>公式：散射強度 ∝ 1/λ⁴<br>→ 藍光散射是紅光的 9.4 倍！<br>→ 正上方的天空顯藍色<br><br><span class="hl3">Mie 散射</span>：<br>較大的粒子（灰塵、水滴）散射所有波長<br>→ 太陽周圍的白色光暈<br>→ 霧霾的「白光」現象<br><br>夕陽原理：<br>太陽低角度時，光穿過<span class="hl">更厚的大氣層</span><br>藍光全散掉了，只剩紅橘色抵達眼睛！<br><br>實作：沿視線積分大氣層 → 漂亮的程序天空！',
 quiz:{q:'夕陽為什麼是紅橘色？',opts:['太陽在傍晚變熱','夕陽時光線穿越的大氣路徑更長，藍光被瑞利散射消耗殆盡，只有長波長的紅橘光抵達眼睛','大氣中有紅色物質','反射地面顏色'],ans:1,explain:'中午太陽在頭頂，大氣路徑短，藍光只散掉一點，天空是藍的。傍晚太陽在地平線，大氣路徑是中午的 10 倍以上，藍光全被散射掉了！只有穿透力強的紅橘色能走完全程 🌅'}},
 {id:'l8',num:'8-8',icon:'⭐',title:'Boss：魔法古塔最終挑戰',sub:'Raymarching + SDF + 體積霧 + 大氣天空 全整合',xp:220,type:'boss',school:'系統整合：GLSL 著色器程式設計的藝術',
-story:'<span class="be">⭐</span><span class="hl3">塔8 最終 Boss！整個 OpenGL 課程的頂峰！</span>⭐<br><br>在 Fragment Shader 裡渲染整個世界！<br>不需要任何頂點，純粹的數學魔法：<br><br>🌐 <span class="hl">程序天空</span> — 大氣散射，隨時間變化的天色<br>🔮 <span class="hl2">SDF 場景</span> — 球、方塊、平面的數學世界<br>🌫️ <span class="hl3">體積霧</span> — 光線步進積分，光束穿透<br>⭐ <span class="hl">軟陰影</span> — SDF 可以算出柔和的陰影！<br>🎨 <span class="hl2">PBR 材質</span> — 甚至在 Raymarching 裡用 PBR！<br>✨ <span class="hl3">Bloom + Tone Mapping</span> — 最後的電影感<br><br>這個世界裡的每一個像素，<br>都是從方程式計算出來的，<br>沒有任何三角形！<br><br>這就是 <span class="hl">Shader Art</span> — 用數學畫出整個宇宙 🌌',
-quiz:{q:'完成了整個 OpenGL 魔法學院，你學到的最重要的事是什麼？',opts:['GPU 比 CPU 快','渲染是物理、數學和工程的結合，每一種視覺效果背後都有清晰的物理原理和數學模型，理解原理才能創造新技術','OpenGL 的 API 很多','著色器很難寫'],ans:1,explain:'恭喜完成全部 8 座塔！你現在理解了 Phong、PBR、陰影、後處理、粒子、骨骼動畫、大氣散射... 每一個都建立在物理和數學基礎上。這個思維方式讓你能學習任何新的渲染技術 — 不只是記憶 API，而是理解原理 🎓'},},
+story:'<span class="be">⭐</span><span class="hl3">城堡8 最終 Boss！整個 OpenGL 課程的頂峰！</span>⭐<br><br>在 Fragment Shader 裡渲染整個世界！<br>不需要任何頂點，純粹的數學魔法：<br><br>🌐 <span class="hl">程序天空</span> — 大氣散射，隨時間變化的天色<br>🔮 <span class="hl2">SDF 場景</span> — 球、方塊、平面的數學世界<br>🌫️ <span class="hl3">體積霧</span> — 光線步進積分，光束穿透<br>⭐ <span class="hl">軟陰影</span> — SDF 可以算出柔和的陰影！<br>🎨 <span class="hl2">PBR 材質</span> — 甚至在 Raymarching 裡用 PBR！<br>✨ <span class="hl3">Bloom + Tone Mapping</span> — 最後的電影感<br><br>這個世界裡的每一個像素，<br>都是從方程式計算出來的，<br>沒有任何三角形！<br><br>這就是 <span class="hl">Shader Art</span> — 用數學畫出整個宇宙 🌌',
+quiz:{q:'完成了整個 OpenGL 魔法王國，你學到的最重要的事是什麼？',opts:['GPU 比 CPU 快','渲染是物理、數學和工程的結合，每一種視覺效果背後都有清晰的物理原理和數學模型，理解原理才能創造新技術','OpenGL 的 API 很多','著色器很難寫'],ans:1,explain:'恭喜完成全部 8 座塔！你現在理解了 Phong、PBR、陰影、後處理、粒子、骨骼動畫、大氣散射... 每一個都建立在物理和數學基礎上。這個思維方式讓你能學習任何新的渲染技術 — 不只是記憶 API，而是理解原理 🎓'},},
 ];
 
 const TOTAL_XP=LESSONS.reduce((s,l)=>s+l.xp,0);
