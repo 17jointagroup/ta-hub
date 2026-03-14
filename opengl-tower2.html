@@ -224,6 +224,33 @@ html{font-size:17px}
 <div class="toast" id="toast"></div>
 
 <script>
+
+// ── iOS Safari Fixes ──
+// roundRect polyfill
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    const R=Math.min(typeof r==='number'?r:r[0],w/2,h/2);
+    this.beginPath();this.moveTo(x+R,y);this.lineTo(x+w-R,y);
+    this.arcTo(x+w,y,x+w,y+R,R);this.lineTo(x+w,y+h-R);
+    this.arcTo(x+w,y+h,x+w-R,y+h,R);this.lineTo(x+R,y+h);
+    this.arcTo(x,y+h,x,y+h-R,R);this.lineTo(x,y+R);
+    this.arcTo(x,y,x+R,y,R);this.closePath();
+  };
+}
+// WebGL context pool - prevents iOS 8-context limit crash
+const _glPool = {};
+function safeGL(cv) {
+  if(!cv) return null;
+  const id = cv.id || 'cv_'+Math.random();
+  cv.id = id;
+  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
+  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
+  if(!gl) return null;
+  _glPool[id] = gl;
+  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  return gl;
+}
+
 // ══════════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════════
@@ -519,7 +546,7 @@ function mkGL(cont,w=600,h=260,label='WebGL Demo'){
     <canvas id="cv-${Math.random().toString(36).slice(2)}" width="${w}" height="${h}" style="height:${h}px"></canvas>
   </div>`;
   const cv=cont.querySelector('canvas');
-  const gl=cv.getContext('webgl');
+  const gl=cv.getContext('webgl',{powerPreference:'low-power'});
   return {cv,gl};
 }
 
@@ -624,7 +651,7 @@ function d2(cont){
   window._phMode='all';
   window.setPhong=m=>{window._phMode=m;document.querySelectorAll('[id^="ph-"]').forEach(b=>b.classList.remove('on'));document.getElementById('ph-'+m).classList.add('on');};
   const cv=document.getElementById('cv-d2');
-  const gl=cv.getContext('webgl');if(!gl)return;
+  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`
     attribute vec3 pos;attribute vec3 norm;
     uniform mat4 mvp;uniform mat4 model;
@@ -724,7 +751,7 @@ function d3(cont){
   window._matIdx=0;
   window.setMat=(i)=>{window._matIdx=i;document.querySelectorAll('#mat-btns .ctrl-btn').forEach((b,j)=>b.classList.toggle('on',i===j));};
   const cv=document.getElementById('cv-d3');
-  const gl=cv.getContext('webgl');if(!gl)return;
+  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
     void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
@@ -783,7 +810,7 @@ function d4(cont){
   window._smMode='final';
   window.setSM=m=>{window._smMode=m;['final','spec','map','diff'].forEach(x=>document.getElementById('sm-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv-d4');
-  const gl=cv.getContext('webgl');if(!gl)return;
+  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   // Make procedural textures
   function makeChecker(gl,w,h,col1,col2){
     const data=new Uint8Array(w*h*4);
@@ -877,7 +904,7 @@ function d5(cont){
     document.getElementById('cutoff-row').style.display=m==='spot'?'flex':'none';
   };
   const cv=document.getElementById('cv-d5');
-  const gl=cv.getContext('webgl');if(!gl)return;
+  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
     void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
@@ -970,7 +997,7 @@ function d6(cont){
     document.getElementById('light-count').textContent=c;
   }
   const cv=document.getElementById('cv-d6');
-  const gl=cv.getContext('webgl');if(!gl)return;
+  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
     void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
