@@ -115,6 +115,25 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 @keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
 .xp-pop{position:fixed;font-family:var(--mono);font-weight:900;font-size:1.2rem;color:var(--acc);pointer-events:none;z-index:999;text-shadow:0 0 20px var(--acc);animation:floatUp .9s ease-out forwards}
 .grad-box{background:linear-gradient(135deg,rgba(179,136,255,.08),rgba(234,128,252,.05));border:1px solid rgba(179,136,255,.2);border-radius:12px;padding:14px;margin:10px 0;font-size:.83rem;line-height:1.7}
+
+/* ── Completion Banner ── */
+.comp-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(4,2,14,.88);backdrop-filter:blur(18px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.comp-overlay.show{display:flex;animation:fadeInComp .5s ease}
+@keyframes fadeInComp{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.comp-title{font-size:2.2rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}
+.comp-sub{font-size:.9rem;color:var(--txt2);margin-bottom:24px;line-height:1.6}
+.comp-trophy{font-size:4rem;margin-bottom:12px;animation:trophy-bob .8s ease infinite alternate}
+@keyframes trophy-bob{from{transform:translateY(0) rotate(-5deg)}to{transform:translateY(-10px) rotate(5deg)}}
+.comp-next-btn{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#050210;border:none;border-radius:100px;padding:14px 32px;font-family:var(--font);font-size:1rem;font-weight:900;cursor:pointer;-webkit-appearance:none;margin-bottom:12px;transition:.2s;box-shadow:0 6px 28px rgba(var(--acc-rgb),.4)}
+.comp-next-btn:active{opacity:.85;transform:scale(.97)}
+.comp-map-btn{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:var(--txt2);border-radius:100px;padding:10px 24px;font-family:var(--font);font-size:.85rem;font-weight:800;cursor:pointer;-webkit-appearance:none;transition:.2s}
+.comp-map-btn:active{opacity:.7}
+.comp-stars{font-size:2rem;letter-spacing:6px;margin-bottom:16px;animation:stars-in .6s .3s ease both}
+@keyframes stars-in{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+/* Firework particles */
+.fw-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.fw{position:absolute;border-radius:50%;animation:fwFly var(--d,.8s) var(--dl,0s) ease-out forwards}
+@keyframes fwFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx,0px),var(--ty,-80px)) scale(0);opacity:0}}
 </style></head>
 <body>
 <div class="stars" id="stars"></div>
@@ -221,7 +240,7 @@ function buildBody(les,done){
 }
 function switchTab(el,panelId,lid){const body=document.getElementById('L'+lid).querySelector('.lesson-body');body.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));body.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById(panelId).classList.add('on');if(panelId.startsWith('d-'))initDemo(lid);}
 function checkQ(lid,idx){const les=LESSONS.find(l=>l.id===lid);document.querySelectorAll(`[id^="opt-${lid}-"]`).forEach((o,i)=>{o.classList.add('disabled');if(i===les.quiz.ans)o.classList.add('correct');else if(i===idx)o.classList.add('wrong');});const ex=document.getElementById('ex-'+lid);ex.innerHTML='💡 '+les.quiz.explain;ex.style.display='block';}
-function complete(id){if(earned.includes(id))return;earned.push(id);localStorage.setItem('tower8_done',JSON.stringify(earned));const les=LESSONS.find(l=>l.id===id);const btn=document.getElementById('btn-'+id);showXPPop(les.xp,btn);const allDone=LESSONS.every(l=>earned.includes(l.id));if(allDone){setTimeout(()=>showGrad(),600);} else {toast(`🌌 +${les.xp} XP！「${les.title}」完成！`);}setTimeout(()=>{current=null;render();updateXP();},500);}
+function complete(id){if(earned.includes(id))return;earned.push(id);localStorage.setItem('tower8_done',JSON.stringify(earned));setTimeout(checkCompletion,400);const les=LESSONS.find(l=>l.id===id);const btn=document.getElementById('btn-'+id);showXPPop(les.xp,btn);const allDone=LESSONS.every(l=>earned.includes(l.id));if(allDone){setTimeout(()=>showGrad(),600);} else {toast(`🌌 +${les.xp} XP！「${les.title}」完成！`);}setTimeout(()=>{current=null;render();updateXP();},500);}
 function showGrad(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(5,3,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px';d.innerHTML='<div style="font-size:4rem;margin-bottom:20px;animation:bob .8s infinite alternate">🎓</div><h1 style="font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,#b388ff,#ea80fc,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px">恭喜完成全部 8 座塔！</h1><p style="color:#b388ff;font-size:1.1rem;max-width:520px;line-height:1.7;margin-bottom:28px">你已掌握從基礎光照到 PBR、從陰影到體積霧、從 Raymarching 到大氣散射的完整 OpenGL 渲染知識。你是一位真正的圖形學魔法師！🌌</p><div style="font-size:2rem;margin-bottom:24px">⭐ 全 8 塔完成 ⭐</div><button onclick="this.parentElement.remove()" style="background:linear-gradient(135deg,#b388ff,#ea80fc);color:#030108;border:none;border-radius:100px;padding:14px 36px;font-size:1rem;font-weight:900;cursor:pointer;font-family:var(--font)">繼續探索 →</button>';document.body.appendChild(d);}
 
 const inited={};
@@ -619,5 +638,81 @@ FragColor = <span class="type">vec4</span>(result, <span class="num">1.0</span>-
 }
 function cpC(btn){const t=btn.closest('.code-wrap').querySelector('pre').innerText;navigator.clipboard.writeText(t).then(()=>{btn.textContent='✓';setTimeout(()=>btn.textContent='複製',1500);});}
 updateXP();render();
+
+// ── Completion System ──
+const CASTLE_NUM = 8;
+const CASTLE_TOTAL = 8;
+const CASTLE_KEY = 'tower8_done';
+const NEXT_CASTLE = 8;
+
+function checkCompletion(){
+  const done = JSON.parse(localStorage.getItem(CASTLE_KEY)||'[]').filter(Boolean).length;
+  if(done >= CASTLE_TOTAL && !localStorage.getItem(CASTLE_KEY+'_comp_shown')){
+    localStorage.setItem(CASTLE_KEY+'_comp_shown','1');
+    setTimeout(showCompletion, 800);
+  }
+}
+
+function showCompletion(){
+  const overlay = document.getElementById('compOverlay');
+  if(!overlay) return;
+  // Fireworks
+  const fw = overlay.querySelector('.fw-wrap');
+  const colors=['#a78bfa','#34d399','#ffd700','#ff6b9d','#00d4ff','#ff9f43'];
+  for(let i=0;i<28;i++){
+    const d=document.createElement('div');
+    d.className='fw';
+    const tx=(Math.random()-.5)*300;
+    const ty=-100-Math.random()*200;
+    d.style.cssText=`width:6px;height:6px;background:${colors[i%colors.length]};left:${40+Math.random()*20}%;top:60%;--d:${.6+Math.random()*.8}s;--dl:${Math.random()*.5}s;--tx:${tx}px;--ty:${ty}px`;
+    fw.appendChild(d);
+  }
+  overlay.classList.add('show');
+}
+
+function goNextCastle(){
+  if(NEXT_CASTLE > 0){
+    window.location.href='opengl-map.html#done-'+CASTLE_NUM;
+  } else {
+    window.location.href='opengl-map.html';
+  }
+}
+
+function goMap(){ window.location.href='opengl-map.html#done-'+CASTLE_NUM; }
+
+// Auto-scroll nav to current castle
+(function(){
+  const navBar = document.querySelector('div[style*="position:sticky;top:52px"]');
+  if(!navBar) return;
+  const current = navBar.querySelector('[style*="opacity:1"]');
+  if(current) setTimeout(()=>{
+    current.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }, 300);
+})();
+
+// Hook into existing complete() function
+const _origComplete = complete;
+if(typeof complete === 'function'){
+  // Override complete to also check completion
+  window._patchedComplete = true;
+}
+// Check on page load
+document.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(checkCompletion, 500);
+});
+// Also check after any storage changes
+window.addEventListener('storage', checkCompletion);
 </script>
+
+<!-- Completion Overlay -->
+<div id="compOverlay" class="comp-overlay">
+  <div class="fw-wrap"></div>
+  <div class="comp-trophy">🏆</div>
+  <div class="comp-stars">⭐⭐⭐</div>
+  <div class="comp-title">城堡8 全通關！<br>秘境之城</div>
+  <div class="comp-sub">你已征服所有關卡<br>獲得全部 XP 獎勵！</div>
+  <button class="comp-next-btn" onclick="goNextCastle()">⚔️ 前往城堡9 →</button>
+  <button class="comp-map-btn" onclick="goMap()">🗺️ 返回地圖</button>
+</div>
+
 </body></html>
