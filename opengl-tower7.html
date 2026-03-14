@@ -179,6 +179,33 @@ html{font-size:17px}
 </div>
 <div class="toast" id="toast"></div>
 <script>
+
+// ── iOS Safari Fixes ──
+// roundRect polyfill
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    const R=Math.min(typeof r==='number'?r:r[0],w/2,h/2);
+    this.beginPath();this.moveTo(x+R,y);this.lineTo(x+w-R,y);
+    this.arcTo(x+w,y,x+w,y+R,R);this.lineTo(x+w,y+h-R);
+    this.arcTo(x+w,y+h,x+w-R,y+h,R);this.lineTo(x+R,y+h);
+    this.arcTo(x,y+h,x,y+h-R,R);this.lineTo(x,y+R);
+    this.arcTo(x,y,x+R,y,R);this.closePath();
+  };
+}
+// WebGL context pool - prevents iOS 8-context limit crash
+const _glPool = {};
+function safeGL(cv) {
+  if(!cv) return null;
+  const id = cv.id || 'cv_'+Math.random();
+  cv.id = id;
+  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
+  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
+  if(!gl) return null;
+  _glPool[id] = gl;
+  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  return gl;
+}
+
 const LESSONS=[
 {id:'l1',num:'7-1',icon:'✨',title:'粒子系統 — 生命的誕生',sub:'CPU 粒子：生命週期、速度、重力、淡出',xp:70,type:'normal',school:'物理：運動學方程，隨機過程',
 story:'<span class="be">✨</span><span class="hl">粒子系統</span>是遊戲最萬能的工具！<br>火焰、爆炸、下雨、魔法、煙霧 — 全靠它！<br><br>每個粒子有這些屬性：<br>• <span class="hl2">位置</span> pos = pos + vel * dt<br>• <span class="hl">速度</span> vel = vel + gravity * dt<br>• <span class="hl3">生命</span> life -= dt（到 0 就消失重生）<br>• 大小、顏色（隨生命衰減淡出）<br><br>每幀：<br>1️⃣ 更新所有粒子物理（CPU）<br>2️⃣ 上傳位置到 VBO（動態緩衝）<br>3️⃣ 用 <span class="hl">Billboard</span> 渲染：永遠朝向攝影機的四邊形<br><br>優化：用<span class="hl2">粒子池</span>，死掉的粒子重設，不刪不建！',
@@ -252,7 +279,7 @@ function mkSD(cont,id,label,mnames,fs,extras){
   const btns=mnames.map((n,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="m7${id}${i}" onclick="setM7_${id}(${i})">${n}</button>`).join('');
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv7${id}" width="600" height="280" style="height:280px"></canvas></div><div class="ctrl-row">${btns}</div>${extras||''}`;
   window[`_m7${id}`]=0;window[`setM7_${id}`]=m=>{window[`_m7${id}`]=m;mnames.forEach((_,i)=>document.getElementById(`m7${id}${i}`).classList.toggle('on',i===m));};
-  const cv=document.getElementById('cv7'+id);const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv7'+id);const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const prog=mkP(gl,'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}',fs);
   const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
   let time=0;(function fr(){time+=0.016;gl.viewport(0,0,600,280);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window[`_m7${id}`]);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
@@ -263,7 +290,7 @@ function d1(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>粒子系統 — CPU 粒子</div></div><canvas id="cv7p1" width="600" height="280" style="height:280px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn on" id="pe-fire" onclick="setPE(\'fire\')">🔥 火焰</button><button class="ctrl-btn" id="pe-magic" onclick="setPE(\'magic\')">✨ 魔法</button><button class="ctrl-btn" id="pe-rain" onclick="setPE(\'rain\')">🌧️ 雨</button></div><div class="slider-row"><span class="slider-label">粒子數量</span><input type="range" min="50" max="500" value="200" id="pe-cnt"><span class="slider-val" id="pe-cntv">200</span></div>';
   document.getElementById('pe-cnt').oninput=function(){document.getElementById('pe-cntv').textContent=this.value;};
   window._pe='fire';window.setPE=m=>{window._pe=m;['fire','magic','rain'].forEach(x=>document.getElementById('pe-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv7p1');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv7p1');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
   const vs=`attribute vec2 pos;attribute float life;uniform mat4 mvp;void main(){float s=life*4.+1.;gl_PointSize=s;gl_Position=vec4(pos,0,1);}`;
   const fs=`precision mediump float;uniform int mode;uniform float t;varying float vLife;void main(){vec2 c=gl_PointCoord-.5;float r=length(c);if(r>.5)discard;float a=(1.-r*2.)*vLife;vec3 col;if(mode==0)col=mix(vec3(1.,.3,.0),vec3(1.,.9,.2),vLife);else if(mode==1)col=vec3(abs(sin(t+vLife*3.)),vLife,1.);else col=vec3(.4,.7,1.);gl_FragColor=vec4(col,a*(.3+vLife*.7));}`;
@@ -271,7 +298,7 @@ function d1(cont){
   const vs2=`attribute vec2 pos;attribute float life;void main(){gl_PointSize=max(1.,life*8.);gl_Position=vec4(pos,0,1);}`;
   const fs2=`precision mediump float;uniform int mode;uniform float t;void main(){vec2 c=gl_PointCoord-.5;float r=length(c);if(r>.5)discard;gl_FragColor=vec4(1.,.5,.1,.5);}`;
   // Simple approach: use 2D canvas for particles, convert to WebGL
-  cv.getContext('webgl');
+  cv.getContext('webgl',{powerPreference:'low-power'});
   // Use 2D canvas overlay
   const ctx2=document.createElement('canvas');ctx2.width=600;ctx2.height=280;ctx2.style.cssText='position:absolute;top:0;left:0;width:100%;height:280px;pointer-events:none';
   cv.parentElement.style.position='relative';cv.parentElement.appendChild(ctx2);
