@@ -127,6 +127,25 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 .tower-row{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:.82rem;font-weight:800}
 .tower-bar-bg{flex:1;height:6px;background:var(--border);border-radius:100px;overflow:hidden}
 .tower-bar-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:100px}
+
+/* ── Completion Banner ── */
+.comp-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(4,2,14,.88);backdrop-filter:blur(18px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.comp-overlay.show{display:flex;animation:fadeInComp .5s ease}
+@keyframes fadeInComp{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.comp-title{font-size:2.2rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}
+.comp-sub{font-size:.9rem;color:var(--txt2);margin-bottom:24px;line-height:1.6}
+.comp-trophy{font-size:4rem;margin-bottom:12px;animation:trophy-bob .8s ease infinite alternate}
+@keyframes trophy-bob{from{transform:translateY(0) rotate(-5deg)}to{transform:translateY(-10px) rotate(5deg)}}
+.comp-next-btn{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#050210;border:none;border-radius:100px;padding:14px 32px;font-family:var(--font);font-size:1rem;font-weight:900;cursor:pointer;-webkit-appearance:none;margin-bottom:12px;transition:.2s;box-shadow:0 6px 28px rgba(var(--acc-rgb),.4)}
+.comp-next-btn:active{opacity:.85;transform:scale(.97)}
+.comp-map-btn{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:var(--txt2);border-radius:100px;padding:10px 24px;font-family:var(--font);font-size:.85rem;font-weight:800;cursor:pointer;-webkit-appearance:none;transition:.2s}
+.comp-map-btn:active{opacity:.7}
+.comp-stars{font-size:2rem;letter-spacing:6px;margin-bottom:16px;animation:stars-in .6s .3s ease both}
+@keyframes stars-in{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+/* Firework particles */
+.fw-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.fw{position:absolute;border-radius:50%;animation:fwFly var(--d,.8s) var(--dl,0s) ease-out forwards}
+@keyframes fwFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx,0px),var(--ty,-80px)) scale(0);opacity:0}}
 </style></head>
 <body>
 <div class="stars" id="stars"></div>
@@ -248,7 +267,7 @@ function switchTab(el,panelId,lid){const body=document.getElementById('L'+lid).q
 function checkQ(lid,idx){const les=LESSONS.find(l=>l.id===lid);document.querySelectorAll(`[id^="opt-${lid}-"]`).forEach((o,i)=>{o.classList.add('disabled');if(i===les.quiz.ans)o.classList.add('correct');else if(i===idx)o.classList.add('wrong');});const ex=document.getElementById('ex-'+lid);ex.innerHTML='💡 '+les.quiz.explain;ex.style.display='block';}
 function complete(id){
   if(earned.includes(id))return;
-  earned.push(id);localStorage.setItem('tower9_done',JSON.stringify(earned));
+  earned.push(id);localStorage.setItem('tower9_done',JSON.stringify(earned));setTimeout(checkCompletion,400);
   const les=LESSONS.find(l=>l.id===id);const btn=document.getElementById('btn-'+id);
   showXPPop(les.xp,btn);
   if(les.type==='final'){setTimeout(()=>showGraduation(),700);}
@@ -774,5 +793,81 @@ function buildCode(les){
 }
 function cpC(btn){const tx=btn.closest('.code-wrap').querySelector('pre').innerText;navigator.clipboard.writeText(tx).then(()=>{btn.textContent='✓';setTimeout(()=>btn.textContent='複製',1500);});}
 updateXP();render();
+
+// ── Completion System ──
+const CASTLE_NUM = 9;
+const CASTLE_TOTAL = 8;
+const CASTLE_KEY = 'tower9_done';
+const NEXT_CASTLE = 9;
+
+function checkCompletion(){
+  const done = JSON.parse(localStorage.getItem(CASTLE_KEY)||'[]').filter(Boolean).length;
+  if(done >= CASTLE_TOTAL && !localStorage.getItem(CASTLE_KEY+'_comp_shown')){
+    localStorage.setItem(CASTLE_KEY+'_comp_shown','1');
+    setTimeout(showCompletion, 800);
+  }
+}
+
+function showCompletion(){
+  const overlay = document.getElementById('compOverlay');
+  if(!overlay) return;
+  // Fireworks
+  const fw = overlay.querySelector('.fw-wrap');
+  const colors=['#a78bfa','#34d399','#ffd700','#ff6b9d','#00d4ff','#ff9f43'];
+  for(let i=0;i<28;i++){
+    const d=document.createElement('div');
+    d.className='fw';
+    const tx=(Math.random()-.5)*300;
+    const ty=-100-Math.random()*200;
+    d.style.cssText=`width:6px;height:6px;background:${colors[i%colors.length]};left:${40+Math.random()*20}%;top:60%;--d:${.6+Math.random()*.8}s;--dl:${Math.random()*.5}s;--tx:${tx}px;--ty:${ty}px`;
+    fw.appendChild(d);
+  }
+  overlay.classList.add('show');
+}
+
+function goNextCastle(){
+  if(NEXT_CASTLE > 0){
+    window.location.href='opengl-map.html#done-'+CASTLE_NUM;
+  } else {
+    window.location.href='opengl-map.html';
+  }
+}
+
+function goMap(){ window.location.href='opengl-map.html#done-'+CASTLE_NUM; }
+
+// Auto-scroll nav to current castle
+(function(){
+  const navBar = document.querySelector('div[style*="position:sticky;top:52px"]');
+  if(!navBar) return;
+  const current = navBar.querySelector('[style*="opacity:1"]');
+  if(current) setTimeout(()=>{
+    current.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }, 300);
+})();
+
+// Hook into existing complete() function
+const _origComplete = complete;
+if(typeof complete === 'function'){
+  // Override complete to also check completion
+  window._patchedComplete = true;
+}
+// Check on page load
+document.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(checkCompletion, 500);
+});
+// Also check after any storage changes
+window.addEventListener('storage', checkCompletion);
 </script>
+
+<!-- Completion Overlay -->
+<div id="compOverlay" class="comp-overlay">
+  <div class="fw-wrap"></div>
+  <div class="comp-trophy">🏆</div>
+  <div class="comp-stars">⭐⭐⭐</div>
+  <div class="comp-title">城堡9 全通關！<br>終極城堡</div>
+  <div class="comp-sub">你已征服所有關卡<br>獲得全部 XP 獎勵！</div>
+  <button class="comp-next-btn" onclick="goMap()">🎉 返回地圖</button>
+  <button class="comp-map-btn" onclick="goMap()">🗺️ 返回地圖</button>
+</div>
+
 </body></html>
