@@ -197,6 +197,33 @@ html{font-size:17px}
 <div class="toast" id="toast"></div>
 
 <script>
+
+// ── iOS Safari Fixes ──
+// roundRect polyfill
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    const R=Math.min(typeof r==='number'?r:r[0],w/2,h/2);
+    this.beginPath();this.moveTo(x+R,y);this.lineTo(x+w-R,y);
+    this.arcTo(x+w,y,x+w,y+R,R);this.lineTo(x+w,y+h-R);
+    this.arcTo(x+w,y+h,x+w-R,y+h,R);this.lineTo(x+R,y+h);
+    this.arcTo(x,y+h,x,y+h-R,R);this.lineTo(x,y+R);
+    this.arcTo(x,y,x+R,y,R);this.closePath();
+  };
+}
+// WebGL context pool - prevents iOS 8-context limit crash
+const _glPool = {};
+function safeGL(cv) {
+  if(!cv) return null;
+  const id = cv.id || 'cv_'+Math.random();
+  cv.id = id;
+  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
+  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
+  if(!gl) return null;
+  _glPool[id] = gl;
+  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  return gl;
+}
+
 const LESSONS=[
 {id:'l1',num:'9-1',icon:'🏗️',title:'引擎架構設計 — 從零開始',sub:'場景圖、資源管理、渲染迴圈架構',xp:100,type:'normal',school:'軟體工程：ECS 架構、物件導向設計、命令模式',
 story:'<span class="be">🏗️</span>你已經學了 8 座塔的技術。現在要問的是：<br>怎麼把這些技術<span class="hl">組織成一個引擎</span>？<br><br>現代遊戲引擎的三大架構選擇：<br><br>🏛️ <span class="hl">傳統 OOP</span>：物件有 Draw()、Update() 方法<br>簡單直覺，小型專案很好用<br><br>🧩 <span class="hl2">ECS（Entity-Component-System）</span>：<br>Entity = 只有 ID<br>Component = 純資料（Position、Mesh、Material）<br>System = 邏輯（RenderSystem、PhysicsSystem）<br>Unreal 5、Unity DOTS 都用這個！<br><br>🔄 <span class="hl3">渲染管線抽象</span>：<br>把渲染分成「Pass」的概念，<br>每個 Pass 只做一件事，可以輕鬆新增/移除/重排！<br><br>城堡9 的 mini 引擎用：<br>簡化版 ECS + Pass-based 渲染管線',
@@ -309,7 +336,7 @@ function mkSD9(cont,id,label,mnames,fs,extras){
   const btns=mnames.map((n,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="m9${id}${i}" onclick="setM9_${id}(${i})">${n}</button>`).join('');
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv9${id}" width="600" height="260" style="height:260px"></canvas></div><div class="ctrl-row">${btns}</div>${extras||''}`;
   window[`_m9${id}`]=0;window[`setM9_${id}`]=m=>{window[`_m9${id}`]=m;mnames.forEach((_,i)=>document.getElementById(`m9${id}${i}`).classList.toggle('on',i===m));};
-  const cv=document.getElementById('cv9'+id);const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv9'+id);const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const prog=mkP(gl,VS,fs);const buf=qB(gl);
   const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
   let time=0;(function fr(){time+=0.016;gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window[`_m9${id}`]);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
@@ -582,7 +609,7 @@ function d8(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>🎓 畢業挑戰 — Mini 渲染引擎（拖曳旋轉）</div></div><canvas id="cv9boss" width="600" height="320" style="height:320px;cursor:grab"></canvas></div><div class="ctrl-row"><button class="ctrl-btn on" id="b9-full" onclick="setB9(\'full\')">🌟 完整場景</button><button class="ctrl-btn" id="b9-pbr" onclick="setB9(\'pbr\')">⚗️ PBR 只</button><button class="ctrl-btn" id="b9-post" onclick="setB9(\'post\')">🎬 後處理</button><button class="ctrl-btn" id="b9-wire" onclick="setB9(\'wire\')">🔮 Wireframe</button></div><div class="slider-row"><span class="slider-label">⏰ 時間</span><input type="range" min="0" max="30" value="10" id="b9-spd"><span class="slider-val" id="b9-spdv">1.0x</span></div>';
   document.getElementById('b9-spd').oninput=function(){document.getElementById('b9-spdv').textContent=(this.value/10).toFixed(1)+'x';};
   window._b9='full';window.setB9=m=>{window._b9=m;['full','pbr','post','wire'].forEach(x=>document.getElementById('b9-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv9boss');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv9boss');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const fs=`precision mediump float;varying vec2 uv;uniform float t;uniform int mode;
   const float PI=3.14159265;
   float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.);}
