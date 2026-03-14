@@ -2,438 +2,534 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no">
 <title>🗺️ OpenGL 魔法王國</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{--font:'Nunito',sans-serif}
+:root{--f:'Nunito',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{font-family:var(--font);overflow:hidden;height:100%;background:#1a1240;touch-action:pan-y}
-/* ── HUD ── */
-.hud{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(14,10,30,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(167,139,250,.18);padding:10px 14px;display:flex;align-items:center;gap:10px}
-.avatar-hud{width:38px;height:38px;border-radius:50%;overflow:hidden;border:2px solid #a78bfa;flex-shrink:0;background:#16112e;display:flex;align-items:center;justify-content:center}
-.player-info{flex:1;min-width:0}
-.player-name-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
-.p-name{font-size:.85rem;font-weight:900;color:#ede9ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lv-badge{background:linear-gradient(135deg,#a78bfa,#34d399);color:#0e0a1e;font-size:.6rem;font-weight:900;padding:1px 7px;border-radius:100px;flex-shrink:0}
-.bars{display:flex;flex-direction:column;gap:3px}
-.bar-row{display:flex;align-items:center;gap:5px}
-.bar-lbl{font-size:.58rem;font-weight:800;color:#6b5a90;min-width:18px;letter-spacing:.04em}
-.bar-bg{flex:1;height:5px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
-.bar-fill{height:100%;border-radius:100px;transition:width .5s ease}
-.hf{background:linear-gradient(90deg,#ff4757,#ff6b81)}
-.mf{background:linear-gradient(90deg,#667eea,#764ba2)}
-.xf{background:linear-gradient(90deg,#f7971e,#ffd200)}
-.hud-btn{background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.25);color:#a78bfa;border-radius:10px;padding:6px 10px;font-size:.7rem;font-weight:800;cursor:pointer;flex-shrink:0;-webkit-appearance:none}
-/* ── MAP SCROLL AREA ── */
-.map-scroll{position:fixed;top:68px;bottom:70px;left:0;right:0;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch}
-.map-world{position:relative;width:100%;height:920px}
-/* ── BACKGROUND LAYERS ── */
-.sky{position:absolute;inset:0;background:linear-gradient(180deg,#0a0518 0%,#1a1240 18%,#2d1b69 35%,#3d4a9e 55%,#4a7fc1 72%,#6db3d9 88%,#a8d5e2 100%)}
-.ground{position:absolute;bottom:0;left:0;right:0;height:180px;background:linear-gradient(180deg,#2d5a27 0%,#3a7a30 30%,#4a9040 100%);border-radius:60% 60% 0 0/20% 20% 0 0}
-.ground2{position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(180deg,#3a7a30,#2d5a27)}
-/* ── CLOUDS ── */
-.cloud{position:absolute;opacity:.55;animation:drift var(--cd,40s) var(--cdl,0s) linear infinite}
-@keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(110vw)}}
-.cblob{position:absolute;background:rgba(255,255,255,.85);border-radius:50%}
-/* ── MOUNTAINS ── */
-.mt{position:absolute;bottom:150px;clip-path:polygon(0% 100%,50% 0%,100% 100%);background:linear-gradient(180deg,#4a5568,#2d3748)}
-.mt-snow{position:absolute;bottom:150px;clip-path:polygon(35% 100%,50% 0%,65% 100%);background:#e2e8f0}
-/* ── PATH ── */
-.path-svg{position:absolute;inset:0;overflow:visible}
-/* ── CASTLE NODES ── */
-.castle-node{position:absolute;transform:translate(-50%,-50%);cursor:pointer;text-align:center;transition:transform .2s}
-.castle-node:active{transform:translate(-50%,-50%) scale(.93)}
-.castle-node.locked{opacity:.45;cursor:not-allowed}
-.c-ring{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;border:3px solid rgba(255,255,255,.15);box-shadow:0 4px 20px rgba(0,0,0,.4);transition:.2s;position:relative}
-.c-ring.unlocked{animation:glow-pulse 2s ease infinite}
-.c-ring.done{border-color:rgba(255,215,0,.7);box-shadow:0 0 20px rgba(255,215,0,.35)}
-@keyframes glow-pulse{0%,100%{box-shadow:0 4px 20px rgba(0,0,0,.4)}50%{box-shadow:0 0 28px rgba(167,139,250,.6),0 4px 20px rgba(0,0,0,.4)}}
-.c-name{font-size:.66rem;font-weight:900;color:#ede9ff;margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,.8);white-space:nowrap}
-.c-stars{font-size:.55rem;margin-top:2px;letter-spacing:1px}
-.c-lock{position:absolute;top:-4px;right:-4px;background:#1a1240;border:1.5px solid rgba(255,255,255,.2);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.65rem}
-.c-prog{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);border-radius:100px;padding:1px 7px;font-size:.55rem;font-weight:800;white-space:nowrap;color:#a0f0ff}
-/* ── DECORATIONS ── */
-.deco{position:absolute;font-size:1.4rem;pointer-events:none;user-select:none}
-.deco.bob{animation:bob 2s ease infinite alternate}
-@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
-/* ── BOTTOM STATS PANEL ── */
-.stats-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(14,10,30,.95);backdrop-filter:blur(14px);border-top:1px solid rgba(167,139,250,.18);transition:height .35s cubic-bezier(.4,0,.2,1);height:70px;overflow:hidden}
-.stats-panel.open{height:260px}
-.panel-tab{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer}
-.panel-tab-left{display:flex;align-items:center;gap:10px;font-size:.8rem;font-weight:800;color:#a78bfa}
-.panel-tab-arrow{color:#6b5a90;font-size:.8rem;transition:.25s}
-.stats-panel.open .panel-tab-arrow{transform:rotate(180deg)}
-.panel-body{padding:0 16px 16px;overflow-y:auto;height:190px}
-.equip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.equip-slot{background:rgba(167,139,250,.06);border:1px dashed rgba(167,139,250,.2);border-radius:12px;padding:10px 4px;text-align:center;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.equip-slot.filled{border-style:solid;border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.1)}
-.es-icon{font-size:1.4rem}
-.es-name{font-size:.58rem;font-weight:800;color:#a78bfa}
-.es-stat{font-size:.55rem;color:#34d399}
-.es-empty{font-size:.65rem;color:#3a2f5a;font-weight:800}
-.full-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.fs{background:rgba(255,255,255,.04);border-radius:10px;padding:8px 4px;text-align:center;border:1px solid rgba(255,255,255,.06)}
-.fs-v{font-size:1.1rem;font-weight:900;font-family:monospace}
-.fs-l{font-size:.58rem;color:#6b5a90;font-weight:800;letter-spacing:.04em;margin-top:2px}
-/* ── LEVEL UP TOAST ── */
-.lvup{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(135deg,#a78bfa,#34d399);color:#0e0a1e;border-radius:100px;padding:10px 24px;font-size:.9rem;font-weight:900;z-index:200;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
-.lvup.show{transform:translateX(-50%) translateY(0)}
+html,body{font-family:var(--f);overflow:hidden;height:100%;background:#060420;touch-action:none;user-select:none}
+
+.hud{position:fixed;top:0;left:0;right:0;z-index:200;padding:max(10px,env(safe-area-inset-top)) 12px 8px;background:rgba(3,1,16,.93);backdrop-filter:blur(18px);border-bottom:1px solid rgba(192,132,252,.14);display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;overflow:hidden;border:2px solid #c084fc;background:#0e0820;flex-shrink:0}
+.pi{flex:1;min-width:0}
+.pnr{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.pn{font-size:.84rem;font-weight:900;color:#f0e8ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv{background:linear-gradient(135deg,#c084fc,#34d399);color:#050210;font-size:.58rem;font-weight:900;padding:2px 7px;border-radius:100px;flex-shrink:0}
+.ttl{font-size:.6rem;font-weight:800;color:#c084fc;flex-shrink:0}
+.brs{display:flex;flex-direction:column;gap:3px}
+.br{display:flex;align-items:center;gap:5px}
+.brl{font-size:.56rem;font-weight:800;color:#3d2a60;min-width:18px}
+.brb{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden}
+.brf{height:100%;border-radius:100px;transition:width .5s}
+.hb{background:linear-gradient(90deg,#ef4444,#f87171)}
+.xb{background:linear-gradient(90deg,#f59e0b,#fcd34d)}
+.hbtn{background:rgba(192,132,252,.12);border:1px solid rgba(192,132,252,.22);color:#c084fc;border-radius:9px;padding:6px 9px;font-size:.68rem;font-weight:800;cursor:pointer;flex-shrink:0;-webkit-appearance:none;font-family:var(--f)}
+
+/* MAP PAN/ZOOM */
+.outer{position:fixed;top:0;left:0;right:0;bottom:60px;overflow:hidden;cursor:grab}
+.outer:active{cursor:grabbing}
+.stage{position:absolute;transform-origin:0 0;will-change:transform}
+canvas{display:block;position:absolute;top:0;left:0;pointer-events:none}
+
+/* Castle label nodes */
+.cn{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;pointer-events:all;z-index:30;cursor:pointer}
+.cn.locked{cursor:not-allowed}
+.cn-bubble{background:rgba(8,4,26,.88);border:2px solid rgba(192,132,252,.3);border-radius:12px;padding:5px 10px;text-align:center;backdrop-filter:blur(8px);transition:.15s;min-width:70px}
+.cn:not(.locked):active .cn-bubble{transform:scale(.93)}
+.cn.locked .cn-bubble{border-color:rgba(255,255,255,.1);opacity:.5}
+.cn.unlocked .cn-bubble{border-color:var(--cc,#c084fc);box-shadow:0 0 12px var(--cc,rgba(192,132,252,.4))}
+.cn.done .cn-bubble{border-color:gold;box-shadow:0 0 16px rgba(255,215,0,.4);animation:done-glow 2.5s ease infinite}
+@keyframes done-glow{0%,100%{box-shadow:0 0 10px rgba(255,215,0,.3)}50%{box-shadow:0 0 22px rgba(255,215,0,.6)}}
+.cn-icon{font-size:1.5rem;line-height:1.1;display:block}
+.cn-name{font-size:.6rem;font-weight:900;color:#f0e8ff;line-height:1.3;margin-top:2px}
+.cn-sub{font-size:.52rem;color:#6b5a90;margin-top:1px}
+.cn-pct{font-size:.54rem;font-weight:900;margin-top:2px;color:#a0f0ff}
+.stars{font-size:.58rem;letter-spacing:1.5px;margin-top:1px}
+
+/* Player */
+.pp{position:absolute;transform:translate(-50%,-100%);z-index:60;pointer-events:none;text-align:center;transition:left 1s cubic-bezier(.34,1.56,.64,1),top 1s cubic-bezier(.34,1.56,.64,1)}
+.pp-dot{width:8px;height:8px;background:#c084fc;border-radius:50%;margin:2px auto 0;box-shadow:0 0 10px #c084fc;animation:pdot 1s infinite}
+@keyframes pdot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+.pp-shadow{width:14px;height:5px;background:rgba(0,0,0,.35);border-radius:50%;margin:0 auto;margin-top:2px}
+
+/* Bottom panel */
+.sp{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(3,1,16,.96);backdrop-filter:blur(18px);border-top:1px solid rgba(192,132,252,.13);padding-bottom:max(8px,env(safe-area-inset-bottom));transition:height .3s cubic-bezier(.4,0,.2,1);height:60px;overflow:hidden}
+.sp.open{height:235px}
+.spt{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;cursor:pointer}
+.sptl{display:flex;align-items:center;gap:10px;font-size:.78rem;font-weight:800;color:#c084fc}
+.spar{color:#3d2a60;transition:.25s}
+.sp.open .spar{transform:rotate(180deg)}
+.spb{padding:8px 14px 4px;overflow-y:auto;height:175px}
+.eqg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.eq{background:rgba(192,132,252,.04);border:1px dashed rgba(192,132,252,.16);border-radius:10px;padding:8px 3px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px}
+.eq.fl{border-style:solid;border-color:rgba(192,132,252,.32);background:rgba(192,132,252,.07)}
+.eq-ic{font-size:1.25rem}
+.eq-nm{font-size:.56rem;font-weight:800;color:#c084fc}
+.eq-st{font-size:.53rem;color:#34d399}
+.eq-em{font-size:.6rem;color:#2d1a50;font-weight:800}
+.fsg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.fs{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:9px;padding:7px 3px;text-align:center}
+.fsv{font-size:1.05rem;font-weight:900;font-family:monospace}
+.fsl{font-size:.56rem;color:#3d2a60;font-weight:800;letter-spacing:.04em;margin-top:2px}
+
+/* Level up */
+.lut{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120px);background:linear-gradient(135deg,#c084fc,#34d399);color:#04020e;border-radius:100px;padding:10px 22px;font-size:.88rem;font-weight:900;z-index:300;transition:transform .45s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 28px rgba(192,132,252,.45)}
+.lut.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
-
-<!-- HUD -->
 <div class="hud">
-  <div class="avatar-hud">
-    <svg id="hudAvatar" viewBox="0 0 110 128" width="34" height="34" xmlns="http://www.w3.org/2000/svg"></svg>
-  </div>
-  <div class="player-info">
-    <div class="player-name-row">
-      <span class="p-name" id="hudName">冒險者</span>
-      <span class="lv-badge" id="hudLv">Lv.1</span>
-      <span style="font-size:.65rem;color:#a78bfa;font-weight:800" id="hudTitle">初學者</span>
-    </div>
-    <div class="bars">
-      <div class="bar-row"><span class="bar-lbl">HP</span><div class="bar-bg"><div class="bar-fill hf" id="hpBar" style="width:100%"></div></div><span style="font-size:.58rem;color:#ff6b81;font-weight:800;min-width:42px;text-align:right" id="hpTxt">100/100</span></div>
-      <div class="bar-row"><span class="bar-lbl">XP</span><div class="bar-bg"><div class="bar-fill xf" id="xpBar" style="width:0%"></div></div><span style="font-size:.58rem;color:#ffd200;font-weight:800;min-width:42px;text-align:right" id="xpTxt">0/500</span></div>
+  <div class="av"><canvas id="hudCv" width="36" height="36"></canvas></div>
+  <div class="pi">
+    <div class="pnr"><span class="pn" id="hudN">冒險者</span><span class="lv" id="hudLv">Lv.1</span><span class="ttl" id="hudTtl">初學者</span></div>
+    <div class="brs">
+      <div class="br"><span class="brl">HP</span><div class="brb"><div class="brf hb" id="hpB" style="width:100%"></div></div><span style="font-size:.56rem;color:#f87171;font-weight:800;min-width:38px;text-align:right" id="hpT">100/100</span></div>
+      <div class="br"><span class="brl">XP</span><div class="brb"><div class="brf xb" id="xpB" style="width:0%"></div></div><span style="font-size:.56rem;color:#fcd34d;font-weight:800;min-width:38px;text-align:right" id="xpT">0/500</span></div>
     </div>
   </div>
-  <button class="hud-btn" onclick="goHome()">🏠</button>
+  <button class="hbtn" onclick="window.location.href='index.html'">🏠</button>
 </div>
 
-<!-- MAP -->
-<div class="map-scroll" id="mapScroll">
-<div class="map-world" id="mapWorld">
-  <div class="sky"></div>
-
-  <!-- Stars in sky -->
-  <div id="skyStars"></div>
-
-  <!-- Mountains -->
-  <div class="mt" style="width:120px;height:120px;left:5%;bottom:155px"></div>
-  <div class="mt" style="width:80px;height:80px;left:18%;bottom:158px"></div>
-  <div class="mt" style="width:160px;height:150px;left:35%;bottom:152px"></div>
-  <div class="mt" style="width:100px;height:100px;left:55%;bottom:157px"></div>
-  <div class="mt" style="width:130px;height:130px;left:68%;bottom:153px"></div>
-  <div class="mt-snow" style="width:120px;height:120px;left:5%;bottom:155px"></div>
-  <div class="mt-snow" style="width:160px;height:150px;left:35%;bottom:152px"></div>
-  <div class="mt-snow" style="width:130px;height:130px;left:68%;bottom:153px"></div>
-
-  <!-- Clouds -->
-  <div class="cloud" style="top:40px;--cd:50s;--cdl:0s"><div class="cblob" style="width:60px;height:30px;left:0;top:10px"></div><div class="cblob" style="width:40px;height:40px;left:15px;top:0"></div><div class="cblob" style="width:50px;height:25px;left:30px;top:12px"></div></div>
-  <div class="cloud" style="top:80px;--cd:70s;--cdl:-25s"><div class="cblob" style="width:80px;height:35px;left:0;top:12px"></div><div class="cblob" style="width:50px;height:45px;left:20px;top:0"></div><div class="cblob" style="width:60px;height:30px;left:42px;top:14px"></div></div>
-  <div class="cloud" style="top:160px;--cd:55s;--cdl:-10s"><div class="cblob" style="width:55px;height:28px;left:0;top:8px"></div><div class="cblob" style="width:38px;height:36px;left:12px;top:0"></div><div class="cblob" style="width:45px;height:24px;left:28px;top:10px"></div></div>
-  <div class="cloud" style="top:230px;--cd:65s;--cdl:-38s"><div class="cblob" style="width:70px;height:32px;left:0;top:10px"></div><div class="cblob" style="width:46px;height:42px;left:18px;top:0"></div></div>
-
-  <!-- Ground -->
-  <div class="ground"></div>
-  <div class="ground2"></div>
-
-  <!-- Path SVG -->
-  <svg class="path-svg" id="pathSVG" width="100%" height="920" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <filter id="pathGlow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    </defs>
-    <!-- Path will be drawn by JS -->
-  </svg>
-
-  <!-- Decorations -->
-  <div class="deco bob" style="left:8%;top:740px">🌳</div>
-  <div class="deco" style="left:80%;top:760px">🌳</div>
-  <div class="deco bob" style="left:15%;top:680px">🌿</div>
-  <div class="deco" style="left:70%;top:640px">🌲</div>
-  <div class="deco bob" style="left:5%;top:580px">🌲</div>
-  <div class="deco" style="left:85%;top:520px">🌲</div>
-  <div class="deco bob" style="left:20%;top:440px">🌲</div>
-  <div class="deco" style="left:75%;top:380px">🌲</div>
-  <div class="deco bob" style="left:10%;top:300px">❄️</div>
-  <div class="deco" style="left:82%;top:260px">❄️</div>
-  <div class="deco bob" style="left:25%;top:180px">⛄</div>
-  <div class="deco" style="left:65%;top:140px">🏔️</div>
-  <div class="deco bob" style="left:40%;top:820px">🌻</div>
-  <div class="deco" style="left:55%;top:790px">🌺</div>
-
-  <!-- Castle nodes will be injected by JS -->
-  <div id="castleLayer"></div>
-
-  <!-- Player character on map -->
-  <div id="playerPin" style="position:absolute;transform:translate(-50%,-100%);z-index:50;text-align:center;transition:top .8s cubic-bezier(.34,1.56,.64,1),left .8s cubic-bezier(.34,1.56,.64,1)">
-    <svg id="playerMapSVG" viewBox="0 0 110 128" width="48" height="56" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 4px 12px rgba(167,139,250,.6))"></svg>
-    <div style="font-size:.6rem;font-weight:900;color:#a78bfa;background:rgba(14,10,30,.8);border-radius:100px;padding:1px 7px;margin-top:2px;white-space:nowrap" id="playerPinName">冒險者</div>
-    <div style="width:8px;height:8px;background:#a78bfa;border-radius:50%;margin:2px auto 0;box-shadow:0 0 8px #a78bfa;animation:blink 1s infinite"></div>
-  </div>
-
-</div>
-</div>
-
-<!-- Stats Panel -->
-<div class="stats-panel" id="statsPanel">
-  <div class="panel-tab" onclick="togglePanel()">
-    <div class="panel-tab-left">
-      <span>⚔️ 裝備 &amp; 能力值</span>
-      <span id="panelStatSummary" style="font-size:.7rem;color:#6b5a90"></span>
+<div class="outer" id="outer">
+  <div class="stage" id="stage">
+    <canvas id="mc"></canvas>
+    <div id="cl"></div>
+    <div class="pp" id="pp">
+      <canvas id="ppCv" width="46" height="52" style="filter:drop-shadow(0 4px 12px rgba(192,132,252,.7))"></canvas>
+      <div class="pp-dot"></div>
+      <div class="pp-shadow"></div>
     </div>
-    <span class="panel-tab-arrow">▲</span>
-  </div>
-  <div class="panel-body">
-    <div class="equip-grid" id="equipGrid"></div>
-    <div class="full-stats" id="fullStats"></div>
   </div>
 </div>
 
-<div class="lvup" id="lvupToast">🎉 等級提升！</div>
-
-<style>@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}</style>
+<div class="sp" id="sp">
+  <div class="spt" onclick="toggleSP()">
+    <div class="sptl"><span>⚔️ 裝備 &amp; 能力值</span><span id="spSum" style="font-size:.66rem;color:#3d2a60"></span></div>
+    <span class="spar">▲</span>
+  </div>
+  <div class="spb">
+    <div class="eqg" id="eqg"></div>
+    <div class="fsg" id="fsg"></div>
+  </div>
+</div>
+<div class="lut" id="lut">🎉 升級了！</div>
 
 <script>
-// ─── Castle data ───
-const CASTLES=[
-  {id:1,name:'城堡1\n召喚之塔',emoji:'🗼',color:'#7c6dfa',bg:'rgba(124,109,250,.18)',key:'tower1_done',xpTotal:820,lessons:9,reward:{slot:'weapon',name:'召喚法杖',icon:'🪄',stat:'INT+3',bonus:{int:3}}},
-  {id:2,name:'城堡2\n光之塔',  emoji:'💡',color:'#ffd93d',bg:'rgba(255,217,61,.18)', key:'tower2_done',xpTotal:660,lessons:6,reward:{slot:'hat',name:'光明王冠',icon:'👑',stat:'INT+2,SPD+2',bonus:{int:2,spd:2}}},
-  {id:3,name:'城堡3\n模型之塔',emoji:'🗿',color:'#00e5a0',bg:'rgba(0,229,160,.16)',  key:'tower3_done',xpTotal:330,lessons:3,reward:{slot:'accessory',name:'立體護目鏡',icon:'🥽',stat:'INT+2',bonus:{int:2}}},
-  {id:4,name:'城堡4\n術式塔',  emoji:'⚔️',color:'#c792ea',bg:'rgba(199,146,234,.16)',key:'tower4_done',xpTotal:1020,lessons:11,reward:{slot:'armor',name:'術式護甲',icon:'🛡️',stat:'DEF+4,INT+3',bonus:{def:4,int:3}}},
-  {id:5,name:'城堡5\n光照塔',  emoji:'🌟',color:'#ff9f43',bg:'rgba(255,159,67,.16)', key:'tower5_done',xpTotal:800,lessons:8,reward:{slot:'accessory',name:'光之戒指',icon:'💍',stat:'INT+4',bonus:{int:4}}},
-  {id:6,name:'城堡6\n物理塔',  emoji:'⚗️',color:'#00d4ff',bg:'rgba(0,212,255,.16)', key:'tower6_done',xpTotal:910,lessons:9,reward:{slot:'armor',name:'PBR護甲',icon:'🦺',stat:'DEF+5,ATK+2',bonus:{def:5,atk:2}}},
-  {id:7,name:'城堡7\n競技場',  emoji:'🔥',color:'#ff4757',bg:'rgba(255,71,87,.16)',  key:'tower7_done',xpTotal:870,lessons:9,reward:{slot:'hat',name:'戰鬥頭盔',icon:'⛑️',stat:'ATK+3,SPD+3',bonus:{atk:3,spd:3}}},
-  {id:8,name:'城堡8\n秘境塔',  emoji:'🌌',color:'#b388ff',bg:'rgba(179,136,255,.16)',key:'tower8_done',xpTotal:1050,lessons:8,reward:{slot:'weapon',name:'古代法杖',icon:'🔮',stat:'INT+7',bonus:{int:7}}},
-  {id:9,name:'城堡9\n終極城堡',emoji:'★',color:'#ffd700',bg:'rgba(255,215,0,.18)', key:'tower9_done',xpTotal:1100,lessons:8,reward:{slot:'accessory',name:'終極王冠',icon:'👑',stat:'ALL+5',bonus:{atk:5,def:5,int:5,spd:5}}},
+// ─── CASTLES ───
+const C=[
+  {id:1,name:'召喚之城', em:'🗼',col:'#7c3aed',glow:'rgba(124,58,237,.7)', key:'tower1_done',tot:9, rw:{slot:'weapon',name:'召喚法杖',icon:'🪄',stat:'INT+3',bonus:{int:3}}},
+  {id:2,name:'光之城',   em:'💡',col:'#d97706',glow:'rgba(217,119,6,.7)',  key:'tower2_done',tot:6, rw:{slot:'hat',name:'光明王冠',icon:'👑',stat:'INT+2,SPD+2',bonus:{int:2,spd:2}}},
+  {id:3,name:'模型之城', em:'🗿',col:'#059669',glow:'rgba(5,150,105,.7)',  key:'tower3_done',tot:3, rw:{slot:'accessory',name:'立體鏡',icon:'🥽',stat:'INT+2',bonus:{int:2}}},
+  {id:4,name:'術式之城', em:'⚔️',col:'#7c3aed',glow:'rgba(124,58,237,.6)',key:'tower4_done',tot:11,rw:{slot:'armor',name:'術式護甲',icon:'🛡️',stat:'DEF+4,INT+3',bonus:{def:4,int:3}}},
+  {id:5,name:'光輝之城', em:'🌟',col:'#d97706',glow:'rgba(217,119,6,.7)',  key:'tower5_done',tot:8, rw:{slot:'accessory',name:'光之戒指',icon:'💍',stat:'INT+4',bonus:{int:4}}},
+  {id:6,name:'物理之城', em:'⚗️',col:'#0891b2',glow:'rgba(8,145,178,.7)',  key:'tower6_done',tot:9, rw:{slot:'armor',name:'PBR護甲',icon:'🦺',stat:'DEF+5,ATK+2',bonus:{def:5,atk:2}}},
+  {id:7,name:'競技之城', em:'🔥',col:'#dc2626',glow:'rgba(220,38,38,.7)',  key:'tower7_done',tot:9, rw:{slot:'hat',name:'戰鬥頭盔',icon:'⛑️',stat:'ATK+3,SPD+3',bonus:{atk:3,spd:3}}},
+  {id:8,name:'秘境之城', em:'🌌',col:'#7c3aed',glow:'rgba(124,58,237,.8)', key:'tower8_done',tot:8, rw:{slot:'weapon',name:'古代法杖',icon:'🔮',stat:'INT+7',bonus:{int:7}}},
+  {id:9,name:'終極城堡', em:'★', col:'#ca8a04',glow:'rgba(202,138,4,.9)', key:'tower9_done',tot:8, rw:{slot:'accessory',name:'終極王冠',icon:'👑',stat:'全屬性+5',bonus:{atk:5,def:5,int:5,spd:5}}},
 ];
 
-const LEVEL_XP=[0,300,700,1200,1800,2500,3400,4400,5600,7000,8500];
-const TITLES=['初學者','OpenGL 學徒','著色器術士','渲染騎士','圖形學大師','終極魔法師'];
+const LX=[0,300,700,1200,1800,2500,3400,4400,5600,7000];
+const TITLES=['初學者','OpenGL學徒','著色器術士','渲染騎士','圖形學大師','終極魔法師'];
 function getTitle(lv){return TITLES[Math.min(Math.floor((lv-1)/2),TITLES.length-1)];}
+function getLevel(xp){for(let i=LX.length-1;i>=0;i--)if(xp>=LX[i])return i+1;return 1;}
+function getDone(c){try{return JSON.parse(localStorage.getItem(c.key)||'[]').filter(Boolean).length;}catch{return 0;}}
+function getTotalXP(){return C.reduce((s,c)=>{const d=getDone(c);return s+Math.round(d/c.tot*(c.id*100+20));},0);}
+function getEq(){const eq={weapon:null,armor:null,hat:null,accessory:null};C.forEach(c=>{if(getDone(c)>=c.tot&&c.rw)eq[c.rw.slot]=c.rw;});return eq;}
 
-// Castle positions (left%, top in px) — winding path from bottom to top
-const CPOS=[
-  [50,  840],  // 城堡1 - START (bottom center)
-  [72,  740],  // 城堡2
-  [32,  640],  // 城堡3
-  [65,  540],  // 城堡4
-  [28,  450],  // 城堡5
-  [68,  360],  // 城堡6
-  [30,  275],  // 城堡7
-  [68,  190],  // 城堡8
-  [50,  100],  // 城堡9 - FINAL (top center)
+let player=null;
+
+// ─── Isometric helpers ───
+// Map grid: each cell 64x32 in iso projection
+const CELL_W=64, CELL_H=32;
+const WALL_H=28; // height of tile walls
+
+// Convert grid coords (gx,gy,gz) to canvas pixel (cx,cy)
+// Iso: x-right goes right+down, y-up goes left+down, z up goes up
+function isoToScreen(gx,gy,gz){
+  const cx=(gx-gy)*CELL_W/2;
+  const cy=(gx+gy)*CELL_H/2-gz*WALL_H;
+  return[cx,cy];
+}
+
+// Canvas size in grid
+const GRID_W=20, GRID_H=22;
+const MAP_CANVAS_W=GRID_W*CELL_W+200;
+const MAP_CANVAS_H=GRID_H*CELL_H+WALL_H*8+300;
+const OFFSET_X=MAP_CANVAS_W/2; // center of canvas
+const OFFSET_Y=180; // top padding
+
+// Castle grid positions [gx, gy] (roughly spiral from bottom-right to center-top)
+const CPOS_G=[
+  [14,16], // 城堡1 - start (right bottom area)
+  [6, 17], // 城堡2
+  [14,12], // 城堡3
+  [5, 12], // 城堡4
+  [14,7],  // 城堡5
+  [4, 7],  // 城堡6
+  [13,3],  // 城堡7
+  [4, 2],  // 城堡8
+  [9, 0],  // 城堡9 - final (top center)
 ];
 
-let player=null,mapW=360;
+function g2s(gx,gy,gz=0){
+  const[cx,cy]=isoToScreen(gx,gy,gz);
+  return[cx+OFFSET_X, cy+OFFSET_Y];
+}
 
-function loadPlayer(){
+// ─── Drawing helpers ───
+function drawIsoTile(ctx,sx,sy,tw,th,topCol,leftCol,rightCol){
+  const hw=tw/2,hh=th/2;
+  // Top face (diamond)
+  ctx.beginPath();
+  ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);
+  ctx.closePath();ctx.fillStyle=topCol;ctx.fill();
+  // Left wall
+  ctx.beginPath();
+  ctx.moveTo(sx-hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx,sy+hh+WALL_H);ctx.lineTo(sx-hw,sy+WALL_H);
+  ctx.closePath();ctx.fillStyle=leftCol;ctx.fill();
+  // Right wall
+  ctx.beginPath();
+  ctx.moveTo(sx,sy+hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx+hw,sy+WALL_H);ctx.lineTo(sx,sy+hh+WALL_H);
+  ctx.closePath();ctx.fillStyle=rightCol;ctx.fill();
+  // Edges
+  ctx.strokeStyle='rgba(0,0,0,.2)';ctx.lineWidth=.5;
+  ctx.beginPath();ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);ctx.closePath();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(sx-hw,sy+WALL_H);ctx.lineTo(sx-hw,sy);ctx.moveTo(sx,sy+hh+WALL_H);ctx.lineTo(sx,sy+hh);ctx.moveTo(sx+hw,sy+WALL_H);ctx.lineTo(sx+hw,sy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(sx-hw,sy+WALL_H);ctx.lineTo(sx,sy+hh+WALL_H);ctx.lineTo(sx+hw,sy+WALL_H);ctx.stroke();
+}
+
+function drawIsoBox(ctx,sx,sy,bw,bh,bz,topC,leftC,rightC){
+  // Taller box: bz = additional height units
+  const hw=bw/2,hh=bh/2,wallH=bz;
+  // Top
+  ctx.beginPath();ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);ctx.closePath();ctx.fillStyle=topC;ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.25)';ctx.lineWidth=.8;ctx.stroke();
+  // Left
+  ctx.beginPath();ctx.moveTo(sx-hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx,sy+hh+wallH);ctx.lineTo(sx-hw,sy+wallH);ctx.closePath();ctx.fillStyle=leftC;ctx.fill();ctx.stroke();
+  // Right
+  ctx.beginPath();ctx.moveTo(sx,sy+hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx+hw,sy+wallH);ctx.lineTo(sx,sy+hh+wallH);ctx.closePath();ctx.fillStyle=rightC;ctx.fill();ctx.stroke();
+}
+
+// ─── Draw Map ───
+function drawMap(){
+  const canvas=document.getElementById('mc');
+  canvas.width=MAP_CANVAS_W;canvas.height=MAP_CANVAS_H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,MAP_CANVAS_W,MAP_CANVAS_H);
+
+  // Sky gradient
+  const sky=ctx.createLinearGradient(0,0,0,MAP_CANVAS_H*.4);
+  sky.addColorStop(0,'#050225');sky.addColorStop(1,'#0a0840');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,MAP_CANVAS_W,MAP_CANVAS_H*.4);
+
+  // Stars in sky
+  const rng=s=>{let x=Math.sin(s)*43758.5;return x-Math.floor(x);};
+  for(let i=0;i<120;i++){
+    const x=rng(i*2)*MAP_CANVAS_W, y=rng(i*2+1)*(MAP_CANVAS_H*.35);
+    const r=rng(i*3)<.15?1.5:rng(i*3)<.4?1:.5;
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(200,180,255,${.3+rng(i*5)*.5})`;ctx.fill();
+  }
+
+  // ── Draw ground tiles (back to front) ──
+  const tileCols=[
+    ['#3a5c2a','#2a4a1e','#223d17'], // green
+    ['#2a4a3a','#1e3a2a','#172e22'], // dark green
+    ['#3a3a2a','#2a2a1e','#222217'], // olive
+    ['#1e2a3a','#152030','#0e1828'], // blue water
+    ['#3a2a1e','#2a1e14','#22160d'], // brown
+    ['#2a1e3a','#1e152a','#160e22'], // purple
+    ['#3a1e1e','#2a1414','#220c0c'], // dark red
+  ];
+
+  // Determine tile color by area
+  function getTileCol(gx,gy){
+    // Castle zone colors
+    for(let i=0;i<CPOS_G.length;i++){
+      const[cx,cy]=CPOS_G[i];
+      if(Math.abs(gx-cx)<=2&&Math.abs(gy-cy)<=2)return[
+        ['#3a5c2a','#2a4a1e','#223d17'],
+        ['#4a3a18','#3a2a10','#2a1e08'],
+        ['#1e3a2e','#142a20','#0e1e16'],
+        ['#2a1840','#1e1030','#150820'],
+        ['#3a2810','#2a1c08','#1e1204'],
+        ['#0e2030','#081828','#041018'],
+        ['#280a0a','#1e0606','#140404'],
+        ['#1a0a30','#120620','#0a0418'],
+        ['#2e2400','#221a00','#180e00'],
+      ][i];
+    }
+    const h=rng(gx*7+gy*13);
+    return tileCols[Math.floor(h*tileCols.length)];
+  }
+
+  // Draw tiles front to back (high gy first for correct overlap)
+  for(let gy=GRID_H-1;gy>=0;gy--){
+    for(let gx=0;gx<GRID_W;gx++){
+      const[sx,sy]=g2s(gx,gy,0);
+      // Skip offscreen
+      if(sx<-CELL_W||sx>MAP_CANVAS_W+CELL_W||sy<-CELL_H||sy>MAP_CANVAS_H+CELL_H)continue;
+      const[tc,lc,rc]=getTileCol(gx,gy);
+      drawIsoTile(ctx,sx,sy,CELL_W,CELL_H,tc,lc,rc);
+    }
+  }
+
+  // ── Path between castles ──
+  // Draw path segments as raised road tiles
+  for(let i=0;i<CPOS_G.length-1;i++){
+    const[x0,y0]=CPOS_G[i],[x1,y1]=CPOS_G[i+1];
+    const steps=Math.max(Math.abs(x1-x0),Math.abs(y1-y0))*2;
+    for(let t=0;t<=steps;t++){
+      const gx=Math.round(x0+(x1-x0)*t/steps);
+      const gy=Math.round(y0+(y1-y0)*t/steps);
+      const[sx,sy]=g2s(gx,gy,0.15);
+      // Raised path tile (slightly brighter and taller)
+      const pathT=i%2===0?'#a08040':'#907030';
+      drawIsoTile(ctx,sx,sy-6,CELL_W*.7,CELL_H*.7,pathT,
+        `rgba(140,100,40,.8)`,`rgba(100,70,30,.8)`);
+    }
+  }
+
+  // ── Trees and decorations ──
+  const TREES=[
+    [2,18],[3,15],[11,17],[16,14],[17,11],[15,9],[3,9],[2,5],[16,5],[8,1]
+  ];
+  TREES.forEach(([gx,gy])=>{
+    const[sx,sy]=g2s(gx,gy,0);
+    // Trunk
+    drawIsoBox(ctx,sx,sy-CELL_H/2-2,16,10,20,'#5c3c18','#3a2510','#2e1c0c');
+    // Foliage layers
+    const r=rng(gx*11+gy*17);
+    const fCol=r<.3?'#2d6a28':r<.6?'#1d5a1d':'#365c28';
+    drawIsoBox(ctx,sx,sy-CELL_H/2-22,32,18,18,fCol,`rgba(20,60,20,.8)`,`rgba(15,45,15,.8)`);
+    drawIsoBox(ctx,sx,sy-CELL_H/2-36,24,14,12,`#34a028`,`rgba(25,80,18,.8)`,`rgba(18,60,15,.8)`);
+  });
+
+  // ── Castles (3D buildings) ──
+  CPOS_G.forEach(([gx,gy],idx)=>{
+    const c=C[idx];
+    const done=getDone(c)>=c.tot;
+    const unlocked=idx===0||(getDone(C[idx-1])>=C[idx-1].tot);
+    const[sx,sy]=g2s(gx,gy,0);
+    
+    // Parse color
+    const col=c.col;
+    const r=parseInt(col.substr(1,2),16),g2=parseInt(col.substr(3,2),16),b=parseInt(col.substr(5,2),16);
+    const topC=col;
+    const leftC=`rgba(${Math.floor(r*.6)},${Math.floor(g2*.6)},${Math.floor(b*.6)},1)`;
+    const rightC=`rgba(${Math.floor(r*.45)},${Math.floor(g2*.45)},${Math.floor(b*.45)},1)`;
+    
+    const alpha=unlocked?1:0.35;
+    ctx.save();ctx.globalAlpha=alpha;
+    
+    // Base/foundation
+    drawIsoBox(ctx,sx,sy-CELL_H/2-2,52,30,8,'#555566','#333344','#222233');
+    // Main tower body
+    drawIsoBox(ctx,sx,sy-CELL_H/2-10,44,26,42,topC,leftC,rightC);
+    // Top battlements
+    [-18,-6,6,18].forEach(dx=>{
+      drawIsoBox(ctx,sx+dx*0.6,sy-CELL_H/2-52-dx*.15,10,6,10,topC,leftC,rightC);
+    });
+    // Flag pole
+    ctx.strokeStyle=done?'#ffd700':'rgba(255,255,255,.4)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(sx,sy-CELL_H/2-52);ctx.lineTo(sx,sy-CELL_H/2-70);ctx.stroke();
+    // Flag
+    if(done||unlocked){
+      ctx.fillStyle=done?'#ffd700':col;
+      ctx.beginPath();ctx.moveTo(sx,sy-CELL_H/2-70);ctx.lineTo(sx+16,sy-CELL_H/2-64);ctx.lineTo(sx,sy-CELL_H/2-58);ctx.closePath();ctx.fill();
+    }
+    // Castle number label on building
+    ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(sx,sy-CELL_H/2-28,12,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=unlocked?'white':'rgba(255,255,255,.3)';
+    ctx.font=`bold 11px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(idx+1,sx,sy-CELL_H/2-28);
+    
+    ctx.restore();
+  });
+}
+
+// ─── Castle Label Nodes ───
+function renderNodes(hi){
+  const layer=document.getElementById('cl');layer.innerHTML='';
+  C.forEach((c,idx)=>{
+    const done=getDone(c)>=c.tot;
+    const unlocked=idx===0||(getDone(C[idx-1])>=C[idx-1].tot);
+    const[gx,gy]=CPOS_G[idx];
+    const[sx,sy]=g2s(gx,gy,0);
+    const pct=Math.round(getDone(c)/c.tot*100);
+    const stars=done?3:getDone(c)>0?Math.min(2,Math.ceil(getDone(c)/c.tot*2)):0;
+    const cls2=`cn${done?' done':unlocked?' unlocked':' locked'}`;
+    const d=document.createElement('div');
+    d.className=cls2;
+    d.style.cssText=`left:${sx}px;top:${sy-CELL_H/2-72}px;--cc:${c.col}`;
+    d.innerHTML=`<div class="cn-bubble">
+      <span class="cn-icon">${unlocked?c.em:'🔒'}</span>
+      <div class="cn-name">${c.name}</div>
+      <div class="cn-sub">城堡 ${c.id}</div>
+      ${unlocked&&!done?`<div class="cn-pct">${pct}%</div>`:''}
+      <div class="stars">${'⭐'.repeat(stars)+'☆'.repeat(3-stars)}</div>
+    </div>`;
+    if(unlocked)d.addEventListener('click',()=>window.location.href=`opengl-tower${c.id}.html`);
+    layer.appendChild(d);
+  });
+}
+
+// ─── Draw char on canvas ───
+function drawCharCanvas(cvId,p,W,H){
+  const cv=document.getElementById(cvId);
+  if(!cv)return;
+  cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const sc=p.appearance?.skin||'#e8a87c',
+        hr=p.appearance?.hair||'#5a2e10',
+        ot=p.appearance?.outfit||'#7c3aed';
+  const cls=p.class||'mage';
+  // Scale to fit
+  const S=W/100;
+  ctx.save();ctx.scale(S,S*(H/H));
+  // Simple mini char (head + body)
+  function shade(col,a){let c=col.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];return'#'+[0,2,4].map(i=>Math.max(0,Math.min(255,parseInt(c.substr(i,2),16)+a)).toString(16).padStart(2,'0')).join('');}
+  const otd=shade(ot,-45);
+  // legs
+  ctx.fillStyle=otd;ctx.beginPath();ctx.roundRect(34,72,11,20,4);ctx.fill();
+  ctx.fillStyle=otd;ctx.beginPath();ctx.roundRect(55,72,11,20,4);ctx.fill();
+  // body
+  ctx.fillStyle=ot;ctx.beginPath();ctx.roundRect(27,52,46,25,9);ctx.fill();
+  // arms
+  ctx.fillStyle=ot;ctx.beginPath();ctx.roundRect(15,54,13,18,6);ctx.fill();
+  ctx.fillStyle=ot;ctx.beginPath();ctx.roundRect(72,54,13,18,6);ctx.fill();
+  // hands
+  ctx.fillStyle=sc;ctx.beginPath();ctx.arc(21,75,6,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=sc;ctx.beginPath();ctx.arc(79,75,6,0,Math.PI*2);ctx.fill();
+  // neck
+  ctx.fillStyle=sc;ctx.beginPath();ctx.roundRect(44,44,12,10,3);ctx.fill();
+  // hair back
+  ctx.fillStyle=hr;ctx.beginPath();ctx.ellipse(50,28,25,22,0,0,Math.PI*2);ctx.fill();
+  // head
+  ctx.save();ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;
+  ctx.fillStyle=sc;ctx.beginPath();ctx.arc(50,28,24,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  // hat
+  if(cls==='mage'){ctx.fillStyle=shade(ot,-20);ctx.beginPath();ctx.moveTo(50,5);ctx.lineTo(64,12);ctx.lineTo(36,12);ctx.closePath();ctx.fill();ctx.fillStyle=ot;ctx.beginPath();ctx.roundRect(33,11,34,8,4);ctx.fill();}
+  else if(cls==='warrior'){ctx.fillStyle='#8899aa';ctx.beginPath();ctx.roundRect(32,8,36,14,7);ctx.fill();}
+  else{ctx.fillStyle=ot;ctx.beginPath();ctx.moveTo(50,6);ctx.quadraticCurveTo(70,14,68,18);ctx.lineTo(32,18);ctx.quadraticCurveTo(30,14,50,6);ctx.closePath();ctx.fill();}
+  // eyes
+  ctx.fillStyle='white';ctx.beginPath();ctx.ellipse(41,28,6,6.5,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='white';ctx.beginPath();ctx.ellipse(59,28,6,6.5,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#180820';ctx.beginPath();ctx.arc(42,29,4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#180820';ctx.beginPath();ctx.arc(60,29,4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='white';ctx.beginPath();ctx.arc(44,26.5,1.8,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='white';ctx.beginPath();ctx.arc(62,26.5,1.8,0,Math.PI*2);ctx.fill();
+  // blush
+  ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#ff8a80';ctx.beginPath();ctx.ellipse(32,35,6,4,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(68,35,6,4,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  ctx.restore();
+}
+
+// ─── Pan / Zoom ───
+let px=0,py=0,sc=1;
+let lx=0,ly=0,drag=false,ld=0;
+const outer=document.getElementById('outer');
+const stage=document.getElementById('stage');
+const HUDH=70;
+
+function applyT(){stage.style.transform=`translate(${px}px,${py}px) scale(${sc})`;}
+function clamp(){
+  const vw=window.innerWidth,vh=window.innerHeight-60;
+  const mw=MAP_CANVAS_W*sc,mh=MAP_CANVAS_H*sc;
+  px=Math.min(0,Math.max(px,vw-mw));
+  py=Math.min(HUDH,Math.max(py,vh-mh));
+}
+
+outer.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}
+  if(e.touches.length===2){ld=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
+},{passive:true});
+outer.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(e.touches.length===1&&drag){px+=e.touches[0].clientX-lx;py+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clamp();applyT();}
+  if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);const ns=Math.min(2.5,Math.max(0.4,sc*d/ld));const cx=(e.touches[0].clientX+e.touches[1].clientX)/2;const cy=(e.touches[0].clientY+e.touches[1].clientY)/2;px=cx-(cx-px)*ns/sc;py=cy-(cy-py)*ns/sc;sc=ns;ld=d;clamp();applyT();}
+},{passive:false});
+outer.addEventListener('touchend',()=>drag=false);
+outer.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;});
+outer.addEventListener('mousemove',e=>{if(!drag)return;px+=e.clientX-lx;py+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clamp();applyT();});
+outer.addEventListener('mouseup',()=>drag=false);
+outer.addEventListener('wheel',e=>{e.preventDefault();const ns=Math.min(2.5,Math.max(0.4,sc*Math.exp(-e.deltaY*.001)));px=e.clientX-(e.clientX-px)*ns/sc;py=e.clientY-(e.clientY-py)*ns/sc;sc=ns;clamp();applyT();},{passive:false});
+
+function scrollToGxy(gx,gy){
+  const[sx,sy]=g2s(gx,gy,0);
+  const vw=window.innerWidth,vh=window.innerHeight-60;
+  px=vw/2-sx*sc;py=vh/2-sy*sc;
+  clamp();applyT();
+}
+
+function updateHUD(xp,lv,eq){
+  const base=player.stats||{atk:8,def:6,int:10,spd:8};
+  const tot={...base};
+  Object.values(eq).forEach(it=>{if(it&&it.bonus)Object.entries(it.bonus).forEach(([k,v])=>{if(tot[k]!==undefined)tot[k]+=v;});});
+  const xpNext=LX[Math.min(lv,LX.length-1)]||9999,xpPrev=LX[Math.max(lv-1,0)]||0;
+  const xpPct=Math.min(100,Math.round((xp-xpPrev)/Math.max(1,xpNext-xpPrev)*100));
+  document.getElementById('hudN').textContent=player.name;
+  document.getElementById('hudLv').textContent='Lv.'+lv;
+  document.getElementById('hudTtl').textContent=getTitle(lv);
+  document.getElementById('hpB').style.width=Math.round(player.hp/player.hpMax*100)+'%';
+  document.getElementById('hpT').textContent=player.hp+'/'+player.hpMax;
+  document.getElementById('xpB').style.width=xpPct+'%';
+  document.getElementById('xpT').textContent=xp+'/'+xpNext;
+  document.getElementById('spSum').textContent=`ATK ${tot.atk}  INT ${tot.int}  DEF ${tot.def}  SPD ${tot.spd}`;
+  const slots=[['weapon','武器'],['armor','防具'],['hat','頭盔'],['accessory','飾品']];
+  document.getElementById('eqg').innerHTML=slots.map(([s,l])=>{const it=eq[s];return it?`<div class="eq fl"><div class="eq-ic">${it.icon}</div><div class="eq-nm">${it.name}</div><div class="eq-st">${it.stat}</div></div>`:`<div class="eq"><div class="eq-em">${l}</div></div>`;}).join('');
+  document.getElementById('fsg').innerHTML=[['ATK',tot.atk,'#f87171'],['DEF',tot.def,'#60a5fa'],['INT',tot.int,'#c084fc'],['SPD',tot.spd,'#34d399']].map(([l,v,c])=>`<div class="fs"><div class="fsv" style="color:${c}">${v}</div><div class="fsl">${l}</div></div>`).join('');
+}
+
+function toggleSP(){document.getElementById('sp').classList.toggle('open');}
+
+function init(){
   const raw=localStorage.getItem('player_data');
   if(!raw){window.location.href='character.html';return;}
   player=JSON.parse(raw);
-}
-
-function getTotalXP(){
-  let xp=0;
-  CASTLES.forEach(c=>{
-    const done=JSON.parse(localStorage.getItem(c.key)||'[]');
-    // Get XP per lesson from tower data (approximate from xpTotal/lessons)
-    if(done.length>0){const perLesson=c.xpTotal/c.lessons;xp+=done.length*perLesson;}
-  });
-  return Math.round(xp);
-}
-
-function getLevel(xp){
-  for(let i=LEVEL_XP.length-1;i>=0;i--){if(xp>=LEVEL_XP[i])return i+1;}return 1;
-}
-
-function getCastleDone(c){return JSON.parse(localStorage.getItem(c.key)||'[]]').filter(x=>x).length;}
-
-function getUnlockedEquipment(){
-  const eq={weapon:null,armor:null,hat:null,accessory:null};
-  CASTLES.forEach(c=>{
-    const done=getCastleDone(c);
-    if(done>=c.lessons&&c.reward){
-      // Castle completed - unlock reward (last one wins per slot)
-      const r=c.reward;eq[r.slot]={name:r.name,icon:r.icon,stat:r.stat,bonus:r.bonus,castle:c.id};
-    }
-  });
-  return eq;
-}
-
-function calcTotalStats(baseStats,equipment){
-  const s={...baseStats};
-  Object.values(equipment).forEach(item=>{
-    if(item&&item.bonus)Object.entries(item.bonus).forEach(([k,v])=>{if(s[k]!==undefined)s[k]+=v;});
-  });
-  return s;
-}
-
-function drawCharSVG(targetId,p){
-  const skin=p.appearance.skin,hair=p.appearance.hair,outfit=p.appearance.outfit;
-  const shadeColor=(col,amt)=>{let c=col.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];let r=Math.max(0,Math.min(255,parseInt(c.substr(0,2),16)+amt));let g=Math.max(0,Math.min(255,parseInt(c.substr(2,2),16)+amt));let b=Math.max(0,Math.min(255,parseInt(c.substr(4,2),16)+amt));return`#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;};
-  const od=shadeColor(outfit,-40);
-  const cls=p.class||'mage';
-  const hat=cls==='mage'?`<polygon points="55,3 39,27 71,27" fill="${outfit}"/><rect x="35" y="24" width="40" height="7" rx="3.5" fill="${outfit}"/><circle cx="55" cy="3" r="3" fill="#ffd700"/>`:cls==='warrior'?`<rect x="30" y="11" width="50" height="17" rx="8.5" fill="#8899aa"/><rect x="22" y="22" width="14" height="12" rx="4" fill="#778899"/><rect x="74" y="22" width="14" height="12" rx="4" fill="#778899"/>`:
-  `<ellipse cx="55" cy="15" rx="28" ry="12" fill="${hair}"/><ellipse cx="71" cy="8" rx="3.5" ry="9" fill="#e8a87c" transform="rotate(28 71 8)"/>`;
-  const weapon=cls==='mage'?`<g transform="translate(92,68) rotate(-25)"><rect x="-2.5" y="-20" width="5" height="28" rx="2.5" fill="#ffd700"/><polygon points="0,-28 -5,-17 5,-17" fill="#89ddff"/><circle cx="0" cy="-28" r="3.5" fill="white" opacity=".8"/></g>`:cls==='warrior'?`<g transform="translate(92,70)"><rect x="-2" y="-24" width="4.5" height="32" rx="1.5" fill="#c0c8d8"/><rect x="-8" y="-5" width="16" height="4.5" rx="2" fill="#aabbcc"/></g>`:
-  `<g transform="translate(93,68)"><path d="M3,-18 Q12,0 3,18" stroke="#8B5E3C" stroke-width="2.5" fill="none" stroke-linecap="round"/></g>`;
-  const g=p.gender||'male';
-  const hB=g==='female'?`<ellipse cx="55" cy="20" rx="30" ry="13" fill="${hair}"/><rect x="24" y="28" width="11" height="34" rx="5.5" fill="${hair}"/><rect x="75" y="28" width="11" height="34" rx="5.5" fill="${hair}"/>`:
-  `<ellipse cx="55" cy="20" rx="30" ry="13" fill="${hair}"/>`;
-  const hF=g==='female'?`<path d="M27,24 Q36,13 50,17 Q42,24 38,30" fill="${hair}"/><path d="M62,17 Q76,13 83,24" fill="${hair}" stroke="${hair}" stroke-width="1"/>`:
-  `<path d="M28,24 Q38,13 52,18 Q44,24 40,30" fill="${hair}"/><path d="M64,18 Q76,13 82,24" fill="${hair}" stroke="${hair}" stroke-width="1"/>`;
-  const svg=`<ellipse cx="55" cy="124" rx="21" ry="5" fill="rgba(0,0,0,.16)"/>
-<rect x="39" y="97" width="13" height="24" rx="6.5" fill="${od}"/>
-<rect x="58" y="97" width="13" height="24" rx="6.5" fill="${od}"/>
-<rect x="26" y="65" width="58" height="37" rx="13" fill="${outfit}"/>
-<circle cx="26" cy="72" r="7.5" fill="${outfit}"/><circle cx="84" cy="72" r="7.5" fill="${outfit}"/>
-<rect x="11" y="69" width="16" height="26" rx="8" fill="${outfit}"/>
-<circle cx="19" cy="97" r="8" fill="${skin}"/>
-<rect x="83" y="69" width="16" height="26" rx="8" fill="${outfit}"/>
-<circle cx="91" cy="97" r="8" fill="${skin}"/>
-${weapon}
-<rect x="46" y="58" width="18" height="11" fill="${skin}"/>
-${hB}
-<circle cx="55" cy="40" r="30" fill="${skin}"/>
-<ellipse cx="25" cy="40" rx="5.5" ry="7" fill="${skin}"/>
-<ellipse cx="85" cy="40" rx="5.5" ry="7" fill="${skin}"/>
-${hat}${hF}
-<ellipse cx="43" cy="39" rx="7" ry="8" fill="white"/>
-<ellipse cx="67" cy="39" rx="7" ry="8" fill="white"/>
-<circle cx="44" cy="40" r="5" fill="#1a1035"/>
-<circle cx="68" cy="40" r="5" fill="#1a1035"/>
-<circle cx="46" cy="37.5" r="2" fill="white"/>
-<circle cx="70" cy="37.5" r="2" fill="white"/>
-<ellipse cx="30" cy="50" rx="8" ry="4.5" fill="rgba(255,130,130,.28)"/>
-<ellipse cx="80" cy="50" rx="8" ry="4.5" fill="rgba(255,130,130,.28)"/>
-<path d="M47 54 Q55 62 63 54" stroke="#cc7070" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
-  document.getElementById(targetId).innerHTML=svg;
-}
-
-function drawPath(){
-  const mw=document.getElementById('mapWorld').offsetWidth||360;
-  const pts=CPOS.map(([lp,top])=>[mw*lp/100,top]);
-  let d=`M ${pts[0][0]} ${pts[0][1]}`;
-  for(let i=1;i<pts.length;i++){
-    const [x0,y0]=pts[i-1],[x1,y1]=pts[i];
-    const cx=(x0+x1)/2,cy=(y0+y1)/2;
-    d+=` Q ${x0} ${cy} ${x1} ${y1}`;
-  }
-  const svg=document.getElementById('pathSVG');
-  svg.innerHTML=`<defs><filter id="pGlow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-  <path d="${d}" stroke="rgba(139,90,43,.5)" stroke-width="22" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="${d}" stroke="#c8a876" stroke-width="18" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1,28" stroke-dashoffset="0"/>
-  <path d="${d}" stroke="rgba(255,220,150,.25)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#pGlow)"/>`;
-}
-
-function renderCastles(totalXP){
-  const mw=document.getElementById('mapWorld').offsetWidth||360;
-  const layer=document.getElementById('castleLayer');layer.innerHTML='';
-  let highestUnlocked=0;
-  CASTLES.forEach((c,idx)=>{
-    const done=getCastleDone(c);
-    const isDone=done>=c.lessons;
-    const isUnlocked=idx===0||(getCastleDone(CASTLES[idx-1])>=CASTLES[idx-1].lessons);
-    if(isUnlocked)highestUnlocked=idx;
-    const [lp,top]=CPOS[idx];
-    const left=mw*lp/100;
-    const pct=Math.round(done/c.lessons*100);
-    const starCount=isDone?3:done>0?Math.ceil(done/c.lessons*2):0;
-    const stars='⭐'.repeat(starCount)+'☆'.repeat(3-starCount);
-    const div=document.createElement('div');
-    div.className=`castle-node${(!isUnlocked)?' locked':''}`;
-    div.style.cssText=`left:${left}px;top:${top}px`;
-    div.innerHTML=`<div class="c-ring${isDone?' done':isUnlocked?' unlocked':''}" style="background:${c.bg};border-color:${isDone?'rgba(255,215,0,.7)':isUnlocked?c.color+'88':'rgba(255,255,255,.1)'};box-shadow:${isDone?'0 0 20px '+c.color+'55,':''}0 4px 16px rgba(0,0,0,.5)">
-      <span style="font-size:${c.emoji==='★'?'1.6rem':'1.5rem'};${isDone?'filter:drop-shadow(0 0 8px '+c.color+')'  :''}">${isDone?c.emoji:isUnlocked?c.emoji:'🔒'}</span>
-      ${!isUnlocked?'<div class="c-lock">🔒</div>':''}
-      ${isUnlocked&&!isDone?`<div class="c-prog">${pct}%</div>`:''}
-    </div>
-    <div class="c-name">${c.name.replace('\n','<br>')}</div>
-    <div class="c-stars">${stars}</div>`;
-    if(isUnlocked){div.addEventListener('click',()=>gotoCastle(c.id));}
-    layer.appendChild(div);
-  });
-  return highestUnlocked;
-}
-
-function positionPlayer(highestUnlocked){
-  const mw=document.getElementById('mapWorld').offsetWidth||360;
-  const [lp,top]=CPOS[highestUnlocked];
-  const pin=document.getElementById('playerPin');
-  pin.style.left=(mw*lp/100)+'px';
-  pin.style.top=(top-10)+'px';
-  document.getElementById('playerPinName').textContent=player.name;
-  // Scroll to player position
-  const scroll=document.getElementById('mapScroll');
-  const targetScroll=top-200;
-  setTimeout(()=>scroll.scrollTo({top:Math.max(0,targetScroll),behavior:'smooth'}),300);
-}
-
-function updateHUD(totalXP,level,equipment){
-  const baseStats=player.stats||{atk:8,def:6,int:10,spd:8};
-  const totalStats=calcTotalStats(baseStats,equipment);
-  const title=getTitle(level);
-  const xpNext=LEVEL_XP[Math.min(level,LEVEL_XP.length-1)]||9999;
-  const xpPrev=LEVEL_XP[Math.max(level-1,0)]||0;
-  const xpPct=Math.min(100,Math.round((totalXP-xpPrev)/(xpNext-xpPrev)*100));
-  document.getElementById('hudName').textContent=player.name;
-  document.getElementById('hudLv').textContent=`Lv.${level}`;
-  document.getElementById('hudTitle').textContent=title;
-  document.getElementById('hpBar').style.width=Math.round(player.hp/player.hpMax*100)+'%';
-  document.getElementById('hpTxt').textContent=`${player.hp}/${player.hpMax}`;
-  document.getElementById('xpBar').style.width=xpPct+'%';
-  document.getElementById('xpTxt').textContent=`${totalXP}/${xpNext}`;
-  document.getElementById('panelStatSummary').textContent=`ATK ${totalStats.atk}  INT ${totalStats.int}  DEF ${totalStats.def}  SPD ${totalStats.spd}`;
-  // Equip grid
-  const slots=[['weapon','武器'],['armor','防具'],['hat','頭盔'],['accessory','飾品']];
-  document.getElementById('equipGrid').innerHTML=slots.map(([s,l])=>{
-    const item=equipment[s];
-    return item?`<div class="equip-slot filled"><div class="es-icon">${item.icon}</div><div class="es-name">${item.name}</div><div class="es-stat">${item.stat}</div></div>`:
-    `<div class="equip-slot"><div class="es-empty">${l}</div><div style="font-size:.6rem;color:#2d2350;margin-top:4px">空槽</div></div>`;
-  }).join('');
-  // Full stats
-  document.getElementById('fullStats').innerHTML=[
-    ['ATK',totalStats.atk,'#ff4757'],['DEF',totalStats.def,'#60a5fa'],
-    ['INT',totalStats.int,'#a78bfa'],['SPD',totalStats.spd,'#34d399'],
-  ].map(([l,v,c])=>`<div class="fs"><div class="fs-v" style="color:${c}">${v}</div><div class="fs-l">${l}</div></div>`).join('');
-}
-
-function makeSkyStars(){
-  const cont=document.getElementById('skyStars');
-  for(let i=0;i<60;i++){
-    const s=document.createElement('div');
-    const sz=Math.random()<.15?3:Math.random()<.4?2:1;
-    s.style.cssText=`position:absolute;border-radius:50%;background:#fff;width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*50}%;opacity:${.3+Math.random()*.5}`;
-    cont.appendChild(s);
-  }
-}
-
-function togglePanel(){document.getElementById('statsPanel').classList.toggle('open');}
-function goHome(){window.location.href='index.html';}
-function gotoCastle(n){window.location.href=`opengl-tower${n}.html`;}
-
-function init(){
-  loadPlayer();
-  if(!player)return;
-  makeSkyStars();
-  drawCharSVG('hudAvatar',player);
-  drawCharSVG('playerMapSVG',player);
-  const totalXP=getTotalXP();
-  const level=getLevel(totalXP);
-  const equipment=getUnlockedEquipment();
-  // Check level up
-  const prevLevel=player.level||1;
-  if(level>prevLevel){
-    player.level=level;
-    localStorage.setItem('player_data',JSON.stringify(player));
-    setTimeout(()=>{
-      const t=document.getElementById('lvupToast');
-      t.textContent=`🎉 升到 Lv.${level}！獲得稱號：${getTitle(level)}`;
-      t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
-    },800);
-  }
+  const xp=getTotalXP(),lv=getLevel(xp),eq=getEq();
+  drawCharCanvas('hudCv',player,36,36);
+  drawCharCanvas('ppCv',player,46,52);
+  document.getElementById('pp') && (document.getElementById('pp').querySelector('canvas')?null:null);
+  updateHUD(xp,lv,eq);
+  // Find current castle (highest unlocked)
+  let hi=0;
+  C.forEach((c,i)=>{if(getDone(c)>0||(i===0))hi=i;if(getDone(c)>=c.tot&&i+1<C.length)hi=i+1;});
+  hi=Math.min(hi,C.length-1);
+  // Draw
+  drawMap();
+  renderNodes(hi);
+  // Position player pin
+  const[pgx,pgy]=CPOS_G[hi];
+  const[psx,psy]=g2s(pgx,pgy,0);
+  const pp=document.getElementById('pp');
+  pp.style.left=psx+'px';pp.style.top=(psy-CELL_H/2-68)+'px';
+  pp.querySelector('#ppCv').parentElement.querySelector('.pp-dot') || null;
+  // Initial view centered on player
   setTimeout(()=>{
-    drawPath();
-    const hi=renderCastles(totalXP);
-    positionPlayer(hi);
-    updateHUD(totalXP,level,equipment);
-  },50);
+    const vw=window.innerWidth,vh=window.innerHeight-60;
+    sc=Math.min(vw/MAP_CANVAS_W*1.2,1.1);sc=Math.max(sc,0.55);
+    scrollToGxy(pgx,pgy);
+    // Level up check
+    const prevLv=player.level||1;
+    if(lv>prevLv){player.level=lv;localStorage.setItem('player_data',JSON.stringify(player));setTimeout(()=>{const t=document.getElementById('lut');t.textContent=`🎉 升到 Lv.${lv}！稱號：${getTitle(lv)}`;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);},700);}
+  },80);
+  // Hash navigation
+  if(location.hash.startsWith('#done-')){
+    const cid=parseInt(location.hash.replace('#done-',''));
+    const ni=Math.min(cid,C.length-1);
+    setTimeout(()=>{
+      const[gx,gy]=CPOS_G[ni];const[sx,sy]=g2s(gx,gy,0);
+      pp.style.left=sx+'px';pp.style.top=(sy-CELL_H/2-68)+'px';
+      setTimeout(()=>scrollToGxy(gx,gy),300);
+    },400);
+    history.replaceState(null,'',location.pathname);
+  }
 }
 
-window.addEventListener('resize',()=>{drawPath();});
+window.addEventListener('resize',()=>{clamp();applyT();});
 init();
 </script>
 </body>
