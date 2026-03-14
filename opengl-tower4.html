@@ -184,6 +184,33 @@ html{font-size:17px}
 <div class="toast" id="toast"></div>
 
 <script>
+
+// ── iOS Safari Fixes ──
+// roundRect polyfill
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    const R=Math.min(typeof r==='number'?r:r[0],w/2,h/2);
+    this.beginPath();this.moveTo(x+R,y);this.lineTo(x+w-R,y);
+    this.arcTo(x+w,y,x+w,y+R,R);this.lineTo(x+w,y+h-R);
+    this.arcTo(x+w,y+h,x+w-R,y+h,R);this.lineTo(x+R,y+h);
+    this.arcTo(x,y+h,x,y+h-R,R);this.lineTo(x,y+R);
+    this.arcTo(x,y,x+R,y,R);this.closePath();
+  };
+}
+// WebGL context pool - prevents iOS 8-context limit crash
+const _glPool = {};
+function safeGL(cv) {
+  if(!cv) return null;
+  const id = cv.id || 'cv_'+Math.random();
+  cv.id = id;
+  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
+  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
+  if(!gl) return null;
+  _glPool[id] = gl;
+  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  return gl;
+}
+
 const LESSONS=[
 {id:'l1',num:'4-1',icon:'🔲',title:'深度測試 — 誰在前面？',
  sub:'Z-buffer：解決物體重疊時的遮擋問題',xp:70,type:'normal',
@@ -462,7 +489,7 @@ function d1(cont){
   <div class="ctrl-row"><button class="ctrl-btn on" id="dt-on" onclick="setDT(true)">✅ 開啟深度測試</button><button class="ctrl-btn" id="dt-off" onclick="setDT(false)">❌ 關閉深度測試</button><button class="ctrl-btn" id="dt-vis" onclick="setDT('vis')">🔲 視覺化 Z-Buffer</button></div>`;
   window._dtMode=true;
   window.setDT=m=>{window._dtMode=m;document.getElementById('dt-on').classList.toggle('on',m===true);document.getElementById('dt-off').classList.toggle('on',m===false);document.getElementById('dt-vis').classList.toggle('on',m==='vis');};
-  const cv=document.getElementById('cv4-1');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv4-1');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec3 p;attribute vec3 c;varying vec3 vc;uniform mat4 mvp;void main(){vc=c;gl_Position=mvp*vec4(p,1);}`;
   const fs=`precision mediump float;varying vec3 vc;uniform bool visDepth;void main(){if(visDepth){float d=gl_FragCoord.z;gl_FragColor=vec4(d,d,d,1);}else{gl_FragColor=vec4(vc,1);}}`;
   const prog=mkProg(gl,vs,fs);
@@ -501,7 +528,7 @@ function d2(cont){
   document.getElementById('outline-w').oninput=function(){document.getElementById('outline-wv').textContent=this.value;};
   window._stMode='on';window._stHue=0;
   window.setST=m=>{if(m==='col'){window._stHue=(window._stHue+30)%360;return;}window._stMode=m;['on','off'].forEach(x=>document.getElementById('st-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-2');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv4-2');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   gl.enable(gl.DEPTH_TEST);
   const vs=`attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vP;uniform mat4 mvp;void main(){vN=n;vP=p;gl_Position=mvp*vec4(p,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 col;void main(){vec3 L=normalize(vec3(2,3,4));float d=max(dot(normalize(vN),L),.1);gl_FragColor=vec4(col*d+.05,1);}`;
@@ -551,7 +578,7 @@ function d3(cont){
   document.getElementById('alpha-sl').oninput=function(){document.getElementById('alpha-v').textContent=(this.value/100).toFixed(2);};
   window._abMode='glass';
   window.setAB=m=>{window._abMode=m;['glass','smoke','fire'].forEach(x=>document.getElementById('ab-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-3');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv4-3');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform float alpha;uniform int mode;uniform float t;void main(){
     vec3 bg=vec3(.1+uv.x*.2,uv.y*.3,.4+sin(uv.x*8.+t)*.1);
@@ -585,7 +612,7 @@ function d4(cont){
   <div class="ctrl-row"><button class="ctrl-btn on" id="pp-none" onclick="setPP(0)">📷 原始</button><button class="ctrl-btn" id="pp-blur" onclick="setPP(1)">🌊 模糊</button><button class="ctrl-btn" id="pp-edge" onclick="setPP(2)">✏️ 邊緣</button><button class="ctrl-btn" id="pp-gray" onclick="setPP(3)">⚫ 灰階</button><button class="ctrl-btn" id="pp-crt" onclick="setPP(4)">📺 CRT</button></div>`;
   window._ppMode=0;
   window.setPP=m=>{window._ppMode=m;[0,1,2,3,4].forEach(x=>document.getElementById('pp-'+['none','blur','edge','gray','crt'][x]).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-4');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv4-4');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
   vec3 scene(vec2 u){
@@ -628,7 +655,7 @@ function d5(cont){
   <div class="ctrl-row"><button class="ctrl-btn on" id="cm-sky" onclick="setCM('sky')">🌅 天空盒</button><button class="ctrl-btn" id="cm-ref" onclick="setCM('ref')">🔮 環境反射</button><button class="ctrl-btn" id="cm-refr" onclick="setCM('refr')">💎 折射</button></div>`;
   window._cmMode='sky';
   window.setCM=m=>{window._cmMode=m;['sky','ref','refr'].forEach(x=>document.getElementById('cm-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-5');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv4-5');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;uniform vec2 cam;
   vec3 skyColor(vec3 d){
@@ -683,7 +710,7 @@ function d6(cont){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>進階 GLSL — Shader 效果庫</div></div><canvas id="cv4-6" width="600" height="260" style="height:260px"></canvas></div>
   <div class="ctrl-row"><button class="ctrl-btn on" id="gs-sdf" onclick="setGS('sdf')">⭕ SDF 圓形</button><button class="ctrl-btn" id="gs-noise" onclick="setGS('noise')">🌊 Noise</button><button class="ctrl-btn" id="gs-grid" onclick="setGS('grid')">📐 Shader 格線</button><button class="ctrl-btn" id="gs-fract" onclick="setGS('fract')">🔮 分形</button></div>`;
   window._gsMode='sdf';window.setGS=m=>{window._gsMode=m;['sdf','noise','grid','fract'].forEach(x=>document.getElementById('gs-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-6');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv4-6');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
   float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -726,7 +753,7 @@ function d7(cont){
   document.getElementById('explode-str').oninput=function(){document.getElementById('explode-sv').textContent=(this.value/100).toFixed(2);};
   window._geMode='sphere';
   window.setGE=m=>{window._geMode=m;['sphere','explode','norm'].forEach(x=>document.getElementById('ge-'+x).classList.toggle('on',x===m));document.getElementById('explode-row').style.display=m==='explode'?'flex':'none';};
-  const cv=document.getElementById('cv4-7');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv4-7');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vP;uniform mat4 mvp;uniform float explode;uniform float t;
   void main(){
     vec3 pos=p;
@@ -775,7 +802,7 @@ function d8(cont){
   <div class="slider-row"><span class="slider-label">🌾 草的數量</span><input type="range" min="100" max="5000" value="2000" step="100" id="grass-n"><span class="slider-val" id="grass-nv">2000</span></div>
   <div style="font-size:.78rem;color:var(--txt2);margin-top:6px">Draw Calls: <span id="dc-count" style="color:var(--acc3);font-family:var(--mono)">1</span>（不管多少棵都是 1 次！）</div>`;
   document.getElementById('grass-n').oninput=function(){document.getElementById('grass-nv').textContent=this.value;rebuildGrass();};
-  const cv=document.getElementById('cv4-8');const gl=cv.getContext('webgl');
+  const cv=document.getElementById('cv4-8');const gl=cv.getContext('webgl',{powerPreference:'low-power'});
   if(!gl)return;
   const ext=gl.getExtension('ANGLE_instanced_arrays');if(!ext){cont.innerHTML+='<p style="color:var(--acc4);padding:10px">需要 ANGLE_instanced_arrays 擴充</p>';return;}
   const vs=`attribute vec2 base;attribute vec2 offset;attribute float height;attribute float hue;varying vec3 vC;uniform float t;
@@ -824,7 +851,7 @@ function d9(cont){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>反鋸齒比較 — 放大看邊緣</div></div><canvas id="cv4-9" width="600" height="260" style="height:260px"></canvas></div>
   <div class="ctrl-row"><button class="ctrl-btn on" id="aa-0" onclick="setAA(0)">❌ 無 AA（鋸齒）</button><button class="ctrl-btn" id="aa-2" onclick="setAA(2)">MSAA 2x</button><button class="ctrl-btn" id="aa-4" onclick="setAA(4)">MSAA 4x</button><button class="ctrl-btn" id="aa-8" onclick="setAA(8)">MSAA 8x</button></div>`;
   window._aaLevel=0;window.setAA=n=>{window._aaLevel=n;[0,2,4,8].forEach(x=>document.getElementById('aa-'+x).classList.toggle('on',x===n));};
-  const cv=document.getElementById('cv4-9');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv4-9');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform float aa;uniform float t;void main(){
     vec2 c=uv-.5;float angle=t*.3;
@@ -855,7 +882,7 @@ function d10(cont){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>法線貼圖 — 假的凹凸感</div></div><canvas id="cv4-10" width="600" height="260" style="height:260px"></canvas></div>
   <div class="ctrl-row"><button class="ctrl-btn on" id="nm-on" onclick="setNM('on')">✅ 法線貼圖</button><button class="ctrl-btn" id="nm-off" onclick="setNM('off')">❌ 關閉（看差異）</button><button class="ctrl-btn" id="nm-show" onclick="setNM('show')">🗺️ 顯示法線圖</button></div>`;
   window._nmMode='on';window.setNM=m=>{window._nmMode=m;['on','off','show'].forEach(x=>document.getElementById('nm-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-10');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv4-10');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
   vec3 normalMap(vec2 u){
@@ -894,7 +921,7 @@ function d11(cont){
   </div>`;
   window._pfx={vignette:true,chroma:true,bloom:true,grain:true,crt:false};
   window.toggleFX=k=>{window._pfx[k]=!window._pfx[k];document.getElementById('pfx-'+k).classList.toggle('on',window._pfx[k]);};
-  const cv=document.getElementById('cv4-11');const gl=cv.getContext('webgl');if(!gl)return;
+  const cv=document.getElementById('cv4-11');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform float t;
   uniform bool vignette,chroma,bloom,grain,crt;
