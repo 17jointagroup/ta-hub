@@ -129,6 +129,18 @@ canvas{display:block;position:absolute;top:0;left:0;pointer-events:none}
 <div class="lut" id="lut">🎉 升級了！</div>
 
 <script>
+
+// ── iOS Safari Polyfills ──
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    const R=Math.min(r,w/2,h/2);
+    this.beginPath();this.moveTo(x+R,y);this.lineTo(x+w-R,y);this.arcTo(x+w,y,x+w,y+R,R);
+    this.lineTo(x+w,y+h-R);this.arcTo(x+w,y+h,x+w-R,y+h,R);
+    this.lineTo(x+R,y+h);this.arcTo(x,y+h,x,y+h-R,R);
+    this.lineTo(x,y+R);this.arcTo(x,y,x+R,y,R);this.closePath();
+  };
+}
+
 // ─── CASTLES ───
 const C=[
   {id:1,name:'召喚之城', em:'🗼',col:'#7c3aed',glow:'rgba(124,58,237,.7)', key:'tower1_done',tot:9, rw:{slot:'weapon',name:'召喚法杖',icon:'🪄',stat:'INT+3',bonus:{int:3}}},
@@ -225,6 +237,23 @@ function drawIsoBox(ctx,sx,sy,bw,bh,bz,topC,leftC,rightC){
 }
 
 
+
+// Safe cross-browser rounded rect
+function rr(ctx,x,y,w,h,rad){
+  const r=Math.min(rad||0,Math.abs(w)/2,Math.abs(h)/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
 // ── 9 Unique Castle Designs ──
 function drawCastle(ctx, sx, sy, castleIdx, col, unlocked, done, alpha) {
   ctx.save();
@@ -282,7 +311,7 @@ function drawCastle(ctx, sx, sy, castleIdx, col, unlocked, done, alpha) {
       box(sx,BY-10,30,17,20,topC,leftC,rightC);
       ctx.beginPath();ctx.ellipse(sx,BY-10-20*S,18*S,13*S,0,Math.PI,0);ctx.fillStyle=`rgba(${r},${g},${b},.88)`;ctx.fill();ctx.strokeStyle=leftC;ctx.lineWidth=2;ctx.stroke();
       box(sx+7*S,BY-10-18*S,5,3,10,'#0891b2','#065f80','#044060');
-      ctx.save();ctx.globalAlpha=.45;ctx.fillStyle='#7dd3fc';ctx.beginPath();ctx.roundRect(sx-2,BY-10-33*S,5,12,2);ctx.fill();ctx.restore();
+      ctx.save();ctx.globalAlpha=.45;ctx.fillStyle='#7dd3fc';rr(ctx,sx-2,BY-10-33*S,5,12,2);ctx.fill();ctx.restore();
       ctx.strokeStyle='#334455';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(sx-13*S,BY-10);ctx.lineTo(sx-13*S,BY-10-13*S);ctx.stroke();
       break;}
     case 6:{ // 競技之城 - Battle fortress
@@ -335,9 +364,21 @@ function drawCastle(ctx, sx, sy, castleIdx, col, unlocked, done, alpha) {
   ctx.restore();
 }
 
+
+function drawMapFallback(){
+  const canvas=document.getElementById('mc');
+  if(!canvas)return;
+  canvas.width=MAP_CANVAS_W;canvas.height=MAP_CANVAS_H;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#060420';ctx.fillRect(0,0,MAP_CANVAS_W,MAP_CANVAS_H);
+  ctx.font='bold 20px sans-serif';ctx.fillStyle='#a78bfa';
+  ctx.textAlign='center';ctx.fillText('地圖載入中…',MAP_CANVAS_W/2,MAP_CANVAS_H/2);
+}
+
 // ─── Draw Map ───
 function drawMap(){
   const canvas=document.getElementById('mc');
+  if(!canvas){console.error("canvas #mc not found");return;}
   canvas.width=MAP_CANVAS_W;canvas.height=MAP_CANVAS_H;
   const ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,MAP_CANVAS_W,MAP_CANVAS_H);
@@ -484,8 +525,9 @@ function renderNodes(hi){
 
 // ─── Draw char on canvas ───
 function drawCharCanvas(cvId,p,W,H){
+  try{
   const cv=document.getElementById(cvId);
-  if(!cv)return;
+  if(!cv||!p||!p.appearance)return;
   cv.width=W;cv.height=H;
   const ctx=cv.getContext('2d');
   ctx.clearRect(0,0,W,H);
@@ -500,18 +542,18 @@ function drawCharCanvas(cvId,p,W,H){
   function shade(col,a){let c=col.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];return'#'+[0,2,4].map(i=>Math.max(0,Math.min(255,parseInt(c.substr(i,2),16)+a)).toString(16).padStart(2,'0')).join('');}
   const otd=shade(ot,-45);
   // legs
-  ctx.fillStyle=otd;ctx.beginPath();ctx.roundRect(34,72,11,20,4);ctx.fill();
-  ctx.fillStyle=otd;ctx.beginPath();ctx.roundRect(55,72,11,20,4);ctx.fill();
+  ctx.fillStyle=otd;rr(ctx,34,72,11,20,4);ctx.fill();
+  ctx.fillStyle=otd;rr(ctx,55,72,11,20,4);ctx.fill();
   // body
-  ctx.fillStyle=ot;ctx.beginPath();ctx.roundRect(27,52,46,25,9);ctx.fill();
+  ctx.fillStyle=ot;rr(ctx,27,52,46,25,9);ctx.fill();
   // arms
-  ctx.fillStyle=ot;ctx.beginPath();ctx.roundRect(15,54,13,18,6);ctx.fill();
-  ctx.fillStyle=ot;ctx.beginPath();ctx.roundRect(72,54,13,18,6);ctx.fill();
+  ctx.fillStyle=ot;rr(ctx,15,54,13,18,6);ctx.fill();
+  ctx.fillStyle=ot;rr(ctx,72,54,13,18,6);ctx.fill();
   // hands
   ctx.fillStyle=sc;ctx.beginPath();ctx.arc(21,75,6,0,Math.PI*2);ctx.fill();
   ctx.fillStyle=sc;ctx.beginPath();ctx.arc(79,75,6,0,Math.PI*2);ctx.fill();
   // neck
-  ctx.fillStyle=sc;ctx.beginPath();ctx.roundRect(44,44,12,10,3);ctx.fill();
+  ctx.fillStyle=sc;rr(ctx,44,44,12,10,3);ctx.fill();
   // hair back
   ctx.fillStyle=hr;ctx.beginPath();ctx.ellipse(50,28,25,22,0,0,Math.PI*2);ctx.fill();
   // head
@@ -519,8 +561,8 @@ function drawCharCanvas(cvId,p,W,H){
   ctx.fillStyle=sc;ctx.beginPath();ctx.arc(50,28,24,0,Math.PI*2);ctx.fill();
   ctx.restore();
   // hat
-  if(cls==='mage'){ctx.fillStyle=shade(ot,-20);ctx.beginPath();ctx.moveTo(50,5);ctx.lineTo(64,12);ctx.lineTo(36,12);ctx.closePath();ctx.fill();ctx.fillStyle=ot;ctx.beginPath();ctx.roundRect(33,11,34,8,4);ctx.fill();}
-  else if(cls==='warrior'){ctx.fillStyle='#8899aa';ctx.beginPath();ctx.roundRect(32,8,36,14,7);ctx.fill();}
+  if(cls==='mage'){ctx.fillStyle=shade(ot,-20);ctx.beginPath();ctx.moveTo(50,5);ctx.lineTo(64,12);ctx.lineTo(36,12);ctx.closePath();ctx.fill();ctx.fillStyle=ot;rr(ctx,33,11,34,8,4);ctx.fill();}
+  else if(cls==='warrior'){ctx.fillStyle='#8899aa';rr(ctx,32,8,36,14,7);ctx.fill();}
   else{ctx.fillStyle=ot;ctx.beginPath();ctx.moveTo(50,6);ctx.quadraticCurveTo(70,14,68,18);ctx.lineTo(32,18);ctx.quadraticCurveTo(30,14,50,6);ctx.closePath();ctx.fill();}
   // eyes
   ctx.fillStyle='white';ctx.beginPath();ctx.ellipse(41,28,6,6.5,0,0,Math.PI*2);ctx.fill();
@@ -606,7 +648,7 @@ function init(){
   C.forEach((c,i)=>{if(getDone(c)>0||(i===0))hi=i;if(getDone(c)>=c.tot&&i+1<C.length)hi=i+1;});
   hi=Math.min(hi,C.length-1);
   // Draw
-  drawMap();
+  try{drawMap();}catch(e){console.error("map err:",e);drawMapFallback();}
   renderNodes(hi);
   // Position player pin
   const[pgx,pgy]=CPOS_G[hi];
@@ -637,7 +679,7 @@ function init(){
 }
 
 window.addEventListener('resize',()=>{clamp();applyT();});
-init();
+document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 </script>
 </body>
 </html>
