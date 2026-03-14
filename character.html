@@ -2,51 +2,59 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no">
 <title>✨ 創造角色 — OpenGL 魔法王國</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e0a1e;--card:#16112e;--border:#2a1f4a;--acc:#a78bfa;--acc2:#34d399;--txt:#ede9ff;--txt2:#6b5a90;--font:'Nunito',sans-serif}
+:root{--bg:#0e0820;--card:#160f2e;--border:#261848;--acc:#c084fc;--acc2:#34d399;--txt:#f0e8ff;--txt2:#6b5a90;--f:'Nunito',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{background:var(--bg);color:var(--txt);font-family:var(--font);min-height:100vh}
-.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
-.star{position:absolute;border-radius:50%;background:#d4aaff;animation:tw var(--d,3s) var(--dl,0s) infinite}
-@keyframes tw{0%,100%{opacity:.06}50%{opacity:.7}}
-.wrap{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:20px 16px 48px}
-h1{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:4px;background:linear-gradient(135deg,#a78bfa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sub{text-align:center;color:var(--txt2);font-size:.8rem;margin-bottom:18px}
-.preview-box{background:var(--card);border:2px solid var(--border);border-radius:24px;padding:18px 12px;display:flex;align-items:center;gap:16px;margin-bottom:14px}
-.char-svg-wrap{flex-shrink:0;width:110px;height:128px;filter:drop-shadow(0 4px 12px rgba(167,139,250,.3))}
-.preview-info{flex:1}
-.preview-name{font-size:1.1rem;font-weight:900;color:var(--txt);margin-bottom:4px}
-.preview-class{font-size:.8rem;font-weight:800;color:var(--acc);margin-bottom:10px}
-.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.ms{background:var(--bg);border-radius:7px;padding:4px 8px;display:flex;justify-content:space-between;align-items:center}
-.ms-l{font-size:.62rem;font-weight:800;color:var(--txt2);letter-spacing:.04em}
-.ms-v{font-size:.78rem;font-weight:900;font-family:monospace}
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:12px}
-.card-title{font-size:.7rem;font-weight:900;color:var(--txt2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.name-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--txt);font-size:.95rem;font-family:var(--font);font-weight:800;outline:none;-webkit-appearance:none;-webkit-text-fill-color:var(--txt)}
-.name-input:focus{border-color:var(--acc)}
-.gender-row{display:flex;gap:7px;margin-top:10px}
-.gbtn{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:9px 4px;color:var(--txt2);font-family:var(--font);font-size:.8rem;font-weight:800;cursor:pointer;text-align:center;transition:.15s;-webkit-appearance:none}
-.gbtn.on{background:rgba(167,139,250,.12);border-color:var(--acc);color:var(--acc)}
-.class-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.ccrd{background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;transition:.15s;-webkit-appearance:none;width:100%}
-.ccrd.on{border-color:var(--acc);background:rgba(167,139,250,.1)}
-.ci{font-size:1.9rem;margin-bottom:5px;display:block}
-.cn{font-size:.8rem;font-weight:900;color:var(--txt);margin-bottom:3px}
-.cd{font-size:.62rem;color:var(--txt2);line-height:1.4;margin-bottom:6px}
-.cbg{display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
-.cb{font-size:.58rem;font-weight:800;padding:1px 5px;border-radius:100px;background:rgba(167,139,250,.1);color:var(--acc)}
-.color-rows{display:flex;flex-direction:column;gap:11px}
-.crow{display:flex;align-items:center;gap:10px}
-.clbl{font-size:.74rem;font-weight:800;color:var(--txt2);min-width:38px}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:.15s;flex-shrink:0;-webkit-appearance:none}
-.chip.on{border-color:white;transform:scale(1.2);box-shadow:0 0 8px rgba(255,255,255,.3)}
-.start-btn{width:100%;background:linear-gradient(135deg,#a78bfa,#34d399);color:#0e0a1e;border:none;border-radius:100px;padding:16px;font-family:var(--font);font-size:1.05rem;font-weight:900;cursor:pointer;-webkit-appearance:none;letter-spacing:.03em;margin-top:6px;transition:.2s}
-.start-btn:active{opacity:.85;transform:scale(.98)}
+html,body{background:var(--bg);color:var(--txt);font-family:var(--f);min-height:100vh}
+body{padding-top:max(12px,env(safe-area-inset-top));padding-bottom:max(20px,env(safe-area-inset-bottom))}
+
+/* stars bg */
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;border-radius:50%;animation:tw var(--d,3s) var(--dl,0s) ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.05;transform:scale(1)}50%{opacity:.8;transform:scale(1.3)}}
+
+.wrap{position:relative;z-index:1;max-width:420px;margin:0 auto;padding:14px 15px 56px}
+h1{text-align:center;font-size:1.45rem;font-weight:900;margin-bottom:2px;background:linear-gradient(135deg,#c084fc,#34d399,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{text-align:center;color:var(--txt2);font-size:.75rem;margin-bottom:14px}
+
+/* Preview card */
+.prev{background:linear-gradient(135deg,#1a1035,#0e0820);border:2px solid var(--border);border-radius:22px;padding:16px 14px;display:flex;align-items:center;gap:12px;margin-bottom:12px;box-shadow:0 8px 32px rgba(192,132,252,.12)}
+.char-wrap{flex-shrink:0;width:100px;height:115px;position:relative;display:flex;align-items:flex-end;justify-content:center}
+.prev-info{flex:1;min-width:0}
+.prev-name{font-size:1.05rem;font-weight:900;color:var(--txt);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prev-cls{font-size:.8rem;font-weight:800;color:var(--acc);margin-bottom:9px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.sg{background:rgba(0,0,0,.3);border-radius:8px;padding:4px 8px;display:flex;align-items:center;justify-content:space-between}
+.sgl{font-size:.6rem;font-weight:800;color:var(--txt2);letter-spacing:.04em}
+.sgv{font-size:.82rem;font-weight:900;font-family:monospace}
+
+/* Section cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:13px;margin-bottom:10px}
+.ct{font-size:.68rem;font-weight:900;color:var(--txt2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:9px}
+.ni{width:100%;background:rgba(0,0,0,.35);border:1.5px solid var(--border);border-radius:11px;padding:10px 13px;color:var(--txt);font-size:.92rem;font-family:var(--f);font-weight:800;outline:none;-webkit-appearance:none;-webkit-text-fill-color:var(--txt)}
+.ni:focus{border-color:var(--acc)}
+.gr{display:flex;gap:7px;margin-top:8px}
+.gb{flex:1;background:rgba(0,0,0,.25);border:1.5px solid var(--border);border-radius:10px;padding:8px 4px;color:var(--txt2);font-family:var(--f);font-size:.8rem;font-weight:800;cursor:pointer;text-align:center;-webkit-appearance:none;transition:.15s}
+.gb.on{background:rgba(192,132,252,.15);border-color:var(--acc);color:var(--acc)}
+.cg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cc{background:rgba(0,0,0,.25);border:1.5px solid var(--border);border-radius:13px;padding:10px 4px;text-align:center;cursor:pointer;-webkit-appearance:none;width:100%;transition:.15s}
+.cc.on{border-color:var(--acc);background:rgba(192,132,252,.1)}
+.cc-i{font-size:1.7rem;display:block;margin-bottom:4px}
+.cc-n{font-size:.82rem;font-weight:900;color:var(--txt);margin-bottom:2px}
+.cc-d{font-size:.62rem;color:var(--txt2);margin-bottom:5px;line-height:1.35}
+.cc-b{display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
+.tag{font-size:.58rem;font-weight:800;padding:1px 6px;border-radius:100px;background:rgba(192,132,252,.12);color:var(--acc)}
+.cols{display:flex;flex-direction:column;gap:10px}
+.cr{display:flex;align-items:center;gap:10px}
+.cl{font-size:.72rem;font-weight:800;color:var(--txt2);min-width:36px}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{width:28px;height:28px;border-radius:8px;cursor:pointer;border:2.5px solid transparent;transition:.15s;-webkit-appearance:none}
+.chip.on{border-color:rgba(255,255,255,.9);box-shadow:0 0 10px rgba(255,255,255,.3);transform:scale(1.18)}
+.start{width:100%;background:linear-gradient(135deg,#c084fc,#34d399);color:#0a0516;border:none;border-radius:100px;padding:15px;font-family:var(--f);font-size:1rem;font-weight:900;cursor:pointer;-webkit-appearance:none;letter-spacing:.02em;margin-top:4px;box-shadow:0 6px 28px rgba(192,132,252,.35);transition:.2s}
+.start:active{opacity:.85;transform:scale(.97)}
 </style>
 </head>
 <body>
@@ -55,147 +63,286 @@ h1{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:4px;backgrou
   <h1>✨ 創造你的角色</h1>
   <p class="sub">踏上 OpenGL 魔法王國的冒險！</p>
 
-  <div class="preview-box">
-    <div class="char-svg-wrap">
-      <svg id="cSVG" viewBox="0 0 110 128" width="110" height="128" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="prev">
+    <div class="char-wrap">
+      <canvas id="charCanvas" width="100" height="112" style="image-rendering:pixelated"></canvas>
     </div>
-    <div class="preview-info">
-      <div class="preview-name" id="pName">冒險者</div>
-      <div class="preview-class" id="pClass">🧙 魔法師</div>
-      <div class="mini-stats" id="pStats"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">👤 角色名稱 &amp; 性別</div>
-    <input class="name-input" id="charName" type="text" placeholder="輸入你的名字..." maxlength="10" autocorrect="off" spellcheck="false">
-    <div class="gender-row">
-      <button class="gbtn on" id="g-male"   onclick="setG('male')"  >👦 男孩</button>
-      <button class="gbtn"    id="g-female" onclick="setG('female')">👧 女孩</button>
-      <button class="gbtn"    id="g-other"  onclick="setG('other')" >🌟 其他</button>
+    <div class="prev-info">
+      <div class="prev-name" id="pName">冒險者</div>
+      <div class="prev-cls" id="pCls">🧙 魔法師</div>
+      <div class="stats-grid" id="pStats"></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">⚔️ 選擇職業</div>
-    <div class="class-grid">
-      <button class="ccrd on" id="cls-mage"    onclick="setCls('mage')"   ><span class="ci">🧙</span><div class="cn">魔法師</div><div class="cd">理解力強<br>著色器天才</div><div class="cbg"><span class="cb">INT↑↑</span><span class="cb">MP↑</span></div></button>
-      <button class="ccrd"    id="cls-warrior" onclick="setCls('warrior')"><span class="ci">⚔️</span><div class="cn">劍士</div><div class="cd">攻擊力強<br>快速通關</div><div class="cbg"><span class="cb">ATK↑↑</span><span class="cb">DEF↑</span></div></button>
-      <button class="ccrd"    id="cls-archer"  onclick="setCls('archer')" ><span class="ci">🏹</span><div class="cn">弓手</div><div class="cd">速度最快<br>效率達人</div><div class="cbg"><span class="cb">SPD↑↑</span><span class="cb">ATK↑</span></div></button>
+    <div class="ct">👤 名稱 &amp; 性別</div>
+    <input class="ni" id="charName" type="text" placeholder="輸入你的名字…" maxlength="10" autocorrect="off" spellcheck="false">
+    <div class="gr">
+      <button class="gb on" id="g-m" onclick="setG('m')">👦 男孩</button>
+      <button class="gb"    id="g-f" onclick="setG('f')">👧 女孩</button>
+      <button class="gb"    id="g-x" onclick="setG('x')">🌟 其他</button>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">🎨 外觀設定</div>
-    <div class="color-rows">
-      <div class="crow"><span class="clbl">膚色</span><div class="chips" id="skinChips"></div></div>
-      <div class="crow"><span class="clbl">髮色</span><div class="chips" id="hairChips"></div></div>
-      <div class="crow"><span class="clbl">服裝</span><div class="chips" id="outfitChips"></div></div>
+    <div class="ct">⚔️ 職業</div>
+    <div class="cg">
+      <button class="cc on" id="cls-mage"    onclick="setCls('mage')"   ><span class="cc-i">🧙</span><div class="cc-n">魔法師</div><div class="cc-d">著色器天才</div><div class="cc-b"><span class="tag">INT↑↑</span><span class="tag">MP↑</span></div></button>
+      <button class="cc"    id="cls-warrior" onclick="setCls('warrior')"><span class="cc-i">⚔️</span><div class="cc-n">劍士</div><div class="cc-d">快速通關</div><div class="cc-b"><span class="tag">ATK↑↑</span><span class="tag">DEF↑</span></div></button>
+      <button class="cc"    id="cls-archer"  onclick="setCls('archer')" ><span class="cc-i">🏹</span><div class="cc-n">弓手</div><div class="cc-d">效率達人</div><div class="cc-b"><span class="tag">SPD↑↑</span><span class="tag">ATK↑</span></div></button>
     </div>
   </div>
 
-  <button class="start-btn" onclick="startAdventure()">⚡ 開始冒險！</button>
+  <div class="card">
+    <div class="ct">🎨 外觀</div>
+    <div class="cols">
+      <div class="cr"><span class="cl">膚色</span><div class="chips" id="sc"></div></div>
+      <div class="cr"><span class="cl">髮色</span><div class="chips" id="hc"></div></div>
+      <div class="cr"><span class="cl">服裝</span><div class="chips" id="oc"></div></div>
+    </div>
+  </div>
+
+  <button class="start" onclick="startGame()">⚡ 開始冒險！進入王國</button>
 </div>
 
 <script>
 const SKINS=['#fde8d0','#f5cba7','#e8a87c','#c8855a','#8d5524','#5c3317'];
-const HAIRS=['#f5e6c8','#e8c97a','#c87820','#6b3a1f','#2a1a08','#111','#e8396a','#7c6dfa'];
-const OUTFITS=['#7c6dfa','#00d4ff','#ff4757','#ff9f43','#2ed573','#ff6b9d','#a78bfa','#ffd700'];
-const CLS_STATS={mage:{atk:8,def:6,int:16,spd:8,hp:80,mp:80},warrior:{atk:16,def:12,int:6,spd:8,hp:120,mp:40},archer:{atk:12,def:8,int:10,spd:16,hp:90,mp:60}};
-const CLS_COL={mage:'#a78bfa',warrior:'#ff4757',archer:'#2ed573'};
-const CLS_NAME={mage:'🧙 魔法師',warrior:'⚔️ 劍士',archer:'🏹 弓手'};
+const HAIRS=['#f2e0a0','#e8c060','#c07820','#5a2e10','#111','#cc2244','#8b5cf6','#0ea5e9'];
+const OUTFITS=['#7c3aed','#0891b2','#dc2626','#d97706','#16a34a','#db2777','#7c6dfa','#ca8a04'];
+const CLS={mage:{atk:8,def:6,int:16,spd:8,hp:80,mp:80,c:'#c084fc',n:'🧙 魔法師'},warrior:{atk:16,def:12,int:6,spd:8,hp:120,mp:40,c:'#f87171',n:'⚔️ 劍士'},archer:{atk:12,def:8,int:10,spd:16,hp:90,mp:60,c:'#34d399',n:'🏹 弓手'}};
 
-let si=2,hi=3,oi=0,gender='male',cls='mage';
+let si=2,hi=3,oi=0,gender='m',cls='mage';
+const cv=document.getElementById('charCanvas');
+const ctx=cv.getContext('2d');
 
-function mkStars(){const c=document.getElementById('stars');for(let i=0;i<80;i++){const s=document.createElement('div');s.className='star';s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${Math.random()<.25?2:1}px;height:${Math.random()<.25?2:1}px;--d:${2+Math.random()*5}s;--dl:${Math.random()*5}s`;c.appendChild(s);}}
-mkStars();
+// ── Star background ──
+(function(){const c=document.getElementById('stars');for(let i=0;i<80;i++){const s=document.createElement('div');s.className='star';s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${Math.random()<.18?2.5:1.5}px;height:${Math.random()<.18?2.5:1.5}px;background:hsl(${260+Math.random()*60},80%,80%);--d:${2+Math.random()*5}s;--dl:${Math.random()*6}s`;c.appendChild(s);}})();
 
+// ── Build color chips ──
 function buildChips(){
-  [['skin',SKINS,si],['hair',HAIRS,hi],['outfit',OUTFITS,oi]].forEach(([t,arr,sel])=>{
-    document.getElementById(t+'Chips').innerHTML=arr.map((c,i)=>`<button class="chip${i===sel?' on':''}" style="background:${c}" onclick="setCol('${t}',${i})"></button>`).join('');
+  [['sc',SKINS,si],['hc',HAIRS,hi],['oc',OUTFITS,oi]].forEach(([id,arr,sel])=>{
+    document.getElementById(id).innerHTML=arr.map((c,i)=>`<button class="chip${i===sel?' on':''}" style="background:${c}" onclick="setCol('${id}',${i})"></button>`).join('');
   });
 }
-function setCol(t,i){if(t==='skin')si=i;else if(t==='hair')hi=i;else oi=i;buildChips();draw();}
-function setG(g){gender=g;['male','female','other'].forEach(x=>document.getElementById('g-'+x).classList.toggle('on',x===g));
-  if(g==='male'){hi=3;oi=0;}else if(g==='female'){hi=0;oi=5;}else{hi=7;oi=6;}
-  buildChips();draw();
+function setCol(id,i){if(id==='sc')si=i;else if(id==='hc')hi=i;else oi=i;buildChips();draw();}
+function setG(g){gender=g;['m','f','x'].forEach(x=>document.getElementById('g-'+x).classList.toggle('on',x===g));draw();}
+function setCls(c){cls=c;['mage','warrior','archer'].forEach(x=>document.getElementById('cls-'+x).classList.toggle('on',x===c));document.getElementById('pCls').textContent=CLS[c].n;updateStats();draw();}
+function updateStats(){const s=CLS[cls],cc=s.c;document.getElementById('pStats').innerHTML=[['ATK',s.atk,cc],['DEF',s.def,'#60a5fa'],['INT',s.int,'#c084fc'],['SPD',s.spd,'#34d399']].map(([l,v,c])=>`<div class="sg"><span class="sgl">${l}</span><span class="sgv" style="color:${c}">${v}</span></div>`).join('');}
+
+// ── Mario-style character drawing ──
+function shade(col,amt){let c=col.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];return'#'+[0,2,4].map(i=>Math.max(0,Math.min(255,parseInt(c.substr(i,2),16)+amt)).toString(16).padStart(2,'0')).join('');}
+function lighter(c){return shade(c,40);}
+function darker(c){return shade(c,-45);}
+
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
 }
-function setCls(c){cls=c;['mage','warrior','archer'].forEach(x=>document.getElementById('cls-'+x).classList.toggle('on',x===c));
-  document.getElementById('pClass').textContent=CLS_NAME[c];updateStats();draw();
-}
-function updateStats(){
-  const s=CLS_STATS[cls];const cc=CLS_COL[cls];
-  document.getElementById('pStats').innerHTML=[['ATK',s.atk,cc],['DEF',s.def,'#60a5fa'],['INT',s.int,'#a78bfa'],['SPD',s.spd,'#34d399']].map(([l,v,c])=>`<div class="ms"><span class="ms-l">${l}</span><span class="ms-v" style="color:${c}">${v}</span></div>`).join('');
+function circle(ctx,x,y,r,fill,stroke){
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}
 }
 
 function draw(){
-  const s=SKINS[si],h=HAIRS[hi],o=OUTFITS[oi];
-  // darken outfit for legs
-  const od=shadeColor(o,-40);
-  const hat=cls==='mage'?
-    `<polygon points="55,3 39,27 71,27" fill="${o}"/><rect x="35" y="24" width="40" height="7" rx="3.5" fill="${o}"/><circle cx="55" cy="3" r="3" fill="#ffd700"/>`:
-    cls==='warrior'?
-    `<rect x="30" y="11" width="50" height="17" rx="8.5" fill="#8899aa"/><rect x="22" y="22" width="14" height="12" rx="4" fill="#778899"/><rect x="74" y="22" width="14" height="12" rx="4" fill="#778899"/>`:
-    `<ellipse cx="55" cy="15" rx="28" ry="12" fill="${h}"/><ellipse cx="71" cy="8" rx="3.5" ry="9" fill="#e8a87c" transform="rotate(28 71 8)"/>`;
-  const weapon=cls==='mage'?
-    `<g transform="translate(92,68) rotate(-25)"><rect x="-2.5" y="-20" width="5" height="28" rx="2.5" fill="#ffd700"/><polygon points="0,-28 -5,-17 5,-17" fill="#89ddff"/><circle cx="0" cy="-28" r="3.5" fill="white" opacity=".8"/></g>`:
-    cls==='warrior'?
-    `<g transform="translate(92,70)"><rect x="-2" y="-24" width="4.5" height="32" rx="1.5" fill="#c0c8d8"/><rect x="-8" y="-5" width="16" height="4.5" rx="2" fill="#aabbcc"/></g>`:
-    `<g transform="translate(93,68)"><path d="M3,-18 Q12,0 3,18" stroke="#8B5E3C" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M3,-18 L3,18" stroke="#ddd" stroke-width="1" stroke-dasharray="2,3"/></g>`;
-  const hB=gender==='female'?
-    `<ellipse cx="55" cy="20" rx="30" ry="13" fill="${h}"/><rect x="24" y="28" width="11" height="34" rx="5.5" fill="${h}"/><rect x="75" y="28" width="11" height="34" rx="5.5" fill="${h}"/>`:
-    gender==='other'?
-    `<ellipse cx="55" cy="20" rx="30" ry="13" fill="${h}"/><rect x="25" y="28" width="10" height="20" rx="5" fill="${h}"/><rect x="75" y="28" width="10" height="20" rx="5" fill="${h}"/>`:
-    `<ellipse cx="55" cy="20" rx="30" ry="13" fill="${h}"/>`;
-  const hF=gender==='female'?
-    `<path d="M27,24 Q36,13 50,17 Q42,24 38,30" fill="${h}"/><path d="M62,17 Q76,13 83,24" fill="${h}" stroke="${h}" stroke-width="1"/>`:
-    `<path d="M28,24 Q38,13 52,18 Q44,24 40,30" fill="${h}"/><path d="M64,18 Q76,13 82,24" fill="${h}" stroke="${h}" stroke-width="1"/>`;
+  const W=100,H=112;
+  ctx.clearRect(0,0,W,H);
+  const sk=SKINS[si],hr=HAIRS[hi],ot=OUTFITS[oi];
+  const otD=darker(ot),otL=lighter(ot),skD=darker(sk);
 
-  document.getElementById('cSVG').innerHTML=`
-<ellipse cx="55" cy="124" rx="21" ry="5" fill="rgba(0,0,0,.16)"/>
-<rect x="39" y="97" width="13" height="24" rx="6.5" fill="${od}"/>
-<rect x="58" y="97" width="13" height="24" rx="6.5" fill="${od}"/>
-<rect x="26" y="65" width="58" height="37" rx="13" fill="${o}"/>
-<circle cx="26" cy="72" r="7.5" fill="${o}"/><circle cx="84" cy="72" r="7.5" fill="${o}"/>
-<rect x="11" y="69" width="16" height="26" rx="8" fill="${o}"/>
-<circle cx="19" cy="97" r="8" fill="${s}"/>
-<rect x="83" y="69" width="16" height="26" rx="8" fill="${o}"/>
-<circle cx="91" cy="97" r="8" fill="${s}"/>
-${weapon}
-<rect x="46" y="58" width="18" height="11" fill="${s}"/>
-${hB}
-<circle cx="55" cy="40" r="30" fill="${s}"/>
-<ellipse cx="25" cy="40" rx="5.5" ry="7" fill="${s}"/>
-<ellipse cx="85" cy="40" rx="5.5" ry="7" fill="${s}"/>
-${hat}${hF}
-<ellipse cx="43" cy="39" rx="7" ry="8" fill="white"/>
-<ellipse cx="67" cy="39" rx="7" ry="8" fill="white"/>
-<circle cx="44" cy="40" r="5" fill="#1a1035"/>
-<circle cx="68" cy="40" r="5" fill="#1a1035"/>
-<circle cx="46" cy="37.5" r="2" fill="white"/>
-<circle cx="70" cy="37.5" r="2" fill="white"/>
-<ellipse cx="30" cy="50" rx="8" ry="4.5" fill="rgba(255,130,130,.28)"/>
-<ellipse cx="80" cy="50" rx="8" ry="4.5" fill="rgba(255,130,130,.28)"/>
-<path d="M47 54 Q55 62 63 54" stroke="#cc7070" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  // Shadow
+  ctx.save();ctx.globalAlpha=.18;
+  ctx.beginPath();ctx.ellipse(50,108,18,4,0,0,Math.PI*2);ctx.fillStyle='#000';ctx.fill();
+  ctx.restore();
+
+  // ── LEGS ──
+  roundRect(ctx,34,80,14,24,5,otD);
+  roundRect(ctx,52,80,14,24,5,otD);
+  // Shoes
+  roundRect(ctx,31,98,19,10,4,'#222');
+  roundRect(ctx,50,98,19,10,4,'#222');
+
+  // ── BODY (overalls style) ──
+  roundRect(ctx,25,55,50,32,10,ot);
+  // Overalls bib
+  roundRect(ctx,35,52,30,16,5,otL);
+  // Button detail
+  circle(ctx,44,60,2.5,sk);
+  circle(ctx,56,60,2.5,sk);
+  // Body shadow bottom
+  ctx.save();ctx.globalAlpha=.15;roundRect(ctx,25,74,50,13,10,'#000');ctx.restore();
+
+  // ── ARMS ──
+  // Left arm
+  roundRect(ctx,14,57,13,22,6,ot);
+  // Left hand
+  circle(ctx,20,82,7,sk);
+  circle(ctx,16,80,4.5,sk);
+  circle(ctx,22,84,4,sk);
+  // Right arm
+  roundRect(ctx,73,57,13,22,6,ot);
+  // Right hand
+  circle(ctx,80,82,7,sk);
+  circle(ctx,84,80,4.5,sk);
+  circle(ctx,78,84,4,sk);
+
+  // Weapon in right hand
+  if(cls==='mage'){
+    // Magic staff
+    ctx.save();ctx.translate(90,68);ctx.rotate(-0.3);
+    ctx.strokeStyle='#c8a030';ctx.lineWidth=3.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(0,10);ctx.lineTo(0,-22);ctx.stroke();
+    // Star on top
+    ctx.fillStyle='#89ddff';
+    for(let i=0;i<5;i++){ctx.save();ctx.rotate(i*Math.PI*.4);ctx.beginPath();ctx.moveTo(0,-9);ctx.lineTo(1.5,-4);ctx.lineTo(6,-4);ctx.lineTo(2.5,-1);ctx.lineTo(4,4);ctx.lineTo(0,1.5);ctx.lineTo(-4,4);ctx.lineTo(-2.5,-1);ctx.lineTo(-6,-4);ctx.lineTo(-1.5,-4);ctx.closePath();ctx.fill();ctx.restore();}
+    ctx.restore();
+  } else if(cls==='warrior'){
+    ctx.save();ctx.translate(88,62);ctx.rotate(-0.2);
+    // Blade
+    ctx.fillStyle='#d4e0f0';
+    ctx.beginPath();ctx.moveTo(0,-28);ctx.lineTo(4,0);ctx.lineTo(0,4);ctx.lineTo(-4,0);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#a0b8d0';ctx.lineWidth=1;ctx.stroke();
+    // Guard
+    roundRect(ctx,-7,-2,14,5,2,'#c8a030');
+    // Handle
+    roundRect(ctx,-3,3,6,14,2,'#7a4a20');
+    ctx.restore();
+  } else {
+    // Bow
+    ctx.save();ctx.translate(89,70);
+    ctx.strokeStyle='#8B5E3C';ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(0,0,16,-.9,.9);ctx.stroke();
+    ctx.strokeStyle='#e8e8e8';ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(13,-14);ctx.lineTo(13,14);ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── NECK ──
+  roundRect(ctx,43,46,14,12,3,sk);
+
+  // ── HAIR BACK (behind head) ──
+  if(gender==='f'){
+    // Long hair sides
+    ctx.beginPath();ctx.ellipse(50,28,29,28,0,0,Math.PI*2);ctx.fillStyle=hr;ctx.fill();
+    // Long hair flowing down
+    roundRect(ctx,20,30,11,34,5,hr);
+    roundRect(ctx,69,30,11,34,5,hr);
+  } else if(gender==='x'){
+    ctx.beginPath();ctx.ellipse(50,28,29,26,0,0,Math.PI*2);ctx.fillStyle=hr;ctx.fill();
+    roundRect(ctx,20,30,10,20,5,hr);
+    roundRect(ctx,70,30,10,20,5,hr);
+  } else {
+    ctx.beginPath();ctx.ellipse(50,29,27,24,0,0,Math.PI*2);ctx.fillStyle=hr;ctx.fill();
+  }
+
+  // ── HEAD (big round Mario-style) ──
+  // Head base
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=8;ctx.shadowOffsetY=4;
+  circle(ctx,50,30,28,sk);
+  ctx.restore();
+  // Ear left
+  circle(ctx,20,30,7,sk);
+  circle(ctx,20,30,4,skD);
+  // Ear right
+  circle(ctx,80,30,7,sk);
+  circle(ctx,80,30,4,skD);
+
+  // ── HAT (clearly on TOP of head) ──
+  // Hat sits at y=4 to y=16, head center at y=30 — hat is well above face
+  if(cls==='mage'){
+    // Witch/wizard hat — cone style
+    // Brim (flat base) at y=14
+    roundRect(ctx,26,12,48,10,5,ot);
+    // Cone above brim
+    ctx.beginPath();ctx.moveTo(50,0);ctx.lineTo(66,12);ctx.lineTo(34,12);ctx.closePath();ctx.fillStyle=otD;ctx.fill();
+    // Hat band
+    roundRect(ctx,29,12,42,5,0,'#ffd700');
+    // Star buckle
+    ctx.fillStyle='#fff';ctx.font='bold 8px serif';ctx.textAlign='center';ctx.fillText('★',50,17);
+  } else if(cls==='warrior'){
+    // Knight helmet
+    roundRect(ctx,24,4,52,18,8,'#8899aa');
+    roundRect(ctx,26,16,48,6,3,'#667788');
+    // Visor slots
+    roundRect(ctx,32,7,10,5,2,'rgba(0,0,0,.5)');
+    roundRect(ctx,58,7,10,5,2,'rgba(0,0,0,.5)');
+    // Top plume
+    ctx.strokeStyle='#dc2626';ctx.lineWidth=4;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(50,4);ctx.quadraticCurveTo(58,-8,50,0);ctx.stroke();
+  } else {
+    // Archer hat — robin hood style
+    ctx.beginPath();ctx.moveTo(50,2);ctx.quadraticCurveTo(75,12,72,20);ctx.lineTo(28,20);ctx.quadraticCurveTo(25,12,50,2);ctx.closePath();ctx.fillStyle=ot;ctx.fill();
+    roundRect(ctx,26,18,48,7,3.5,otD);
+    // Feather
+    ctx.save();ctx.translate(70,6);ctx.rotate(0.5);
+    ctx.strokeStyle='#e8f4d0';ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(0,10);ctx.quadraticCurveTo(8,-4,2,-14);ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── HAIR FRONT (forehead fringe, drawn after hat) ──
+  if(gender==='f'){
+    // Side bangs
+    ctx.beginPath();ctx.ellipse(29,22,7,5,0.5,0,Math.PI*2);ctx.fillStyle=hr;ctx.fill();
+    ctx.beginPath();ctx.ellipse(71,22,7,5,-0.5,0,Math.PI*2);ctx.fillStyle=hr;ctx.fill();
+  } else if(gender!=='x'){
+    // Short side hair
+    if(cls!=='warrior'){
+      ctx.beginPath();ctx.ellipse(28,23,6,4,0.4,0,Math.PI);ctx.fillStyle=hr;ctx.fill();
+      ctx.beginPath();ctx.ellipse(72,23,6,4,-0.4,0,Math.PI);ctx.fillStyle=hr;ctx.fill();
+    }
+  }
+
+  // ── EYES ──
+  // Eye whites
+  circle(ctx,38,32,8,'white');
+  circle(ctx,62,32,8,'white');
+  // Iris
+  circle(ctx,39,33,5.5,'#1a0a2e');
+  circle(ctx,63,33,5.5,'#1a0a2e');
+  // Color ring
+  const eyeCol=cls==='mage'?'#8b5cf6':cls==='warrior'?'#dc2626':'#16a34a';
+  circle(ctx,39,33,4,eyeCol);
+  circle(ctx,63,33,4,eyeCol);
+  // Pupil
+  circle(ctx,40,33.5,2.5,'#0a0020');
+  circle(ctx,64,33.5,2.5,'#0a0020');
+  // Highlights
+  circle(ctx,42,30.5,2,'white');
+  circle(ctx,66,30.5,2,'white');
+  circle(ctx,43,32,1,'rgba(255,255,255,.6)');
+  circle(ctx,67,32,1,'rgba(255,255,255,.6)');
+
+  // Eyebrows
+  ctx.strokeStyle=hr;ctx.lineWidth=2.8;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(32,23);ctx.quadraticCurveTo(39,20,45,23);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(55,23);ctx.quadraticCurveTo(61,20,68,23);ctx.stroke();
+
+  // ── NOSE & CHEEKS ──
+  circle(ctx,50,38,3,skD);
+  ctx.save();ctx.globalAlpha=.35;
+  circle(ctx,33,40,7,'#ff8a80');
+  circle(ctx,67,40,7,'#ff8a80');
+  ctx.restore();
+
+  // ── MOUTH ──
+  ctx.strokeStyle=darker(sk)+' ';ctx.strokeStyle='#c06060';ctx.lineWidth=2.2;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(42,46);ctx.quadraticCurveTo(50,54,58,46);ctx.stroke();
+  // Smile teeth
+  ctx.fillStyle='white';ctx.save();ctx.clip&&ctx.save();
+  ctx.beginPath();ctx.moveTo(43,48);ctx.quadraticCurveTo(50,54,57,48);ctx.lineTo(57,50);ctx.quadraticCurveTo(50,56,43,50);ctx.closePath();
+  ctx.fillStyle='rgba(255,255,255,.7)';ctx.fill();
+  ctx.restore();
 }
-
-function shadeColor(col,amt){let c=col.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];let r=Math.max(0,Math.min(255,parseInt(c.substr(0,2),16)+amt));let g=Math.max(0,Math.min(255,parseInt(c.substr(2,2),16)+amt));let b=Math.max(0,Math.min(255,parseInt(c.substr(4,2),16)+amt));return`#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;}
 
 document.getElementById('charName').addEventListener('input',function(){document.getElementById('pName').textContent=this.value||'冒險者';});
 
-function startAdventure(){
+function startGame(){
   const name=document.getElementById('charName').value.trim()||'冒險者';
-  const s=CLS_STATS[cls];
-  const p={name,gender,class:cls,
-    appearance:{skin:SKINS[si],hair:HAIRS[hi],outfit:OUTFITS[oi]},
-    level:1,xp:0,xpNext:500,
-    hp:s.hp,hpMax:s.hp,mp:s.mp,mpMax:s.mp,
-    stats:{atk:s.atk,def:s.def,int:s.int,spd:s.spd},
-    equipment:{weapon:null,armor:null,hat:null,accessory:null},
-    unlockedItems:[],
-    titles:['初學者'],currentTitle:'初學者',
-    created:Date.now()};
-  localStorage.setItem('player_data',JSON.stringify(p));
+  const s=CLS[cls];
+  localStorage.setItem('player_data',JSON.stringify({name,gender,class:cls,appearance:{skin:SKINS[si],hair:HAIRS[hi],outfit:OUTFITS[oi]},level:1,xp:0,xpNext:500,hp:s.hp,hpMax:s.hp,mp:s.mp,mpMax:s.mp,stats:{atk:s.atk,def:s.def,int:s.int,spd:s.spd},equipment:{weapon:null,armor:null,hat:null,accessory:null},titles:['初學者'],currentTitle:'初學者',created:Date.now()}));
   window.location.href='opengl-map.html';
 }
 
