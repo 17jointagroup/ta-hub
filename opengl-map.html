@@ -6,118 +6,128 @@
 <title>🗺️ OpenGL 魔法王國</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{--f:'Nunito',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{font-family:var(--f);overflow:hidden;height:100%;background:#060420;touch-action:none;user-select:none}
+html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background:#060210;touch-action:none;user-select:none}
 
-.hud{position:fixed;top:0;left:0;right:0;z-index:200;padding:max(10px,env(safe-area-inset-top)) 12px 8px;background:rgba(3,1,16,.93);backdrop-filter:blur(18px);border-bottom:1px solid rgba(192,132,252,.14);display:flex;align-items:center;gap:10px}
-.av{width:36px;height:36px;border-radius:50%;overflow:hidden;border:2px solid #c084fc;background:#0e0820;flex-shrink:0}
+/* ── HUD ── */
+.hud{position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:max(10px,env(safe-area-inset-top)) 12px 8px;
+  background:rgba(3,1,16,.95);border-bottom:1px solid rgba(180,130,255,.15);
+  display:flex;align-items:center;gap:10px;backdrop-filter:blur(12px)}
+.av{width:36px;height:36px;border-radius:50%;border:2px solid #c084fc;background:#100828;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
 .pi{flex:1;min-width:0}
 .pnr{display:flex;align-items:center;gap:6px;margin-bottom:3px}
-.pn{font-size:.84rem;font-weight:900;color:#f0e8ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lv{background:linear-gradient(135deg,#c084fc,#34d399);color:#050210;font-size:.58rem;font-weight:900;padding:2px 7px;border-radius:100px;flex-shrink:0}
-.ttl{font-size:.6rem;font-weight:800;color:#c084fc;flex-shrink:0}
+.pn{font-size:.9rem;font-weight:900;color:#f0e8ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv{background:linear-gradient(135deg,#c084fc,#34d399);color:#050210;font-size:.6rem;font-weight:900;padding:2px 7px;border-radius:100px;flex-shrink:0}
+.ttl{font-size:.6rem;font-weight:800;color:#a78bfa;flex-shrink:0}
 .brs{display:flex;flex-direction:column;gap:3px}
 .br{display:flex;align-items:center;gap:5px}
-.brl{font-size:.56rem;font-weight:800;color:#3d2a60;min-width:18px}
-.brb{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden}
-.brf{height:100%;border-radius:100px;transition:width .5s}
+.brl{font-size:.58rem;font-weight:800;color:#3d2a60;min-width:18px}
+.brb{flex:1;height:5px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+.brf{height:100%;border-radius:100px;transition:width .4s}
 .hb{background:linear-gradient(90deg,#ef4444,#f87171)}
 .xb{background:linear-gradient(90deg,#f59e0b,#fcd34d)}
-.hbtn{background:rgba(192,132,252,.12);border:1px solid rgba(192,132,252,.22);color:#c084fc;border-radius:9px;padding:6px 9px;font-size:.68rem;font-weight:800;cursor:pointer;flex-shrink:0;-webkit-appearance:none;font-family:var(--f)}
+.hbtn{background:rgba(192,132,252,.12);border:1px solid rgba(192,132,252,.22);color:#c084fc;border-radius:9px;padding:6px 10px;font-size:.7rem;font-weight:800;cursor:pointer;flex-shrink:0;font-family:inherit}
 
-/* MAP PAN/ZOOM */
+/* ── SCROLL AREA ── */
 .outer{position:fixed;top:0;left:0;right:0;bottom:60px;overflow:hidden;cursor:grab}
 .outer:active{cursor:grabbing}
 .stage{position:absolute;transform-origin:0 0;will-change:transform}
-canvas{display:block;position:absolute;top:0;left:0;pointer-events:none}
 
-/* Castle label nodes */
-.cn{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;pointer-events:all;z-index:30;cursor:pointer}
-.cn.locked{cursor:not-allowed}
-.cn-bubble{background:rgba(8,4,26,.88);border:2px solid rgba(192,132,252,.3);border-radius:12px;padding:5px 10px;text-align:center;backdrop-filter:blur(8px);transition:.15s;min-width:70px}
-.cn:not(.locked):active .cn-bubble{transform:scale(.93)}
-.cn.locked .cn-bubble{border-color:rgba(255,255,255,.1);opacity:.5}
-.cn.unlocked .cn-bubble{border-color:var(--cc,#c084fc);box-shadow:0 0 12px var(--cc,rgba(192,132,252,.4))}
-.cn.done .cn-bubble{border-color:gold;box-shadow:0 0 16px rgba(255,215,0,.4);animation:done-glow 2.5s ease infinite}
-@keyframes done-glow{0%,100%{box-shadow:0 0 10px rgba(255,215,0,.3)}50%{box-shadow:0 0 22px rgba(255,215,0,.6)}}
-.cn-icon{font-size:1.5rem;line-height:1.1;display:block}
-.cn-name{font-size:.6rem;font-weight:900;color:#f0e8ff;line-height:1.3;margin-top:2px}
-.cn-sub{font-size:.52rem;color:#6b5a90;margin-top:1px}
-.cn-pct{font-size:.54rem;font-weight:900;margin-top:2px;color:#a0f0ff}
-.stars{font-size:.58rem;letter-spacing:1.5px;margin-top:1px}
+/* ── MAP WORLD (SVG + HTML overlay) ── */
+.map-bg{display:block;position:absolute;top:0;left:0}
 
-/* Player */
-.pp{position:absolute;transform:translate(-50%,-100%);z-index:60;pointer-events:none;text-align:center;transition:left 1s cubic-bezier(.34,1.56,.64,1),top 1s cubic-bezier(.34,1.56,.64,1)}
-.pp-dot{width:8px;height:8px;background:#c084fc;border-radius:50%;margin:2px auto 0;box-shadow:0 0 10px #c084fc;animation:pdot 1s infinite}
-@keyframes pdot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
-.pp-shadow{width:14px;height:5px;background:rgba(0,0,0,.35);border-radius:50%;margin:0 auto;margin-top:2px}
+/* ── CASTLE NODES ── */
+.castle{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer;z-index:20}
+.castle.locked{cursor:not-allowed;opacity:.35}
+.c-tower{display:flex;flex-direction:column;align-items:center;position:relative;transition:transform .2s}
+.castle:not(.locked):active .c-tower{transform:scale(.92)}
+.c-icon{font-size:2.8rem;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6));position:relative;z-index:2}
+.castle.locked .c-icon{filter:grayscale(1) brightness(.4)}
+.castle.done .c-icon{filter:drop-shadow(0 0 14px gold)}
+.castle.current .c-icon{animation:pulse-castle 2s ease infinite}
+@keyframes pulse-castle{0%,100%{filter:drop-shadow(0 4px 12px rgba(0,0,0,.6)) drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 4px 12px rgba(0,0,0,.6)) drop-shadow(0 0 18px var(--cc,#c084fc))}}
+.c-base{width:56px;height:14px;border-radius:50%;margin-top:-4px;position:relative;z-index:1}
+.c-lbl{text-align:center;margin-top:6px}
+.c-name{font-size:.72rem;font-weight:900;color:#f0e8ff;text-shadow:0 2px 8px rgba(0,0,0,.9);line-height:1.3}
+.c-stars{font-size:.65rem;letter-spacing:1px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.c-pct{font-size:.6rem;font-weight:900;color:#a0f8ff;margin-top:2px;background:rgba(0,0,0,.5);border-radius:100px;padding:1px 7px}
+.c-num{position:absolute;top:-6px;right:-8px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:900;color:white;border:1.5px solid rgba(255,255,255,.4);z-index:5}
 
-/* Bottom panel */
-.sp{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(3,1,16,.96);backdrop-filter:blur(18px);border-top:1px solid rgba(192,132,252,.13);padding-bottom:max(8px,env(safe-area-inset-bottom));transition:height .3s cubic-bezier(.4,0,.2,1);height:60px;overflow:hidden}
-.sp.open{height:235px}
+/* ── PATH ── */
+.map-path{position:absolute;top:0;left:0;pointer-events:none;z-index:5}
+
+/* ── PLAYER PIN ── */
+.pp{position:absolute;transform:translate(-50%,-100%);z-index:50;pointer-events:none;text-align:center;transition:left .9s cubic-bezier(.34,1.56,.64,1),top .9s cubic-bezier(.34,1.56,.64,1)}
+.pp-av{font-size:2rem;filter:drop-shadow(0 4px 12px rgba(192,132,252,.8));animation:pp-bob .9s ease infinite alternate}
+@keyframes pp-bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
+.pp-name{font-size:.6rem;font-weight:900;color:#c084fc;background:rgba(5,2,14,.8);border-radius:100px;padding:1px 8px;margin-top:2px;white-space:nowrap}
+.pp-dot{width:8px;height:8px;background:#c084fc;border-radius:50%;margin:3px auto 0;box-shadow:0 0 10px #c084fc;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* ── BOTTOM PANEL ── */
+.sp{position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(3,1,16,.97);border-top:1px solid rgba(192,132,252,.15);
+  padding-bottom:max(8px,env(safe-area-inset-bottom));
+  transition:height .3s cubic-bezier(.4,0,.2,1);height:60px;overflow:hidden}
+.sp.open{height:230px}
 .spt{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;cursor:pointer}
-.sptl{display:flex;align-items:center;gap:10px;font-size:.78rem;font-weight:800;color:#c084fc}
+.sptl{display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:800;color:#c084fc}
 .spar{color:#3d2a60;transition:.25s}
 .sp.open .spar{transform:rotate(180deg)}
-.spb{padding:8px 14px 4px;overflow-y:auto;height:175px}
+.spb{padding:8px 14px 4px;overflow-y:auto;height:170px}
 .eqg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
-.eq{background:rgba(192,132,252,.04);border:1px dashed rgba(192,132,252,.16);border-radius:10px;padding:8px 3px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px}
-.eq.fl{border-style:solid;border-color:rgba(192,132,252,.32);background:rgba(192,132,252,.07)}
-.eq-ic{font-size:1.25rem}
-.eq-nm{font-size:.56rem;font-weight:800;color:#c084fc}
-.eq-st{font-size:.53rem;color:#34d399}
-.eq-em{font-size:.6rem;color:#2d1a50;font-weight:800}
+.eq{background:rgba(192,132,252,.05);border:1px dashed rgba(192,132,252,.18);border-radius:10px;padding:8px 4px;text-align:center;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.eq.fl{border-style:solid;border-color:rgba(192,132,252,.35);background:rgba(192,132,252,.08)}
+.eq-ic{font-size:1.25rem}.eq-nm{font-size:.58rem;font-weight:800;color:#c084fc}.eq-st{font-size:.54rem;color:#34d399}.eq-em{font-size:.6rem;color:#2d1a50;font-weight:800}
 .fsg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .fs{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:9px;padding:7px 3px;text-align:center}
-.fsv{font-size:1.05rem;font-weight:900;font-family:monospace}
-.fsl{font-size:.56rem;color:#3d2a60;font-weight:800;letter-spacing:.04em;margin-top:2px}
+.fsv{font-size:1.1rem;font-weight:900;font-family:monospace}
+.fsl{font-size:.58rem;color:#3d2a60;font-weight:800;letter-spacing:.04em;margin-top:2px}
 
-/* Level up */
-.lut{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120px);background:linear-gradient(135deg,#c084fc,#34d399);color:#04020e;border-radius:100px;padding:10px 22px;font-size:.88rem;font-weight:900;z-index:300;transition:transform .45s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 28px rgba(192,132,252,.45)}
+/* ── LEVEL UP TOAST ── */
+.lut{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120px);background:linear-gradient(135deg,#c084fc,#34d399);color:#04020e;border-radius:100px;padding:10px 22px;font-size:.9rem;font-weight:900;z-index:300;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none}
 .lut.show{transform:translateX(-50%) translateY(0)}
-
-/* Map font boost */
-.cn-name{font-size:.72rem!important}
-.cn-sub{font-size:.6rem!important}
-.cn-pct{font-size:.62rem!important}
-.stars{font-size:.65rem!important}
-.cn-bubble{padding:7px 12px!important}
-.hud .pn{font-size:.92rem!important}
-.hud .lv{font-size:.66rem!important}
-.sptl{font-size:.85rem!important}
-.eq-nm{font-size:.62rem!important}
-.eq-st{font-size:.6rem!important}
-.fsv{font-size:1.15rem!important}
 </style>
 </head>
 <body>
+
 <div class="hud">
-  <div class="av"><canvas id="hudCv" width="36" height="36"></canvas></div>
+  <div class="av" id="hudAv">🧙</div>
   <div class="pi">
     <div class="pnr"><span class="pn" id="hudN">冒險者</span><span class="lv" id="hudLv">Lv.1</span><span class="ttl" id="hudTtl">初學者</span></div>
     <div class="brs">
-      <div class="br"><span class="brl">HP</span><div class="brb"><div class="brf hb" id="hpB" style="width:100%"></div></div><span style="font-size:.56rem;color:#f87171;font-weight:800;min-width:38px;text-align:right" id="hpT">100/100</span></div>
-      <div class="br"><span class="brl">XP</span><div class="brb"><div class="brf xb" id="xpB" style="width:0%"></div></div><span style="font-size:.56rem;color:#fcd34d;font-weight:800;min-width:38px;text-align:right" id="xpT">0/500</span></div>
+      <div class="br"><span class="brl">HP</span><div class="brb"><div class="brf hb" id="hpB" style="width:100%"></div></div><span style="font-size:.58rem;color:#f87171;font-weight:800;min-width:38px;text-align:right" id="hpT">100/100</span></div>
+      <div class="br"><span class="brl">XP</span><div class="brb"><div class="brf xb" id="xpB" style="width:0%"></div></div><span style="font-size:.58rem;color:#fcd34d;font-weight:800;min-width:38px;text-align:right" id="xpT">0/500</span></div>
     </div>
   </div>
-  <button class="hbtn" onclick="window.location.href='index.html'">🏠</button>
+  <button class="hbtn" onclick="location.href='index.html'">🏠</button>
 </div>
 
 <div class="outer" id="outer">
-  <div class="stage" id="stage">
-    <canvas id="mc"></canvas>
-    <div id="cl"></div>
-    <div class="pp" id="pp">
-      <canvas id="ppCv" width="46" height="52" style="filter:drop-shadow(0 4px 12px rgba(192,132,252,.7))"></canvas>
-      <div class="pp-dot"></div>
-      <div class="pp-shadow"></div>
-    </div>
-  </div>
+<div class="stage" id="stage">
+
+<!-- SVG background - world map -->
+<svg class="map-bg" id="mapSVG" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<!-- Path between castles -->
+<svg class="map-path" id="pathSVG" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<!-- Castle nodes injected by JS -->
+<div id="castleLayer"></div>
+
+<!-- Player -->
+<div class="pp" id="pp">
+  <div class="pp-av" id="ppAv">🧙</div>
+  <div class="pp-name" id="ppName">冒險者</div>
+  <div class="pp-dot"></div>
+</div>
+
+</div>
 </div>
 
 <div class="sp" id="sp">
-  <div class="spt" onclick="toggleSP()">
+  <div class="spt" onclick="document.getElementById('sp').classList.toggle('open')">
     <div class="sptl"><span>⚔️ 裝備 &amp; 能力值</span><span id="spSum" style="font-size:.66rem;color:#3d2a60"></span></div>
     <span class="spar">▲</span>
   </div>
@@ -126,34 +136,21 @@ canvas{display:block;position:absolute;top:0;left:0;pointer-events:none}
     <div class="fsg" id="fsg"></div>
   </div>
 </div>
+
 <div class="lut" id="lut">🎉 升級了！</div>
 
 <script>
-
-// ── iOS Safari Polyfills ──
-if(!CanvasRenderingContext2D.prototype.roundRect){
-  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
-    const R=Math.min(r,w/2,h/2);
-    this.beginPath();this.moveTo(x+R,y);this.lineTo(x+w-R,y);this.arcTo(x+w,y,x+w,y+R,R);
-    this.lineTo(x+w,y+h-R);this.arcTo(x+w,y+h,x+w-R,y+h,R);
-    this.lineTo(x+R,y+h);this.arcTo(x,y+h,x,y+h-R,R);
-    this.lineTo(x,y+R);this.arcTo(x,y,x+R,y,R);this.closePath();
-  };
-}
-
-// ─── CASTLES ───
 const C=[
-  {id:1,name:'召喚之城', em:'🗼',col:'#7c3aed',glow:'rgba(124,58,237,.7)', key:'tower1_done',tot:9, rw:{slot:'weapon',name:'召喚法杖',icon:'🪄',stat:'INT+3',bonus:{int:3}}},
-  {id:2,name:'光之城',   em:'💡',col:'#d97706',glow:'rgba(217,119,6,.7)',  key:'tower2_done',tot:6, rw:{slot:'hat',name:'光明王冠',icon:'👑',stat:'INT+2,SPD+2',bonus:{int:2,spd:2}}},
-  {id:3,name:'模型之城', em:'🗿',col:'#059669',glow:'rgba(5,150,105,.7)',  key:'tower3_done',tot:3, rw:{slot:'accessory',name:'立體鏡',icon:'🥽',stat:'INT+2',bonus:{int:2}}},
-  {id:4,name:'術式之城', em:'⚔️',col:'#7c3aed',glow:'rgba(124,58,237,.6)',key:'tower4_done',tot:11,rw:{slot:'armor',name:'術式護甲',icon:'🛡️',stat:'DEF+4,INT+3',bonus:{def:4,int:3}}},
-  {id:5,name:'光輝之城', em:'🌟',col:'#d97706',glow:'rgba(217,119,6,.7)',  key:'tower5_done',tot:8, rw:{slot:'accessory',name:'光之戒指',icon:'💍',stat:'INT+4',bonus:{int:4}}},
-  {id:6,name:'物理之城', em:'⚗️',col:'#0891b2',glow:'rgba(8,145,178,.7)',  key:'tower6_done',tot:9, rw:{slot:'armor',name:'PBR護甲',icon:'🦺',stat:'DEF+5,ATK+2',bonus:{def:5,atk:2}}},
-  {id:7,name:'競技之城', em:'🔥',col:'#dc2626',glow:'rgba(220,38,38,.7)',  key:'tower7_done',tot:9, rw:{slot:'hat',name:'戰鬥頭盔',icon:'⛑️',stat:'ATK+3,SPD+3',bonus:{atk:3,spd:3}}},
-  {id:8,name:'秘境之城', em:'🌌',col:'#7c3aed',glow:'rgba(124,58,237,.8)', key:'tower8_done',tot:8, rw:{slot:'weapon',name:'古代法杖',icon:'🔮',stat:'INT+7',bonus:{int:7}}},
-  {id:9,name:'終極城堡', em:'★', col:'#ca8a04',glow:'rgba(202,138,4,.9)', key:'tower9_done',tot:8, rw:{slot:'accessory',name:'終極王冠',icon:'👑',stat:'全屬性+5',bonus:{atk:5,def:5,int:5,spd:5}}},
+  {id:1,em:'🏰',name:'召喚之城',col:'#7c3aed',key:'tower1_done',tot:9, rw:{slot:'weapon',name:'召喚法杖',icon:'🪄',stat:'INT+3',bonus:{int:3}}},
+  {id:2,em:'⚡',name:'光之城',  col:'#d97706',key:'tower2_done',tot:6, rw:{slot:'hat',name:'光明王冠',icon:'👑',stat:'INT+2,SPD+2',bonus:{int:2,spd:2}}},
+  {id:3,em:'🗿',name:'模型之城',col:'#059669',key:'tower3_done',tot:3, rw:{slot:'accessory',name:'立體鏡',icon:'🥽',stat:'INT+2',bonus:{int:2}}},
+  {id:4,em:'🔮',name:'術式之城',col:'#7c3aed',key:'tower4_done',tot:11,rw:{slot:'armor',name:'術式護甲',icon:'🛡️',stat:'DEF+4,INT+3',bonus:{def:4,int:3}}},
+  {id:5,em:'🌟',name:'光輝之城',col:'#d97706',key:'tower5_done',tot:8, rw:{slot:'accessory',name:'光之戒指',icon:'💍',stat:'INT+4',bonus:{int:4}}},
+  {id:6,em:'🧪',name:'物理之城',col:'#0891b2',key:'tower6_done',tot:9, rw:{slot:'armor',name:'PBR護甲',icon:'🦺',stat:'DEF+5,ATK+2',bonus:{def:5,atk:2}}},
+  {id:7,em:'⚔️',name:'競技之城',col:'#dc2626',key:'tower7_done',tot:9, rw:{slot:'hat',name:'戰鬥頭盔',icon:'⛑️',stat:'ATK+3,SPD+3',bonus:{atk:3,spd:3}}},
+  {id:8,em:'🌌',name:'秘境之城',col:'#7c3aed',key:'tower8_done',tot:8, rw:{slot:'weapon',name:'古代法杖',icon:'🔮',stat:'INT+7',bonus:{int:7}}},
+  {id:9,em:'👑',name:'終極城堡',col:'#ca8a04',key:'tower9_done',tot:8, rw:{slot:'accessory',name:'終極王冠',icon:'👑',stat:'全屬性+5',bonus:{atk:5,def:5,int:5,spd:5}}},
 ];
-
 const LX=[0,300,700,1200,1800,2500,3400,4400,5600,7000];
 const TITLES=['初學者','OpenGL學徒','著色器術士','渲染騎士','圖形學大師','終極魔法師'];
 function getTitle(lv){return TITLES[Math.min(Math.floor((lv-1)/2),TITLES.length-1)];}
@@ -162,463 +159,179 @@ function getDone(c){try{return JSON.parse(localStorage.getItem(c.key)||'[]').fil
 function getTotalXP(){return C.reduce((s,c)=>{const d=getDone(c);return s+Math.round(d/c.tot*(c.id*100+20));},0);}
 function getEq(){const eq={weapon:null,armor:null,hat:null,accessory:null};C.forEach(c=>{if(getDone(c)>=c.tot&&c.rw)eq[c.rw.slot]=c.rw;});return eq;}
 
-let player=null;
+// Map dimensions
+const MW=600, MH=2200;
 
-// ─── Isometric helpers ───
-// Map grid: each cell 64x32 in iso projection
-const CELL_W=64, CELL_H=32;
-const WALL_H=28; // height of tile walls
-
-// Convert grid coords (gx,gy,gz) to canvas pixel (cx,cy)
-// Iso: x-right goes right+down, y-up goes left+down, z up goes up
-function isoToScreen(gx,gy,gz){
-  const cx=(gx-gy)*CELL_W/2;
-  const cy=(gx+gy)*CELL_H/2-gz*WALL_H;
-  return[cx,cy];
-}
-
-// Canvas size in grid
-const GRID_W=20, GRID_H=22;
-const MAP_CANVAS_W=GRID_W*CELL_W+200;
-const MAP_CANVAS_H=GRID_H*CELL_H+WALL_H*8+300;
-const OFFSET_X=MAP_CANVAS_W/2; // center of canvas
-const OFFSET_Y=180; // top padding
-
-// Castle grid positions [gx, gy] (roughly spiral from bottom-right to center-top)
-const CPOS_G=[
-  [14,16], // 城堡1 - start (right bottom area)
-  [6, 17], // 城堡2
-  [14,12], // 城堡3
-  [5, 12], // 城堡4
-  [14,7],  // 城堡5
-  [4, 7],  // 城堡6
-  [13,3],  // 城堡7
-  [4, 2],  // 城堡8
-  [9, 0],  // 城堡9 - final (top center)
+// Castle positions [x,y] on the map
+const CPOS=[
+  [340,2060], // 1
+  [160,1860], // 2
+  [420,1660], // 3
+  [150,1450], // 4
+  [410,1240], // 5
+  [150,1030], // 6
+  [410,820],  // 7
+  [150,610],  // 8
+  [300,380],  // 9
 ];
 
-function g2s(gx,gy,gz=0){
-  const[cx,cy]=isoToScreen(gx,gy,gz);
-  return[cx+OFFSET_X, cy+OFFSET_Y];
-}
-
-// ─── Drawing helpers ───
-function drawIsoTile(ctx,sx,sy,tw,th,topCol,leftCol,rightCol){
-  const hw=tw/2,hh=th/2;
-  // Top face (diamond)
-  ctx.beginPath();
-  ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);
-  ctx.closePath();ctx.fillStyle=topCol;ctx.fill();
-  // Left wall
-  ctx.beginPath();
-  ctx.moveTo(sx-hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx,sy+hh+WALL_H);ctx.lineTo(sx-hw,sy+WALL_H);
-  ctx.closePath();ctx.fillStyle=leftCol;ctx.fill();
-  // Right wall
-  ctx.beginPath();
-  ctx.moveTo(sx,sy+hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx+hw,sy+WALL_H);ctx.lineTo(sx,sy+hh+WALL_H);
-  ctx.closePath();ctx.fillStyle=rightCol;ctx.fill();
-  // Edges
-  ctx.strokeStyle='rgba(0,0,0,.2)';ctx.lineWidth=.5;
-  ctx.beginPath();ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);ctx.closePath();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(sx-hw,sy+WALL_H);ctx.lineTo(sx-hw,sy);ctx.moveTo(sx,sy+hh+WALL_H);ctx.lineTo(sx,sy+hh);ctx.moveTo(sx+hw,sy+WALL_H);ctx.lineTo(sx+hw,sy);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(sx-hw,sy+WALL_H);ctx.lineTo(sx,sy+hh+WALL_H);ctx.lineTo(sx+hw,sy+WALL_H);ctx.stroke();
-}
-
-function drawIsoBox(ctx,sx,sy,bw,bh,bz,topC,leftC,rightC){
-  // Taller box: bz = additional height units
-  const hw=bw/2,hh=bh/2,wallH=bz;
-  // Top
-  ctx.beginPath();ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);ctx.closePath();ctx.fillStyle=topC;ctx.fill();
-  ctx.strokeStyle='rgba(0,0,0,.25)';ctx.lineWidth=.8;ctx.stroke();
-  // Left
-  ctx.beginPath();ctx.moveTo(sx-hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx,sy+hh+wallH);ctx.lineTo(sx-hw,sy+wallH);ctx.closePath();ctx.fillStyle=leftC;ctx.fill();ctx.stroke();
-  // Right
-  ctx.beginPath();ctx.moveTo(sx,sy+hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx+hw,sy+wallH);ctx.lineTo(sx,sy+hh+wallH);ctx.closePath();ctx.fillStyle=rightC;ctx.fill();ctx.stroke();
-}
-
-
-
-// Safe cross-browser rounded rect
-function rr(ctx,x,y,w,h,rad){
-  const r=Math.min(rad||0,Math.abs(w)/2,Math.abs(h)/2);
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.lineTo(x+w-r,y);
-  ctx.arcTo(x+w,y,x+w,y+r,r);
-  ctx.lineTo(x+w,y+h-r);
-  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
-  ctx.lineTo(x+r,y+h);
-  ctx.arcTo(x,y+h,x,y+h-r,r);
-  ctx.lineTo(x,y+r);
-  ctx.arcTo(x,y,x+r,y,r);
-  ctx.closePath();
-}
-
-// ── 9 Unique Castle Designs ──
-function drawCastle(ctx, sx, sy, castleIdx, col, unlocked, done, alpha) {
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  const r = parseInt(col.substr(1,2),16), g = parseInt(col.substr(3,2),16), b = parseInt(col.substr(5,2),16);
-  const topC=col, leftC=`rgb(${Math.floor(r*.55)},${Math.floor(g*.55)},${Math.floor(b*.55)})`, rightC=`rgb(${Math.floor(r*.38)},${Math.floor(g*.38)},${Math.floor(b*.38)})`;
-  const BY = sy - CELL_H/2;
-  const S = 2.0; // 2x scale
-
-  function box(x,y,bw,bh,bz,t,l,ri){drawIsoBox(ctx,x,y,bw*S,bh*S,bz*S,t,l,ri);}
-
-  switch(castleIdx){
-    case 0:{ // 召喚之城 - Classic keep
-      box(sx,BY-4,28,16,5,'#8899aa','#556677','#445566');
-      box(sx,BY-6,24,14,25,topC,leftC,rightC);
-      [[-10,-5],[10,-5],[-10,5],[10,5]].forEach(([dx,dy])=>{
-        box(sx+dx*S,BY-6+dy*S,9,5,30,topC,leftC,rightC);
-        box(sx+dx*S,BY-6+dy*S-30*S,11,6,4,topC,leftC,rightC);
-      });
-      box(sx,BY-6,16,9,36,topC,leftC,rightC);
-      ctx.beginPath();ctx.moveTo(sx,BY-42*S);ctx.lineTo(sx+10*S,BY-36*S);ctx.lineTo(sx,BY-33*S);ctx.lineTo(sx-10*S,BY-36*S);ctx.closePath();ctx.fillStyle='#7c3aed';ctx.fill();
-      break;}
-    case 1:{ // 光之城 - Lighthouse tower
-      box(sx,BY-4,30,17,4,'#7a7a6a','#5a5a4a','#4a4a3a');
-      box(sx,BY-8,19,11,40,topC,leftC,rightC);
-      box(sx,BY-8-23*S,23,13,10,topC,leftC,rightC);
-      box(sx,BY-8-35*S,19,11,10,topC,leftC,rightC);
-      ctx.save();ctx.globalAlpha*=.95;
-      ctx.beginPath();ctx.ellipse(sx,BY-8-45*S,11*S,8*S,0,Math.PI,0);ctx.fillStyle='rgba(255,220,50,.9)';ctx.fill();
-      if(unlocked){ctx.save();ctx.globalAlpha=.3;const lg=ctx.createRadialGradient(sx,BY-8-45*S,0,sx,BY-8-45*S,40);lg.addColorStop(0,'#ffd700');lg.addColorStop(1,'transparent');ctx.fillStyle=lg;ctx.beginPath();ctx.arc(sx,BY-8-45*S,40,0,Math.PI*2);ctx.fill();ctx.restore();}
-      ctx.restore();
-      break;}
-    case 2:{ // 模型之城 - Wide fortress
-      box(sx,BY-4,40,23,6,'#667788','#445566','#334455');
-      box(sx,BY-10,36,20,18,topC,leftC,rightC);
-      for(let d=-14;d<=14;d+=7){box(sx+d*S,BY-10-18*S+d*S*.2,5,3,6,topC,leftC,rightC);}
-      [[-14,0],[14,0]].forEach(([dx])=>{box(sx+dx*S,BY-10,12,7,26,topC,leftC,rightC);box(sx+dx*S,BY-10-26*S,14,8,4,topC,leftC,rightC);});
-      break;}
-    case 3:{ // 術式之城 - Magic spire
-      box(sx,BY-4,26,15,4,'#6644aa','#442288','#331166');
-      box(sx,BY-8,18,10,44,topC,leftC,rightC);
-      box(sx,BY-8-44*S,10,6,12,topC,leftC,rightC);
-      ctx.beginPath();ctx.moveTo(sx,BY-8-56*S-8);ctx.lineTo(sx+6*S,BY-8-56*S+8);ctx.lineTo(sx-6*S,BY-8-56*S+8);ctx.closePath();ctx.fillStyle='#a78bfa';ctx.fill();
-      ctx.save();ctx.globalAlpha=.5;ctx.strokeStyle='#c084fc';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(sx,BY-8-30*S,15*S,5*S,0,0,Math.PI*2);ctx.stroke();ctx.restore();
-      break;}
-    case 4:{ // 光輝之城 - Palace with domes
-      box(sx,BY-4,40,23,5,'#7a6020','#5a4010','#3a2808');
-      box(sx,BY-9,31,18,22,topC,leftC,rightC);
-      ctx.beginPath();ctx.ellipse(sx,BY-9-22*S,16*S,12*S,0,Math.PI,0);ctx.fillStyle=topC;ctx.fill();ctx.strokeStyle=leftC;ctx.lineWidth=1.5;ctx.stroke();
-      [[-16,4],[16,4]].forEach(([dx])=>{box(sx+dx*S,BY-5,14,8,16,topC,leftC,rightC);ctx.beginPath();ctx.ellipse(sx+dx*S,BY-5-16*S,7*S,5*S,0,Math.PI,0);ctx.fillStyle=topC;ctx.fill();});
-      ctx.beginPath();ctx.arc(sx,BY-9-34*S,5,0,Math.PI*2);ctx.fillStyle='#ffd700';ctx.fill();
-      break;}
-    case 5:{ // 物理之城 - Observatory
-      box(sx,BY-4,36,21,6,'#334455','#223344','#1a2a3a');
-      box(sx,BY-10,30,17,20,topC,leftC,rightC);
-      ctx.beginPath();ctx.ellipse(sx,BY-10-20*S,18*S,13*S,0,Math.PI,0);ctx.fillStyle=`rgba(${r},${g},${b},.88)`;ctx.fill();ctx.strokeStyle=leftC;ctx.lineWidth=2;ctx.stroke();
-      box(sx+7*S,BY-10-18*S,5,3,10,'#0891b2','#065f80','#044060');
-      ctx.save();ctx.globalAlpha=.45;ctx.fillStyle='#7dd3fc';rr(ctx,sx-2,BY-10-33*S,5,12,2);ctx.fill();ctx.restore();
-      ctx.strokeStyle='#334455';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(sx-13*S,BY-10);ctx.lineTo(sx-13*S,BY-10-13*S);ctx.stroke();
-      break;}
-    case 6:{ // 競技之城 - Battle fortress
-      box(sx,BY-4,43,25,7,'#3a0808','#280606','#1a0404');
-      box(sx,BY-11,33,19,25,topC,leftC,rightC);
-      box(sx,BY-11,15,9,28,leftC,rightC,`rgba(${Math.floor(r*.2)},${Math.floor(g*.2)},${Math.floor(b*.2)},1)`);
-      ctx.save();ctx.globalAlpha=.85;ctx.fillStyle='#0a0000';ctx.beginPath();ctx.ellipse(sx,BY-11-18*S,4*S,6*S,0,Math.PI,0);ctx.fill();ctx.restore();
-      for(let d=-14;d<=14;d+=8){if(Math.abs(d)>3)box(sx+d*S,BY-11-25*S+d*S*.08,4,2.5,5,topC,leftC,rightC);}
-      [[-11,-2],[11,-2]].forEach(([dx])=>{ctx.strokeStyle='#a0a0a0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sx+dx*S,BY-11-33*S);ctx.lineTo(sx+dx*S,BY-11-42*S);ctx.stroke();ctx.fillStyle='#dc2626';ctx.beginPath();ctx.moveTo(sx+dx*S,BY-11-42*S);ctx.lineTo(sx+dx*S+7*S,BY-11-36*S);ctx.lineTo(sx+dx*S,BY-11-30*S);ctx.closePath();ctx.fill();});
-      break;}
-    case 7:{ // 秘境之城 - Ancient ruins
-      box(sx,BY-4,30,17,5,'#1a0a30','#120620','#0a0418');
-      box(sx,BY-9,22,13,34,topC,leftC,rightC);
-      box(sx-5*S,BY-9-34*S,8,5,12,topC,leftC,rightC);
-      box(sx+6*S,BY-9-34*S,7,4,9,topC,leftC,rightC);
-      // Floating diamond crystal
-      ctx.save();ctx.translate(sx,BY-9-52*S);ctx.rotate(Math.PI/4);ctx.fillStyle='rgba(179,136,255,.88)';ctx.beginPath();ctx.moveTo(0,-6*S);ctx.lineTo(4*S,0);ctx.lineTo(0,6*S);ctx.lineTo(-4*S,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#c084fc';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
-      if(unlocked){ctx.save();ctx.globalAlpha=.18;const mg=ctx.createRadialGradient(sx,BY-9-40*S,0,sx,BY-9-40*S,50);mg.addColorStop(0,'#b388ff');mg.addColorStop(1,'transparent');ctx.fillStyle=mg;ctx.beginPath();ctx.arc(sx,BY-9-40*S,50,0,Math.PI*2);ctx.fill();ctx.restore();}
-      break;}
-    case 8:{ // 終極城堡 - Grand palace
-      box(sx,BY-4,50,29,7,'#5a4a10','#3a3008','#28200a');
-      box(sx,BY-11,41,24,28,topC,leftC,rightC);
-      [[-16,-8],[16,-8],[-16,8],[16,8]].forEach(([dx,dy])=>{
-        box(sx+dx*S,BY-11+dy*S,11,6,36,topC,leftC,rightC);
-        ctx.beginPath();ctx.moveTo(sx+dx*S,BY-11+dy*S-36*S);ctx.lineTo(sx+dx*S+7*S,BY-11+dy*S-36*S+8);ctx.lineTo(sx+dx*S,BY-11+dy*S-36*S+14);ctx.lineTo(sx+dx*S-7*S,BY-11+dy*S-36*S+8);ctx.closePath();ctx.fillStyle='#ca8a04';ctx.fill();
-      });
-      box(sx,BY-11,22,13,45,topC,leftC,rightC);
-      ctx.beginPath();ctx.ellipse(sx,BY-11-45*S,14*S,10*S,0,Math.PI,0);ctx.fillStyle='#ffd700';ctx.fill();ctx.strokeStyle='#ca8a04';ctx.lineWidth=2;ctx.stroke();
-      ctx.strokeStyle='#ffd700';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx,BY-11-55*S-5);ctx.lineTo(sx,BY-11-45*S);ctx.stroke();
-      ctx.beginPath();ctx.arc(sx,BY-11-56*S,4,0,Math.PI*2);ctx.fillStyle='white';ctx.fill();
-      if(done){ctx.save();ctx.globalAlpha=.15;const ag=ctx.createRadialGradient(sx,BY-11-40*S,0,sx,BY-11-40*S,90);ag.addColorStop(0,'#ffd700');ag.addColorStop(1,'transparent');ctx.fillStyle=ag;ctx.beginPath();ctx.arc(sx,BY-11-40*S,90,0,Math.PI*2);ctx.fill();ctx.restore();}
-      break;}
-  }
-  // Flag
-  const poleYs=[36,45,30,56,38,38,44,42,62];
-  const poleY = BY - poleYs[castleIdx]*S - 10;
-  if(unlocked){
-    ctx.strokeStyle=done?'#ffd700':'rgba(220,220,220,.7)';ctx.lineWidth=2;
-    ctx.beginPath();ctx.moveTo(sx,poleY);ctx.lineTo(sx,poleY-18);ctx.stroke();
-    ctx.fillStyle=done?'#ffd700':col;ctx.beginPath();ctx.moveTo(sx,poleY-18);ctx.lineTo(sx+12,poleY-12);ctx.lineTo(sx,poleY-6);ctx.closePath();ctx.fill();
-  }
-  // Castle number badge
-  const bx=sx+13*S,by_=BY-7*S;
-  ctx.beginPath();ctx.arc(bx,by_,12,0,Math.PI*2);
-  ctx.fillStyle=unlocked?col:'rgba(30,20,50,.8)';ctx.fill();
-  ctx.strokeStyle=unlocked?'rgba(255,255,255,.5)':'rgba(100,80,140,.3)';ctx.lineWidth=1.5;ctx.stroke();
-  ctx.fillStyle=unlocked?'white':'rgba(255,255,255,.3)';
-  ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(castleIdx+1,bx,by_);
-  ctx.restore();
-}
-
-
-function drawMapFallback(){
-  const canvas=document.getElementById('mc');
-  if(!canvas)return;
-  canvas.width=MAP_CANVAS_W;canvas.height=MAP_CANVAS_H;
-  const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#060420';ctx.fillRect(0,0,MAP_CANVAS_W,MAP_CANVAS_H);
-  ctx.font='bold 20px sans-serif';ctx.fillStyle='#a78bfa';
-  ctx.textAlign='center';ctx.fillText('地圖載入中…',MAP_CANVAS_W/2,MAP_CANVAS_H/2);
-}
-
-// ─── Draw Map ───
-function drawMap(){
-  const canvas=document.getElementById('mc');
-  if(!canvas){console.error("canvas #mc not found");return;}
-  canvas.width=MAP_CANVAS_W;canvas.height=MAP_CANVAS_H;
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,MAP_CANVAS_W,MAP_CANVAS_H);
-
-  // Sky gradient
-  const sky=ctx.createLinearGradient(0,0,0,MAP_CANVAS_H*.4);
-  sky.addColorStop(0,'#050225');sky.addColorStop(1,'#0a0840');
-  ctx.fillStyle=sky;ctx.fillRect(0,0,MAP_CANVAS_W,MAP_CANVAS_H*.4);
-
-  // Stars in sky
-  const rng=s=>{let x=Math.sin(s)*43758.5;return x-Math.floor(x);};
-  for(let i=0;i<120;i++){
-    const x=rng(i*2)*MAP_CANVAS_W, y=rng(i*2+1)*(MAP_CANVAS_H*.35);
-    const r=rng(i*3)<.15?1.5:rng(i*3)<.4?1:.5;
-    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(200,180,255,${.3+rng(i*5)*.5})`;ctx.fill();
-  }
-
-  // ── Draw ground tiles (back to front) ──
-  const tileCols=[
-    ['#3a5c2a','#2a4a1e','#223d17'], // green
-    ['#2a4a3a','#1e3a2a','#172e22'], // dark green
-    ['#3a3a2a','#2a2a1e','#222217'], // olive
-    ['#1e2a3a','#152030','#0e1828'], // blue water
-    ['#3a2a1e','#2a1e14','#22160d'], // brown
-    ['#2a1e3a','#1e152a','#160e22'], // purple
-    ['#3a1e1e','#2a1414','#220c0c'], // dark red
-  ];
-
-  // Determine tile color by area
-  function getTileCol(gx,gy){
-    // Castle zone colors
-    for(let i=0;i<CPOS_G.length;i++){
-      const[cx,cy]=CPOS_G[i];
-      if(Math.abs(gx-cx)<=2&&Math.abs(gy-cy)<=2)return[
-        ['#3a5c2a','#2a4a1e','#223d17'],
-        ['#4a3a18','#3a2a10','#2a1e08'],
-        ['#1e3a2e','#142a20','#0e1e16'],
-        ['#2a1840','#1e1030','#150820'],
-        ['#3a2810','#2a1c08','#1e1204'],
-        ['#0e2030','#081828','#041018'],
-        ['#280a0a','#1e0606','#140404'],
-        ['#1a0a30','#120620','#0a0418'],
-        ['#2e2400','#221a00','#180e00'],
-      ][i];
-    }
-    const h=rng(gx*7+gy*13);
-    return tileCols[Math.floor(h*tileCols.length)];
-  }
-
-  // Draw tiles front to back (high gy first for correct overlap)
-  for(let gy=GRID_H-1;gy>=0;gy--){
-    for(let gx=0;gx<GRID_W;gx++){
-      const[sx,sy]=g2s(gx,gy,0);
-      // Skip offscreen
-      if(sx<-CELL_W||sx>MAP_CANVAS_W+CELL_W||sy<-CELL_H||sy>MAP_CANVAS_H+CELL_H)continue;
-      const[tc,lc,rc]=getTileCol(gx,gy);
-      drawIsoTile(ctx,sx,sy,CELL_W,CELL_H,tc,lc,rc);
-    }
-  }
-
-  // ── Path between castles ──
-  // Draw path segments as raised road tiles
-  for(let i=0;i<CPOS_G.length-1;i++){
-    const[x0,y0]=CPOS_G[i],[x1,y1]=CPOS_G[i+1];
-    const steps=Math.max(Math.abs(x1-x0),Math.abs(y1-y0))*2;
-    for(let t=0;t<=steps;t++){
-      const gx=Math.round(x0+(x1-x0)*t/steps);
-      const gy=Math.round(y0+(y1-y0)*t/steps);
-      const[sx,sy]=g2s(gx,gy,0.15);
-      // Raised path tile (slightly brighter and taller)
-      const pathT=i%2===0?'#a08040':'#907030';
-      drawIsoTile(ctx,sx,sy-6,CELL_W*.7,CELL_H*.7,pathT,
-        `rgba(140,100,40,.8)`,`rgba(100,70,30,.8)`);
-    }
-  }
-
-  // ── Trees and decorations ──
-  const TREES=[
-    [2,18],[3,15],[11,17],[16,14],[17,11],[15,9],[3,9],[2,5],[16,5],[8,1]
-  ];
-  TREES.forEach(([gx,gy])=>{
-    const[sx,sy]=g2s(gx,gy,0);
-    // Trunk
-    drawIsoBox(ctx,sx,sy-CELL_H/2-2,16,10,20,'#5c3c18','#3a2510','#2e1c0c');
-    // Foliage layers
-    const r=rng(gx*11+gy*17);
-    const fCol=r<.3?'#2d6a28':r<.6?'#1d5a1d':'#365c28';
-    drawIsoBox(ctx,sx,sy-CELL_H/2-22,32,18,18,fCol,`rgba(20,60,20,.8)`,`rgba(15,45,15,.8)`);
-    drawIsoBox(ctx,sx,sy-CELL_H/2-36,24,14,12,`#34a028`,`rgba(25,80,18,.8)`,`rgba(18,60,15,.8)`);
-  });
-
-  // ── Castles ──
-  CPOS_G.forEach(([gx,gy],idx)=>{
-    const c=C[idx];
-    const done=getDone(c)>=c.tot;
-    const unlocked=idx===0||(getDone(C[idx-1])>=C[idx-1].tot);
-    const[sx,sy]=g2s(gx,gy,0);
-    drawCastle(ctx,sx,sy,idx,c.col,unlocked,done,unlocked?1:0.28);
-  });
-    // Flag pole
-    ctx.strokeStyle=done?'#ffd700':'rgba(255,255,255,.4)';ctx.lineWidth=2;
-    ctx.beginPath();ctx.moveTo(sx,sy-CELL_H/2-52);ctx.lineTo(sx,sy-CELL_H/2-70);ctx.stroke();
-    // Flag
-    if(done||unlocked){
-      ctx.fillStyle=done?'#ffd700':col;
-      ctx.beginPath();ctx.moveTo(sx,sy-CELL_H/2-70);ctx.lineTo(sx+16,sy-CELL_H/2-64);ctx.lineTo(sx,sy-CELL_H/2-58);ctx.closePath();ctx.fill();
-    }
-    // Castle number label on building
-    ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(sx,sy-CELL_H/2-28,12,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle=unlocked?'white':'rgba(255,255,255,.3)';
-    ctx.font=`bold 11px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(idx+1,sx,sy-CELL_H/2-28);
-    
-    ctx.restore();
-  });
-}
-
-// ─── Castle Label Nodes ───
-function renderNodes(hi){
-  const layer=document.getElementById('cl');layer.innerHTML='';
-  C.forEach((c,idx)=>{
-    const done=getDone(c)>=c.tot;
-    const unlocked=idx===0||(getDone(C[idx-1])>=C[idx-1].tot);
-    const[gx,gy]=CPOS_G[idx];
-    const[sx,sy]=g2s(gx,gy,0);
-    const pct=Math.round(getDone(c)/c.tot*100);
-    const stars=done?3:getDone(c)>0?Math.min(2,Math.ceil(getDone(c)/c.tot*2)):0;
-    const cls2=`cn${done?' done':unlocked?' unlocked':' locked'}`;
-    const d=document.createElement('div');
-    d.className=cls2;
-    d.style.cssText=`left:${sx}px;top:${sy-CELL_H/2-130}px;--cc:${c.col}`;
-    d.innerHTML=`<div class="cn-bubble">
-      <span class="cn-icon">${unlocked?c.em:'🔒'}</span>
-      <div class="cn-name">${c.name}</div>
-      <div class="cn-sub">城堡 ${c.id}</div>
-      ${unlocked&&!done?`<div class="cn-pct">${pct}%</div>`:''}
-      <div class="stars">${'⭐'.repeat(stars)+'☆'.repeat(3-stars)}</div>
-    </div>`;
-    if(unlocked)d.addEventListener('click',()=>window.location.href=`opengl-tower${c.id}.html`);
-    layer.appendChild(d);
-  });
-}
-
-// ─── Draw char on canvas ───
-function drawCharCanvas(cvId,p,W,H){
-  try{
-  const cv=document.getElementById(cvId);
-  if(!cv||!p||!p.appearance)return;
-  cv.width=W;cv.height=H;
-  const ctx=cv.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-  const sc=p.appearance?.skin||'#e8a87c',
-        hr=p.appearance?.hair||'#5a2e10',
-        ot=p.appearance?.outfit||'#7c3aed';
-  const cls=p.class||'mage';
-  // Scale to fit
-  const S=W/100;
-  ctx.save();ctx.scale(S,S*(H/H));
-  // Simple mini char (head + body)
-  function shade(col,a){let c=col.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];return'#'+[0,2,4].map(i=>Math.max(0,Math.min(255,parseInt(c.substr(i,2),16)+a)).toString(16).padStart(2,'0')).join('');}
-  const otd=shade(ot,-45);
-  // legs
-  ctx.fillStyle=otd;rr(ctx,34,72,11,20,4);ctx.fill();
-  ctx.fillStyle=otd;rr(ctx,55,72,11,20,4);ctx.fill();
-  // body
-  ctx.fillStyle=ot;rr(ctx,27,52,46,25,9);ctx.fill();
-  // arms
-  ctx.fillStyle=ot;rr(ctx,15,54,13,18,6);ctx.fill();
-  ctx.fillStyle=ot;rr(ctx,72,54,13,18,6);ctx.fill();
-  // hands
-  ctx.fillStyle=sc;ctx.beginPath();ctx.arc(21,75,6,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=sc;ctx.beginPath();ctx.arc(79,75,6,0,Math.PI*2);ctx.fill();
-  // neck
-  ctx.fillStyle=sc;rr(ctx,44,44,12,10,3);ctx.fill();
-  // hair back
-  ctx.fillStyle=hr;ctx.beginPath();ctx.ellipse(50,28,25,22,0,0,Math.PI*2);ctx.fill();
-  // head
-  ctx.save();ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;
-  ctx.fillStyle=sc;ctx.beginPath();ctx.arc(50,28,24,0,Math.PI*2);ctx.fill();
-  ctx.restore();
-  // hat
-  if(cls==='mage'){ctx.fillStyle=shade(ot,-20);ctx.beginPath();ctx.moveTo(50,5);ctx.lineTo(64,12);ctx.lineTo(36,12);ctx.closePath();ctx.fill();ctx.fillStyle=ot;rr(ctx,33,11,34,8,4);ctx.fill();}
-  else if(cls==='warrior'){ctx.fillStyle='#8899aa';rr(ctx,32,8,36,14,7);ctx.fill();}
-  else{ctx.fillStyle=ot;ctx.beginPath();ctx.moveTo(50,6);ctx.quadraticCurveTo(70,14,68,18);ctx.lineTo(32,18);ctx.quadraticCurveTo(30,14,50,6);ctx.closePath();ctx.fill();}
-  // eyes
-  ctx.fillStyle='white';ctx.beginPath();ctx.ellipse(41,28,6,6.5,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='white';ctx.beginPath();ctx.ellipse(59,28,6,6.5,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#180820';ctx.beginPath();ctx.arc(42,29,4,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#180820';ctx.beginPath();ctx.arc(60,29,4,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='white';ctx.beginPath();ctx.arc(44,26.5,1.8,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='white';ctx.beginPath();ctx.arc(62,26.5,1.8,0,Math.PI*2);ctx.fill();
-  // blush
-  ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#ff8a80';ctx.beginPath();ctx.ellipse(32,35,6,4,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(68,35,6,4,0,0,Math.PI*2);ctx.fill();ctx.restore();
-  ctx.restore();
-}
-
-// ─── Pan / Zoom ───
-let px=0,py=0,sc=1;
-let lx=0,ly=0,drag=false,ld=0;
+let player=null, panX=0,panY=0,sc=1,lx=0,ly=0,dragging=false,lastDist=0;
 const outer=document.getElementById('outer');
 const stage=document.getElementById('stage');
-const HUDH=70;
+const HUDH=72;
 
-function applyT(){stage.style.transform=`translate(${px}px,${py}px) scale(${sc})`;}
+function applyT(){stage.style.transform='translate('+panX+'px,'+panY+'px) scale('+sc+')';}
 function clamp(){
   const vw=window.innerWidth,vh=window.innerHeight-60;
-  const mw=MAP_CANVAS_W*sc,mh=MAP_CANVAS_H*sc;
-  px=Math.min(0,Math.max(px,vw-mw));
-  py=Math.min(HUDH,Math.max(py,vh-mh));
+  const mw=MW*sc,mh=MH*sc;
+  panX=Math.min(0,Math.max(panX,vw-mw));
+  panY=Math.min(HUDH,Math.max(panY,vh-mh));
 }
 
-outer.addEventListener('touchstart',e=>{
-  if(e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}
-  if(e.touches.length===2){ld=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
+outer.addEventListener('touchstart',function(e){
+  if(e.touches.length===1){dragging=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}
+  else if(e.touches.length===2){lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
 },{passive:true});
-outer.addEventListener('touchmove',e=>{
+outer.addEventListener('touchmove',function(e){
   e.preventDefault();
-  if(e.touches.length===1&&drag){px+=e.touches[0].clientX-lx;py+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clamp();applyT();}
-  if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);const ns=Math.min(2.5,Math.max(0.4,sc*d/ld));const cx=(e.touches[0].clientX+e.touches[1].clientX)/2;const cy=(e.touches[0].clientY+e.touches[1].clientY)/2;px=cx-(cx-px)*ns/sc;py=cy-(cy-py)*ns/sc;sc=ns;ld=d;clamp();applyT();}
+  if(e.touches.length===1&&dragging){panX+=e.touches[0].clientX-lx;panY+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clamp();applyT();}
+  if(e.touches.length===2){
+    var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    var ns=Math.min(2.5,Math.max(0.35,sc*d/lastDist));
+    var cx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    var cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    panX=cx-(cx-panX)*ns/sc;panY=cy-(cy-panY)*ns/sc;sc=ns;lastDist=d;clamp();applyT();
+  }
 },{passive:false});
-outer.addEventListener('touchend',()=>drag=false);
-outer.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;});
-outer.addEventListener('mousemove',e=>{if(!drag)return;px+=e.clientX-lx;py+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clamp();applyT();});
-outer.addEventListener('mouseup',()=>drag=false);
-outer.addEventListener('wheel',e=>{e.preventDefault();const ns=Math.min(2.5,Math.max(0.4,sc*Math.exp(-e.deltaY*.001)));px=e.clientX-(e.clientX-px)*ns/sc;py=e.clientY-(e.clientY-py)*ns/sc;sc=ns;clamp();applyT();},{passive:false});
+outer.addEventListener('touchend',function(){dragging=false;});
+outer.addEventListener('mousedown',function(e){dragging=true;lx=e.clientX;ly=e.clientY;});
+outer.addEventListener('mousemove',function(e){if(!dragging)return;panX+=e.clientX-lx;panY+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clamp();applyT();});
+outer.addEventListener('mouseup',function(){dragging=false;});
+outer.addEventListener('wheel',function(e){e.preventDefault();var ns=Math.min(2.5,Math.max(0.35,sc*Math.exp(-e.deltaY*.001)));panX=e.clientX-(e.clientX-panX)*ns/sc;panY=e.clientY-(e.clientY-panY)*ns/sc;sc=ns;clamp();applyT();},{passive:false});
 
-function scrollToGxy(gx,gy){
-  const[sx,sy]=g2s(gx,gy,0);
-  const vw=window.innerWidth,vh=window.innerHeight-60;
-  px=vw/2-sx*sc;py=vh/2-sy*sc;
-  clamp();applyT();
+function scrollToPos(x,y){
+  var vw=window.innerWidth,vh=window.innerHeight-60;
+  panX=vw/2-x*sc; panY=vh/2-y*sc; clamp(); applyT();
 }
 
+// ── Draw SVG Map Background ──
+function drawMapSVG(){
+  var svg=document.getElementById('mapSVG');
+  svg.setAttribute('width',MW);svg.setAttribute('height',MH);
+  svg.setAttribute('viewBox','0 0 '+MW+' '+MH);
+
+  var defs='<defs>'+
+    '<radialGradient id="sg0" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="#0a0428"/><stop offset="100%" stop-color="#060210"/></radialGradient>'+
+    '<radialGradient id="zg1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2a1060" stop-opacity=".8"/><stop offset="100%" stop-color="#2a1060" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#403010" stop-opacity=".8"/><stop offset="100%" stop-color="#403010" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg3" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#083020" stop-opacity=".8"/><stop offset="100%" stop-color="#083020" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg4" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#200850" stop-opacity=".8"/><stop offset="100%" stop-color="#200850" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg5" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#402808" stop-opacity=".8"/><stop offset="100%" stop-color="#402808" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg6" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#082038" stop-opacity=".8"/><stop offset="100%" stop-color="#082038" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg7" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#380808" stop-opacity=".8"/><stop offset="100%" stop-color="#380808" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg8" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#180430" stop-opacity=".8"/><stop offset="100%" stop-color="#180430" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg9" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#302000" stop-opacity=".8"/><stop offset="100%" stop-color="#302000" stop-opacity="0"/></radialGradient>'+
+    '</defs>';
+
+  var bg='<rect width="'+MW+'" height="'+MH+'" fill="url(#sg0)"/>';
+
+  // Stars
+  var stars='';
+  function rng(s){var x=Math.sin(s+1)*43758.5;return x-Math.floor(x);}
+  for(var i=0;i<200;i++){
+    var sx=rng(i*2)*MW, sy=rng(i*2+1)*(MH*.7);
+    var sr=rng(i*3)<.15?1.5:rng(i*3)<.4?1:.5;
+    var sa=(.3+rng(i*5)*.6).toFixed(2);
+    stars+='<circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="'+sr+'" fill="rgba(220,190,255,'+sa+')" />';
+  }
+
+  // Island base shape
+  var island='<path d="M120,400 Q80,600 100,900 Q70,1100 80,1400 Q60,1600 120,1900 Q180,2100 300,2150 Q420,2180 500,2100 Q560,2020 540,1800 Q560,1600 540,1300 Q570,1100 550,850 Q580,650 540,420 Q500,250 380,200 Q260,150 180,280 Z" fill="#0e1428" stroke="rgba(100,80,200,.2)" stroke-width="2"/>';
+
+  // Zone glows around each castle
+  var zones='';
+  CPOS.forEach(function(pos,i){
+    var r=140;
+    zones+='<ellipse cx="'+pos[0]+'" cy="'+pos[1]+'" rx="'+r+'" ry="'+(r*.7)+'" fill="url(#zg'+(i+1)+')" />';
+  });
+
+  // Rivers/paths as SVG lines (drawn before castles)
+  var rivers='<path d="M300,2060 Q260,1900 280,1700 Q250,1500 280,1300 Q240,1100 260,900 Q240,700 280,500 Q300,400 310,380" fill="none" stroke="rgba(0,120,200,.25)" stroke-width="18" stroke-linecap="round"/>';
+
+  // Trees (emoji via text)
+  var trees='';
+  var treePositions=[[80,1950],[520,1980],[80,1750],[490,1720],[100,1500],[500,1480],[90,1200],[510,1200],[100,950],[500,920],[90,700],[510,680],[100,450],[490,440],[200,250],[400,260]];
+  treePositions.forEach(function(t){
+    trees+='<text x="'+t[0]+'" y="'+t[1]+'" font-size="28" text-anchor="middle" dominant-baseline="middle">🌲</text>';
+  });
+
+  svg.innerHTML=defs+bg+stars+island+zones+rivers+trees;
+}
+
+// ── Draw path SVG between castles ──
+function drawPath(unlockedCount){
+  var svg=document.getElementById('pathSVG');
+  svg.setAttribute('width',MW);svg.setAttribute('height',MH);
+  svg.setAttribute('viewBox','0 0 '+MW+' '+MH);
+
+  var lines='<defs><filter id="pf"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+
+  for(var i=0;i<CPOS.length-1;i++){
+    var p0=CPOS[i], p1=CPOS[i+1];
+    var done=i<unlockedCount;
+    var cx=(p0[0]+p1[0])/2, cy=(p0[1]+p1[1])/2;
+    // Road shadow
+    lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="rgba(80,50,20,.6)" stroke-width="20" stroke-linecap="round"/>';
+    // Road surface
+    lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="'+(done?'rgba(180,140,60,.7)':'rgba(80,70,50,.4)')+'" stroke-width="13" stroke-linecap="round"/>';
+    // Road dashes
+    if(done){lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="rgba(240,200,100,.4)" stroke-width="4" stroke-dasharray="16,20" stroke-linecap="round"/>';}
+    // Glow if unlocked
+    if(done){lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="rgba(180,150,80,.15)" stroke-width="28" stroke-linecap="round" filter="url(#pf)"/>';}
+  }
+  svg.innerHTML=lines;
+}
+
+// ── Render Castle HTML nodes ──
+function renderCastles(hi){
+  var layer=document.getElementById('castleLayer');
+  layer.innerHTML='';
+  C.forEach(function(c,idx){
+    var done=getDone(c)>=c.tot;
+    var unlocked=idx===0||(getDone(C[idx-1])>=C[idx-1].tot);
+    var isCurrent=idx===hi;
+    var pos=CPOS[idx];
+    var pct=Math.round(getDone(c)/c.tot*100);
+    var stars=done?'⭐⭐⭐':getDone(c)>0?(getDone(c)>=Math.floor(c.tot*.66)?'⭐⭐☆':'⭐☆☆'):'☆☆☆';
+
+    var div=document.createElement('div');
+    div.className='castle'+(done?' done':unlocked?' current':' locked');
+    if(isCurrent)div.className+=' current';
+    div.style.cssText='left:'+pos[0]+'px;top:'+pos[1]+'px;--cc:'+c.col;
+    
+    div.innerHTML='<div class="c-tower">'+
+      '<span class="c-icon" style="font-size:'+(idx===8?'3.6rem':'2.8rem')+'">'+c.em+'</span>'+
+      '<div class="c-num" style="background:'+c.col+';border-color:rgba(255,255,255,.4)">'+(idx+1)+'</div>'+
+      '<div class="c-base" style="background:radial-gradient(ellipse,'+c.col+'66 0%,transparent 70%)"></div>'+
+    '</div>'+
+    '<div class="c-lbl">'+
+      '<div class="c-name">'+c.name+'</div>'+
+      (unlocked&&!done?'<div class="c-pct">'+pct+'%</div>':'')+''+
+      '<div class="c-stars">'+stars+'</div>'+
+    '</div>';
+
+    if(unlocked){div.addEventListener('click',function(id){return function(){location.href='opengl-tower'+id+'.html';};}(c.id));}
+    layer.appendChild(div);
+  });
+}
+
+// ── Update HUD ──
 function updateHUD(xp,lv,eq){
-  const base=player.stats||{atk:8,def:6,int:10,spd:8};
-  const tot={...base};
-  Object.values(eq).forEach(it=>{if(it&&it.bonus)Object.entries(it.bonus).forEach(([k,v])=>{if(tot[k]!==undefined)tot[k]+=v;});});
-  const xpNext=LX[Math.min(lv,LX.length-1)]||9999,xpPrev=LX[Math.max(lv-1,0)]||0;
-  const xpPct=Math.min(100,Math.round((xp-xpPrev)/Math.max(1,xpNext-xpPrev)*100));
+  var base=player.stats||{atk:8,def:6,int:10,spd:8};
+  var tot=JSON.parse(JSON.stringify(base));
+  Object.values(eq).forEach(function(it){if(it&&it.bonus)Object.keys(it.bonus).forEach(function(k){if(tot[k]!==undefined)tot[k]+=it.bonus[k];});});
+  var xpNext=LX[Math.min(lv,LX.length-1)]||9999, xpPrev=LX[Math.max(lv-1,0)]||0;
+  var xpPct=Math.min(100,Math.round((xp-xpPrev)/Math.max(1,xpNext-xpPrev)*100));
   document.getElementById('hudN').textContent=player.name;
   document.getElementById('hudLv').textContent='Lv.'+lv;
   document.getElementById('hudTtl').textContent=getTitle(lv);
@@ -626,60 +339,88 @@ function updateHUD(xp,lv,eq){
   document.getElementById('hpT').textContent=player.hp+'/'+player.hpMax;
   document.getElementById('xpB').style.width=xpPct+'%';
   document.getElementById('xpT').textContent=xp+'/'+xpNext;
-  document.getElementById('spSum').textContent=`ATK ${tot.atk}  INT ${tot.int}  DEF ${tot.def}  SPD ${tot.spd}`;
-  const slots=[['weapon','武器'],['armor','防具'],['hat','頭盔'],['accessory','飾品']];
-  document.getElementById('eqg').innerHTML=slots.map(([s,l])=>{const it=eq[s];return it?`<div class="eq fl"><div class="eq-ic">${it.icon}</div><div class="eq-nm">${it.name}</div><div class="eq-st">${it.stat}</div></div>`:`<div class="eq"><div class="eq-em">${l}</div></div>`;}).join('');
-  document.getElementById('fsg').innerHTML=[['ATK',tot.atk,'#f87171'],['DEF',tot.def,'#60a5fa'],['INT',tot.int,'#c084fc'],['SPD',tot.spd,'#34d399']].map(([l,v,c])=>`<div class="fs"><div class="fsv" style="color:${c}">${v}</div><div class="fsl">${l}</div></div>`).join('');
+  document.getElementById('spSum').textContent='ATK '+tot.atk+'  INT '+tot.int+'  DEF '+tot.def+'  SPD '+tot.spd;
+  // Equip
+  var slots=[['weapon','武器'],['armor','防具'],['hat','頭盔'],['accessory','飾品']];
+  document.getElementById('eqg').innerHTML=slots.map(function(sl){var it=eq[sl[0]];return it?'<div class="eq fl"><div class="eq-ic">'+it.icon+'</div><div class="eq-nm">'+it.name+'</div><div class="eq-st">'+it.stat+'</div></div>':'<div class="eq"><div class="eq-em">'+sl[1]+'</div></div>';}).join('');
+  document.getElementById('fsg').innerHTML=[['ATK',tot.atk,'#f87171'],['DEF',tot.def,'#60a5fa'],['INT',tot.int,'#c084fc'],['SPD',tot.spd,'#34d399']].map(function(x){return '<div class="fs"><div class="fsv" style="color:'+x[2]+'">'+x[1]+'</div><div class="fsl">'+x[0]+'</div></div>';}).join('');
+  // Avatar emoji
+  var clsEmoji={mage:'🧙',warrior:'⚔️',archer:'🏹'};
+  var av=clsEmoji[player.class]||'🧙';
+  document.getElementById('hudAv').textContent=av;
+  document.getElementById('ppAv').textContent=av;
+  document.getElementById('ppName').textContent=player.name;
 }
 
-function toggleSP(){document.getElementById('sp').classList.toggle('open');}
-
+// ── INIT ──
 function init(){
-  const raw=localStorage.getItem('player_data');
-  if(!raw){window.location.href='character.html';return;}
+  var raw=localStorage.getItem('player_data');
+  if(!raw){location.href='character.html';return;}
   player=JSON.parse(raw);
-  const xp=getTotalXP(),lv=getLevel(xp),eq=getEq();
-  drawCharCanvas('hudCv',player,36,36);
-  drawCharCanvas('ppCv',player,46,52);
-  document.getElementById('pp') && (document.getElementById('pp').querySelector('canvas')?null:null);
-  updateHUD(xp,lv,eq);
-  // Find current castle (highest unlocked)
-  let hi=0;
-  C.forEach((c,i)=>{if(getDone(c)>0||(i===0))hi=i;if(getDone(c)>=c.tot&&i+1<C.length)hi=i+1;});
+  var xp=getTotalXP(),lv=getLevel(xp),eq=getEq();
+  
+  // Find current position
+  var hi=0;
+  C.forEach(function(c,i){
+    if(getDone(c)>0)hi=i;
+    if(getDone(c)>=c.tot&&i+1<C.length)hi=i+1;
+  });
   hi=Math.min(hi,C.length-1);
-  // Draw
-  try{drawMap();}catch(e){console.error("map err:",e);drawMapFallback();}
-  renderNodes(hi);
-  // Position player pin
-  const[pgx,pgy]=CPOS_G[hi];
-  const[psx,psy]=g2s(pgx,pgy,0);
-  const pp=document.getElementById('pp');
-  pp.style.left=psx+'px';pp.style.top=(psy-CELL_H/2-68)+'px';
-  pp.querySelector('#ppCv').parentElement.querySelector('.pp-dot') || null;
-  // Initial view centered on player
-  setTimeout(()=>{
-    const vw=window.innerWidth,vh=window.innerHeight-60;
-    sc=Math.min(vw/MAP_CANVAS_W*1.2,1.1);sc=Math.max(sc,0.55);
-    scrollToGxy(pgx,pgy);
+
+  // Draw world
+  drawMapSVG();
+  drawPath(hi);
+  renderCastles(hi);
+  updateHUD(xp,lv,eq);
+
+  // Position player
+  var pos=CPOS[hi];
+  var pp=document.getElementById('pp');
+  pp.style.left=pos[0]+'px';
+  pp.style.top=(pos[1]-20)+'px';
+
+  // Set initial view
+  setTimeout(function(){
+    var vw=window.innerWidth, vh=window.innerHeight-60;
+    sc=Math.min(vw/MW*1.1,1.2);
+    sc=Math.max(sc,0.5);
+    scrollToPos(pos[0],pos[1]-60);
+    
     // Level up check
-    const prevLv=player.level||1;
-    if(lv>prevLv){player.level=lv;localStorage.setItem('player_data',JSON.stringify(player));setTimeout(()=>{const t=document.getElementById('lut');t.textContent=`🎉 升到 Lv.${lv}！稱號：${getTitle(lv)}`;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);},700);}
-  },80);
-  // Hash navigation
-  if(location.hash.startsWith('#done-')){
-    const cid=parseInt(location.hash.replace('#done-',''));
-    const ni=Math.min(cid,C.length-1);
-    setTimeout(()=>{
-      const[gx,gy]=CPOS_G[ni];const[sx,sy]=g2s(gx,gy,0);
-      pp.style.left=sx+'px';pp.style.top=(sy-CELL_H/2-68)+'px';
-      setTimeout(()=>scrollToGxy(gx,gy),300);
+    var prevLv=player.level||1;
+    if(lv>prevLv){
+      player.level=lv;
+      localStorage.setItem('player_data',JSON.stringify(player));
+      setTimeout(function(){
+        var t=document.getElementById('lut');
+        t.textContent='🎉 升到 Lv.'+lv+'！稱號：'+getTitle(lv);
+        t.classList.add('show');
+        setTimeout(function(){t.classList.remove('show');},3000);
+      },800);
+    }
+  },50);
+
+  // Hash navigation from castle completion
+  if(location.hash&&location.hash.indexOf('#done-')===0){
+    var cid=parseInt(location.hash.replace('#done-',''));
+    var ni=Math.min(cid,C.length-1);
+    setTimeout(function(){
+      var npos=CPOS[ni];
+      pp.style.left=npos[0]+'px';
+      pp.style.top=(npos[1]-20)+'px';
+      setTimeout(function(){scrollToPos(npos[0],npos[1]-60);},300);
     },400);
     history.replaceState(null,'',location.pathname);
   }
 }
 
-window.addEventListener('resize',()=>{clamp();applyT();});
-document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
+window.addEventListener('resize',function(){clamp();applyT();});
+// Wait for DOM
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',init);
+}else{
+  init();
+}
 </script>
 </body>
 </html>
