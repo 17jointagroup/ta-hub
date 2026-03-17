@@ -197,15 +197,26 @@ if(!CanvasRenderingContext2D.prototype.roundRect){
 const _glPool = {};
 function safeGL(cv) {
   if(!cv) return null;
-  const id = cv.id || 'cv_'+Math.random();
+  const id = cv.id || ('cv_'+Math.random().toString(36).slice(2));
   cv.id = id;
-  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
-  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
-  if(!gl) return null;
-  _glPool[id] = gl;
-  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  if(!window._glPool) window._glPool = {};
+  const pool = window._glPool;
+  if(pool[id] && !pool[id].isContextLost()) return pool[id];
+  // Release oldest contexts if near iOS limit
+  const keys = Object.keys(pool);
+  if(keys.length >= 6) {
+    try { pool[keys[0]].getExtension('WEBGL_lose_context')?.loseContext(); } catch(e){}
+    delete pool[keys[0]];
+  }
+  const opts = {powerPreference:'low-power', preserveDrawingBuffer:false,
+    failIfMajorPerformanceCaveat:false, antialias:true};
+  const gl = cv.getContext('webgl', opts) || cv.getContext('experimental-webgl', opts);
+  if(!gl) { console.warn('WebGL unavailable:', id); return null; }
+  pool[id] = gl;
+  cv.addEventListener('webglcontextlost', e=>{e.preventDefault();delete pool[id];});
   return gl;
 }
+
 
 const LESSONS=[
 {id:'l1',num:'6-1',icon:'⚗️',title:'PBR 理論 — 光的物理方程式',sub:'渲染方程、能量守恆、微表面模型',xp:80,type:'normal',school:'物理：輻射度量學，立體角，BRDF 反射分佈函數',
@@ -333,7 +344,7 @@ const VS3D=`attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vP;un
 
 function makePBRScene(cont,id,label,rows,getParams){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv6-${id}" width="600" height="300" style="height:300px;cursor:grab"></canvas></div>`;
-  const cv=document.getElementById(`cv6-${id}`);const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById(`cv6-${id}`);const gl=safeGL(cv);if(!gl)return;
   gl.enable(gl.DEPTH_TEST);
   const prog=mkP(gl,VS3D,PBR_FS);
   const{vb,nb,ib,ic}=makeSphBufs(gl);
@@ -348,9 +359,9 @@ function makePBRScene(cont,id,label,rows,getParams){
   let t=0;
   (function frame(){t+=0.012;
     const ex=Math.cos(camP)*Math.cos(camY)*10,ey=Math.sin(camP)*10,ez=Math.cos(camP)*Math.sin(camY)*10;
-    const proj=perspM(40*Math.PI/180,600/300,.1,50);
+    const proj=perspM(45*Math.PI/180,cv.width/cv.height,.1,50);
     const view=lookM([ex,ey,ez],[0,0,0],[0,1,0]);
-    gl.viewport(0,0,600,300);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);gl.uniform1f(tL,t);gl.uniform3f(camL,ex,ey,ez);
     gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
@@ -392,15 +403,17 @@ function d1(cont){
     col=col/(col+1.);col=pow(col,vec3(1./2.2));gl_FragColor=vec4(col,1.);
   }`;
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>PBR 渲染方程可視化</div></div><canvas id="cv6d1" width="600" height="260" style="height:260px"></canvas></div>';
-  const cv=document.getElementById('cv6d1');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv6d1');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const prog=mkP(gl,vs,fs);const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),tL=gl.getUniformLocation(prog,'t');
-  let time=0;(function fr(){time+=0.012;gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
+  let time=0;(function fr(){time+=0.012;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
 }
 
 function d2(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>金屬度 Metallic 0 → 1（拖曳旋轉）</div></div><canvas id="cv6-d2" width="600" height="260" style="height:260px;cursor:grab"></canvas></div><div class="slider-row"><span class="slider-label">🪞 金屬度</span><input type="range" min="0" max="100" value="50" id="met-sl"><span class="slider-val" id="met-v">0.50</span></div>';
   document.getElementById('met-sl').oninput=function(){document.getElementById('met-v').textContent=(this.value/100).toFixed(2);};
-  const cv=document.getElementById('cv6-d2');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;gl.enable(gl.DEPTH_TEST);
+  const cv=document.getElementById('cv6-d2');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;gl.enable(gl.DEPTH_TEST);
   const prog=mkP(gl,VS3D,PBR_FS);const{vb,nb,ib,ic}=makeSphBufs(gl);
   const pL=gl.getAttribLocation(prog,'p'),nL=gl.getAttribLocation(prog,'n');
   const mvpL=gl.getUniformLocation(prog,'mvp'),modelL=gl.getUniformLocation(prog,'model');
@@ -413,7 +426,7 @@ function d2(cont){
     const met=document.getElementById('met-sl').value/100;
     const ex=Math.cos(camP)*Math.cos(camY)*8,ey=Math.sin(camP)*8,ez=Math.cos(camP)*Math.sin(camY)*8;
     const proj=perspM(40*Math.PI/180,2.3,.1,50),view=lookM([ex,ey,ez],[0,0,0],[0,1,0]);
-    gl.viewport(0,0,600,260);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);gl.uniform1f(tL,t);gl.uniform3f(camL,ex,ey,ez);gl.uniform3f(albL,1.,.7,.2);gl.uniform1f(metL,met);gl.uniform1f(rouL,.2);
     gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
@@ -441,8 +454,8 @@ function d3(cont){
   let t=0;(function fr(){t+=0.012;
     const met=document.getElementById('d3-met').value/100;
     const ex=Math.cos(camP)*Math.cos(camY)*14,ey=Math.sin(camP)*14,ez=Math.cos(camP)*Math.sin(camY)*14;
-    const proj=perspM(40*Math.PI/180,600/260,.1,60),view=lookM([ex,ey,ez],[0,0,0],[0,1,0]);
-    gl.viewport(0,0,600,260);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    const proj=perspM(45*Math.PI/180,cv.width/cv.height,.1,60),view=lookM([ex,ey,ez],[0,0,0],[0,1,0]);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);gl.uniform1f(tL,t);gl.uniform3f(camL,ex,ey,ez);gl.uniform3f(albL,.9,.85,.7);gl.uniform1f(metL,met);
     gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
@@ -459,10 +472,10 @@ function makeShaderDemo2(cont,id,label,modes,modeNames,fs){
   const btns=modeNames.map((n,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="m6${id}-${i}" onclick="setSD6_${id}(${i})">${n}</button>`).join('');
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv6s-${id}" width="600" height="260" style="height:260px"></canvas></div><div class="ctrl-row">${btns}</div>`;
   window[`_sd6${id}`]=0;window[`setSD6_${id}`]=m=>{window[`_sd6${id}`]=m;modeNames.forEach((_,i)=>document.getElementById(`m6${id}-${i}`).classList.toggle('on',i===m));};
-  const cv=document.getElementById('cv6s-'+id);const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv6s-'+id);const gl=safeGL(cv);if(!gl)return;
   const prog=mkP(gl,'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}',fs);
   const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
-  let time=0;(function fr(){time+=0.012;gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window[`_sd6${id}`]);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
+  let time=0;(function fr(){time+=0.012;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window[`_sd6${id}`]);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
 }
 
 function d4(cont){makeShaderDemo2(cont,'d4','菲涅耳效應 — 掠射角反射',2,['🔵 菲涅耳可視化','🌊 水面模擬'],
@@ -499,7 +512,8 @@ function d6(cont){
   let sel=0;
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>PBR 材質球庫</div></div><canvas id="cv6-d6" width="600" height="240" style="height:240px;cursor:grab"></canvas></div><div class="ctrl-row">'+materials.map((m,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="mat${i}" onclick="selMat(${i})">${m.name}</button>`).join('')+'</div>';
   window.selMat=i=>{sel=i;materials.forEach((_,j)=>document.getElementById('mat'+j).classList.toggle('on',j===i));};
-  const cv=document.getElementById('cv6-d6');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;gl.enable(gl.DEPTH_TEST);
+  const cv=document.getElementById('cv6-d6');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;gl.enable(gl.DEPTH_TEST);
   const prog=mkP(gl,VS3D,PBR_FS);const{vb,nb,ib,ic}=makeSphBufs(gl);
   const pL=gl.getAttribLocation(prog,'p'),nL=gl.getAttribLocation(prog,'n');
   const mvpL=gl.getUniformLocation(prog,'mvp'),modelL=gl.getUniformLocation(prog,'model');
@@ -511,7 +525,7 @@ function d6(cont){
   let t=0;(function fr(){t+=0.01;const m=materials[sel];
     const ex=Math.cos(camP)*Math.cos(camY)*8,ey=Math.sin(camP)*8,ez=Math.cos(camP)*Math.sin(camY)*8;
     const proj=perspM(40*Math.PI/180,2.5,.1,50),view=lookM([ex,ey,ez],[0,0,0],[0,1,0]);
-    gl.viewport(0,0,600,240);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);gl.uniform1f(tL,t);gl.uniform3f(camL,ex,ey,ez);
     gl.uniform3f(albL,...m.albedo);gl.uniform1f(metL,m.metallic);gl.uniform1f(rouL,m.roughness);
     gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
@@ -525,7 +539,8 @@ function d6(cont){
 
 function d7(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>IBL + PBR 完整整合 — 5×5 材質矩陣（拖曳旋轉）</div></div><canvas id="cv6-d7" width="600" height="300" style="height:300px;cursor:grab"></canvas></div>';
-  const cv=document.getElementById('cv6-d7');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;gl.enable(gl.DEPTH_TEST);
+  const cv=document.getElementById('cv6-d7');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;gl.enable(gl.DEPTH_TEST);
   const prog=mkP(gl,VS3D,PBR_FS);const{vb,nb,ib,ic}=makeSphBufs(gl);
   const pL=gl.getAttribLocation(prog,'p'),nL=gl.getAttribLocation(prog,'n');
   const mvpL=gl.getUniformLocation(prog,'mvp'),modelL=gl.getUniformLocation(prog,'model');
@@ -537,7 +552,7 @@ function d7(cont){
   let t=0;(function fr(){t+=0.01;
     const ex=Math.cos(camP)*Math.cos(camY)*22,ey=Math.sin(camP)*22,ez=Math.cos(camP)*Math.sin(camY)*22;
     const proj=perspM(40*Math.PI/180,2,.1,60),view=lookM([ex,ey,ez],[0,0,0],[0,1,0]);
-    gl.viewport(0,0,600,300);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);gl.uniform1f(tL,t);gl.uniform3f(camL,ex,ey,ez);
     gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
@@ -567,7 +582,8 @@ function d8(cont){makeShaderDemo2(cont,'d8','SSAO — 螢幕空間環境光遮�
 function d9(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>👑 BOSS：完整 PBR + 延遲渲染架構可視化</div></div><canvas id="cv6-d9" width="600" height="300" style="height:300px;cursor:grab"></canvas></div><div class="ctrl-row"><button class="ctrl-btn on" id="dr-final" onclick="setDR('final')">🎨 最終渲染</button><button class="ctrl-btn" id="dr-albedo" onclick="setDR('albedo')">🎭 G-Buffer: Albedo</button><button class="ctrl-btn" id="dr-normal" onclick="setDR('normal')">🧲 G-Buffer: 法線</button><button class="ctrl-btn" id="dr-rough" onclick="setDR('rough')">🪨 G-Buffer: Roughness/Metallic</button></div>';
   window._drMode='final';window.setDR=m=>{window._drMode=m;['final','albedo','normal','rough'].forEach(x=>document.getElementById('dr-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv6-d9');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;gl.enable(gl.DEPTH_TEST);
+  const cv=document.getElementById('cv6-d9');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;gl.enable(gl.DEPTH_TEST);
   const prog=mkP(gl,VS3D,`precision mediump float;
 varying vec3 vN;varying vec3 vP;
 uniform vec3 albedo;uniform float metallic;uniform float roughness;uniform vec3 camPos;uniform float t;uniform int gmode;
@@ -600,7 +616,7 @@ void main(){
   let t=0;(function fr(){t+=0.01;const modes={final:0,albedo:1,normal:2,rough:3};
     const ex=Math.cos(camP)*Math.cos(camY)*14,ey=Math.sin(camP)*14,ez=Math.cos(camP)*Math.sin(camY)*14;
     const proj=perspM(40*Math.PI/180,2,.1,50),view=lookM([ex,ey,ez],[0,0,0],[0,1,0]);
-    gl.viewport(0,0,600,300);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.015,.04,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);gl.uniform1f(tL,t);gl.uniform3f(camL,ex,ey,ez);gl.uniform1i(gmL,modes[window._drMode]||0);
     gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
