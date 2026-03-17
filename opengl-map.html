@@ -12,9 +12,9 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 /* ── HUD ── */
 .hud{position:fixed;top:0;left:0;right:0;z-index:200;
   padding:max(10px,env(safe-area-inset-top)) 12px 8px;
-  background:rgba(3,1,16,.94);border-bottom:1px solid rgba(180,130,255,.14);
-  display:flex;align-items:center;gap:10px;backdrop-filter:blur(14px)}
-.av{width:36px;height:36px;border-radius:50%;border:2px solid #c084fc;background:#100828;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.25rem}
+  background:rgba(3,1,16,.95);border-bottom:1px solid rgba(180,130,255,.15);
+  display:flex;align-items:center;gap:10px;backdrop-filter:blur(12px)}
+.av{width:36px;height:36px;border-radius:50%;border:2px solid #c084fc;background:#100828;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
 .pi{flex:1;min-width:0}
 .pnr{display:flex;align-items:center;gap:6px;margin-bottom:3px}
 .pn{font-size:.9rem;font-weight:900;color:#f0e8ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -23,62 +23,69 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 .brs{display:flex;flex-direction:column;gap:3px}
 .br{display:flex;align-items:center;gap:5px}
 .brl{font-size:.58rem;font-weight:800;color:#3d2a60;min-width:18px}
-.brb{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden}
+.brb{flex:1;height:5px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
 .brf{height:100%;border-radius:100px;transition:width .4s}
-.hb{background:linear-gradient(90deg,#ef4444,#f87171)}.xb{background:linear-gradient(90deg,#f59e0b,#fcd34d)}
+.hb{background:linear-gradient(90deg,#ef4444,#f87171)}
+.xb{background:linear-gradient(90deg,#f59e0b,#fcd34d)}
 .hbtn{background:rgba(192,132,252,.12);border:1px solid rgba(192,132,252,.22);color:#c084fc;border-radius:9px;padding:6px 10px;font-size:.7rem;font-weight:800;cursor:pointer;flex-shrink:0;font-family:inherit}
 
-/* ── SCROLL (horizontal) ── */
+/* ── SCROLL AREA ── */
 .outer{position:fixed;top:0;left:0;right:0;bottom:60px;overflow:hidden;cursor:grab}
 .outer:active{cursor:grabbing}
 .stage{position:absolute;transform-origin:0 0;will-change:transform}
 
-/* ── ISOMETRIC CANVAS ── */
-#mapCanvas{display:block;position:absolute;top:0;left:0;pointer-events:none}
+/* ── MAP WORLD (SVG + HTML overlay) ── */
+.map-bg{display:block;position:absolute;top:0;left:0}
 
-/* ── Castle HTML nodes overlay ── */
-#castleLayer{position:absolute;top:0;left:0;pointer-events:none}
-.cnode{position:absolute;transform:translate(-50%,-100%);pointer-events:all;text-align:center;cursor:pointer;z-index:30}
-.cnode.locked{cursor:not-allowed}
-.cnode-inner{display:flex;flex-direction:column;align-items:center;gap:3px}
-.cnode-badge{background:rgba(4,2,18,.88);border-radius:12px;padding:5px 10px;border:2px solid transparent;backdrop-filter:blur(6px);transition:border-color .2s,box-shadow .2s;min-width:72px;text-align:center}
-.cnode:not(.locked):active .cnode-badge{transform:scale(.92)}
-.cnode.unlocked .cnode-badge{border-color:var(--cc,#c084fc);box-shadow:0 0 14px var(--cc,rgba(192,132,252,.35))}
-.cnode.done .cnode-badge{border-color:gold;box-shadow:0 0 18px rgba(255,215,0,.4);animation:cglow 2.5s ease infinite}
-@keyframes cglow{0%,100%{box-shadow:0 0 12px rgba(255,215,0,.3)}50%{box-shadow:0 0 26px rgba(255,215,0,.6)}}
-.cnode.locked .cnode-badge{border-color:rgba(255,255,255,.08);opacity:.4}
-.cn-em{font-size:1.8rem;line-height:1.1;display:block}
-.cn-name{font-size:.65rem;font-weight:900;color:#f0e8ff;margin-top:1px;white-space:nowrap}
-.cn-num{font-size:.56rem;font-weight:800;color:#a78bfa}
-.cn-pct{font-size:.56rem;font-weight:900;color:#a0f8ff;background:rgba(0,0,0,.4);border-radius:100px;padding:0 6px;margin-top:1px}
-.cn-stars{font-size:.58rem;letter-spacing:1px;margin-top:1px}
-.cn-tap{font-size:.55rem;font-weight:800;color:rgba(255,255,255,.4);margin-top:2px}
-.cnode.unlocked .cn-tap{color:var(--cc,#c084fc)}
+/* ── CASTLE NODES ── */
+.castle{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer;z-index:20}
+.castle.locked{cursor:not-allowed;opacity:.35}
+.c-tower{display:flex;flex-direction:column;align-items:center;position:relative;transition:transform .2s}
+.castle:not(.locked):active .c-tower{transform:scale(.92)}
+.c-icon{font-size:2.8rem;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6));position:relative;z-index:2}
+.castle.locked .c-icon{filter:grayscale(1) brightness(.4)}
+.castle.done .c-icon{filter:drop-shadow(0 0 14px gold)}
+.castle.current .c-icon{animation:pulse-castle 2s ease infinite}
+@keyframes pulse-castle{0%,100%{filter:drop-shadow(0 4px 12px rgba(0,0,0,.6)) drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 4px 12px rgba(0,0,0,.6)) drop-shadow(0 0 18px var(--cc,#c084fc))}}
+.c-base{width:56px;height:14px;border-radius:50%;margin-top:-4px;position:relative;z-index:1}
+.c-lbl{text-align:center;margin-top:6px}
+.c-name{font-size:.72rem;font-weight:900;color:#f0e8ff;text-shadow:0 2px 8px rgba(0,0,0,.9);line-height:1.3}
+.c-stars{font-size:.65rem;letter-spacing:1px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.c-pct{font-size:.6rem;font-weight:900;color:#a0f8ff;margin-top:2px;background:rgba(0,0,0,.5);border-radius:100px;padding:1px 7px}
+.c-num{position:absolute;top:-6px;right:-8px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:900;color:white;border:1.5px solid rgba(255,255,255,.4);z-index:5}
 
-/* Player */
-.pp{position:absolute;pointer-events:none;z-index:50;text-align:center;transform:translate(-50%,-90%);transition:left .95s cubic-bezier(.34,1.56,.64,1),top .95s cubic-bezier(.34,1.56,.64,1)}
-.pp-em{font-size:2rem;line-height:1;animation:ppbob .8s ease infinite alternate;filter:drop-shadow(0 4px 10px rgba(192,132,252,.8))}
-@keyframes ppbob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
-.pp-shadow{width:18px;height:5px;background:rgba(0,0,0,.3);border-radius:50%;margin:2px auto 0}
-.pp-dot{width:6px;height:6px;background:#c084fc;border-radius:50%;margin:2px auto 0;animation:blink .9s infinite;box-shadow:0 0 8px #c084fc}
-@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+/* ── PATH ── */
+.map-path{position:absolute;top:0;left:0;pointer-events:none;z-index:5}
 
-/* Bottom panel */
-.sp{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(3,1,16,.96);border-top:1px solid rgba(192,132,252,.14);padding-bottom:max(8px,env(safe-area-inset-bottom));transition:height .3s;height:60px;overflow:hidden}
+/* ── PLAYER PIN ── */
+.pp{position:absolute;transform:translate(-50%,-100%);z-index:50;pointer-events:none;text-align:center;transition:left .9s cubic-bezier(.34,1.56,.64,1),top .9s cubic-bezier(.34,1.56,.64,1)}
+.pp-av{font-size:2rem;filter:drop-shadow(0 4px 12px rgba(192,132,252,.8));animation:pp-bob .9s ease infinite alternate}
+@keyframes pp-bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
+.pp-name{font-size:.6rem;font-weight:900;color:#c084fc;background:rgba(5,2,14,.8);border-radius:100px;padding:1px 8px;margin-top:2px;white-space:nowrap}
+.pp-dot{width:8px;height:8px;background:#c084fc;border-radius:50%;margin:3px auto 0;box-shadow:0 0 10px #c084fc;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* ── BOTTOM PANEL ── */
+.sp{position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(3,1,16,.97);border-top:1px solid rgba(192,132,252,.15);
+  padding-bottom:max(8px,env(safe-area-inset-bottom));
+  transition:height .3s cubic-bezier(.4,0,.2,1);height:60px;overflow:hidden}
 .sp.open{height:230px}
 .spt{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;cursor:pointer}
-.sptl{font-size:.82rem;font-weight:800;color:#c084fc;display:flex;align-items:center;gap:10px}
-.spar{color:#3d2a60;transition:.25s}.sp.open .spar{transform:rotate(180deg)}
+.sptl{display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:800;color:#c084fc}
+.spar{color:#3d2a60;transition:.25s}
+.sp.open .spar{transform:rotate(180deg)}
 .spb{padding:8px 14px 4px;overflow-y:auto;height:170px}
 .eqg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
-.eq{background:rgba(192,132,252,.04);border:1px dashed rgba(192,132,252,.16);border-radius:10px;padding:8px 4px;text-align:center;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
-.eq.fl{border-style:solid;border-color:rgba(192,132,252,.32);background:rgba(192,132,252,.07)}
+.eq{background:rgba(192,132,252,.05);border:1px dashed rgba(192,132,252,.18);border-radius:10px;padding:8px 4px;text-align:center;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.eq.fl{border-style:solid;border-color:rgba(192,132,252,.35);background:rgba(192,132,252,.08)}
 .eq-ic{font-size:1.25rem}.eq-nm{font-size:.58rem;font-weight:800;color:#c084fc}.eq-st{font-size:.54rem;color:#34d399}.eq-em{font-size:.6rem;color:#2d1a50;font-weight:800}
 .fsg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .fs{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:9px;padding:7px 3px;text-align:center}
-.fsv{font-size:1.1rem;font-weight:900;font-family:monospace}.fsl{font-size:.58rem;color:#3d2a60;font-weight:800;letter-spacing:.04em;margin-top:2px}
+.fsv{font-size:1.1rem;font-weight:900;font-family:monospace}
+.fsl{font-size:.58rem;color:#3d2a60;font-weight:800;letter-spacing:.04em;margin-top:2px}
 
-/* Level up toast */
+/* ── LEVEL UP TOAST ── */
 .lut{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120px);background:linear-gradient(135deg,#c084fc,#34d399);color:#04020e;border-radius:100px;padding:10px 22px;font-size:.9rem;font-weight:900;z-index:300;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none}
 .lut.show{transform:translateX(-50%) translateY(0)}
 </style>
@@ -98,15 +105,25 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 </div>
 
 <div class="outer" id="outer">
-  <div class="stage" id="stage">
-    <canvas id="mapCanvas"></canvas>
-    <div id="castleLayer"></div>
-    <div class="pp" id="pp">
-      <div class="pp-em" id="ppEm">🧙</div>
-      <div class="pp-shadow"></div>
-      <div class="pp-dot"></div>
-    </div>
-  </div>
+<div class="stage" id="stage">
+
+<!-- SVG background - world map -->
+<svg class="map-bg" id="mapSVG" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<!-- Path between castles -->
+<svg class="map-path" id="pathSVG" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<!-- Castle nodes injected by JS -->
+<div id="castleLayer"></div>
+
+<!-- Player -->
+<div class="pp" id="pp">
+  <div class="pp-av" id="ppAv">🧙</div>
+  <div class="pp-name" id="ppName">冒險者</div>
+  <div class="pp-dot"></div>
+</div>
+
+</div>
 </div>
 
 <div class="sp" id="sp">
@@ -119,10 +136,11 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
     <div class="fsg" id="fsg"></div>
   </div>
 </div>
+
 <div class="lut" id="lut">🎉 升級了！</div>
 
 <script>
-var C=[
+const C=[
   {id:1,em:'🏰',name:'召喚之城',col:'#7c3aed',key:'tower1_done',tot:9, rw:{slot:'weapon',name:'召喚法杖',icon:'🪄',stat:'INT+3',bonus:{int:3}}},
   {id:2,em:'⚡',name:'光之城',  col:'#d97706',key:'tower2_done',tot:6, rw:{slot:'hat',name:'光明王冠',icon:'👑',stat:'INT+2,SPD+2',bonus:{int:2,spd:2}}},
   {id:3,em:'🗿',name:'模型之城',col:'#059669',key:'tower3_done',tot:3, rw:{slot:'accessory',name:'立體鏡',icon:'🥽',stat:'INT+2',bonus:{int:2}}},
@@ -131,281 +149,188 @@ var C=[
   {id:6,em:'🧪',name:'物理之城',col:'#0891b2',key:'tower6_done',tot:9, rw:{slot:'armor',name:'PBR護甲',icon:'🦺',stat:'DEF+5,ATK+2',bonus:{def:5,atk:2}}},
   {id:7,em:'⚔️',name:'競技之城',col:'#dc2626',key:'tower7_done',tot:9, rw:{slot:'hat',name:'戰鬥頭盔',icon:'⛑️',stat:'ATK+3,SPD+3',bonus:{atk:3,spd:3}}},
   {id:8,em:'🌌',name:'秘境之城',col:'#7c3aed',key:'tower8_done',tot:8, rw:{slot:'weapon',name:'古代法杖',icon:'🔮',stat:'INT+7',bonus:{int:7}}},
-  {id:9,em:'👑',name:'終極城堡',col:'#ca8a04',key:'tower9_done',tot:8, rw:{slot:'accessory',name:'終極王冠',icon:'👑',stat:'全屬性+5',bonus:{atk:5,def:5,int:5,spd:5}}}
+  {id:9,em:'👑',name:'終極城堡',col:'#ca8a04',key:'tower9_done',tot:8, rw:{slot:'accessory',name:'終極王冠',icon:'👑',stat:'全屬性+5',bonus:{atk:5,def:5,int:5,spd:5}}},
 ];
-var LX=[0,300,700,1200,1800,2500,3400,4400,5600,7000];
-var TITLES=['初學者','OpenGL學徒','著色器術士','渲染騎士','圖形學大師','終極魔法師'];
+const LX=[0,300,700,1200,1800,2500,3400,4400,5600,7000];
+const TITLES=['初學者','OpenGL學徒','著色器術士','渲染騎士','圖形學大師','終極魔法師'];
 function getTitle(lv){return TITLES[Math.min(Math.floor((lv-1)/2),TITLES.length-1)];}
-function getLevel(xp){for(var i=LX.length-1;i>=0;i--)if(xp>=LX[i])return i+1;return 1;}
-function getDone(c){try{return JSON.parse(localStorage.getItem(c.key)||'[]').filter(Boolean).length;}catch(e){return 0;}}
-function getTotalXP(){return C.reduce(function(s,c){var d=getDone(c);return s+Math.round(d/c.tot*(c.id*100+20));},0);}
-function getEq(){var eq={weapon:null,armor:null,hat:null,accessory:null};C.forEach(function(c){if(getDone(c)>=c.tot&&c.rw)eq[c.rw.slot]=c.rw;});return eq;}
+function getLevel(xp){for(let i=LX.length-1;i>=0;i--)if(xp>=LX[i])return i+1;return 1;}
+function getDone(c){try{return JSON.parse(localStorage.getItem(c.key)||'[]').filter(Boolean).length;}catch{return 0;}}
+function getTotalXP(){return C.reduce((s,c)=>{const d=getDone(c);return s+Math.round(d/c.tot*(c.id*100+20));},0);}
+function getEq(){const eq={weapon:null,armor:null,hat:null,accessory:null};C.forEach(c=>{if(getDone(c)>=c.tot&&c.rw)eq[c.rw.slot]=c.rw;});return eq;}
 
-// ── Isometric 45° setup (horizontal scroll, left→right) ──
-// Each grid cell in screen space
-var TW=96, TH=48; // tile width/height in iso projection
-var TILE_DEPTH=28; // wall height
+// Map dimensions
+const MW=600, MH=2200;
 
-// Grid layout: 9 castles on a horizontal world
-// World is ~18 cells wide, 6 cells tall
-var WORLD_COLS=20, WORLD_ROWS=8;
-
-// Castle grid positions [col, row] - snake path left to right, slight elevation changes
-var CPOS_G=[
-  [1, 5], // 城堡1 - start (leftmost, lower ground)
-  [3, 4], // 城堡2
-  [5, 5], // 城堡3
-  [7, 3], // 城堡4 - elevated
-  [9, 4], // 城堡5
-  [11,3], // 城堡6
-  [13,5], // 城堡7
-  [15,2], // 城堡8 - high peak
-  [18,3], // 城堡9 - final (rightmost)
+// Castle positions [x,y] on the map
+const CPOS=[
+  [340,2060], // 1
+  [160,1860], // 2
+  [420,1660], // 3
+  [150,1450], // 4
+  [410,1240], // 5
+  [150,1030], // 6
+  [410,820],  // 7
+  [150,610],  // 8
+  [300,380],  // 9
 ];
 
-// Iso projection: 45° angle, right-pointing x, down-right y
-function iso(col, row, elev) {
-  // Staggered isometric: each col shifts right+down, each row shifts right-down
-  var sx = (col - row) * TW/2;
-  var sy = (col + row) * TH/2 - (elev||0) * TILE_DEPTH;
-  return {x: sx, y: sy};
+let player=null, panX=0,panY=0,sc=1,lx=0,ly=0,dragging=false,lastDist=0;
+const outer=document.getElementById('outer');
+const stage=document.getElementById('stage');
+const HUDH=72;
+
+function applyT(){stage.style.transform='translate('+panX+'px,'+panY+'px) scale('+sc+')';}
+function clamp(){
+  const vw=window.innerWidth,vh=window.innerHeight-60;
+  const mw=MW*sc,mh=MH*sc;
+  panX=Math.min(0,Math.max(panX,vw-mw));
+  panY=Math.min(HUDH,Math.max(panY,vh-mh));
 }
 
-// Map canvas size
-var MAP_W = (WORLD_COLS + WORLD_ROWS) * TW/2 + 200;
-var MAP_H = (WORLD_COLS + WORLD_ROWS) * TH/2 + 400;
-
-// Elevation map for terrain variety
-var ELEV_MAP={};
-function setElev(c,r,e){ELEV_MAP[c+','+r]=e;}
-function getElev(c,r){return ELEV_MAP[c+','+r]||0;}
-
-// Initialize elevations around castle positions
-function initElevMap(){
-  CPOS_G.forEach(function(pos,i){
-    var c=pos[0],r=pos[1];
-    var baseElev=[1,1,1,2,1,2,1,3,2][i];
-    // Set castle area to elevated
-    for(var dc=-2;dc<=2;dc++)for(var dr=-2;dr<=2;dr++){
-      var d=Math.abs(dc)+Math.abs(dr);
-      var e=Math.max(0,baseElev-Math.floor(d/2));
-      var key=(c+dc)+','+(r+dr);
-      if(!ELEV_MAP[key]||ELEV_MAP[key]<e)ELEV_MAP[key]=e;
-    }
-  });
-  // Path elevation gradient
-  for(var i=0;i<CPOS_G.length-1;i++){
-    var p0=CPOS_G[i],p1=CPOS_G[i+1];
-    var steps=Math.max(Math.abs(p1[0]-p0[0]),Math.abs(p1[1]-p0[1]))*3;
-    for(var t=0;t<=steps;t++){
-      var gc=Math.round(p0[0]+(p1[0]-p0[0])*t/steps);
-      var gr=Math.round(p0[1]+(p1[1]-p0[1])*t/steps);
-      var e=Math.round(getElev(p0[0],p0[1])+(getElev(p1[0],p1[1])-getElev(p0[0],p0[1]))*t/steps);
-      var key=gc+','+gr;
-      if(!ELEV_MAP[key])ELEV_MAP[key]=e;
-    }
+outer.addEventListener('touchstart',function(e){
+  if(e.touches.length===1){dragging=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}
+  else if(e.touches.length===2){lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
+},{passive:true});
+outer.addEventListener('touchmove',function(e){
+  e.preventDefault();
+  if(e.touches.length===1&&dragging){panX+=e.touches[0].clientX-lx;panY+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clamp();applyT();}
+  if(e.touches.length===2){
+    var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    var ns=Math.min(2.5,Math.max(0.35,sc*d/lastDist));
+    var cx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    var cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    panX=cx-(cx-panX)*ns/sc;panY=cy-(cy-panY)*ns/sc;sc=ns;lastDist=d;clamp();applyT();
   }
+},{passive:false});
+outer.addEventListener('touchend',function(){dragging=false;});
+outer.addEventListener('mousedown',function(e){dragging=true;lx=e.clientX;ly=e.clientY;});
+outer.addEventListener('mousemove',function(e){if(!dragging)return;panX+=e.clientX-lx;panY+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clamp();applyT();});
+outer.addEventListener('mouseup',function(){dragging=false;});
+outer.addEventListener('wheel',function(e){e.preventDefault();var ns=Math.min(2.5,Math.max(0.35,sc*Math.exp(-e.deltaY*.001)));panX=e.clientX-(e.clientX-panX)*ns/sc;panY=e.clientY-(e.clientY-panY)*ns/sc;sc=ns;clamp();applyT();},{passive:false});
+
+function scrollToPos(x,y){
+  var vw=window.innerWidth,vh=window.innerHeight-60;
+  panX=vw/2-x*sc; panY=vh/2-y*sc; clamp(); applyT();
 }
 
-// ── Draw isometric tile ──
-function drawTile(ctx, col, row, elev, topCol, leftCol, rightCol, depth) {
-  var p = iso(col, row, elev);
-  var x=p.x, y=p.y, hw=TW/2, hh=TH/2, d=depth||TILE_DEPTH;
-  // Top face
-  ctx.beginPath();
-  ctx.moveTo(x, y-hh); ctx.lineTo(x+hw, y); ctx.lineTo(x, y+hh); ctx.lineTo(x-hw, y);
-  ctx.closePath(); ctx.fillStyle=topCol; ctx.fill();
-  // Left wall
-  ctx.beginPath();
-  ctx.moveTo(x-hw, y); ctx.lineTo(x, y+hh); ctx.lineTo(x, y+hh+d); ctx.lineTo(x-hw, y+d);
-  ctx.closePath(); ctx.fillStyle=leftCol; ctx.fill();
-  // Right wall
-  ctx.beginPath();
-  ctx.moveTo(x, y+hh); ctx.lineTo(x+hw, y); ctx.lineTo(x+hw, y+d); ctx.lineTo(x, y+hh+d);
-  ctx.closePath(); ctx.fillStyle=rightCol; ctx.fill();
-  // Edges
-  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=.5;
-  ctx.beginPath(); ctx.moveTo(x,y-hh); ctx.lineTo(x+hw,y); ctx.lineTo(x,y+hh); ctx.lineTo(x-hw,y); ctx.closePath(); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x-hw,y+d); ctx.lineTo(x-hw,y); ctx.moveTo(x,y+hh+d); ctx.lineTo(x,y+hh); ctx.moveTo(x+hw,y+d); ctx.lineTo(x+hw,y); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x-hw,y+d); ctx.lineTo(x,y+hh+d); ctx.lineTo(x+hw,y+d); ctx.stroke();
-}
+// ── Draw SVG Map Background ──
+function drawMapSVG(){
+  var svg=document.getElementById('mapSVG');
+  svg.setAttribute('width',MW);svg.setAttribute('height',MH);
+  svg.setAttribute('viewBox','0 0 '+MW+' '+MH);
 
-// ── Tile color by type ──
-function tileColor(col, row) {
-  // Zone-based colors
-  for(var i=0;i<CPOS_G.length;i++){
-    var p=CPOS_G[i];
-    var d=Math.abs(col-p[0])+Math.abs(row-p[1]);
-    if(d<=2){
-      var zoneColors=[
-        ['#2d4a20','#1e3414','#162610'], // 1 forest
-        ['#4a3810','#342808','#261c06'], // 2 golden
-        ['#1a3a28','#102a1c','#081e12'], // 3 teal
-        ['#280e40','#1c0830','#100520'], // 4 purple
-        ['#3a2810','#2a1c08','#1e1204'], // 5 amber
-        ['#082030','#051828','#03101c'], // 6 blue
-        ['#280808','#1c0606','#100404'], // 7 red
-        ['#160830','#0e0520','#06030e'], // 8 deep purple
-        ['#302200','#221800','#180e00'], // 9 gold
-      ][i];
-      return zoneColors;
-    }
-  }
-  // Default ground
-  var h = Math.sin(col*1.3+row*2.1)*0.5+0.5;
-  var e = getElev(col,row);
-  if(e>=3) return ['#9ea8b0','#6e7880','#4e5860']; // snow/rock
-  if(e>=2) return ['#556640','#384430','#283020']; // highland
-  if(h>0.7) return ['#2a4820','#1c3214','#14220c']; // dark forest
-  return ['#1e3a18','#142810','#0c1c08']; // default green
-}
+  var defs='<defs>'+
+    '<radialGradient id="sg0" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="#0a0428"/><stop offset="100%" stop-color="#060210"/></radialGradient>'+
+    '<radialGradient id="zg1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2a1060" stop-opacity=".8"/><stop offset="100%" stop-color="#2a1060" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#403010" stop-opacity=".8"/><stop offset="100%" stop-color="#403010" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg3" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#083020" stop-opacity=".8"/><stop offset="100%" stop-color="#083020" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg4" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#200850" stop-opacity=".8"/><stop offset="100%" stop-color="#200850" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg5" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#402808" stop-opacity=".8"/><stop offset="100%" stop-color="#402808" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg6" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#082038" stop-opacity=".8"/><stop offset="100%" stop-color="#082038" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg7" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#380808" stop-opacity=".8"/><stop offset="100%" stop-color="#380808" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg8" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#180430" stop-opacity=".8"/><stop offset="100%" stop-color="#180430" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg9" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#302000" stop-opacity=".8"/><stop offset="100%" stop-color="#302000" stop-opacity="0"/></radialGradient>'+
+    '</defs>';
 
-// ── Draw the map ──
-function drawIsometricMap(canvas, unlockedCount) {
-  var W=MAP_W, H=MAP_H;
-  canvas.width=W; canvas.height=H;
-  var ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-
-  // Offset so whole map is visible
-  ctx.save();
-  ctx.translate(WORLD_ROWS*TW/2 + 50, WORLD_ROWS*TH/2 + 150);
-
-  // Sky gradient
-  ctx.restore();
-  var sky=ctx.createLinearGradient(0,0,0,H*0.45);
-  sky.addColorStop(0,'#050220'); sky.addColorStop(1,'#0a0840');
-  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*0.45);
-  // Lower ground bg
-  ctx.fillStyle='#04100a'; ctx.fillRect(0,H*0.4,W,H*0.6);
-  ctx.save();
-  ctx.translate(WORLD_ROWS*TW/2 + 50, WORLD_ROWS*TH/2 + 150);
+  var bg='<rect width="'+MW+'" height="'+MH+'" fill="url(#sg0)"/>';
 
   // Stars
-  ctx.restore();
-  var rng=function(s){var x=Math.sin(s+1)*43758.5;return x-Math.floor(x);};
-  for(var i=0;i<120;i++){
-    var sx=rng(i*2)*W, sy=rng(i*2+1)*(H*0.38);
+  var stars='';
+  function rng(s){var x=Math.sin(s+1)*43758.5;return x-Math.floor(x);}
+  for(var i=0;i<200;i++){
+    var sx=rng(i*2)*MW, sy=rng(i*2+1)*(MH*.7);
     var sr=rng(i*3)<.15?1.5:rng(i*3)<.4?1:.5;
-    ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2);
-    ctx.fillStyle='rgba(200,180,255,'+(0.3+rng(i*5)*0.5)+')'; ctx.fill();
-  }
-  ctx.save();
-  ctx.translate(WORLD_ROWS*TW/2 + 50, WORLD_ROWS*TH/2 + 150);
-
-  // Draw tiles back-to-front (painter's algorithm: high col+row first for proper overlap)
-  // Sort order: col+row descending
-  var tiles=[];
-  for(var r=WORLD_ROWS-1;r>=0;r--){
-    for(var c=WORLD_COLS-1;c>=0;c--){
-      tiles.push([c,r]);
-    }
+    var sa=(.3+rng(i*5)*.6).toFixed(2);
+    stars+='<circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="'+sr+'" fill="rgba(220,190,255,'+sa+')" />';
   }
 
-  tiles.forEach(function(t){
-    var c=t[0],r=t[1],e=getElev(c,r);
-    var colors=tileColor(c,r);
-    drawTile(ctx,c,r,e,colors[0],colors[1],colors[2]);
-    // Draw intermediate elevation tiles as walls only
-    for(var el=0;el<e;el++){
-      var cc=colors;
-      ctx.beginPath();
-      var p=iso(c,r,el);
-      var x=p.x,y=p.y,hw=TW/2,hh=TH/2,d=TILE_DEPTH;
-      ctx.moveTo(x-hw,y+hh+d); ctx.lineTo(x-hw,y+hh+d-TILE_DEPTH);
-      ctx.lineTo(x,y+2*hh+d-TILE_DEPTH); ctx.lineTo(x,y+2*hh+d);
-      ctx.closePath(); ctx.fillStyle=cc[1]; ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(x,y+2*hh+d); ctx.lineTo(x,y+2*hh+d-TILE_DEPTH);
-      ctx.lineTo(x+hw,y+hh+d-TILE_DEPTH); ctx.lineTo(x+hw,y+hh+d);
-      ctx.closePath(); ctx.fillStyle=cc[2]; ctx.fill();
-    }
+  // Island base shape
+  var island='<path d="M120,400 Q80,600 100,900 Q70,1100 80,1400 Q60,1600 120,1900 Q180,2100 300,2150 Q420,2180 500,2100 Q560,2020 540,1800 Q560,1600 540,1300 Q570,1100 550,850 Q580,650 540,420 Q500,250 380,200 Q260,150 180,280 Z" fill="#0e1428" stroke="rgba(100,80,200,.2)" stroke-width="2"/>';
+
+  // Zone glows around each castle
+  var zones='';
+  CPOS.forEach(function(pos,i){
+    var r=140;
+    zones+='<ellipse cx="'+pos[0]+'" cy="'+pos[1]+'" rx="'+r+'" ry="'+(r*.7)+'" fill="url(#zg'+(i+1)+')" />';
   });
 
-  // ── Draw path between castles ──
-  for(var i=0;i<CPOS_G.length-1;i++){
-    var p0=CPOS_G[i],p1=CPOS_G[i+1];
-    var isDone=i<unlockedCount;
-    var steps=Math.max(Math.abs(p1[0]-p0[0]),Math.abs(p1[1]-p0[1]))*4;
-    for(var t=0;t<=steps;t++){
-      var gc=Math.round(p0[0]+(p1[0]-p0[0])*t/steps);
-      var gr=Math.round(p0[1]+(p1[1]-p0[1])*t/steps);
-      var ge=getElev(gc,gr);
-      var pp=iso(gc,gr,ge+0.08);
-      var rpw=TW*0.55,rph=TH*0.55;
-      // Road tile
-      ctx.beginPath();
-      ctx.moveTo(pp.x,pp.y-rph/2); ctx.lineTo(pp.x+rpw/2,pp.y); ctx.lineTo(pp.x,pp.y+rph/2); ctx.lineTo(pp.x-rpw/2,pp.y);
-      ctx.closePath();
-      ctx.fillStyle=isDone?'rgba(180,140,60,.75)':'rgba(80,70,50,.4)'; ctx.fill();
-    }
-  }
+  // Rivers/paths as SVG lines (drawn before castles)
+  var rivers='<path d="M300,2060 Q260,1900 280,1700 Q250,1500 280,1300 Q240,1100 260,900 Q240,700 280,500 Q300,400 310,380" fill="none" stroke="rgba(0,120,200,.25)" stroke-width="18" stroke-linecap="round"/>';
 
-  // ── Trees ──
-  function drawTree(ctx,c,r,e){
-    var p=iso(c,r,e+0.1);
-    // Trunk
-    ctx.fillStyle='#4a2c10';
-    ctx.fillRect(p.x-3,p.y-8,6,20);
-    // 3 layers of foliage
-    var gc=ctx.createRadialGradient(p.x,p.y-20,0,p.x,p.y-20,28);
-    gc.addColorStop(0,'#3a6428'); gc.addColorStop(1,'rgba(20,40,15,0)');
-    ctx.beginPath(); ctx.arc(p.x,p.y-20,22,0,Math.PI*2); ctx.fillStyle=gc; ctx.fill();
-    gc=ctx.createRadialGradient(p.x,p.y-30,0,p.x,p.y-30,18);
-    gc.addColorStop(0,'#4a8030'); gc.addColorStop(1,'rgba(20,40,15,0)');
-    ctx.beginPath(); ctx.arc(p.x,p.y-30,16,0,Math.PI*2); ctx.fillStyle=gc; ctx.fill();
-  }
-
-  var treeCells=[[0,6],[2,5],[2,7],[4,6],[6,6],[8,5],[8,7],[10,6],[12,4],[12,6],[14,4],[16,5],[17,4],[19,5]];
-  treeCells.forEach(function(t){
-    var e2=getElev(t[0],t[1]);
-    drawTree(ctx,t[0],t[1],e2);
+  // Trees (emoji via text)
+  var trees='';
+  var treePositions=[[80,1950],[520,1980],[80,1750],[490,1720],[100,1500],[500,1480],[90,1200],[510,1200],[100,950],[500,920],[90,700],[510,680],[100,450],[490,440],[200,250],[400,260]];
+  treePositions.forEach(function(t){
+    trees+='<text x="'+t[0]+'" y="'+t[1]+'" font-size="28" text-anchor="middle" dominant-baseline="middle">🌲</text>';
   });
 
-  ctx.restore();
+  svg.innerHTML=defs+bg+stars+island+zones+rivers+trees;
 }
 
-// ── Render castle HTML overlay nodes ──
-function renderCastles(hi) {
+// ── Draw path SVG between castles ──
+function drawPath(unlockedCount){
+  var svg=document.getElementById('pathSVG');
+  svg.setAttribute('width',MW);svg.setAttribute('height',MH);
+  svg.setAttribute('viewBox','0 0 '+MW+' '+MH);
+
+  var lines='<defs><filter id="pf"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+
+  for(var i=0;i<CPOS.length-1;i++){
+    var p0=CPOS[i], p1=CPOS[i+1];
+    var done=i<unlockedCount;
+    var cx=(p0[0]+p1[0])/2, cy=(p0[1]+p1[1])/2;
+    // Road shadow
+    lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="rgba(80,50,20,.6)" stroke-width="20" stroke-linecap="round"/>';
+    // Road surface
+    lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="'+(done?'rgba(180,140,60,.7)':'rgba(80,70,50,.4)')+'" stroke-width="13" stroke-linecap="round"/>';
+    // Road dashes
+    if(done){lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="rgba(240,200,100,.4)" stroke-width="4" stroke-dasharray="16,20" stroke-linecap="round"/>';}
+    // Glow if unlocked
+    if(done){lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="rgba(180,150,80,.15)" stroke-width="28" stroke-linecap="round" filter="url(#pf)"/>';}
+  }
+  svg.innerHTML=lines;
+}
+
+// ── Render Castle HTML nodes ──
+function renderCastles(hi){
   var layer=document.getElementById('castleLayer');
   layer.innerHTML='';
-  var ox=WORLD_ROWS*TW/2+50, oy=WORLD_ROWS*TH/2+150;
-
   C.forEach(function(c,idx){
     var done=getDone(c)>=c.tot;
     var unlocked=idx===0||(getDone(C[idx-1])>=C[idx-1].tot);
-    var pos=CPOS_G[idx];
-    var elev=getElev(pos[0],pos[1]);
-    var p=iso(pos[0],pos[1],elev);
-    var sx=p.x+ox, sy=p.y+oy;
+    var isCurrent=idx===hi;
+    var pos=CPOS[idx];
     var pct=Math.round(getDone(c)/c.tot*100);
-    var stars=done?'⭐⭐⭐':getDone(c)>0?(getDone(c)>=Math.ceil(c.tot*.6)?'⭐⭐☆':'⭐☆☆'):'☆☆☆';
+    var stars=done?'⭐⭐⭐':getDone(c)>0?(getDone(c)>=Math.floor(c.tot*.66)?'⭐⭐☆':'⭐☆☆'):'☆☆☆';
 
     var div=document.createElement('div');
-    div.className='cnode'+(done?' done':unlocked?' unlocked':' locked');
-    div.style.cssText='left:'+sx+'px;top:'+(sy-TILE_DEPTH*(elev+1))+'px;--cc:'+c.col;
-    div.innerHTML='<div class="cnode-inner"><div class="cnode-badge">'+
-      '<span class="cn-em">'+c.em+'</span>'+
-      '<div class="cn-name">'+c.name+'</div>'+
-      '<div class="cn-num">城堡 '+c.id+'</div>'+
-      (unlocked&&!done?'<div class="cn-pct">'+pct+'%</div>':'')+
-      '<div class="cn-stars">'+stars+'</div>'+
-      (unlocked?'<div class="cn-tap">點擊進入</div>':'<div class="cn-tap">🔒 未解鎖</div>')+
-    '</div></div>';
+    div.className='castle'+(done?' done':unlocked?' current':' locked');
+    if(isCurrent)div.className+=' current';
+    div.style.cssText='left:'+pos[0]+'px;top:'+pos[1]+'px;--cc:'+c.col;
+    
+    div.innerHTML='<div class="c-tower">'+
+      '<span class="c-icon" style="font-size:'+(idx===8?'3.6rem':'2.8rem')+'">'+c.em+'</span>'+
+      '<div class="c-num" style="background:'+c.col+';border-color:rgba(255,255,255,.4)">'+(idx+1)+'</div>'+
+      '<div class="c-base" style="background:radial-gradient(ellipse,'+c.col+'66 0%,transparent 70%)"></div>'+
+    '</div>'+
+    '<div class="c-lbl">'+
+      '<div class="c-name">'+c.name+'</div>'+
+      (unlocked&&!done?'<div class="c-pct">'+pct+'%</div>':'')+''+
+      '<div class="c-stars">'+stars+'</div>'+
+    '</div>';
 
-    if(unlocked){
-      div.addEventListener('click',function(id){return function(){location.href='opengl-tower'+id+'.html';};}(c.id));
-    }
+    if(unlocked){div.addEventListener('click',function(id){return function(){location.href='opengl-level'+id+'.html';};}(c.id));}
     layer.appendChild(div);
   });
 }
 
-// ── HUD update ──
+// ── Update HUD ──
 function updateHUD(xp,lv,eq){
   var base=player.stats||{atk:8,def:6,int:10,spd:8};
-  var tot=Object.assign({},base);
+  var tot=JSON.parse(JSON.stringify(base));
   Object.values(eq).forEach(function(it){if(it&&it.bonus)Object.keys(it.bonus).forEach(function(k){if(tot[k]!==undefined)tot[k]+=it.bonus[k];});});
-  var xpNext=LX[Math.min(lv,LX.length-1)]||9999,xpPrev=LX[Math.max(lv-1,0)]||0;
+  var xpNext=LX[Math.min(lv,LX.length-1)]||9999, xpPrev=LX[Math.max(lv-1,0)]||0;
   var xpPct=Math.min(100,Math.round((xp-xpPrev)/Math.max(1,xpNext-xpPrev)*100));
   document.getElementById('hudN').textContent=player.name;
   document.getElementById('hudLv').textContent='Lv.'+lv;
@@ -415,67 +340,26 @@ function updateHUD(xp,lv,eq){
   document.getElementById('xpB').style.width=xpPct+'%';
   document.getElementById('xpT').textContent=xp+'/'+xpNext;
   document.getElementById('spSum').textContent='ATK '+tot.atk+'  INT '+tot.int+'  DEF '+tot.def+'  SPD '+tot.spd;
+  // Equip
   var slots=[['weapon','武器'],['armor','防具'],['hat','頭盔'],['accessory','飾品']];
-  document.getElementById('eqg').innerHTML=slots.map(function(s){var it=eq[s[0]];return it?'<div class="eq fl"><div class="eq-ic">'+it.icon+'</div><div class="eq-nm">'+it.name+'</div><div class="eq-st">'+it.stat+'</div></div>':'<div class="eq"><div class="eq-em">'+s[1]+'</div></div>';}).join('');
+  document.getElementById('eqg').innerHTML=slots.map(function(sl){var it=eq[sl[0]];return it?'<div class="eq fl"><div class="eq-ic">'+it.icon+'</div><div class="eq-nm">'+it.name+'</div><div class="eq-st">'+it.stat+'</div></div>':'<div class="eq"><div class="eq-em">'+sl[1]+'</div></div>';}).join('');
   document.getElementById('fsg').innerHTML=[['ATK',tot.atk,'#f87171'],['DEF',tot.def,'#60a5fa'],['INT',tot.int,'#c084fc'],['SPD',tot.spd,'#34d399']].map(function(x){return '<div class="fs"><div class="fsv" style="color:'+x[2]+'">'+x[1]+'</div><div class="fsl">'+x[0]+'</div></div>';}).join('');
+  // Avatar emoji
   var clsEmoji={mage:'🧙',warrior:'⚔️',archer:'🏹'};
-  var em=clsEmoji[player.class||'mage']||'🧙';
-  document.getElementById('hudAv').textContent=em;
-  document.getElementById('ppEm').textContent=em;
+  var av=clsEmoji[player.class]||'🧙';
+  document.getElementById('hudAv').textContent=av;
+  document.getElementById('ppAv').textContent=av;
+  document.getElementById('ppName').textContent=player.name;
 }
 
-// ── Pan & zoom ──
-var panX=0,panY=0,sc=1,lx=0,ly=0,drag=false,lastDist=0;
-var outer=document.getElementById('outer');
-var stage=document.getElementById('stage');
-
-function applyT(){stage.style.transform='translate('+panX+'px,'+panY+'px) scale('+sc+')';}
-function clamp(){
-  var vw=window.innerWidth,vh=window.innerHeight-60;
-  var mw=MAP_W*sc,mh=MAP_H*sc;
-  panX=Math.min(0,Math.max(panX,vw-mw));
-  panY=Math.min(80,Math.max(panY,vh-mh));
-}
-function scrollToISO(col,row,elev){
-  var p=iso(col,row,elev);
-  var sx=p.x+WORLD_ROWS*TW/2+50, sy=p.y+WORLD_ROWS*TH/2+150;
-  var vw=window.innerWidth,vh=window.innerHeight-60;
-  panX=vw/2-sx*sc; panY=vh/2-sy*sc; clamp(); applyT();
-}
-
-outer.addEventListener('touchstart',function(e){
-  if(e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}
-  else if(e.touches.length===2){lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
-},{passive:true});
-outer.addEventListener('touchmove',function(e){
-  e.preventDefault();
-  if(e.touches.length===1&&drag){panX+=e.touches[0].clientX-lx;panY+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clamp();applyT();}
-  if(e.touches.length===2){
-    var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-    var ns=Math.min(2.5,Math.max(0.3,sc*d/lastDist));
-    var cx=(e.touches[0].clientX+e.touches[1].clientX)/2,cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
-    panX=cx-(cx-panX)*ns/sc; panY=cy-(cy-panY)*ns/sc; sc=ns; lastDist=d; clamp(); applyT();
-  }
-},{passive:false});
-outer.addEventListener('touchend',function(){drag=false;});
-outer.addEventListener('mousedown',function(e){drag=true;lx=e.clientX;ly=e.clientY;});
-outer.addEventListener('mousemove',function(e){if(!drag)return;panX+=e.clientX-lx;panY+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clamp();applyT();});
-outer.addEventListener('mouseup',function(){drag=false;});
-outer.addEventListener('wheel',function(e){e.preventDefault();var ns=Math.min(2.5,Math.max(0.3,sc*Math.exp(-e.deltaY*.001)));panX=e.clientX-(e.clientX-panX)*ns/sc;panY=e.clientY-(e.clientY-panY)*ns/sc;sc=ns;clamp();applyT();},{passive:false});
-
-var player=null;
-
+// ── INIT ──
 function init(){
   var raw=localStorage.getItem('player_data');
   if(!raw){location.href='character.html';return;}
   player=JSON.parse(raw);
-
-  initElevMap();
-
   var xp=getTotalXP(),lv=getLevel(xp),eq=getEq();
-  updateHUD(xp,lv,eq);
-
-  // Find current castle
+  
+  // Find current position
   var hi=0;
   C.forEach(function(c,i){
     if(getDone(c)>0)hi=i;
@@ -483,58 +367,60 @@ function init(){
   });
   hi=Math.min(hi,C.length-1);
 
-  // Draw map
-  try{
-    drawIsometricMap(document.getElementById('mapCanvas'),hi);
-  }catch(e){
-    console.error('Map draw error:',e);
-  }
-
+  // Draw world
+  drawMapSVG();
+  drawPath(hi);
   renderCastles(hi);
+  updateHUD(xp,lv,eq);
 
-  // Position player pin
+  // Position player
+  var pos=CPOS[hi];
   var pp=document.getElementById('pp');
-  var ppos=CPOS_G[hi], pelev=getElev(ppos[0],ppos[1]);
-  var piso=iso(ppos[0],ppos[1],pelev);
-  var ox=WORLD_ROWS*TW/2+50, oy=WORLD_ROWS*TH/2+150;
-  pp.style.left=(piso.x+ox)+'px';
-  pp.style.top=(piso.y+oy-TILE_DEPTH*(pelev+1)-10)+'px';
+  pp.style.left=pos[0]+'px';
+  pp.style.top=(pos[1]-20)+'px';
 
-  // Initial scroll to player, show most of horizontal map
+  // Set initial view
   setTimeout(function(){
-    var vw=window.innerWidth,vh=window.innerHeight-60;
-    sc=Math.max(0.45,Math.min(vw/MAP_W*0.9,0.9));
-    scrollToISO(ppos[0],ppos[1],pelev);
-
+    var vw=window.innerWidth, vh=window.innerHeight-60;
+    sc=Math.min(vw/MW*1.1,1.2);
+    sc=Math.max(sc,0.5);
+    scrollToPos(pos[0],pos[1]-60);
+    
     // Level up check
     var prevLv=player.level||1;
     if(lv>prevLv){
-      player.level=lv; localStorage.setItem('player_data',JSON.stringify(player));
+      player.level=lv;
+      localStorage.setItem('player_data',JSON.stringify(player));
       setTimeout(function(){
         var t=document.getElementById('lut');
         t.textContent='🎉 升到 Lv.'+lv+'！稱號：'+getTitle(lv);
-        t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},3000);
+        t.classList.add('show');
+        setTimeout(function(){t.classList.remove('show');},3000);
       },800);
     }
-  },60);
+  },50);
 
-  // Hash routing from castle completion
+  // Hash navigation from castle completion
   if(location.hash&&location.hash.indexOf('#done-')===0){
     var cid=parseInt(location.hash.replace('#done-',''));
     var ni=Math.min(cid,C.length-1);
     setTimeout(function(){
-      var npos=CPOS_G[ni],ne=getElev(npos[0],npos[1]);
-      var niso=iso(npos[0],npos[1],ne);
-      pp.style.left=(niso.x+ox)+'px';
-      pp.style.top=(niso.y+oy-TILE_DEPTH*(ne+1)-10)+'px';
-      setTimeout(function(){scrollToISO(npos[0],npos[1],ne);},300);
-    },500);
+      var npos=CPOS[ni];
+      pp.style.left=npos[0]+'px';
+      pp.style.top=(npos[1]-20)+'px';
+      setTimeout(function(){scrollToPos(npos[0],npos[1]-60);},300);
+    },400);
     history.replaceState(null,'',location.pathname);
   }
 }
 
 window.addEventListener('resize',function(){clamp();applyT();});
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+// Wait for DOM
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',init);
+}else{
+  init();
+}
 </script>
 </body>
 </html>
