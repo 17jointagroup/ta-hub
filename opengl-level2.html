@@ -241,15 +241,26 @@ if(!CanvasRenderingContext2D.prototype.roundRect){
 const _glPool = {};
 function safeGL(cv) {
   if(!cv) return null;
-  const id = cv.id || 'cv_'+Math.random();
+  const id = cv.id || ('cv_'+Math.random().toString(36).slice(2));
   cv.id = id;
-  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
-  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
-  if(!gl) return null;
-  _glPool[id] = gl;
-  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  if(!window._glPool) window._glPool = {};
+  const pool = window._glPool;
+  if(pool[id] && !pool[id].isContextLost()) return pool[id];
+  // Release oldest contexts if near iOS limit
+  const keys = Object.keys(pool);
+  if(keys.length >= 6) {
+    try { pool[keys[0]].getExtension('WEBGL_lose_context')?.loseContext(); } catch(e){}
+    delete pool[keys[0]];
+  }
+  const opts = {powerPreference:'low-power', preserveDrawingBuffer:false,
+    failIfMajorPerformanceCaveat:false, antialias:true};
+  const gl = cv.getContext('webgl', opts) || cv.getContext('experimental-webgl', opts);
+  if(!gl) { console.warn('WebGL unavailable:', id); return null; }
+  pool[id] = gl;
+  cv.addEventListener('webglcontextlost', e=>{e.preventDefault();delete pool[id];});
   return gl;
 }
+
 
 // ══════════════════════════════════════════════════════
 // DATA
@@ -546,7 +557,7 @@ function mkGL(cont,w=600,h=260,label='WebGL Demo'){
     <canvas id="cv-${Math.random().toString(36).slice(2)}" width="${w}" height="${h}" style="height:${h}px"></canvas>
   </div>`;
   const cv=cont.querySelector('canvas');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});
+  const gl=safeGL(cv);
   return {cv,gl};
 }
 
@@ -595,7 +606,8 @@ function d1(cont){
   };
   window._lc=[1,1,1];window._oc=[1,0,0];
   const cv=document.getElementById('cv-d1');
-  const ctx=cv.getContext('2d');
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const ctx=cv.getContext('2d');
   function draw(){
     const [lr,lg,lb]=window._lc;const [or,og,ob]=window._oc;
     const fr=lr*or,fg=lg*og,fb=lb*ob;
@@ -651,7 +663,8 @@ function d2(cont){
   window._phMode='all';
   window.setPhong=m=>{window._phMode=m;document.querySelectorAll('[id^="ph-"]').forEach(b=>b.classList.remove('on'));document.getElementById('ph-'+m).classList.add('on');};
   const cv=document.getElementById('cv-d2');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`
     attribute vec3 pos;attribute vec3 norm;
     uniform mat4 mvp;uniform mat4 model;
@@ -702,10 +715,10 @@ function d2(cont){
     const lx=Math.cos(t)*3,ly=2,lz=Math.sin(t)*3;
     const sh=parseInt(document.getElementById('sh-val').value);
     const modes={'all':0,'amb':1,'dif':2,'spe':3};
-    gl.viewport(0,0,600,280);
+    gl.viewport(0,0,cv.width,cv.height);
     gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
-    const proj=perspM(45*Math.PI/180,600/280,.1,50);
+    const proj=perspM(45*Math.PI/180,cv.width/cv.height,.1,50);
     const view=lookAtM([0,0,4],[0,0,0],[0,1,0]);
     const model=identM();
     const mvp=m4mul(m4mul(proj,view),model);
@@ -751,7 +764,8 @@ function d3(cont){
   window._matIdx=0;
   window.setMat=(i)=>{window._matIdx=i;document.querySelectorAll('#mat-btns .ctrl-btn').forEach((b,j)=>b.classList.toggle('on',i===j));};
   const cv=document.getElementById('cv-d3');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
     void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
@@ -778,10 +792,10 @@ function d3(cont){
   function frame(){
     t+=0.008;
     const m=MATS[window._matIdx];
-    gl.viewport(0,0,600,280);
+    gl.viewport(0,0,cv.width,cv.height);
     gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
-    const mvp=m4mul(m4mul(perspM(45*Math.PI/180,600/280,.1,50),lookAtM([0,0,4],[0,0,0],[0,1,0])),identM());
+    const mvp=m4mul(m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,50),lookAtM([0,0,4],[0,0,0],[0,1,0])),identM());
     gl.uniformMatrix4fv(mvpL,false,mvp);
     gl.uniform3fv(ambL,m.amb);gl.uniform3fv(difL,m.dif);gl.uniform3fv(speL,m.spe);gl.uniform1f(shL,m.sh);
     gl.uniform3f(lpL,Math.cos(t)*4,3,Math.sin(t)*4);gl.uniform3f(vpL,0,0,4);
@@ -810,7 +824,8 @@ function d4(cont){
   window._smMode='final';
   window.setSM=m=>{window._smMode=m;['final','spec','map','diff'].forEach(x=>document.getElementById('sm-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv-d4');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   // Make procedural textures
   function makeChecker(gl,w,h,col1,col2){
     const data=new Uint8Array(w*h*4);
@@ -865,7 +880,7 @@ function d4(cont){
   function frame(){
     time+=0.015;
     const modes={'final':0,'spec':1,'map':2,'diff':3};
-    gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(prog);
     gl.bindBuffer(gl.ARRAY_BUFFER,buf);
     gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);
@@ -904,7 +919,8 @@ function d5(cont){
     document.getElementById('cutoff-row').style.display=m==='spot'?'flex':'none';
   };
   const cv=document.getElementById('cv-d5');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
     void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
@@ -949,9 +965,9 @@ function d5(cont){
     const types={'dir':0,'pt':1,'spot':2};
     const co=Math.cos(parseInt(document.getElementById('cutoff-val').value)*Math.PI/180);
     const lx=Math.cos(t)*5,lz=Math.sin(t)*5;
-    gl.viewport(0,0,600,280);gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
-    const mvp=m4mul(m4mul(perspM(50*Math.PI/180,600/280,.1,50),lookAtM([0,6,8],[0,0,0],[0,1,0])),identM());
+    const mvp=m4mul(m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,50),lookAtM([0,6,8],[0,0,0],[0,1,0])),identM());
     gl.uniformMatrix4fv(mvpL,false,mvp);
     gl.uniform1i(ltL,types[window._ltMode]||0);
     gl.uniform3f(lpL,lx,4,lz);
@@ -997,7 +1013,8 @@ function d6(cont){
     document.getElementById('light-count').textContent=c;
   }
   const cv=document.getElementById('cv-d6');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
     void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
@@ -1059,12 +1076,12 @@ function d6(cont){
       const hue=i/ptCount;
       ptCol.push(.5+Math.sin(hue*6)*.5,.5+Math.sin(hue*6+2)*.5,.5+Math.sin(hue*6+4)*.5);
     }
-    gl.viewport(0,0,600,320);gl.clearColor(.02,.01,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.02,.01,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
     const ex=Math.cos(camPitch)*Math.cos(camYaw)*9;
     const ey=Math.sin(camPitch)*9;
     const ez=Math.cos(camPitch)*Math.sin(camYaw)*9;
-    const mvp=m4mul(m4mul(perspM(50*Math.PI/180,600/320,.1,60),lookAtM([ex,ey,ez],[0,0,0],[0,1,0])),identM());
+    const mvp=m4mul(m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,60),lookAtM([ex,ey,ez],[0,0,0],[0,1,0])),identM());
     gl.uniformMatrix4fv(mvpL,false,mvp);
     gl.uniform1i(moonL,moon?1:0);gl.uniform1i(spotL2,spot?1:0);
     gl.uniform1i(ptCntL,ptCount);
