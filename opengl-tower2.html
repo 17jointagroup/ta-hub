@@ -3,1385 +3,668 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💡 光之城 — OpenGL 魔法王國</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<title>光之城 — 城堡2</title>
 <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#09080f;--bg2:#0e0c1a;--card:#131024;--border:#1d1a30;
-  --acc:#ffd93d;--acc2:#ff6b9d;--acc3:#00d4ff;--acc4:#7c6dfa;
-  --txt:#f0eeff;--txt2:#6b6590;
-  --font:'Nunito',sans-serif;--mono:'Space Mono',monospace;
-  --glow:0 0 24px rgba(255,217,61,.3);
+  --bg:#09091a;--card:#111128;--border:rgba(255,255,255,0.09);
+  --text:#dde0f0;--muted:#7070a0;--gold:#d4a017;--blue:#4f80e8;
+  --green:#38c66b;--pink:#e0508a;--purple:#9060d8;--teal:#30b0a0;
+  --r:14px;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  display:flex;flex-direction:column;align-items:center;padding:24px 12px;gap:14px;}
+canvas{display:block;}
 
-/* Stars */
-.stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.star{position:absolute;border-radius:50%;animation:twinkle var(--d,3s) var(--dl,0s) infinite}
-@keyframes twinkle{0%,100%{opacity:.1}50%{opacity:.8}}
+/* ── Map ── */
+#mapWrap{width:100%;max-width:960px;border-radius:20px;overflow:hidden;position:relative;}
+#mapCanvas{width:100%;}
 
-/* Floating light orbs */
-.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:drift var(--d,20s) ease-in-out infinite alternate}
-@keyframes drift{0%{transform:translate(0,0)}100%{transform:translate(var(--tx,40px),var(--ty,-40px))}}
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  width:100%;max-width:720px;overflow:hidden;}
+.card.boss{border-color:rgba(224,80,138,0.6);}
+.card.ch3{border-color:rgba(56,198,107,0.4);}
+.card.ch4{border-color:rgba(144,96,216,0.4);}
 
-/* Header */
-header{position:sticky;top:0;z-index:100;background:rgba(9,8,15,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:11px 24px;display:flex;align-items:center;gap:14px}
-.back-btn{background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:6px 14px;border-radius:100px;font-family:var(--font);font-size:.78rem;font-weight:800;cursor:pointer;transition:.2s;text-decoration:none;display:inline-block}
-.back-btn:hover{color:var(--acc);border-color:var(--acc)}
-.header-title{font-size:1rem;font-weight:900;color:var(--acc)}
-.xp-bar{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:800}
-.xp-total{color:var(--acc);font-family:var(--mono)}
-.xp-track{width:110px;height:7px;background:var(--border);border-radius:100px;overflow:hidden}
-.xp-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:100px;transition:width .7s cubic-bezier(.34,1.56,.64,1)}
+.hdr{display:flex;align-items:center;gap:12px;padding:16px 18px;}
+.icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;
+  justify-content:center;font-size:16px;flex-shrink:0;}
+.icon.done{background:var(--blue);}
+.icon.ch2{background:linear-gradient(135deg,#1a3a8a,#4f80e8);}
+.icon.ch3{background:linear-gradient(135deg,#0a4a20,#38c66b);}
+.icon.ch4{background:linear-gradient(135deg,#3a1060,#9060d8);}
+.icon.boss-ico{background:linear-gradient(135deg,#6a1030,#e0508a);}
+.ttl{flex:1;}
+.ttl h2{font-size:15px;font-weight:500;}
+.ttl p{font-size:11px;color:var(--muted);margin-top:2px;}
+.badge{border:1px solid var(--gold);color:var(--gold);font-size:11px;
+  padding:3px 9px;border-radius:20px;}
+.badge.boss-badge{border-color:var(--pink);color:var(--pink);}
+.chk{width:26px;height:26px;border-radius:50%;background:var(--blue);
+  display:flex;align-items:center;justify-content:center;font-size:12px;margin-left:6px;}
 
-/* Hero */
-.hero{position:relative;z-index:1;text-align:center;padding:64px 24px 44px}
-.tower-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,217,61,.08);border:1px solid rgba(255,217,61,.25);border-radius:100px;padding:6px 18px;font-size:.78rem;font-weight:800;color:var(--acc);margin-bottom:20px;letter-spacing:.04em}
-.hero h1{font-size:clamp(2rem,6vw,3.6rem);font-weight:900;line-height:1.1;margin-bottom:14px}
-.hero h1 span{background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{color:var(--txt2);font-size:.95rem;max-width:480px;margin:0 auto 32px;line-height:1.75}
-.stats-row{display:flex;justify-content:center;gap:20px;flex-wrap:wrap}
-.stat-chip{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 22px;text-align:center;min-width:80px}
-.stat-chip .num{font-size:1.5rem;font-weight:900;font-family:var(--mono);color:var(--acc)}
-.stat-chip .lbl{font-size:.68rem;color:var(--txt2);font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+/* ── Tabs ── */
+.tabs{display:flex;gap:4px;padding:0 14px 10px;}
+.tab{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:8px;
+  font-size:12px;cursor:pointer;border:1px solid transparent;
+  color:var(--muted);background:transparent;transition:.15s;}
+.tab.on{background:rgba(100,80,200,.2);border-color:#8060c8;color:#b090f0;}
+.tab span{font-size:13px;}
 
-/* Map */
-.chapter-map{position:relative;z-index:1;padding:24px;max-width:920px;margin:0 auto}
-.map-title{font-size:.75rem;font-weight:800;color:var(--txt2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px;padding-left:4px}
+/* ── Panels ── */
+.panel{display:none;padding:0 14px 16px;}
+.panel.on{display:block;}
+.panel-lbl{font-size:10px;letter-spacing:.08em;color:var(--muted);
+  display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.dot{width:7px;height:7px;border-radius:50%;background:#e05050;display:inline-block;}
 
-/* Lesson card */
-.lesson{background:var(--card);border:1px solid var(--border);border-radius:22px;margin-bottom:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s;cursor:pointer}
-.lesson:hover:not(.locked){border-color:rgba(255,217,61,.4);box-shadow:var(--glow)}
-.lesson.locked{opacity:.45;cursor:not-allowed}
-.lesson.active{border-color:var(--acc);box-shadow:var(--glow)}
-.lesson.done{border-color:rgba(0,212,255,.5)}
-.lesson.boss{border-color:rgba(255,107,157,.25)}
-.lesson.boss:hover:not(.locked),.lesson.boss.active{border-color:var(--acc2);box-shadow:0 0 24px rgba(255,107,157,.3)}
-.lesson-header{display:flex;align-items:center;gap:16px;padding:18px 20px}
-.lesson-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;position:relative}
-.icon-normal{background:rgba(255,217,61,.08);border:1px solid rgba(255,217,61,.2)}
-.icon-done{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.4)}
-.icon-boss{background:rgba(255,107,157,.08);border:1px solid rgba(255,107,157,.25)}
-.icon-locked{background:var(--border);border:1px solid transparent;filter:grayscale(1)}
-.lesson-info{flex:1;min-width:0}
-.lesson-title{font-size:1rem;font-weight:900;margin-bottom:3px;display:flex;align-items:center;gap:8px}
-.lesson-subtitle{font-size:.78rem;color:var(--txt2);font-weight:700;line-height:1.4}
-.lesson-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.xp-pill{background:rgba(255,217,61,.08);color:var(--acc);border:1px solid rgba(255,217,61,.25);border-radius:100px;padding:3px 10px;font-size:.72rem;font-weight:900;font-family:var(--mono)}
-.boss-pill{background:rgba(255,107,157,.08);color:var(--acc2);border:1px solid rgba(255,107,157,.3);border-radius:100px;padding:3px 10px;font-size:.7rem;font-weight:900}
-.check{width:28px;height:28px;border-radius:50%;background:rgba(0,212,255,.12);color:var(--acc3);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900}
-.lock{width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--txt2);display:flex;align-items:center;justify-content:center;font-size:.82rem}
+/* ── GL Canvas ── */
+.gl-canvas{width:100%;border-radius:10px;background:#06060f;}
 
-/* Lesson body */
-.lesson-body{display:none;border-top:1px solid var(--border)}
-.lesson.active .lesson-body{display:block}
+/* ── Buttons row ── */
+.btns{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 7px;}
+.btn{border-radius:20px;padding:5px 15px;font-size:12px;cursor:pointer;
+  transition:.15s;border:1px solid var(--border);background:transparent;color:var(--muted);}
+.btn.on{background:var(--gold);color:#1a1200;border:none;font-weight:500;}
+.btn.on.g{background:var(--green);color:#021a08;}
+.btn.on.p{background:var(--purple);color:#fff;}
+.btn.on.t{background:var(--teal);color:#001a18;}
+.btn.on.pk{background:var(--pink);color:#fff;}
 
-/* Tabs */
-.tab-bar{display:flex;gap:3px;padding:12px 16px 0;background:var(--bg2)}
-.tab{padding:8px 16px;border-radius:10px 10px 0 0;font-size:.78rem;font-weight:800;cursor:pointer;transition:.15s;color:var(--txt2);border:1px solid transparent;border-bottom:none}
-.tab.on{background:var(--card);color:var(--txt);border-color:var(--border)}
-.tab-content{padding:20px}
-.tab-panel{display:none}
-.tab-panel.on{display:block}
+/* ── Slider ── */
+.sl-row{display:flex;align-items:center;gap:10px;margin-top:4px;}
+.sl-lbl{font-size:12px;color:var(--muted);white-space:nowrap;}
+input[type=range]{-webkit-appearance:none;flex:1;height:4px;border-radius:2px;
+  background:#1e1e3a;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg);}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
+  background:var(--gold);cursor:pointer;border:2px solid var(--bg);}
+.sl-val{font-size:12px;font-weight:500;min-width:28px;text-align:right;}
 
-/* Story */
-.story-box{background:linear-gradient(135deg,rgba(255,217,61,.04),rgba(255,107,157,.03));border:1px solid rgba(255,217,61,.15);border-radius:18px;padding:22px;margin-bottom:18px;line-height:1.85;font-size:.93rem}
-.big-emoji{font-size:2.8rem;display:block;margin-bottom:12px;animation:bounce .8s ease infinite alternate}
-@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-6px)}}
-.hl{background:rgba(255,217,61,.15);color:var(--acc);border-radius:4px;padding:1px 7px;font-weight:900}
-.hl2{background:rgba(255,107,157,.12);color:var(--acc2);border-radius:4px;padding:1px 7px;font-weight:900}
-.hl3{background:rgba(0,212,255,.1);color:var(--acc3);border-radius:4px;padding:1px 7px;font-weight:900}
-.school-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(124,109,250,.08);border:1px solid rgba(124,109,250,.2);border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:800;color:var(--acc4);margin-top:14px}
+/* ── Status bar ── */
+.statusbar{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.statusbar .hi{color:var(--gold);}
 
-/* Code */
-.code-wrap{background:#060510;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:14px 0;position:relative}
-.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border)}
-.code-lang{font-size:.7rem;font-weight:800;color:var(--txt2);font-family:var(--mono);letter-spacing:.05em}
-.copy-btn{background:none;border:1px solid var(--border);color:var(--txt2);padding:3px 10px;border-radius:6px;font-size:.68rem;font-weight:800;cursor:pointer;transition:.15s;font-family:var(--mono)}
-.copy-btn:hover{color:var(--acc);border-color:var(--acc)}
-pre{padding:16px;font-family:var(--mono);font-size:.78rem;line-height:1.75;overflow-x:auto;white-space:pre}
-.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}
-.num{color:var(--acc)}.cm{color:#3d3a5e}.type{color:var(--acc3)}
-.var{color:#f07178}
+/* ── Story text ── */
+.story{font-size:13px;line-height:1.85;color:var(--muted);}
+.story strong{color:var(--text);font-weight:500;}
+.code-box{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:9px;
+  padding:13px;font-size:11px;font-family:'SF Mono','Fira Code',monospace;color:#8ab4f8;
+  line-height:1.8;overflow-x:auto;margin:10px 0;}
+.code-box .kw{color:#c792ea}.code-box .cm{color:#546e7a}.code-box .nm{color:#f78c6c}
 
-/* Demo */
-.demo-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px}
-.demo-top{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--border)}
-.demo-label{font-size:.7rem;font-weight:800;color:var(--txt2);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--acc2);box-shadow:0 0 6px var(--acc2);animation:blink 1.2s infinite}
-@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
-canvas{display:block;width:100%}
-
-/* Controls */
-.ctrl-row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
-.ctrl-btn{background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:7px 16px;border-radius:100px;font-family:var(--font);font-size:.8rem;font-weight:800;cursor:pointer;transition:.2s}
-.ctrl-btn:hover{border-color:var(--acc);color:var(--acc)}
-.ctrl-btn.on{background:rgba(255,217,61,.1);border-color:var(--acc);color:var(--acc)}
-.slider-row{display:flex;align-items:center;gap:12px;margin:7px 0}
-.slider-label{font-size:.78rem;font-weight:800;color:var(--txt2);min-width:90px}
-input[type=range]{flex:1;accent-color:var(--acc);height:4px}
-.slider-val{font-family:var(--mono);font-size:.78rem;color:var(--acc);min-width:42px;text-align:right}
-
-/* Challenge */
-.quiz-box{background:rgba(255,107,157,.04);border:1px solid rgba(255,107,157,.18);border-radius:16px;padding:20px;margin-top:18px}
-.quiz-title{font-size:.82rem;font-weight:900;color:var(--acc2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.quiz-q{font-size:.9rem;line-height:1.6;color:var(--txt);margin-bottom:14px;font-weight:700}
-.opts{display:grid;gap:8px}
-.opt{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 16px;cursor:pointer;font-size:.86rem;font-weight:700;transition:.2s;display:flex;align-items:center;gap:10px;text-align:left}
-.opt:hover{border-color:var(--acc);background:rgba(255,217,61,.04)}
-.opt.correct{border-color:var(--acc3);background:rgba(0,212,255,.06);color:var(--acc3);pointer-events:none}
-.opt.wrong{border-color:var(--acc2);background:rgba(255,107,157,.06);color:var(--acc2);pointer-events:none}
-.opt.disabled{pointer-events:none;opacity:.6}
-.opt-k{width:24px;height:24px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:900;font-family:var(--mono);flex-shrink:0}
-.explain-box{margin-top:12px;padding:12px 16px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.18);border-radius:10px;font-size:.83rem;line-height:1.65;color:var(--txt2);display:none}
-
-/* Complete */
-.done-btn{width:100%;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#07080f;border:none;border-radius:100px;padding:13px;font-family:var(--font);font-size:.95rem;font-weight:900;cursor:pointer;margin-top:16px;transition:.25s;display:flex;align-items:center;justify-content:center;gap:8px}
-.done-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,217,61,.35)}
-.done-btn:disabled{opacity:.35;cursor:default;transform:none;box-shadow:none}
-
-/* Connector */
-.conn{width:2px;height:10px;background:linear-gradient(var(--border),transparent);margin:0 auto -1px;position:relative;left:22px}
-
-/* Toast & XP popup */
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--acc);border-radius:100px;padding:11px 28px;font-weight:800;font-size:.88rem;color:var(--acc);z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(255,217,61,.2);white-space:nowrap}
-.toast.show{transform:translateX(-50%) translateY(0)}
-@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.2)}}
-.xp-pop{position:fixed;font-family:var(--mono);font-weight:900;font-size:1.3rem;color:var(--acc);pointer-events:none;z-index:999;text-shadow:0 0 20px var(--acc);animation:floatUp .9s ease-out forwards}
-
-/* ── Completion Banner ── */
-.comp-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(4,2,14,.88);backdrop-filter:blur(18px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
-.comp-overlay.show{display:flex;animation:fadeInComp .5s ease}
-@keyframes fadeInComp{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
-.comp-title{font-size:2.2rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}
-.comp-sub{font-size:.9rem;color:var(--txt2);margin-bottom:24px;line-height:1.6}
-.comp-trophy{font-size:4rem;margin-bottom:12px;animation:trophy-bob .8s ease infinite alternate}
-@keyframes trophy-bob{from{transform:translateY(0) rotate(-5deg)}to{transform:translateY(-10px) rotate(5deg)}}
-.comp-next-btn{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#050210;border:none;border-radius:100px;padding:14px 32px;font-family:var(--font);font-size:1rem;font-weight:900;cursor:pointer;-webkit-appearance:none;margin-bottom:12px;transition:.2s;box-shadow:0 6px 28px rgba(var(--acc-rgb),.4)}
-.comp-next-btn:active{opacity:.85;transform:scale(.97)}
-.comp-map-btn{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:var(--txt2);border-radius:100px;padding:10px 24px;font-family:var(--font);font-size:.85rem;font-weight:800;cursor:pointer;-webkit-appearance:none;transition:.2s}
-.comp-map-btn:active{opacity:.7}
-.comp-stars{font-size:2rem;letter-spacing:6px;margin-bottom:16px;animation:stars-in .6s .3s ease both}
-@keyframes stars-in{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
-/* Firework particles */
-.fw-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.fw{position:absolute;border-radius:50%;animation:fwFly var(--d,.8s) var(--dl,0s) ease-out forwards}
-@keyframes fwFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx,0px),var(--ty,-80px)) scale(0);opacity:0}}
-
-/* ── Font size boost ── */
-html{font-size:17px}
-.lesson-title{font-size:1.05rem!important}
-.lesson-sub{font-size:.85rem!important}
-.story-box{font-size:1rem!important;line-height:1.9!important}
-.quiz-q{font-size:.98rem!important;line-height:1.7!important}
-.opt{font-size:.95rem!important}
-.done-btn{font-size:1rem!important}
-.xp-pill{font-size:.78rem!important}
-.tab{font-size:.85rem!important}
-.school-badge{font-size:.84rem!important}
-.code-wrap pre{font-size:.82rem!important}
-.map-title{font-size:.82rem!important}
+/* ── Chapter dividers ── */
+.ch-title{width:100%;max-width:720px;font-size:10px;letter-spacing:.12em;
+  color:var(--muted);text-transform:uppercase;padding-left:4px;}
 </style>
 </head>
 <body>
 
-<!-- Ambient orbs -->
-<div class="stars" id="stars"></div>
-<div class="orb" style="width:300px;height:300px;background:rgba(255,217,61,.06);top:10%;left:5%;--d:18s;--tx:60px;--ty:30px"></div>
-<div class="orb" style="width:250px;height:250px;background:rgba(255,107,157,.05);bottom:20%;right:8%;--d:22s;--tx:-50px;--ty:-40px"></div>
-<div class="orb" style="width:200px;height:200px;background:rgba(0,212,255,.04);top:50%;left:50%;--d:15s;--tx:30px;--ty:-60px"></div>
+<!-- ═══════════ MAP ═══════════ -->
+<div id="mapWrap"><canvas id="mapCanvas"></canvas></div>
 
-<header>
-  <a href="opengl-map.html" class="back-btn">🗺️ 地圖</a>
-  <a href="index.html" class="back-btn">🏠 首頁</a>
-  <span class="header-title">💡 光之城</span>
-  <div class="xp-bar">
-    <span style="color:var(--txt2)">⚡</span>
-    <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
-    <span class="xp-total" id="xp-total">0/660</span>
+
+<body>
+<div style="width:100%;max-width:720px;margin-bottom:4px;">
+  <a href="opengl-map.html" style="font-size:12px;color:#7070a0;text-decoration:none;">← 回到地圖</a>
+</div>
+<div class="ch-title">☀️ 光之城 — 第二章</div>
+
+<!-- 2-1 completed -->
+<div class="card">
+  <div class="hdr">
+    <div class="icon done">✓</div>
+    <div class="ttl"><h2>2-1 顏色的本質 — 光的乘法</h2><p>光與物體顏色相乘，決定你看到什麼</p></div>
+    <div class="badge">+80</div><div class="chk">✓</div>
   </div>
-</header>
-
-<section class="hero">
-  <div class="tower-badge">💡 城堡2 · 光之城 · Lighting</div>
-  <h1>模擬<span>太陽</span>的力量</h1>
-  <p>光讓世界看起來真實。沒有光，3D 物體只是一個沒有靈魂的輪廓。學會光照，你就掌握了讓畫面「活起來」的秘密 ✨</p>
-  <div class="stats-row">
-    <div class="stat-chip"><div class="num" id="done-count">0</div><div class="lbl">已完成</div></div>
-    <div class="stat-chip"><div class="num">6</div><div class="lbl">關卡數</div></div>
-    <div class="stat-chip"><div class="num">660</div><div class="lbl">總 XP</div></div>
-    <div class="stat-chip"><div class="num">👑</div><div class="lbl">Boss 1關</div></div>
-  </div>
-</section>
-
-<div class="chapter-map">
-  <div class="map-title">📍 關卡地圖</div>
-  <div id="lesson-list"></div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- 2-2 Phong -->
+<div class="card" id="c22">
+  <div class="hdr">
+    <div class="icon done">✓</div>
+    <div class="ttl"><h2>2-2 基礎光照 — Phong 的三層魔法</h2><p>Ambient + Diffuse + Specular = 真實感</p></div>
+    <div class="badge">+120</div><div class="chk">✓</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-card="c22" data-p="story"><span>📖</span>故事</div>
+    <div class="tab on" data-card="c22" data-p="inter"><span>🎮</span>互動</div>
+    <div class="tab" data-card="c22" data-p="code"><span>💻</span>程式碼</div>
+  </div>
+  <div class="panel" id="c22-story">
+    <div class="story"><strong>1975 年，Bui Tuong Phong</strong> 將光拆成三層：<br><br>
+    <strong>Ambient</strong> 環境光 — 場景底色，防止全黑。<br>
+    <strong>Diffuse</strong> 漫反射 — 角度越正對光源越亮。<br>
+    <strong>Specular</strong> 高光 — 鏡面反射亮點。</div>
+  </div>
+  <div class="panel on" id="c22-inter">
+    <div class="panel-lbl"><span class="dot"></span>PHONG 光照 — 即時球體</div>
+    <canvas class="gl-canvas" id="cv22" height="360"></canvas>
+    <div class="btns" id="b22">
+      <button class="btn on" data-m="all">全部三層</button>
+      <button class="btn" data-m="ambient">只有 Ambient</button>
+      <button class="btn" data-m="diffuse">只有 Diffuse</button>
+      <button class="btn" data-m="specular">只有 Specular</button>
+    </div>
+    <div class="sl-row">
+      <span class="sl-lbl">✦ 光澤度</span>
+      <input type="range" id="s22" min="1" max="128" value="32">
+      <span class="sl-val" id="sv22">32</span>
+    </div>
+  </div>
+  <div class="panel" id="c22-code">
+    <div class="code-box"><span class="kw">vec3</span> N=normalize(vN), L=normalize(uLight-vP), V=normalize(uEye-vP), R=reflect(-L,N);<br>
+<span class="kw">vec3</span> ambient  = <span class="nm">0.18</span> * objColor;<br>
+<span class="kw">vec3</span> diffuse  = max(dot(N,L),<span class="nm">0.0</span>) * objColor;<br>
+<span class="kw">float</span> spec    = pow(max(dot(V,R),<span class="nm">0.0</span>), uShininess);<br>
+gl_FragColor   = <span class="kw">vec4</span>(ambient+diffuse+spec*<span class="kw">vec3</span>(<span class="nm">1.0</span>),<span class="nm">1.0</span>);</div>
+  </div>
+</div>
+
+<!-- 2-3 Materials -->
+<div class="card" id="c23">
+  <div class="hdr">
+    <div class="icon ch2">🪨</div>
+    <div class="ttl"><h2>2-3 材質系統 — 物體的性格</h2><p>Material struct：不同物體對光的反應</p></div>
+    <div class="badge">+100</div><div class="chk">✓</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-card="c23" data-p="story"><span>📖</span>故事</div>
+    <div class="tab on" data-card="c23" data-p="inter"><span>🎮</span>互動</div>
+    <div class="tab" data-card="c23" data-p="code"><span>💻</span>程式碼</div>
+  </div>
+  <div class="panel" id="c23-story">
+    <div class="story">材質決定物體<strong>如何對光反應</strong>。相同的光源，不同材質呈現截然不同的視覺效果。<br><br>
+    <strong>石頭</strong>：低反射、無光澤。<strong>鉻金屬</strong>：高 specular、強反光。<strong>金</strong>：暖色 diffuse、中等高光。</div>
+  </div>
+  <div class="panel on" id="c23-inter">
+    <div class="panel-lbl"><span class="dot"></span>材質切換 — 感受不同材料</div>
+    <canvas class="gl-canvas" id="cv23" height="340"></canvas>
+    <div class="btns" id="b23">
+      <button class="btn on" data-m="stone">🪨 石頭</button>
+      <button class="btn" data-m="chrome">🪙 鉻金屬</button>
+      <button class="btn" data-m="gold">🥇 金</button>
+      <button class="btn" data-m="jade">💎 翡翠</button>
+      <button class="btn" data-m="wood">🪵 木頭</button>
+    </div>
+  </div>
+  <div class="panel" id="c23-code">
+    <div class="code-box"><span class="kw">struct</span> Material {<br>
+  <span class="kw">vec3</span> ambient, diffuse, specular;<br>
+  <span class="kw">float</span> shininess;<br>
+};<br><span class="cm">// Chrome: {0.25,0.25,0.28}, {0.5,0.5,0.6}, {0.9,0.9,0.9}, 128.0</span><br>
+<span class="cm">// Gold:   {0.25,0.2,0.07}, {0.75,0.6,0.22}, {0.63,0.56,0.37}, 51.2</span></div>
+  </div>
+</div>
+
+<!-- 2-5 Light types -->
+<div class="card" id="c25">
+  <div class="hdr">
+    <div class="icon ch2">💡</div>
+    <div class="ttl"><h2>2-5 光源種類 — 三種不同的燈</h2><p>方向光、點光源、聚光燈的物理原理</p></div>
+    <div class="badge">+120</div><div class="chk">✓</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-card="c25" data-p="story"><span>📖</span>故事</div>
+    <div class="tab on" data-card="c25" data-p="inter"><span>🎮</span>互動</div>
+    <div class="tab" data-card="c25" data-p="code"><span>💻</span>程式碼</div>
+  </div>
+  <div class="panel" id="c25-story">
+    <div class="story"><strong>方向光（Directional）</strong>：無限遠，所有光線平行，如太陽。<br><br>
+    <strong>點光源（Point）</strong>：從一點向四面八方發散，有衰減公式。<br><br>
+    <strong>聚光燈（Spotlight）</strong>：帶有方向和錐角，像手電筒。</div>
+  </div>
+  <div class="panel on" id="c25-inter">
+    <div class="panel-lbl"><span class="dot"></span>三種光源比較</div>
+    <canvas class="gl-canvas" id="cv25" height="340"></canvas>
+    <div class="btns" id="b25">
+      <button class="btn on" data-m="dir">☀️ 方向光</button>
+      <button class="btn" data-m="point">💡 點光源</button>
+      <button class="btn" data-m="spot">🔦 聚光燈</button>
+    </div>
+  </div>
+  <div class="panel" id="c25-code">
+    <div class="code-box"><span class="cm">// Point attenuation</span><br>
+<span class="kw">float</span> d = length(uLight - vP);<br>
+<span class="kw">float</span> att = <span class="nm">1.0</span> / (<span class="nm">1.0</span>+<span class="nm">0.09</span>*d+<span class="nm">0.032</span>*d*d);<br><br>
+<span class="cm">// Spotlight</span><br>
+<span class="kw">float</span> theta = dot(L, normalize(-uSpotDir));<br>
+<span class="kw">float</span> edge = smoothstep(outerCut, innerCut, theta);</div>
+  </div>
+</div>
+
+<!-- 2-6 City Boss -->
+<div class="card boss" id="c26">
+  <div class="hdr">
+    <div class="icon boss-ico">🌃</div>
+    <div class="ttl"><h2>2-6 多光源 — 城市夜景 Boss！</h2><p>Boss 關卡：結合所有光照，渲染完整夜景</p></div>
+    <div class="badge boss-badge">BOSS</div><div class="badge">+120</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-card="c26" data-p="story"><span>📖</span>故事</div>
+    <div class="tab on" data-card="c26" data-p="inter"><span>🎮</span>互動</div>
+    <div class="tab" data-card="c26" data-p="code"><span>💻</span>程式碼</div>
+  </div>
+  <div class="panel" id="c26-story">
+    <div class="story">真實場景包含<strong>數十乃至數百個光源</strong>。多光源疊加，每個光源都計算 Phong，最後累加。<br><br>
+    這個 Boss 關要你感受多光源帶來的城市氛圍：月光作環境光、路燈是點光源、手電筒是聚光燈。</div>
+  </div>
+  <div class="panel on" id="c26-inter">
+    <div class="panel-lbl"><span class="dot"></span>BOSS：夜晚城市 — 多光源場景</div>
+    <canvas id="cv26" class="gl-canvas" height="340"></canvas>
+    <div class="statusbar">光源數：<span class="hi" id="c26lights">3</span> &nbsp; 月光：<span class="hi" id="c26moon">ON</span> &nbsp; 手電筒：<span class="hi" id="c26flash">OFF</span></div>
+    <div class="btns" id="b26">
+      <button class="btn on" data-m="moon">🌙 月光</button>
+      <button class="btn" data-m="flash">🔦 手電筒</button>
+      <button class="btn" data-m="lamp">+ 增加路燈</button>
+    </div>
+  </div>
+  <div class="panel" id="c26-code">
+    <div class="code-box"><span class="kw">vec3</span> result = ambient;<br>
+<span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">0</span>; i&lt;uNumLights; i++){<br>
+  result += CalcPointLight(uLights[i], N, vP, V);<br>
+}<br>
+result += CalcSpotLight(uFlashlight, N, vP, V);</div>
+  </div>
+</div>
+
 
 <script>
-
-
-// ── Canvas DPI fix for retina/iOS ──
-function setupCanvas(canvas, w, h) {
-  var dpr = window.devicePixelRatio || 1;
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
-  canvas.style.width = w + 'px';
-  canvas.style.height = h + 'px';
-  var ctx = canvas.getContext('2d');
-  if(ctx) ctx.scale(dpr, dpr);
-  return canvas;
-}
-function makeCanvas(w, h) {
-  var cv = document.createElement('canvas');
-  return setupCanvas(cv, w, h);
-}
-
-
-// ── Managed Animation Frame ──
-var _rafIds = {};
-function managedRAF(key, fn) {
-  if(_rafIds[key]) cancelAnimationFrame(_rafIds[key]);
-  function loop() {
-    _rafIds[key] = requestAnimationFrame(function() {
-      // Check if the canvas still exists in DOM
-      var el = document.getElementById(key);
-      if(!el || !el.isConnected) {
-        delete _rafIds[key];
-        return;
-      }
-      fn();
-      loop();
-    });
+// ════════════════════════════════════════════
+//  SHARED UTILITIES
+// ════════════════════════════════════════════
+const M = {
+  persp(fov,asp,n,f){
+    const t=Math.tan(fov/2),d=f-n,m=new Float32Array(16);
+    m[0]=1/(t*asp);m[5]=1/t;m[10]=-(f+n)/d;m[11]=-1;m[14]=-2*f*n/d;return m;
+  },
+  lookAt(ex,ey,ez,cx=0,cy=0,cz=0){
+    let fx=cx-ex,fy=cy-ey,fz=cz-ez;
+    const fl=Math.hypot(fx,fy,fz);fx/=fl;fy/=fl;fz/=fl;
+    let rx=fy*0-fz*1,ry=fz*0-fx*0,rz=fx*1-fy*0;
+    const rl=Math.hypot(rx,ry,rz);rx/=rl;ry/=rl;rz/=rl;
+    const ux=ry*fz-rz*fy,uy=rz*fx-rx*fz,uz=rx*fy-ry*fx;
+    const m=new Float32Array(16);
+    m[0]=rx;m[4]=ry;m[8]=rz;m[12]=-(rx*ex+ry*ey+rz*ez);
+    m[1]=ux;m[5]=uy;m[9]=uz;m[13]=-(ux*ex+uy*ey+uz*ez);
+    m[2]=-fx;m[6]=-fy;m[10]=-fz;m[14]=(fx*ex+fy*ey+fz*ez);
+    m[15]=1;return m;
+  },
+  mul(a,b){
+    const m=new Float32Array(16);
+    for(let i=0;i<4;i++)for(let j=0;j<4;j++){
+      let s=0;for(let k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];m[i+j*4]=s;
+    }return m;
   }
-  loop();
-}
-function stopRAF(key) {
-  if(_rafIds[key]) { cancelAnimationFrame(_rafIds[key]); delete _rafIds[key]; }
-}
-function stopAllRAF() {
-  Object.keys(_rafIds).forEach(function(k) { stopRAF(k); });
-}
+};
 
-// ── iOS Safari Fixes ──
-// roundRect polyfill
-if(!CanvasRenderingContext2D.prototype.roundRect){
-  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
-    const R=Math.min(typeof r==='number'?r:r[0],w/2,h/2);
-    this.beginPath();this.moveTo(x+R,y);this.lineTo(x+w-R,y);
-    this.arcTo(x+w,y,x+w,y+R,R);this.lineTo(x+w,y+h-R);
-    this.arcTo(x+w,y+h,x+w-R,y+h,R);this.lineTo(x+R,y+h);
-    this.arcTo(x,y+h,x,y+h-R,R);this.lineTo(x,y+R);
-    this.arcTo(x,y,x+R,y,R);this.closePath();
-  };
-}
-// WebGL context pool - prevents iOS 8-context limit crash
-const _glPool = {};
-function safeGL(cv) {
-  if(!cv) return null;
-  const id = cv.id || 'cv_'+Math.random();
-  cv.id = id;
-  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
-  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
-  if(!gl) return null;
-  _glPool[id] = gl;
-  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+function mkGL(id){
+  const c=document.getElementById(id);
+  const dpr=window.devicePixelRatio||1;
+  const pw=c.parentElement.clientWidth;
+  const ph=parseInt(c.getAttribute('height')||340);
+  c.width=Math.round(pw*dpr);
+  c.height=Math.round(ph*dpr);
+  c.style.width='100%';c.style.height=ph+'px';
+  const gl=c.getContext('webgl',{stencil:true});
+  if(!gl)return null;
+  gl._canvas=c;gl._dpr=dpr;
   return gl;
 }
-
-// ══════════════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════════════
-const LESSONS = [
-{
-  id:'l1',num:'2-1',icon:'🌈',title:'顏色的本質 — 光的乘法',
-  sub:'光與物體顏色相乘，決定你看到什麼',xp:80,type:'normal',
-  school:'物理：光的三原色 RGB，反射與吸收',
-  story:`<span class="big-emoji">🌈</span>
-你知道為什麼蘋果是紅色的嗎？<br><br>
-因為蘋果<span class="hl">吸收了藍光和綠光</span>，只把<span class="hl">紅光反射</span>回你的眼睛！<br><br>
-在 OpenGL 裡，顏色是這樣計算的：<br>
-<span class="hl2">物體最終顏色 = 光源顏色 × 物體顏色</span><br><br>
-例如：白光 <code>(1,1,1)</code> 照到紅蘋果 <code>(1,0,0)</code><br>
-→ 結果 = <code>(1×1, 1×0, 1×0)</code> = <span class="hl">(1,0,0)</span> 還是紅色！✅<br><br>
-但如果用紅光 <code>(1,0,0)</code> 照到藍球 <code>(0,0,1)</code><br>
-→ 結果 = <code>(1×0, 0×0, 0×1)</code> = <span class="hl2">(0,0,0)</span> 全黑！<br>
-因為藍球沒有紅色可以反射 🙈`,
-  quiz:{q:'黃光 (1,1,0) 照到綠色物體 (0,1,0)，結果是什麼顏色？',
-    opts:['黃色 (1,1,0)','綠色 (0,1,0) ✓','黑色 (0,0,0)','白色 (1,1,1)'],
-    ans:1,explain:'黃光(1,1,0) × 綠色(0,1,0) = (0×1, 1×1, 0×0) = (0,1,0) 綠色！綠色物體反射綠光，吸收紅光 🌿'}
-},
-{
-  id:'l2',num:'2-2',icon:'💫',title:'基礎光照 — Phong 的三層魔法',
-  sub:'Ambient + Diffuse + Specular = 真實感',xp:120,type:'normal',
-  school:'物理：漫反射 Lambert 定律，鏡面反射 Snell 定律',
-  story:`<span class="big-emoji">💫</span>
-真實的光照有三個成分，就像三層蛋糕！🎂<br><br>
-🌫️ <span class="hl">Ambient（環境光）</span><br>
-就算躲在陰影裡也能看到東西，因為光會從四面八方反彈。<br>
-→ 一個固定的底色亮度，讓物體不會全黑。<br><br>
-☀️ <span class="hl2">Diffuse（漫反射）</span><br>
-光線直射的地方比較亮，側邊比較暗。<br>
-→ 用光線方向 和 法向量 的夾角算出來（<code>dot product</code>！）<br><br>
-✨ <span class="hl3">Specular（鏡面反射）</span><br>
-光滑表面上那個閃亮的小白點。<br>
-→ 看你視角和反射方向夠不夠接近。<br><br>
-三個加起來 = <span class="hl">Phong 光照模型</span>，是遊戲史上最重要的公式之一！`,
-  quiz:{q:'法向量（Normal）在光照裡是做什麼用的？',
-    opts:['讓物體變透明','告訴我們表面「面向哪裡」，用來算光照角度','讓物體旋轉','決定物體的顏色'],
-    ans:1,explain:'法向量垂直於表面，告訴我們「這個面朝哪個方向」。光線和法向量夾角越小，漫反射越亮！這就是 Lambert 餘弦定律 cos θ 🌞'}
-},
-{
-  id:'l3',num:'2-3',icon:'🧪',title:'材質系統 — 物體的性格',
-  sub:'Material struct：不同物體對光的反應',xp:100,type:'normal',
-  school:'化學：不同材料的表面分子結構決定光學性質',
-  story:`<span class="big-emoji">🧪</span>
-為什麼金屬、橡皮、皮膚在同樣的燈光下看起來完全不同？<br><br>
-因為它們有不同的<span class="hl">材質 Material</span>！<br><br>
-每個材質有三個參數：<br>
-<span class="hl">ambient</span> — 環境光反射顏色（底色有多亮）<br>
-<span class="hl2">diffuse</span> — 漫反射顏色（正面受光的顏色）<br>
-<span class="hl3">specular</span> — 鏡面反射顏色（閃光點是什麼顏色）<br>
-<span class="hl">shininess</span> — 光澤度（閃光點有多小多亮）<br><br>
-低 shininess = 橡皮（大片的柔和光）<br>
-高 shininess = 鋼鐵（很小的超亮白點）<br><br>
-就像每種材料的「光照性格"一樣！`,
-  quiz:{q:'shininess 值越高，鏡面反射的光點會變成什麼樣？',
-    opts:['光點變大變柔和','光點變小但更亮更集中','光點消失','光點變紅色'],
-    ans:1,explain:'shininess 越高，指數越大，只有角度非常接近的方向才能看到反射 → 光點小而亮，就像拋光金屬表面的那個小亮點！✨'}
-},
-{
-  id:'l4',num:'2-4',icon:'🗺️',title:'光照貼圖 — 細節的秘密',
-  sub:'Diffuse Map + Specular Map：讓材質有細節',xp:120,type:'normal',
-  school:'化學：氧化反應讓金屬表面局部改變光學特性',
-  story:`<span class="big-emoji">🗺️</span>
-如果整個物體都用同一個材質，看起來很假對吧？<br>
-真實的東西，不同部位有不同的材質！<br><br>
-比如一個箱子：<br>
-🪵 木頭部分 → 粗糙，幾乎沒有鏡面反射<br>
-⚙️ 鐵鍊部分 → 光滑，有明顯鏡面反射<br><br>
-這就要用到<span class="hl">光照貼圖</span>！<br><br>
-📷 <span class="hl">Diffuse Map</span>（漫反射貼圖）<br>
-一張圖片，記錄每個位置的「底色」<br><br>
-✨ <span class="hl2">Specular Map</span>（鏡面貼圖）<br>
-一張圖片，記錄每個位置「有多光滑」<br>
-白色 = 超光滑，黑色 = 完全粗糙<br><br>
-兩張貼圖合起來，同一個物體就能有超豐富的細節！`,
-  quiz:{q:'Specular Map 上面，鐵製鉚釘的部位應該是什麼顏色？',
-    opts:['黑色（鐵很粗糙）','白色（鐵很光滑有反射）','紅色（金屬是紅的）','透明'],
-    ans:1,explain:'Specular Map 裡，越白 = 越光滑 = 越多鏡面反射！鐵釘是金屬，高反射率 → 白色。木頭粗糙，低反射 → 黑色或深灰 🔩'}
-},
-{
-  id:'l5',num:'2-5',icon:'🔦',title:'光源種類 — 三種不同的燈',
-  sub:'方向光、點光源、聚光燈的物理原理',xp:120,type:'normal',
-  school:'物理：光的直線傳播、衰減定律、立體角',
-  story:`<span class="big-emoji">🔦</span>
-世界上的光源有三種基本類型：<br><br>
-☀️ <span class="hl">方向光 Directional Light</span><br>
-無限遠的光源（太陽）。光線是平行的，沒有衰減。<br>
-「太陽不管你在地球哪個角落，光線方向一樣」<br><br>
-💡 <span class="hl2">點光源 Point Light</span><br>
-從一個點向四面八方發光（電燈泡）。距離越遠越暗！<br>
-衰減公式：<code>1 / (k₀ + k₁d + k₂d²)</code><br>
-d = 距離，越遠越暗 📉<br><br>
-🔦 <span class="hl3">聚光燈 Spotlight</span><br>
-有方向的圓錐形光束（手電筒、舞台燈）。<br>
-有內圈（全亮）和外圈（漸暗邊緣）！<br><br>
-三種組合就能做出幾乎所有現實中的光線效果 💪`,
-  quiz:{q:'為什麼點光源距離越遠越暗，要用 1/d² 而不是 1/d？',
-    opts:['因為 d² 計算比較簡單','光能量散布在球面上，球面積 = 4πr²，所以是距離平方的倒數','隨便選的','因為遠的地方空氣比較多'],
-    ans:1,explain:'光往四面八方擴散，某個距離 d 的球面積是 4πd²，相同能量分散到更大面積上，所以每個點拿到的能量是 1/d² — 這就是物理的反平方定律！🌟'}
-},
-{
-  id:'l6',num:'2-6',icon:'🌃',title:'多光源 — 城市夜景 Boss！',
-  sub:'Boss 關卡：結合所有光照，渲染完整夜景',xp:120,type:'boss',
-  school:'物理：疊加原理 — 多個光源的貢獻直接相加',
-  story:`<span class="big-emoji">🌃</span>
-恭喜抵達 <span class="hl2">Boss 關卡</span>！👑<br><br>
-真實的場景不只有一個光源！<br>
-一個夜晚的城市街道可能有：<br>
-☀️ 一個月光（方向光）<br>
-💡 幾十個路燈（點光源）<br>
-🔦 一個手電筒（聚光燈）<br><br>
-OpenGL 的做法很簡單粗暴但超有效：<br>
-<span class="hl">把每個光源的貢獻全部加起來！</span><br><br>
-<code>最終顏色 = 方向光效果 + 點光1 + 點光2 + ... + 聚光</code><br><br>
-這就是<span class="hl2">光照疊加原理</span>！在物理上，多個光源的電場可以直接疊加，OpenGL 也一樣！<br><br>
-用一個 for 迴圈跑過所有光源，累加結果，就完成了！`,
-  quiz:{q:'場景裡有 1 個方向光 + 4 個點光源 + 1 個聚光，最終片段著色器要計算幾次光照？',
-    opts:['只算1次，取平均','6次，每個光源各算一次，然後加起來','先算最亮的就好','不知道，讓 GPU 自己決定'],
-    ans:1,explain:'對！每個光源都要單獨算出它的 ambient + diffuse + specular，然後把所有結果加起來。6個光源 = 6次計算累加。這就是為什麼多光源場景需要優化！🔆'}
-}
-];
-
-const TOTAL_XP = LESSONS.reduce((s,l)=>s+l.xp,0);
-let earned = JSON.parse(localStorage.getItem('tower2_done')||'[]');
-let current = null;
-
-// Stars
-function makeStars(){
-  const c=document.getElementById('stars');
-  for(let i=0;i<100;i++){
-    const s=document.createElement('div');
-    s.className='star';
-    const sz=Math.random()<.3?2:1;
-    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;background:#fff;--d:${2+Math.random()*5}s;--dl:${Math.random()*5}s`;
-    c.appendChild(s);
-  }
-}
-makeStars();
-
-// XP
-function updateXP(){
-  const total=earned.reduce((s,id)=>{const l=LESSONS.find(x=>x.id===id);return s+(l?l.xp:0);},0);
-  const pct=(total/TOTAL_XP*100).toFixed(1);
-  document.getElementById('xp-fill').style.width=pct+'%';
-  document.getElementById('xp-total').textContent=total+'/'+TOTAL_XP;
-  document.getElementById('done-count').textContent=earned.length;
-}
-
-function showXPPop(xp,el){
-  const r=el.getBoundingClientRect();
-  const d=document.createElement('div');
-  d.className='xp-pop';d.textContent='+'+xp+' ⚡';
-  d.style.cssText=`left:${r.left+r.width/2-30}px;top:${r.top+window.scrollY-10}px`;
-  document.body.appendChild(d);setTimeout(()=>d.remove(),950);
-}
-
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2600);
-}
-
-// Render
-function render(){
-  const list=document.getElementById('lesson-list');
-  list.innerHTML='';
-  LESSONS.forEach((les,idx)=>{
-    const done=earned.includes(les.id);
-    const active=current===les.id;
-    const prevDone=idx===0||earned.includes(LESSONS[idx-1].id);
-    const locked=!done&&!active&&!prevDone;
-    const boss=les.type==='boss';
-
-    const div=document.createElement('div');
-    div.className=`lesson${done?' done':''}${active?' active':''}${locked?' locked':''}${boss?' boss':''}`;
-    div.id='L'+les.id;
-
-    const iconCls=done?'icon-done':boss?'icon-boss':locked?'icon-locked':'icon-normal';
-    const iconTxt=done?'✓':les.icon;
-    const rightHTML=(boss?`<span class="boss-pill">👑 BOSS</span>`:'')
-      +`<span class="xp-pill">+${les.xp}</span>`
-      +(done?`<div class="check">✓</div>`:locked?`<div class="lock">🔒</div>`:'');
-
-    div.innerHTML=`
-      <div class="lesson-header">
-        <div class="lesson-icon ${iconCls}">${iconTxt}</div>
-        <div class="lesson-info">
-          <div class="lesson-title">${les.num} ${les.title}</div>
-          <div class="lesson-subtitle">${les.sub}</div>
-        </div>
-        <div class="lesson-right">${rightHTML}</div>
-      </div>
-      <div class="lesson-body">${active?buildBody(les,done):''}</div>`;
-
-    if(!locked) div.querySelector('.lesson-header').addEventListener('click',()=>toggle(les.id));
-    list.appendChild(div);
-    if(idx<LESSONS.length-1){const c=document.createElement('div');c.className='conn';list.appendChild(c);}
-  });
-}
-
-function toggle(id){
-  current=current===id?null:id;
-  render();
-  if(current){
-    setTimeout(()=>{
-      const el=document.getElementById('L'+id);
-      if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});
-      initDemo(id);
-    },40);
-  }
-}
-
-function buildBody(les,done){
-  const opts=les.quiz.opts.map((o,i)=>`
-    <div class="opt" id="opt-${les.id}-${i}" onclick="checkQ('${les.id}',${i})">
-      <div class="opt-k">${['A','B','C','D'][i]}</div>${o}
-    </div>`).join('');
-  return `
-    <div class="tab-bar">
-      <div class="tab on" onclick="switchTab(this,'s-${les.id}','${les.id}')">📖 故事</div>
-      <div class="tab" onclick="switchTab(this,'d-${les.id}','${les.id}')">🎮 互動</div>
-      <div class="tab" onclick="switchTab(this,'c-${les.id}','${les.id}')">💻 程式碼</div>
-    </div>
-    <div class="tab-content">
-      <div id="s-${les.id}" class="tab-panel on">
-        <div class="story-box">${les.story}<div class="school-badge">📚 ${les.school}</div></div>
-        <div class="quiz-box">
-          <div class="quiz-title">🎯 挑戰問題</div>
-          <div class="quiz-q">${les.quiz.q}</div>
-          <div class="opts">${opts}</div>
-          <div class="explain-box" id="ex-${les.id}"></div>
-        </div>
-        <button class="done-btn" id="btn-${les.id}" onclick="complete('${les.id}')" ${done?'disabled':''}>
-          ${done?'✅ 已完成！':'⚡ 完成此關 → 解鎖下一關'}
-        </button>
-      </div>
-      <div id="d-${les.id}" class="tab-panel">
-        <div id="dc-${les.id}"><div style="text-align:center;padding:40px;color:var(--txt2);font-size:.85rem">🎮 載入互動 Demo…</div></div>
-      </div>
-      <div id="c-${les.id}" class="tab-panel">
-        ${buildCode(les)}
-      </div>
-    </div>`;
-}
-
-function switchTab(el,panelId,lid){
-  const body=document.getElementById('L'+lid).querySelector('.lesson-body');
-  body.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  body.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
-  el.classList.add('on');
-  document.getElementById(panelId).classList.add('on');
-  if(panelId.startsWith('d-'))initDemo(lid);
-}
-
-function checkQ(lid,idx){
-  const les=LESSONS.find(l=>l.id===lid);
-  document.querySelectorAll(`[id^="opt-${lid}-"]`).forEach((o,i)=>{
-    o.classList.add('disabled');
-    if(i===les.quiz.ans)o.classList.add('correct');
-    else if(i===idx)o.classList.add('wrong');
-  });
-  const ex=document.getElementById('ex-'+lid);
-  ex.innerHTML='💡 '+les.quiz.explain;ex.style.display='block';
-}
-
-function complete(id){
-  if(earned.includes(id))return;
-  earned.push(id);
-  localStorage.setItem('tower2_done',JSON.stringify(earned));setTimeout(checkCompletion,400);
-  const les=LESSONS.find(l=>l.id===id);
-  const btn=document.getElementById('btn-'+id);
-  showXPPop(les.xp,btn);
-  toast(`🌟 +${les.xp} XP！「${les.title}」完成！`);
-  setTimeout(()=>{current=null;render();updateXP();},500);
-}
-
-// ══════════════════════════════════════════════════════
-// DEMOS
-// ══════════════════════════════════════════════════════
-const inited={};
-function initDemo(id){
-  if(inited[id])return;inited[id]=true;
-  const cont=document.getElementById('dc-'+id);if(!cont)return;
-  ({l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6})[id]?.(cont);
-}
-
-function mkGL(cont,w=600,h=260,label='WebGL Demo'){
-  cont.innerHTML=`<div class="demo-wrap">
-    <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div>
-    <canvas id="cv-${Math.random().toString(36).slice(2)}" width="${w}" height="${h}" style="height:${h}px"></canvas>
-  </div>`;
-  const cv=cont.querySelector('canvas');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});
-  return {cv,gl};
-}
-
 function mkProg(gl,vs,fs){
-  const mkS=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;};
   const p=gl.createProgram();
-  gl.attachShader(p,mkS(gl.VERTEX_SHADER,vs));
-  gl.attachShader(p,mkS(gl.FRAGMENT_SHADER,fs));
-  gl.linkProgram(p);return p;
+  [gl.VERTEX_SHADER,gl.FRAGMENT_SHADER].forEach((t,i)=>{
+    const s=gl.createShader(t);
+    gl.shaderSource(s,[vs,fs][i]);gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(s));
+    gl.attachShader(p,s);
+  });
+  gl.linkProgram(p);gl.useProgram(p);return p;
 }
-
-function quadBuf(gl){
-  const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);
-  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-  return b;
+function mkBuf(gl,data,target=gl.ARRAY_BUFFER){
+  const b=gl.createBuffer();gl.bindBuffer(target,b);
+  gl.bufferData(target,data,gl.STATIC_DRAW);return b;
 }
-
-// Demo L1 — Color Multiplication Visualizer
-function d1(cont){
-  cont.innerHTML=`
-  <div class="demo-wrap">
-    <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>光的乘法 — 顏色混合實驗</div></div>
-    <canvas id="cv-d1" width="600" height="200" style="height:200px"></canvas>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px">
-    <div>
-      <div style="font-size:.78rem;font-weight:800;color:var(--txt2);margin-bottom:8px">💡 光源顏色</div>
-      <div class="slider-row"><span class="slider-label">🔴 R</span><input type="range" min="0" max="100" value="100" id="lr" oninput="upColor()"><span class="slider-val" id="lrv">1.0</span></div>
-      <div class="slider-row"><span class="slider-label">🟢 G</span><input type="range" min="0" max="100" value="100" id="lg" oninput="upColor()"><span class="slider-val" id="lgv">1.0</span></div>
-      <div class="slider-row"><span class="slider-label">🔵 B</span><input type="range" min="0" max="100" value="100" id="lb" oninput="upColor()"><span class="slider-val" id="lbv">1.0</span></div>
-    </div>
-    <div>
-      <div style="font-size:.78rem;font-weight:800;color:var(--txt2);margin-bottom:8px">🍎 物體顏色</div>
-      <div class="slider-row"><span class="slider-label">🔴 R</span><input type="range" min="0" max="100" value="100" id="or" oninput="upColor()"><span class="slider-val" id="orv">1.0</span></div>
-      <div class="slider-row"><span class="slider-label">🟢 G</span><input type="range" min="0" max="100" value="0" id="og" oninput="upColor()"><span class="slider-val" id="ogv">0.0</span></div>
-      <div class="slider-row"><span class="slider-label">🔵 B</span><input type="range" min="0" max="100" value="0" id="ob" oninput="upColor()"><span class="slider-val" id="obv">0.0</span></div>
-    </div>
-  </div>`;
-  window.upColor=()=>{
-    const get=(id)=>document.getElementById(id).value/100;
-    window._lc=[get('lr'),get('lg'),get('lb')];
-    window._oc=[get('or'),get('og'),get('ob')];
-    ['lr','lg','lb','or','og','ob'].forEach(id=>{
-      document.getElementById(id+'v').textContent=(document.getElementById(id).value/100).toFixed(1);
-    });
-  };
-  window._lc=[1,1,1];window._oc=[1,0,0];
-  const cv=document.getElementById('cv-d1');
-  const ctx=cv.getContext('2d');
-  function draw(){
-    const [lr,lg,lb]=window._lc;const [or,og,ob]=window._oc;
-    const fr=lr*or,fg=lg*og,fb=lb*ob;
-    ctx.fillStyle='#060510';ctx.fillRect(0,0,600,200);
-    const boxes=[
-      {label:'光源',r:lr,g:lg,b:lb,x:60},
-      {label:'×',x:200,op:true},
-      {label:'物體',r:or,g:og,b:ob,x:280},
-      {label:'=',x:420,op:true},
-      {label:'結果',r:fr,g:fg,b:fb,x:490}
-    ];
-    boxes.forEach(box=>{
-      if(box.op){
-        ctx.fillStyle='#4a4a6a';ctx.font='bold 28px Nunito';ctx.textAlign='center';
-        ctx.fillText(box.label,box.x,115);return;
-      }
-      const col=`rgb(${Math.round(box.r*255)},${Math.round(box.g*255)},${Math.round(box.b*255)})`;
-      ctx.shadowColor=col;ctx.shadowBlur=box.label==='結果'?24:8;
-      ctx.fillStyle=col;roundRect2(ctx,box.x-55,55,110,90,12);ctx.fill();
-      ctx.shadowBlur=0;
-      ctx.fillStyle='rgba(255,255,255,.8)';ctx.font='bold 11px Nunito';ctx.textAlign='center';
-      ctx.fillText(box.label,box.x,42);
-      ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='9px Space Mono';
-      ctx.fillText(`(${box.r.toFixed(1)},${box.g.toFixed(1)},${box.b.toFixed(1)})`,box.x,165);
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
+function bindAttr(gl,prog,name,buf,size=3){
+  const loc=gl.getAttribLocation(prog,name);
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc,size,gl.FLOAT,false,0,0);
 }
-
-function roundRect2(ctx,x,y,w,h,r){
-  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
-}
-
-// Demo L2 — Phong Lighting on a sphere
-function d2(cont){
-  cont.innerHTML=`
-  <div class="demo-wrap">
-    <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>Phong 光照 — 即時球體</div></div>
-    <canvas id="cv-d2" width="600" height="280" style="height:280px"></canvas>
-  </div>
-  <div class="ctrl-row">
-    <button class="ctrl-btn on" id="ph-all" onclick="setPhong('all')">全部三層</button>
-    <button class="ctrl-btn" id="ph-amb" onclick="setPhong('amb')">只有 Ambient</button>
-    <button class="ctrl-btn" id="ph-dif" onclick="setPhong('dif')">只有 Diffuse</button>
-    <button class="ctrl-btn" id="ph-spe" onclick="setPhong('spe')">只有 Specular</button>
-  </div>
-  <div class="slider-row"><span class="slider-label">✨ 光澤度</span><input type="range" min="1" max="128" value="32" id="sh-val"><span class="slider-val" id="sh-disp">32</span></div>`;
-  document.getElementById('sh-val').oninput=function(){document.getElementById('sh-disp').textContent=this.value;};
-  window._phMode='all';
-  window.setPhong=m=>{window._phMode=m;document.querySelectorAll('[id^="ph-"]').forEach(b=>b.classList.remove('on'));document.getElementById('ph-'+m).classList.add('on');};
-  const cv=document.getElementById('cv-d2');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
-  const vs=`
-    attribute vec3 pos;attribute vec3 norm;
-    uniform mat4 mvp;uniform mat4 model;
-    varying vec3 vN;varying vec3 vP;
-    void main(){
-      vN=normalize(mat3(model)*norm);
-      vP=(model*vec4(pos,1.0)).xyz;
-      gl_Position=mvp*vec4(pos,1.0);
-    }`;
-  const fs=`
-    precision mediump float;
-    varying vec3 vN;varying vec3 vP;
-    uniform vec3 lightPos;uniform vec3 viewPos;
-    uniform int mode;uniform float shininess;
-    void main(){
-      vec3 N=normalize(vN);
-      vec3 L=normalize(lightPos-vP);
-      vec3 V=normalize(viewPos-vP);
-      vec3 R=reflect(-L,N);
-      float amb=0.1;
-      float dif=max(dot(N,L),0.0);
-      float spec=pow(max(dot(V,R),0.0),shininess);
-      vec3 col=vec3(0.9,0.5,0.2);
-      vec3 result;
-      if(mode==0) result=col*(amb+dif)+vec3(spec);
-      else if(mode==1) result=col*amb;
-      else if(mode==2) result=col*dif;
-      else result=vec3(spec);
-      gl_FragColor=vec4(result,1.0);
-    }`;
-  const prog=mkProg(gl,vs,fs);
-  const {verts,norms,idx}=genSphere(32,32);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
-  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,norms,gl.STATIC_DRAW);
-  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
-  const posL=gl.getAttribLocation(prog,'pos');
-  const normL=gl.getAttribLocation(prog,'norm');
-  const mvpL=gl.getUniformLocation(prog,'mvp');
-  const modL=gl.getUniformLocation(prog,'model');
-  const lpL=gl.getUniformLocation(prog,'lightPos');
-  const vpL=gl.getUniformLocation(prog,'viewPos');
-  const modeL=gl.getUniformLocation(prog,'mode');
-  const shinL=gl.getUniformLocation(prog,'shininess');
-  gl.enable(gl.DEPTH_TEST);
-  let t=0;
-  function frame(){
-    t+=0.008;
-    const lx=Math.cos(t)*3,ly=2,lz=Math.sin(t)*3;
-    const sh=parseInt(document.getElementById('sh-val').value);
-    const modes={'all':0,'amb':1,'dif':2,'spe':3};
-    gl.viewport(0,0,600,280);
-    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(prog);
-    const proj=perspM(45*Math.PI/180,600/280,.1,50);
-    const view=lookAtM([0,0,4],[0,0,0],[0,1,0]);
-    const model=identM();
-    const mvp=m4mul(m4mul(proj,view),model);
-    gl.uniformMatrix4fv(mvpL,false,mvp);
-    gl.uniformMatrix4fv(modL,false,model);
-    gl.uniform3f(lpL,lx,ly,lz);
-    gl.uniform3f(vpL,0,0,4);
-    gl.uniform1i(modeL,modes[window._phMode]||0);
-    gl.uniform1f(shinL,sh);
-    gl.bindBuffer(gl.ARRAY_BUFFER,vb);
-    gl.enableVertexAttribArray(posL);gl.vertexAttribPointer(posL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,nb);
-    gl.enableVertexAttribArray(normL);gl.vertexAttribPointer(normL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
-    gl.drawElements(gl.TRIANGLES,idx.length,gl.UNSIGNED_SHORT,0);
-    // draw light indicator (small circle in canvas 2d overlay)
-    requestAnimationFrame(frame);
-  }
-  frame();
-}
-
-// Demo L3 — Material Presets
-function d3(cont){
-  cont.innerHTML=`
-  <div class="demo-wrap">
-    <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>材質切換 — 感受不同材料</div></div>
-    <canvas id="cv-d3" width="600" height="280" style="height:280px"></canvas>
-  </div>
-  <div class="ctrl-row" id="mat-btns">
-    <button class="ctrl-btn on" onclick="setMat(0)">🪨 石頭</button>
-    <button class="ctrl-btn" onclick="setMat(1)">🔩 鉻金屬</button>
-    <button class="ctrl-btn" onclick="setMat(2)">🥇 金</button>
-    <button class="ctrl-btn" onclick="setMat(3)">🔵 翡翠</button>
-    <button class="ctrl-btn" onclick="setMat(4)">🪵 木頭</button>
-  </div>`;
-  const MATS=[
-    {name:'石頭',   amb:[.19,.19,.19],dif:[.51,.51,.51],spe:[.1,.1,.1], sh:10},
-    {name:'鉻金屬', amb:[.25,.25,.25],dif:[.4,.4,.4],   spe:[.77,.77,.77],sh:76},
-    {name:'金',    amb:[.25,.20,.07],dif:[.75,.60,.22],spe:[.63,.56,.37],sh:51},
-    {name:'翡翠',  amb:[.02,.17,.02],dif:[.07,.61,.07],spe:[.63,.72,.63],sh:76},
-    {name:'木頭',  amb:[.33,.20,.08],dif:[.55,.35,.14],spe:[.05,.02,.01],sh:4},
-  ];
-  window._matIdx=0;
-  window.setMat=(i)=>{window._matIdx=i;document.querySelectorAll('#mat-btns .ctrl-btn').forEach((b,j)=>b.classList.toggle('on',i===j));};
-  const cv=document.getElementById('cv-d3');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
-  const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
-    void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
-  const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
-    uniform vec3 amb;uniform vec3 dif;uniform vec3 spe;uniform float sh;
-    uniform vec3 lp;uniform vec3 vp;
-    void main(){
-      vec3 N=normalize(vN);vec3 L=normalize(lp-vP);vec3 V=normalize(vp-vP);vec3 R=reflect(-L,N);
-      vec3 a=amb*0.4;
-      vec3 d=dif*max(dot(N,L),0.0);
-      vec3 s=spe*pow(max(dot(V,R),0.0),sh);
-      gl_FragColor=vec4(a+d+s,1);
-    }`;
-  const prog=mkProg(gl,vs,fs);
-  const {verts,norms,idx}=genSphere(32,32);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
-  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,norms,gl.STATIC_DRAW);
-  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
-  const posL=gl.getAttribLocation(prog,'pos'),normL=gl.getAttribLocation(prog,'norm');
-  const mvpL=gl.getUniformLocation(prog,'mvp');
-  const ambL=gl.getUniformLocation(prog,'amb'),difL=gl.getUniformLocation(prog,'dif'),speL=gl.getUniformLocation(prog,'spe'),shL=gl.getUniformLocation(prog,'sh');
-  const lpL=gl.getUniformLocation(prog,'lp'),vpL=gl.getUniformLocation(prog,'vp');
-  gl.enable(gl.DEPTH_TEST);
-  let t=0;
-  function frame(){
-    t+=0.008;
-    const m=MATS[window._matIdx];
-    gl.viewport(0,0,600,280);
-    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(prog);
-    const mvp=m4mul(m4mul(perspM(45*Math.PI/180,600/280,.1,50),lookAtM([0,0,4],[0,0,0],[0,1,0])),identM());
-    gl.uniformMatrix4fv(mvpL,false,mvp);
-    gl.uniform3fv(ambL,m.amb);gl.uniform3fv(difL,m.dif);gl.uniform3fv(speL,m.spe);gl.uniform1f(shL,m.sh);
-    gl.uniform3f(lpL,Math.cos(t)*4,3,Math.sin(t)*4);gl.uniform3f(vpL,0,0,4);
-    gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(posL);gl.vertexAttribPointer(posL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(normL);gl.vertexAttribPointer(normL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
-    gl.drawElements(gl.TRIANGLES,idx.length,gl.UNSIGNED_SHORT,0);
-    requestAnimationFrame(frame);
-  }
-  frame();
-}
-
-// Demo L4 — Specular Map visualization
-function d4(cont){
-  cont.innerHTML=`
-  <div class="demo-wrap">
-    <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>光照貼圖 — Specular Map 可視化</div></div>
-    <canvas id="cv-d4" width="600" height="260" style="height:260px"></canvas>
-  </div>
-  <div class="ctrl-row">
-    <button class="ctrl-btn on" id="sm-final" onclick="setSM('final')">🎨 最終效果</button>
-    <button class="ctrl-btn" id="sm-spec" onclick="setSM('spec')">✨ 只看 Specular</button>
-    <button class="ctrl-btn" id="sm-map" onclick="setSM('map')">🗺️ Specular Map</button>
-    <button class="ctrl-btn" id="sm-diff" onclick="setSM('diff')">🌈 Diffuse Map</button>
-  </div>`;
-  window._smMode='final';
-  window.setSM=m=>{window._smMode=m;['final','spec','map','diff'].forEach(x=>document.getElementById('sm-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv-d4');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
-  // Make procedural textures
-  function makeChecker(gl,w,h,col1,col2){
-    const data=new Uint8Array(w*h*4);
-    for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-      const check=((Math.floor(x/8)+Math.floor(y/8))%2===0);
-      const [r,g,b]=check?col1:col2;
-      const i=(y*w+x)*4;data[i]=r;data[i+1]=g;data[i+2]=b;data[i+3]=255;
-    }
-    const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,data);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
-    return t;
-  }
-  // Specular map: center bright (metal), edges dark (wood)
-  function makeSpecMap(gl){
-    const w=64,h=64,data=new Uint8Array(w*h*4);
-    for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-      const cx=(x-32)/32,cy=(y-32)/32;
-      const metal=(Math.abs(cx)<0.3&&Math.abs(cy)<0.3)||(Math.abs(cx)>0.7||Math.abs(cy)>0.7)?255:30;
-      const i=(y*w+x)*4;data[i]=metal;data[i+1]=metal;data[i+2]=metal;data[i+3]=255;
-    }
-    const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,data);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-    return t;
-  }
-  const diffTex=makeChecker(gl,64,64,[180,120,60],[140,90,40]);
-  const specTex=makeSpecMap(gl);
-  const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
-  const fs=`precision mediump float;
-    uniform sampler2D diffMap;uniform sampler2D specMap;
-    uniform float t;uniform int mode;varying vec2 uv;
-    void main(){
-      vec3 diff=texture2D(diffMap,uv).rgb;
-      float spec=texture2D(specMap,uv).r;
-      vec2 ldir=normalize(vec2(cos(t),sin(t)));
-      vec2 n=uv-0.5;
-      float diffLight=max(dot(normalize(n),ldir)*0.5+0.8,0.0);
-      vec3 specLight=vec3(pow(max(dot(reflect(-ldir,vec2(0,1)),ldir),0.0),32.0)*spec);
-      if(mode==0) gl_FragColor=vec4(diff*diffLight+specLight,1);
-      else if(mode==1) gl_FragColor=vec4(specLight+0.1,1);
-      else if(mode==2) gl_FragColor=vec4(spec,spec,spec,1);
-      else gl_FragColor=vec4(diff,1);
-    }`;
-  const prog=mkProg(gl,vs,fs);
-  const buf=quadBuf(gl);
-  const pL=gl.getAttribLocation(prog,'p');
-  const dmL=gl.getUniformLocation(prog,'diffMap'),smL=gl.getUniformLocation(prog,'specMap');
-  const tL=gl.getUniformLocation(prog,'t'),mL=gl.getUniformLocation(prog,'mode');
-  let time=0;
-  function frame(){
-    time+=0.015;
-    const modes={'final':0,'spec':1,'map':2,'diff':3};
-    gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.useProgram(prog);
-    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-    gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);
-    gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,diffTex);gl.uniform1i(dmL,0);
-    gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,specTex);gl.uniform1i(smL,1);
-    gl.uniform1f(tL,time);
-    gl.uniform1i(mL,modes[window._smMode]||0);
-    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-    requestAnimationFrame(frame);
-  }
-  frame();
-}
-
-// Demo L5 — Three Light Types
-function d5(cont){
-  cont.innerHTML=`
-  <div class="demo-wrap">
-    <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>三種光源比較</div></div>
-    <canvas id="cv-d5" width="600" height="280" style="height:280px"></canvas>
-  </div>
-  <div class="ctrl-row">
-    <button class="ctrl-btn on" id="lt-dir" onclick="setLT('dir')">☀️ 方向光</button>
-    <button class="ctrl-btn" id="lt-pt" onclick="setLT('pt')">💡 點光源</button>
-    <button class="ctrl-btn" id="lt-spot" onclick="setLT('spot')">🔦 聚光燈</button>
-  </div>
-  <div class="slider-row" id="cutoff-row" style="display:none">
-    <span class="slider-label">🔦 光束角度</span>
-    <input type="range" min="5" max="60" value="20" id="cutoff-val">
-    <span class="slider-val" id="cutoff-disp">20°</span>
-  </div>`;
-  document.getElementById('cutoff-val').oninput=function(){document.getElementById('cutoff-disp').textContent=this.value+'°';};
-  window._ltMode='dir';
-  window.setLT=m=>{
-    window._ltMode=m;
-    ['dir','pt','spot'].forEach(x=>document.getElementById('lt-'+x).classList.toggle('on',x===m));
-    document.getElementById('cutoff-row').style.display=m==='spot'?'flex':'none';
-  };
-  const cv=document.getElementById('cv-d5');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
-  const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
-    void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
-  const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
-    uniform int ltype;uniform vec3 lightPos;uniform vec3 lightDir;
-    uniform float cutoff;uniform vec3 vp;
-    void main(){
-      vec3 N=normalize(vN);vec3 V=normalize(vp-vP);
-      vec3 L;float att=1.0;float inten=1.0;
-      if(ltype==0){L=normalize(-lightDir);}
-      else if(ltype==1){
-        L=normalize(lightPos-vP);
-        float d=length(lightPos-vP);
-        att=1.0/(1.0+0.09*d+0.032*d*d);
-      } else {
-        L=normalize(lightPos-vP);
-        float theta=dot(L,normalize(-lightDir));
-        float edge=0.92;
-        inten=clamp((theta-cutoff)/(edge-cutoff),0.0,1.0);
-        att=inten;
-      }
-      vec3 R=reflect(-L,N);
-      float dif=max(dot(N,L),0.0);
-      float spec=pow(max(dot(V,R),0.0),32.0);
-      vec3 col=vec3(0.4,0.6,0.9);
-      vec3 result=col*(0.08+dif*att)+vec3(spec*att*0.8);
-      gl_FragColor=vec4(result,1);
-    }`;
-  const prog=mkProg(gl,vs,fs);
-  // ground plane grid
-  const {verts,norms,idx}=genGrid(20,20,10);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
-  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,norms,gl.STATIC_DRAW);
-  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
-  const posL=gl.getAttribLocation(prog,'pos'),normL=gl.getAttribLocation(prog,'norm');
-  const mvpL=gl.getUniformLocation(prog,'mvp'),ltL=gl.getUniformLocation(prog,'ltype');
-  const lpL=gl.getUniformLocation(prog,'lightPos'),ldL=gl.getUniformLocation(prog,'lightDir');
-  const coL=gl.getUniformLocation(prog,'cutoff'),vpL=gl.getUniformLocation(prog,'vp');
-  gl.enable(gl.DEPTH_TEST);
-  let t=0;
-  function frame(){
-    t+=0.01;
-    const types={'dir':0,'pt':1,'spot':2};
-    const co=Math.cos(parseInt(document.getElementById('cutoff-val').value)*Math.PI/180);
-    const lx=Math.cos(t)*5,lz=Math.sin(t)*5;
-    gl.viewport(0,0,600,280);gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(prog);
-    const mvp=m4mul(m4mul(perspM(50*Math.PI/180,600/280,.1,50),lookAtM([0,6,8],[0,0,0],[0,1,0])),identM());
-    gl.uniformMatrix4fv(mvpL,false,mvp);
-    gl.uniform1i(ltL,types[window._ltMode]||0);
-    gl.uniform3f(lpL,lx,4,lz);
-    gl.uniform3f(ldL,lx*.3,- 1,lz*.3);
-    gl.uniform1f(coL,co);
-    gl.uniform3f(vpL,0,6,8);
-    gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(posL);gl.vertexAttribPointer(posL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(normL);gl.vertexAttribPointer(normL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
-    gl.drawElements(gl.TRIANGLES,idx.length,gl.UNSIGNED_SHORT,0);
-    requestAnimationFrame(frame);
-  }
-  frame();
-}
-
-// Demo L6 — Boss: Night City Multi-lights
-function d6(cont){
-  cont.innerHTML=`
-  <div class="demo-wrap">
-    <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>👑 BOSS：夜晚城市 — 多光源場景</div></div>
-    <canvas id="cv-d6" width="600" height="320" style="height:320px;cursor:grab"></canvas>
-  </div>
-  <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
-    <div style="font-size:.78rem;font-weight:800;color:var(--txt2)">光源數：<span id="light-count" style="color:var(--acc);font-family:var(--mono)">6</span></div>
-    <div style="font-size:.78rem;font-weight:800;color:var(--txt2)">月光：<span id="moon-info" style="color:#aaccff;font-family:var(--mono)">ON</span></div>
-    <div style="font-size:.78rem;font-weight:800;color:var(--txt2)">手電筒：<span id="spot-info" style="color:var(--acc2);font-family:var(--mono)">ON</span></div>
-  </div>
-  <div class="ctrl-row">
-    <button class="ctrl-btn on" id="ml-moon" onclick="toggleLight('moon')">🌙 月光</button>
-    <button class="ctrl-btn on" id="ml-spot" onclick="toggleLight('spot')">🔦 手電筒</button>
-    <button class="ctrl-btn" id="ml-more" onclick="addLights()">+ 增加路燈</button>
-  </div>`;
-  window._mlState={moon:true,spot:true,ptCount:4};
-  window.toggleLight=k=>{
-    window._mlState[k]=!window._mlState[k];
-    document.getElementById('ml-'+k).classList.toggle('on',window._mlState[k]);
-    document.getElementById(k==='moon'?'moon-info':'spot-info').textContent=window._mlState[k]?'ON':'OFF';
-    updateCount();
-  };
-  window.addLights=()=>{if(window._mlState.ptCount<12)window._mlState.ptCount+=2;updateCount();};
-  function updateCount(){
-    const c=(window._mlState.moon?1:0)+(window._mlState.spot?1:0)+window._mlState.ptCount;
-    document.getElementById('light-count').textContent=c;
-  }
-  const cv=document.getElementById('cv-d6');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
-  const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
-    void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
-  const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
-    uniform bool useMoon;uniform bool useSpot;uniform int ptCount;
-    uniform vec3 ptPos[12];uniform vec3 ptCol[12];
-    uniform vec3 spotPos;uniform vec3 spotDir;
-    uniform vec3 vp;
-    void main(){
-      vec3 N=normalize(vN);vec3 V=normalize(vp-vP);
-      vec3 total=vec3(0.02,0.02,0.05);
-      if(useMoon){
-        vec3 L=normalize(vec3(0.3,1,0.5));
-        float d=max(dot(N,L),0.0);
-        total+=vec3(0.2,0.25,0.4)*d*0.3;
-      }
-      for(int i=0;i<12;i++){
-        if(i>=ptCount)break;
-        vec3 L=normalize(ptPos[i]-vP);
-        float dist=length(ptPos[i]-vP);
-        float att=1.0/(1.0+0.3*dist+0.1*dist*dist);
-        float d=max(dot(N,L),0.0);
-        vec3 R=reflect(-L,N);float s=pow(max(dot(V,R),0.0),16.0);
-        total+=ptCol[i]*(d*att+s*att*0.5);
-      }
-      if(useSpot){
-        vec3 L=normalize(spotPos-vP);
-        float theta=dot(L,normalize(-spotDir));
-        float inten=smoothstep(0.9,0.95,theta);
-        float d=max(dot(N,L),0.0);
-        total+=vec3(1.0,0.9,0.7)*d*inten*0.8;
-      }
-      gl_FragColor=vec4(clamp(total,0.0,1.0),1);
-    }`;
-  const prog=mkProg(gl,vs,fs);
-  const {verts,norms,idx}=genGrid(30,30,10);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
-  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,norms,gl.STATIC_DRAW);
-  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
-  const posL=gl.getAttribLocation(prog,'pos'),normL=gl.getAttribLocation(prog,'norm');
-  const mvpL=gl.getUniformLocation(prog,'mvp');
-  const moonL=gl.getUniformLocation(prog,'useMoon'),spotL2=gl.getUniformLocation(prog,'useSpot');
-  const ptCntL=gl.getUniformLocation(prog,'ptCount');
-  const spotPosL=gl.getUniformLocation(prog,'spotPos'),spotDirL=gl.getUniformLocation(prog,'spotDir');
-  const vpL=gl.getUniformLocation(prog,'vp');
-  gl.enable(gl.DEPTH_TEST);
-  // Camera drag
-  let camYaw=0.3,camPitch=0.5,isDrag=false,lx=0,ly=0;
-  cv.addEventListener('mousedown',e=>{isDrag=true;lx=e.clientX;ly=e.clientY;cv.style.cursor='grabbing';});
-  cv.addEventListener('mouseup',()=>{isDrag=false;cv.style.cursor='grab';});
-  cv.addEventListener('mousemove',e=>{if(!isDrag)return;camYaw+=(e.clientX-lx)*.005;camPitch-=(e.clientY-ly)*.005;camPitch=Math.max(.1,Math.min(1.4,camPitch));lx=e.clientX;ly=e.clientY;});
-  let t=0;
-  function frame(){
-    t+=0.008;
-    const {moon,spot,ptCount}=window._mlState;
-    const ptPos=[],ptCol=[];
-    for(let i=0;i<ptCount;i++){
-      const a=i/ptCount*Math.PI*2+t*.2;
-      ptPos.push(Math.cos(a)*6,0.5,Math.sin(a)*6);
-      const hue=i/ptCount;
-      ptCol.push(.5+Math.sin(hue*6)*.5,.5+Math.sin(hue*6+2)*.5,.5+Math.sin(hue*6+4)*.5);
-    }
-    gl.viewport(0,0,600,320);gl.clearColor(.02,.01,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(prog);
-    const ex=Math.cos(camPitch)*Math.cos(camYaw)*9;
-    const ey=Math.sin(camPitch)*9;
-    const ez=Math.cos(camPitch)*Math.sin(camYaw)*9;
-    const mvp=m4mul(m4mul(perspM(50*Math.PI/180,600/320,.1,60),lookAtM([ex,ey,ez],[0,0,0],[0,1,0])),identM());
-    gl.uniformMatrix4fv(mvpL,false,mvp);
-    gl.uniform1i(moonL,moon?1:0);gl.uniform1i(spotL2,spot?1:0);
-    gl.uniform1i(ptCntL,ptCount);
-    if(ptPos.length)gl.uniform3fv(gl.getUniformLocation(prog,'ptPos'),new Float32Array(ptPos.slice(0,36)));
-    if(ptCol.length)gl.uniform3fv(gl.getUniformLocation(prog,'ptCol'),new Float32Array(ptCol.slice(0,36)));
-    gl.uniform3f(spotPosL,Math.cos(t*.5)*3,3,Math.sin(t*.5)*3);
-    gl.uniform3f(spotDirL,0,-1,0);
-    gl.uniform3f(vpL,ex,ey,ez);
-    gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(posL);gl.vertexAttribPointer(posL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(normL);gl.vertexAttribPointer(normL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
-    gl.drawElements(gl.TRIANGLES,idx.length,gl.UNSIGNED_SHORT,0);
-    requestAnimationFrame(frame);
-  }
-  frame();
-}
-
-// ══════════════════════════════════════════════════════
-// CODE SNIPPETS
-// ══════════════════════════════════════════════════════
-function buildCode(les){
-  const codes={
-    l1:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · Fragment Shader</span><button class="copy-btn" onclick="cpCode(this)">複製</button></div><pre>
-<span class="cm">// 光的顏色乘法</span>
-<span class="kw">uniform</span> <span class="type">vec3</span> lightColor;   <span class="cm">// 光源顏色</span>
-<span class="kw">uniform</span> <span class="type">vec3</span> objectColor;  <span class="cm">// 物體顏色</span>
-
-<span class="kw">void</span> <span class="fn">main</span>(){
-  <span class="cm">// 乘法！光 × 物體 = 最終顏色</span>
-  <span class="type">vec3</span> result = lightColor * objectColor;
-  FragColor = <span class="type">vec4</span>(result, <span class="num">1.0</span>);
-}
-
-<span class="cm">// 範例：白光照紅蘋果</span>
-<span class="cm">// (1,1,1) * (1,0,0) = (1,0,0) 紅色 ✅</span>
-<span class="cm">// 紅光照藍球</span>
-<span class="cm">// (1,0,0) * (0,0,1) = (0,0,0) 黑色 ⚫</span>
-</pre></div>`,
-    l2:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · Phong 光照</span><button class="copy-btn" onclick="cpCode(this)">複製</button></div><pre>
-<span class="cm">// Phong 光照模型完整實作</span>
-<span class="kw">void</span> <span class="fn">main</span>(){
-  <span class="cm">// 1. Ambient — 環境光（底色）</span>
-  <span class="kw">float</span> ambientStrength = <span class="num">0.1</span>;
-  <span class="type">vec3</span> ambient = ambientStrength * lightColor;
-
-  <span class="cm">// 2. Diffuse — 漫反射（需要法向量！）</span>
-  <span class="type">vec3</span> norm = <span class="fn">normalize</span>(Normal);
-  <span class="type">vec3</span> lightDir = <span class="fn">normalize</span>(lightPos - FragPos);
-  <span class="kw">float</span> diff = <span class="fn">max</span>(<span class="fn">dot</span>(norm, lightDir), <span class="num">0.0</span>);
-  <span class="type">vec3</span> diffuse = diff * lightColor;
-
-  <span class="cm">// 3. Specular — 鏡面反射（閃光點）</span>
-  <span class="kw">float</span> specStrength = <span class="num">0.5</span>;
-  <span class="type">vec3</span> viewDir = <span class="fn">normalize</span>(viewPos - FragPos);
-  <span class="type">vec3</span> reflectDir = <span class="fn">reflect</span>(-lightDir, norm);
-  <span class="kw">float</span> spec = <span class="fn">pow</span>(<span class="fn">max</span>(<span class="fn">dot</span>(viewDir, reflectDir), <span class="num">0.0</span>), <span class="num">32</span>);
-  <span class="type">vec3</span> specular = specStrength * spec * lightColor;
-
-  <span class="cm">// 三個加起來！</span>
-  <span class="type">vec3</span> result = (ambient + diffuse + specular) * objectColor;
-  FragColor = <span class="type">vec4</span>(result, <span class="num">1.0</span>);
-}
-</pre></div>`,
-    l3:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · 材質系統</span><button class="copy-btn" onclick="cpCode(this)">複製</button></div><pre>
-<span class="cm">// 材質 struct 定義</span>
-<span class="kw">struct</span> <span class="type">Material</span> {
-  <span class="type">vec3</span>  ambient;    <span class="cm">// 環境光顏色</span>
-  <span class="type">vec3</span>  diffuse;    <span class="cm">// 漫反射顏色</span>
-  <span class="type">vec3</span>  specular;   <span class="cm">// 鏡面反射顏色</span>
-  <span class="kw">float</span> shininess;  <span class="cm">// 光澤度（越高越亮）</span>
-};
-<span class="kw">uniform</span> <span class="type">Material</span> material;
-
-<span class="kw">void</span> <span class="fn">main</span>(){
-  <span class="type">vec3</span> ambient = light.ambient * material.ambient;
-  <span class="type">vec3</span> diffuse = light.diffuse * diff * material.diffuse;
-  <span class="type">vec3</span> specular = light.specular
-    * <span class="fn">pow</span>(spec, material.shininess) * material.specular;
-}
-
-<span class="cm">// CPU 端設定黃金材質：</span>
-<span class="cm">// ambient  = (0.25, 0.20, 0.07)</span>
-<span class="cm">// diffuse  = (0.75, 0.60, 0.22)</span>
-<span class="cm">// specular = (0.63, 0.56, 0.37)</span>
-<span class="cm">// shininess= 51.2</span>
-</pre></div>`,
-    l4:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · 光照貼圖</span><button class="copy-btn" onclick="cpCode(this)">複製</button></div><pre>
-<span class="cm">// 貼圖材質：diffuse + specular map</span>
-<span class="kw">struct</span> <span class="type">Material</span> {
-  <span class="type">sampler2D</span> diffuse;   <span class="cm">// 漫反射貼圖</span>
-  <span class="type">sampler2D</span> specular;  <span class="cm">// 鏡面貼圖</span>
-  <span class="kw">float</span>     shininess;
-};
-<span class="kw">in</span> <span class="type">vec2</span> TexCoords;  <span class="cm">// UV 座標傳入</span>
-
-<span class="kw">void</span> <span class="fn">main</span>(){
-  <span class="cm">// 從貼圖採樣顏色和反射強度</span>
-  <span class="type">vec3</span> diffCol  = <span class="fn">texture</span>(material.diffuse, TexCoords).rgb;
-  <span class="type">vec3</span> specMask = <span class="fn">texture</span>(material.specular, TexCoords).rgb;
-
-  <span class="type">vec3</span> ambient  = light.ambient  * diffCol;
-  <span class="type">vec3</span> diffuse  = light.diffuse  * diff * diffCol;
-  <span class="type">vec3</span> specular = light.specular * spec * specMask;
-  <span class="cm">// ↑ specMask 控制哪裡有反射光！</span>
-}
-</pre></div>`,
-    l5:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · 三種光源</span><button class="copy-btn" onclick="cpCode(this)">複製</button></div><pre>
-<span class="cm">// 點光源（有衰減）</span>
-<span class="kw">float</span> dist     = <span class="fn">length</span>(light.position - FragPos);
-<span class="kw">float</span> attenuation = <span class="num">1.0</span> /
-  (light.constant + light.linear * dist
-   + light.quadratic * (dist * dist));
-<span class="cm">// 越遠越暗！</span>
-
-<span class="cm">// 聚光燈（有光圈邊界）</span>
-<span class="type">vec3</span>  lightDir  = <span class="fn">normalize</span>(light.position - FragPos);
-<span class="kw">float</span> theta     = <span class="fn">dot</span>(lightDir, <span class="fn">normalize</span>(-light.direction));
-<span class="kw">float</span> epsilon   = light.cutOff - light.outerCutOff;
-<span class="kw">float</span> intensity = <span class="fn">clamp</span>((theta - light.outerCutOff)
-                         / epsilon, <span class="num">0.0</span>, <span class="num">1.0</span>);
-<span class="cm">// 邊緣柔和漸暗！</span>
-</pre></div>`,
-    l6:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · 多光源疊加</span><button class="copy-btn" onclick="cpCode(this)">複製</button></div><pre>
-<span class="kw">uniform</span> <span class="type">DirLight</span>   dirLight;
-<span class="kw">uniform</span> <span class="type">PointLight</span> pointLights[<span class="num">4</span>];
-<span class="kw">uniform</span> <span class="type">SpotLight</span>  spotLight;
-
-<span class="kw">void</span> <span class="fn">main</span>(){
-  <span class="cm">// 先計算方向光（月光）</span>
-  <span class="type">vec3</span> result = <span class="fn">CalcDirLight</span>(dirLight, norm, viewDir);
-
-  <span class="cm">// 加上所有點光源（路燈）</span>
-  <span class="kw">for</span>(<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">4</span>; i++)
-    result += <span class="fn">CalcPointLight</span>(pointLights[i], norm, FragPos, viewDir);
-
-  <span class="cm">// 加上聚光燈（手電筒）</span>
-  result += <span class="fn">CalcSpotLight</span>(spotLight, norm, FragPos, viewDir);
-
-  <span class="cm">// 疊加原理：直接相加！</span>
-  FragColor = <span class="type">vec4</span>(result, <span class="num">1.0</span>);
-}
-</pre></div>`
-  };
-  return codes[les.id]||'<p style="color:var(--txt2);padding:20px">程式碼載入中…</p>';
-}
-
-function cpCode(btn){
-  const text=btn.closest('.code-wrap').querySelector('pre').innerText;
-  navigator.clipboard.writeText(text).then(()=>{btn.textContent='✓ 已複製';setTimeout(()=>btn.textContent='複製',1500);});
-}
-
-// ══════════════════════════════════════════════════════
-// MATH
-// ══════════════════════════════════════════════════════
-function genSphere(stacks,slices){
-  const v=[],n=[],i=[];
-  for(let s=0;s<=stacks;s++){
-    const phi=s/stacks*Math.PI;
-    for(let sl=0;sl<=slices;sl++){
-      const theta=sl/slices*Math.PI*2;
-      const x=Math.sin(phi)*Math.cos(theta),y=Math.cos(phi),z=Math.sin(phi)*Math.sin(theta);
-      v.push(x,y,z);n.push(x,y,z);
+function buildSphere(stacks=36,slices=36){
+  const pos=[],nor=[],uv=[],idx=[];
+  for(let i=0;i<=stacks;i++){
+    const phi=Math.PI*i/stacks;
+    for(let j=0;j<=slices;j++){
+      const th=2*Math.PI*j/slices;
+      const x=Math.sin(phi)*Math.cos(th),y=Math.cos(phi),z=Math.sin(phi)*Math.sin(th);
+      pos.push(x,y,z);nor.push(x,y,z);uv.push(j/slices,i/stacks);
     }
   }
-  for(let s=0;s<stacks;s++){
-    for(let sl=0;sl<slices;sl++){
-      const a=s*(slices+1)+sl,b=a+slices+1;
-      i.push(a,b,a+1,b,b+1,a+1);
-    }
+  for(let i=0;i<stacks;i++)for(let j=0;j<slices;j++){
+    const a=i*(slices+1)+j,b=a+slices+1;
+    idx.push(a,b,a+1,b,b+1,a+1);
   }
-  return{verts:new Float32Array(v),norms:new Float32Array(n),idx:new Uint16Array(i)};
+  return{pos:new Float32Array(pos),nor:new Float32Array(nor),uv:new Float32Array(uv),idx:new Uint16Array(idx)};
 }
 
-function genGrid(rows,cols,size){
-  const v=[],n=[],i=[];
-  const s=size/(rows*1.0);
-  for(let r=0;r<=rows;r++)for(let c=0;c<=cols;c++){
-    v.push((c-cols/2)*s,0,(r-rows/2)*s);
-    n.push(0,1,0);
-  }
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-    const a=r*(cols+1)+c;i.push(a,a+1,a+cols+1,a+1,a+cols+2,a+cols+1);
-  }
-  return{verts:new Float32Array(v),norms:new Float32Array(n),idx:new Uint16Array(i)};
+// ── Shared Phong shaders ──
+const PHONG_VS=`
+attribute vec3 aP,aN;attribute vec2 aUV;
+uniform mat4 uMVP;
+varying vec3 vN,vP;varying vec2 vUV;
+void main(){vP=aP;vN=aN;vUV=aUV;gl_Position=uMVP*vec4(aP,1.0);}`;
+
+const PHONG_FS=`
+precision mediump float;
+varying vec3 vN,vP;varying vec2 vUV;
+uniform vec3 uLight,uEye,uAmb,uDif,uSpec;
+uniform float uShine;
+uniform int uMode,uLType;
+void main(){
+  vec3 N=normalize(vN),V=normalize(uEye-vP);
+  vec3 L;float att=1.0;
+  if(uLType==0){L=normalize(-uLight);}
+  else if(uLType==1){vec3 d=uLight-vP;float dist=length(d);L=normalize(d);att=1.0/(1.0+0.14*dist+0.07*dist*dist);}
+  else{vec3 d=uLight-vP;L=normalize(d);float th=dot(L,normalize(vec3(0.0,0.0,-1.0)-uLight));att=th>0.94?pow(th,32.0):0.0;}
+  vec3 R=reflect(-L,N);
+  vec3 amb=uAmb;
+  vec3 dif=max(dot(N,L),0.0)*uDif*att;
+  vec3 spec=pow(max(dot(V,R),0.0),uShine)*uSpec*att;
+  vec3 res;
+  if(uMode==1)res=amb;
+  else if(uMode==2)res=amb*0.2+dif;
+  else if(uMode==3)res=spec+vec3(0.02);
+  else res=amb+dif+spec;
+  gl_FragColor=vec4(res,1.0);
+}`;
+
+function mkMVP(gl,ex,ey,ez){
+  const c=gl._canvas;
+  const P=M.persp(Math.PI/4,c.width/c.height,0.1,100);
+  const V=M.lookAt(ex,ey,ez);
+  return M.mul(P,V);
 }
 
-function perspM(fov,asp,n,f){const s=1/Math.tan(fov/2);return new Float32Array([s/asp,0,0,0,0,s,0,0,0,0,(f+n)/(n-f),-1,0,0,2*f*n/(n-f),0]);}
-function identM(){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);}
-function lookAtM(e,c,u){const z=nrm([e[0]-c[0],e[1]-c[1],e[2]-c[2]]);const x=nrm(crs(u,z));const y=crs(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dt(x,e),-dt(y,e),-dt(z,e),1]);}
-function m4mul(a,b){const r=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let k=0;k<4;k++)r[i*4+j]+=a[i*4+k]*b[k*4+j];return r;}
-function nrm(v){const l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);return[v[0]/l,v[1]/l,v[2]/l];}
-function crs(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
-function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    const card=tab.dataset.card,p=tab.dataset.p;
+    document.querySelectorAll(`#${card} .tab`).forEach(t=>t.classList.remove('on'));
+    document.querySelectorAll(`#${card} .panel`).forEach(x=>x.classList.remove('on'));
+    tab.classList.add('on');
+    document.getElementById(`${card}-${p}`).classList.add('on');
+  });
+});
 
-// ══════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════
-updateXP();render();
 
-// ── Completion System ──
-const CASTLE_NUM = 2;
-const CASTLE_TOTAL = 6;
-const CASTLE_KEY = 'tower2_done';
-const NEXT_CASTLE = 2;
-
-function checkCompletion(){
-  const done = JSON.parse(localStorage.getItem(CASTLE_KEY)||'[]').filter(Boolean).length;
-  if(done >= CASTLE_TOTAL && !localStorage.getItem(CASTLE_KEY+'_comp_shown')){
-    localStorage.setItem(CASTLE_KEY+'_comp_shown','1');
-    setTimeout(showCompletion, 800);
-  }
-}
-
-function showCompletion(){
-  const overlay = document.getElementById('compOverlay');
-  if(!overlay) return;
-  // Fireworks
-  const fw = overlay.querySelector('.fw-wrap');
-  const colors=['#a78bfa','#34d399','#ffd700','#ff6b9d','#00d4ff','#ff9f43'];
-  for(let i=0;i<28;i++){
-    const d=document.createElement('div');
-    d.className='fw';
-    const tx=(Math.random()-.5)*300;
-    const ty=-100-Math.random()*200;
-    d.style.cssText=`width:6px;height:6px;background:${colors[i%colors.length]};left:${40+Math.random()*20}%;top:60%;--d:${.6+Math.random()*.8}s;--dl:${Math.random()*.5}s;--tx:${tx}px;--ty:${ty}px`;
-    fw.appendChild(d);
-  }
-  overlay.classList.add('show');
-}
-
-function goNextCastle(){
-  if(NEXT_CASTLE > 0){
-    window.location.href='opengl-map.html#done-'+CASTLE_NUM;
-  } else {
-    window.location.href='opengl-map.html';
-  }
-}
-
-function goMap(){ window.location.href='opengl-map.html#done-'+CASTLE_NUM; }
-
-// Auto-scroll nav to current castle
+// ════════════════════════════════════════════
+//  2-2 PHONG
+// ════════════════════════════════════════════
 (function(){
-  const navBar = document.querySelector('div[style*="position:sticky;top:52px"]');
-  if(!navBar) return;
-  const current = navBar.querySelector('[style*="opacity:1"]');
-  if(current) setTimeout(()=>{
-    current.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  }, 300);
+  const gl=mkGL('cv22'); if(!gl)return;
+  const mesh=buildSphere();
+  const prog=mkProg(gl,PHONG_VS,PHONG_FS);
+  const PB=mkBuf(gl,mesh.pos),NB=mkBuf(gl,mesh.nor),UVB=mkBuf(gl,mesh.uv);
+  mkBuf(gl,mesh.idx,gl.ELEMENT_ARRAY_BUFFER);
+  bindAttr(gl,prog,'aP',PB);bindAttr(gl,prog,'aN',NB);bindAttr(gl,prog,'aUV',UVB,2);
+  const uMVP=gl.getUniformLocation(prog,'uMVP');
+  const uLight=gl.getUniformLocation(prog,'uLight');
+  const uEye=gl.getUniformLocation(prog,'uEye');
+  const uShine=gl.getUniformLocation(prog,'uShine');
+  const uMode=gl.getUniformLocation(prog,'uMode');
+  const uLType=gl.getUniformLocation(prog,'uLType');
+  gl.uniform3fv(gl.getUniformLocation(prog,'uAmb'),new Float32Array([0.07,0.1,0.18]));
+  gl.uniform3fv(gl.getUniformLocation(prog,'uDif'),new Float32Array([0.35,0.6,1.0]));
+  gl.uniform3fv(gl.getUniformLocation(prog,'uSpec'),new Float32Array([0.9,0.9,1.0]));
+  gl.uniform1i(uLType,0);
+  gl.enable(gl.DEPTH_TEST);gl.clearColor(0.024,0.024,0.06,1);
+  const EYE=[0,0.3,3];gl.uniform3fv(uEye,new Float32Array(EYE));
+  let mode='all',shine=32,t=0;
+  const mM={all:0,ambient:1,diffuse:2,specular:3};
+  document.getElementById('b22').addEventListener('click',e=>{
+    const btn=e.target.closest('.btn');if(!btn)return;
+    mode=btn.dataset.m;
+    document.querySelectorAll('#b22 .btn').forEach(b=>{b.classList.toggle('on',b.dataset.m===mode);});
+  });
+  document.getElementById('s22').addEventListener('input',function(){
+    shine=+this.value;document.getElementById('sv22').textContent=this.value;
+  });
+  function frame(){
+    t+=0.012;
+    const MVP=mkMVP(gl,...EYE);
+    gl.uniformMatrix4fv(uMVP,false,MVP);
+    const lx=2.2*Math.cos(t),lz=2.2*Math.sin(t);
+    gl.uniform3fv(uLight,new Float32Array([lx,1.5,lz]));
+    gl.uniform1f(uShine,shine);gl.uniform1i(uMode,mM[mode]);
+    gl.viewport(0,0,gl._canvas.width,gl._canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.drawElements(gl.TRIANGLES,mesh.idx.length,gl.UNSIGNED_SHORT,0);
+    requestAnimationFrame(frame);
+  }
+  frame();
 })();
 
-// Hook into existing complete() function
-const _origComplete = complete;
-if(typeof complete === 'function'){
-  // Override complete to also check completion
-  window._patchedComplete = true;
-}
-// Check on page load
-document.addEventListener('DOMContentLoaded', ()=>{
-  setTimeout(checkCompletion, 500);
-});
-// Also check after any storage changes
-window.addEventListener('storage', checkCompletion);
+// ════════════════════════════════════════════
+//  2-3 MATERIALS
+// ════════════════════════════════════════════
+(function(){
+  const gl=mkGL('cv23'); if(!gl)return;
+  const mesh=buildSphere();
+  const prog=mkProg(gl,PHONG_VS,PHONG_FS);
+  const PB=mkBuf(gl,mesh.pos),NB=mkBuf(gl,mesh.nor),UVB=mkBuf(gl,mesh.uv);
+  mkBuf(gl,mesh.idx,gl.ELEMENT_ARRAY_BUFFER);
+  bindAttr(gl,prog,'aP',PB);bindAttr(gl,prog,'aN',NB);bindAttr(gl,prog,'aUV',UVB,2);
+  const uMVP=gl.getUniformLocation(prog,'uMVP');
+  const uLight=gl.getUniformLocation(prog,'uLight');
+  const uEye=gl.getUniformLocation(prog,'uEye');
+  gl.uniform1i(gl.getUniformLocation(prog,'uMode'),0);
+  gl.uniform1i(gl.getUniformLocation(prog,'uLType'),0);
+  gl.enable(gl.DEPTH_TEST);gl.clearColor(0.02,0.02,0.05,1);
+  const EYE=[0,0,3];gl.uniform3fv(uEye,new Float32Array(EYE));
+  gl.uniform3fv(uLight,new Float32Array([-1,-0.5,-1]));
+
+  const MATS={
+    stone:{amb:[0.1,0.1,0.12],dif:[0.38,0.38,0.4],spec:[0.05,0.05,0.05],shine:8},
+    chrome:{amb:[0.2,0.2,0.22],dif:[0.45,0.45,0.5],spec:[0.95,0.95,1.0],shine:128},
+    gold:{amb:[0.25,0.18,0.0],dif:[0.85,0.65,0.12],spec:[0.75,0.62,0.22],shine:52},
+    jade:{amb:[0.0,0.12,0.07],dif:[0.05,0.5,0.28],spec:[0.08,0.18,0.12],shine:12},
+    wood:{amb:[0.2,0.1,0.03],dif:[0.52,0.3,0.1],spec:[0.02,0.01,0.0],shine:4},
+  };
+  let curMat=MATS.stone,t=0;
+  function setMat(m){
+    curMat=MATS[m];
+    gl.uniform3fv(gl.getUniformLocation(prog,'uAmb'),new Float32Array(curMat.amb));
+    gl.uniform3fv(gl.getUniformLocation(prog,'uDif'),new Float32Array(curMat.dif));
+    gl.uniform3fv(gl.getUniformLocation(prog,'uSpec'),new Float32Array(curMat.spec));
+    gl.uniform1f(gl.getUniformLocation(prog,'uShine'),curMat.shine);
+  }
+  setMat('stone');
+  document.getElementById('b23').addEventListener('click',e=>{
+    const btn=e.target.closest('.btn');if(!btn)return;
+    setMat(btn.dataset.m);
+    document.querySelectorAll('#b23 .btn').forEach(b=>b.classList.toggle('on',b.dataset.m===btn.dataset.m));
+  });
+  function frame(){
+    t+=0.01;
+    const MVP=mkMVP(gl,...EYE);
+    gl.uniformMatrix4fv(uMVP,false,MVP);
+    gl.viewport(0,0,gl._canvas.width,gl._canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.drawElements(gl.TRIANGLES,mesh.idx.length,gl.UNSIGNED_SHORT,0);
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// ════════════════════════════════════════════
+//  2-5 LIGHT TYPES
+// ════════════════════════════════════════════
+(function(){
+  const gl=mkGL('cv25'); if(!gl)return;
+  const mesh=buildSphere();
+  const prog=mkProg(gl,PHONG_VS,PHONG_FS);
+  const PB=mkBuf(gl,mesh.pos),NB=mkBuf(gl,mesh.nor),UVB=mkBuf(gl,mesh.uv);
+  mkBuf(gl,mesh.idx,gl.ELEMENT_ARRAY_BUFFER);
+  bindAttr(gl,prog,'aP',PB);bindAttr(gl,prog,'aN',NB);bindAttr(gl,prog,'aUV',UVB,2);
+  gl.uniform3fv(gl.getUniformLocation(prog,'uAmb'),new Float32Array([0.05,0.08,0.15]));
+  gl.uniform3fv(gl.getUniformLocation(prog,'uDif'),new Float32Array([0.5,0.7,1.0]));
+  gl.uniform3fv(gl.getUniformLocation(prog,'uSpec'),new Float32Array([1.0,1.0,1.0]));
+  gl.uniform1f(gl.getUniformLocation(prog,'uShine'),48);
+  gl.uniform1i(gl.getUniformLocation(prog,'uMode'),0);
+  gl.enable(gl.DEPTH_TEST);gl.clearColor(0.03,0.02,0.06,1);
+  const EYE=[0,0.2,3.5];
+  gl.uniform3fv(gl.getUniformLocation(prog,'uEye'),new Float32Array(EYE));
+  const uMVP=gl.getUniformLocation(prog,'uMVP');
+  const uLight=gl.getUniformLocation(prog,'uLight');
+  const uLType=gl.getUniformLocation(prog,'uLType');
+  let ltype=0,t=0;
+  const ltM={dir:0,point:1,spot:2};
+  document.getElementById('b25').addEventListener('click',e=>{
+    const btn=e.target.closest('.btn');if(!btn)return;
+    ltype=ltM[btn.dataset.m];
+    document.querySelectorAll('#b25 .btn').forEach(b=>b.classList.toggle('on',b.dataset.m===btn.dataset.m));
+  });
+  function frame(){
+    t+=0.013;
+    const MVP=mkMVP(gl,...EYE);
+    gl.uniformMatrix4fv(uMVP,false,MVP);
+    gl.uniform1i(uLType,ltype);
+    // directional: direction vec; point: position; spot: position then checks against -Z dir
+    if(ltype===0) gl.uniform3fv(uLight,new Float32Array([-Math.cos(t),-0.3,-Math.sin(t)]));
+    else if(ltype===1) gl.uniform3fv(uLight,new Float32Array([2*Math.cos(t),1.5,2*Math.sin(t)]));
+    else gl.uniform3fv(uLight,new Float32Array([0,0,2.5])); // spot from camera dir
+    gl.viewport(0,0,gl._canvas.width,gl._canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.drawElements(gl.TRIANGLES,mesh.idx.length,gl.UNSIGNED_SHORT,0);
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// ════════════════════════════════════════════
+//  2-6 CITY NIGHT (Canvas 2D)
+// ════════════════════════════════════════════
+(function(){
+  const canvas=document.getElementById('cv26');
+  const dpr=window.devicePixelRatio||1;
+  const pw=canvas.parentElement.clientWidth;
+  const ph=340;
+  canvas.width=Math.round(pw*dpr);canvas.height=Math.round(ph*dpr);
+  canvas.style.width='100%';canvas.style.height=ph+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const W=pw,H=ph;
+
+  let moonOn=true,flashOn=false,lampCount=3,lamps=[];
+  // Init lamps
+  function initLamps(){
+    lamps=[];
+    for(let i=0;i<lampCount;i++){
+      lamps.push({x:60+i*(W-120)/(Math.max(lampCount-1,1)),y:H*0.62,r:70+Math.random()*30,color:`hsl(${40+Math.random()*20},100%,60%)`});
+    }
+  }
+  initLamps();
+
+  let flashAngle=0,t=0;
+  document.getElementById('b26').addEventListener('click',e=>{
+    const btn=e.target.closest('.btn');if(!btn)return;
+    const m=btn.dataset.m;
+    if(m==='moon'){moonOn=!moonOn;btn.classList.toggle('on',moonOn);document.getElementById('c26moon').textContent=moonOn?'ON':'OFF';}
+    else if(m==='flash'){flashOn=!flashOn;btn.classList.toggle('on',flashOn);document.getElementById('c26flash').textContent=flashOn?'ON':'OFF';}
+    else if(m==='lamp'){lampCount=Math.min(lampCount+1,8);initLamps();document.getElementById('c26lights').textContent=lampCount+(moonOn?1:0)+(flashOn?1:0);}
+  });
+
+  // Buildings
+  const bldgs=[];
+  for(let x=0;x<W;x+=0){
+    const w=20+Math.random()*35;
+    const h=40+Math.random()*120;
+    bldgs.push({x,y:H-h,w,h});
+    x+=w+2+Math.random()*5;
+  }
+
+  function drawScene(){
+    ctx.clearRect(0,0,W,H);
+    // Sky gradient
+    const sky=ctx.createLinearGradient(0,0,0,H*0.7);
+    sky.addColorStop(0,'#050510');sky.addColorStop(1,'#0a0a25');
+    ctx.fillStyle=sky;ctx.fillRect(0,0,W,H*0.7);
+    // Ground
+    ctx.fillStyle='#080815';ctx.fillRect(0,H*0.7,W,H*0.3);
+
+    // Stars
+    ctx.fillStyle='rgba(255,255,255,0.7)';
+    for(let i=0;i<80;i++){
+      const sx=((i*137)%W),sy=((i*91)%(H*0.6));
+      ctx.fillRect(sx,sy,1,1);
+    }
+
+    // Moon
+    if(moonOn){
+      const mg=ctx.createRadialGradient(W*0.8,H*0.15,2,W*0.8,H*0.15,40);
+      mg.addColorStop(0,'rgba(200,220,255,0.25)');mg.addColorStop(1,'rgba(100,120,255,0)');
+      ctx.fillStyle=mg;ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#dde8ff';
+      ctx.beginPath();ctx.arc(W*0.8,H*0.15,14,0,Math.PI*2);ctx.fill();
+    }
+
+    // Street lamps glow
+    lamps.forEach(lp=>{
+      const g=ctx.createRadialGradient(lp.x,lp.y,0,lp.x,lp.y,lp.r);
+      g.addColorStop(0,'rgba(255,200,80,0.35)');g.addColorStop(1,'rgba(255,200,80,0)');
+      ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(lp.x,lp.y,lp.r,lp.r*0.7,0,0,Math.PI*2);ctx.fill();
+    });
+
+    // Flashlight beam
+    if(flashOn){
+      const fx=W*0.5,fy=H+50;
+      const tx=W*0.5+Math.sin(flashAngle)*80,ty=H*0.4;
+      const fg=ctx.createRadialGradient(fx,fy,0,tx,ty,80);
+      fg.addColorStop(0,'rgba(220,240,255,0.3)');fg.addColorStop(1,'rgba(220,240,255,0)');
+      ctx.save();ctx.globalCompositeOperation='screen';
+      ctx.fillStyle=fg;ctx.beginPath();ctx.moveTo(fx,fy);
+      ctx.lineTo(tx-50,ty);ctx.lineTo(tx+50,ty);ctx.closePath();ctx.fill();
+      ctx.restore();
+    }
+
+    // Buildings
+    bldgs.forEach(b=>{
+      // Building body
+      let bdColor='#0d0d22';
+      if(moonOn) bdColor='#0f0f28';
+      ctx.fillStyle=bdColor;ctx.fillRect(b.x,b.y,b.w,b.h+H*0.3);
+      // Windows
+      for(let wy=b.y+6;wy<b.y+b.h-10;wy+=12){
+        for(let wx=b.x+4;wx<b.x+b.w-4;wx+=8){
+          const lit=Math.random()>0.4;
+          ctx.fillStyle=lit?`rgba(255,230,120,${0.3+Math.random()*0.4})`:'rgba(30,30,60,0.5)';
+          ctx.fillRect(wx,wy,5,7);
+        }
+      }
+    });
+
+    // Lamp posts
+    lamps.forEach(lp=>{
+      ctx.strokeStyle='#334';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(lp.x,H*0.9);ctx.lineTo(lp.x,lp.y);ctx.stroke();
+      ctx.fillStyle=lp.color;
+      ctx.beginPath();ctx.arc(lp.x,lp.y,5,0,Math.PI*2);ctx.fill();
+    });
+  }
+
+  function frame(){
+    t+=0.02;flashAngle=Math.sin(t)*0.3;
+    drawScene();
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// ════════════════════════════════════════════
+
 </script>
-
-<!-- Completion Overlay -->
-<div id="compOverlay" class="comp-overlay">
-  <div class="fw-wrap"></div>
-  <div class="comp-trophy">🏆</div>
-  <div class="comp-stars">⭐⭐⭐</div>
-  <div class="comp-title">城堡2 全通關！<br>光之城</div>
-  <div class="comp-sub">你已征服所有關卡<br>獲得全部 XP 獎勵！</div>
-  <button class="comp-next-btn" onclick="goNextCastle()">⚔️ 前往城堡3 →</button>
-  <button class="comp-map-btn" onclick="goMap()">🗺️ 返回地圖</button>
-</div>
-
 </body>
 </html>
