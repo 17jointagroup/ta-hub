@@ -726,70 +726,76 @@ function d2(cont){
 
 // Demo L3 — Material Presets
 function d3(cont){
-  cont.innerHTML=`
-  <div class="demo-wrap">
-    <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>材質切換 — 感受不同材料</div></div>
-    <canvas id="cv-d3" width="600" height="280" style="height:280px"></canvas>
-  </div>
+  var MATS=[
+    {name:'石頭',   amb:[.19,.19,.19],dif:[.51,.51,.51],spe:[.10,.10,.10],sh:10},
+    {name:'鉻金屬', amb:[.25,.25,.25],dif:[.40,.40,.40],spe:[.77,.77,.77],sh:76},
+    {name:'金',     amb:[.25,.20,.07],dif:[.75,.60,.22],spe:[.63,.56,.37],sh:51},
+    {name:'翡翠',   amb:[.02,.17,.02],dif:[.07,.61,.07],spe:[.63,.72,.63],sh:76},
+    {name:'木頭',   amb:[.33,.20,.08],dif:[.55,.35,.14],spe:[.05,.02,.01],sh:4},
+  ];
+  window._matIdx=0;
+  window.setMat=function(i){window._matIdx=i;document.querySelectorAll('#mat-btns .ctrl-btn').forEach(function(b,j){b.classList.toggle('on',i===j);});};
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>材質切換 — 感受不同材料</div></div><canvas id="cv-d3"></canvas></div>
   <div class="ctrl-row" id="mat-btns">
     <button class="ctrl-btn on" onclick="setMat(0)">🪨 石頭</button>
     <button class="ctrl-btn" onclick="setMat(1)">🔩 鉻金屬</button>
     <button class="ctrl-btn" onclick="setMat(2)">🥇 金</button>
-    <button class="ctrl-btn" onclick="setMat(3)">🔵 翡翠</button>
+    <button class="ctrl-btn" onclick="setMat(3)">💎 翡翠</button>
     <button class="ctrl-btn" onclick="setMat(4)">🪵 木頭</button>
   </div>`;
-  const MATS=[
-    {name:'石頭',   amb:[.19,.19,.19],dif:[.51,.51,.51],spe:[.1,.1,.1], sh:10},
-    {name:'鉻金屬', amb:[.25,.25,.25],dif:[.4,.4,.4],   spe:[.77,.77,.77],sh:76},
-    {name:'金',    amb:[.25,.20,.07],dif:[.75,.60,.22],spe:[.63,.56,.37],sh:51},
-    {name:'翡翠',  amb:[.02,.17,.02],dif:[.07,.61,.07],spe:[.63,.72,.63],sh:76},
-    {name:'木頭',  amb:[.33,.20,.08],dif:[.55,.35,.14],spe:[.05,.02,.01],sh:4},
-  ];
-  window._matIdx=0;
-  window.setMat=(i)=>{window._matIdx=i;document.querySelectorAll('#mat-btns .ctrl-btn').forEach((b,j)=>b.classList.toggle('on',i===j));};
-  const cv=document.getElementById('cv-d3');
-  
-  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
-  const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
-    void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
-  const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
-    uniform vec3 amb;uniform vec3 dif;uniform vec3 spe;uniform float sh;
-    uniform vec3 lp;uniform vec3 vp;
-    void main(){
-      vec3 N=normalize(vN);vec3 L=normalize(lp-vP);vec3 V=normalize(vp-vP);vec3 R=reflect(-L,N);
-      vec3 a=amb*0.4;
-      vec3 d=dif*max(dot(N,L),0.0);
-      vec3 s=spe*pow(max(dot(V,R),0.0),sh);
-      gl_FragColor=vec4(a+d+s,1);
-    }`;
-  const prog=mkProg(gl,vs,fs);
-  const {verts,norms,idx}=genSphere(32,32);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
-  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,norms,gl.STATIC_DRAW);
-  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
-  const posL=gl.getAttribLocation(prog,'pos'),normL=gl.getAttribLocation(prog,'norm');
-  const mvpL=gl.getUniformLocation(prog,'mvp');
-  const ambL=gl.getUniformLocation(prog,'amb'),difL=gl.getUniformLocation(prog,'dif'),speL=gl.getUniformLocation(prog,'spe'),shL=gl.getUniformLocation(prog,'sh');
-  const lpL=gl.getUniformLocation(prog,'lp'),vpL=gl.getUniformLocation(prog,'vp');
-  gl.enable(gl.DEPTH_TEST);
-  let t=0;
-  function frame(){
-    t+=0.008;
-    const m=MATS[window._matIdx];
-    gl.viewport(0,0,cv.width,cv.height);
-    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(prog);
-    const mvp=m4mul(m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,50),lookAtM([0,0,4],[0,0,0],[0,1,0])),identM());
-    gl.uniformMatrix4fv(mvpL,false,mvp);
-    gl.uniform3fv(ambL,m.amb);gl.uniform3fv(difL,m.dif);gl.uniform3fv(speL,m.spe);gl.uniform1f(shL,m.sh);
-    gl.uniform3f(lpL,Math.cos(t)*4,3,Math.sin(t)*4);gl.uniform3f(vpL,0,0,4);
-    gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(posL);gl.vertexAttribPointer(posL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(normL);gl.vertexAttribPointer(normL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
-    gl.drawElements(gl.TRIANGLES,idx.length,gl.UNSIGNED_SHORT,0);
-    requestAnimationFrame(frame);
-  }
-  frame();
+  var cv3=document.getElementById('cv-d3');
+  cv3.width=420; cv3.height=420;
+  cv3.style.width='420px'; cv3.style.height='420px';
+  cv3.style.display='block'; cv3.style.margin='0 auto';
+  var gl3=cv3.getContext('webgl');
+  if(!gl3){console.error('WebGL n/a d3');return;}
+  var VS3=`attribute vec3 aP,aN;uniform mat4 uMVP;varying vec3 vN,vP;void main(){vP=aP;vN=aN;gl_Position=uMVP*vec4(aP,1.0);}`;
+  var FS3=`precision mediump float;varying vec3 vN,vP;uniform vec3 uAmb,uDif,uSpe;uniform float uSh;uniform vec3 uL,uE;void main(){vec3 N=normalize(vN);vec3 L=normalize(uL-vP);vec3 V=normalize(uE-vP);vec3 R=reflect(-L,N);vec3 a=uAmb*0.5;vec3 d=uDif*max(dot(N,L),0.0);vec3 s=uSpe*pow(max(dot(V,R),0.0),uSh);gl_FragColor=vec4(a+d+s,1.0);}`;
+  function mkS3(t,src){var s=gl3.createShader(t);gl3.shaderSource(s,src);gl3.compileShader(s);if(!gl3.getShaderParameter(s,gl3.COMPILE_STATUS))console.error(gl3.getShaderInfoLog(s));return s;}
+  var p3=gl3.createProgram();
+  gl3.attachShader(p3,mkS3(gl3.VERTEX_SHADER,VS3));
+  gl3.attachShader(p3,mkS3(gl3.FRAGMENT_SHADER,FS3));
+  gl3.linkProgram(p3);gl3.useProgram(p3);
+  // sphere
+  var pos3=[],nor3=[],idx3=[];
+  var ST3=48,SL3=48;
+  for(var i=0;i<=ST3;i++){var phi=Math.PI*i/ST3;for(var j=0;j<=SL3;j++){var th=2*Math.PI*j/SL3;var x=Math.sin(phi)*Math.cos(th),y=Math.cos(phi),z=Math.sin(phi)*Math.sin(th);pos3.push(x,y,z);nor3.push(x,y,z);}}
+  for(var i=0;i<ST3;i++)for(var j=0;j<SL3;j++){var a=i*(SL3+1)+j,b=a+SL3+1;idx3.push(a,b,a+1,b,b+1,a+1);}
+  var PB3=gl3.createBuffer();gl3.bindBuffer(gl3.ARRAY_BUFFER,PB3);gl3.bufferData(gl3.ARRAY_BUFFER,new Float32Array(pos3),gl3.STATIC_DRAW);
+  var NB3=gl3.createBuffer();gl3.bindBuffer(gl3.ARRAY_BUFFER,NB3);gl3.bufferData(gl3.ARRAY_BUFFER,new Float32Array(nor3),gl3.STATIC_DRAW);
+  var IB3=gl3.createBuffer();gl3.bindBuffer(gl3.ELEMENT_ARRAY_BUFFER,IB3);gl3.bufferData(gl3.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx3),gl3.STATIC_DRAW);
+  var pL3=gl3.getAttribLocation(p3,'aP'),nL3=gl3.getAttribLocation(p3,'aN');
+  gl3.bindBuffer(gl3.ARRAY_BUFFER,PB3);gl3.enableVertexAttribArray(pL3);gl3.vertexAttribPointer(pL3,3,gl3.FLOAT,false,0,0);
+  gl3.bindBuffer(gl3.ARRAY_BUFFER,NB3);gl3.enableVertexAttribArray(nL3);gl3.vertexAttribPointer(nL3,3,gl3.FLOAT,false,0,0);
+  var uMVP3=gl3.getUniformLocation(p3,'uMVP');
+  var uAmb3=gl3.getUniformLocation(p3,'uAmb'),uDif3=gl3.getUniformLocation(p3,'uDif'),uSpe3=gl3.getUniformLocation(p3,'uSpe'),uSh3=gl3.getUniformLocation(p3,'uSh');
+  var uL3=gl3.getUniformLocation(p3,'uL'),uE3=gl3.getUniformLocation(p3,'uE');
+  var EYE3=[0,0,3];
+  gl3.uniform3fv(uE3,new Float32Array(EYE3));
+  gl3.enable(gl3.DEPTH_TEST);gl3.clearColor(0.024,0.024,0.06,1);
+  var idxLen3=idx3.length;
+  var t3=0;
+  function perspM3(fov,asp,n,f){var ta=Math.tan(fov/2),d=f-n,m=new Float32Array(16);m[0]=1/(ta*asp);m[5]=1/ta;m[10]=-(f+n)/d;m[11]=-1;m[14]=-2*f*n/d;return m;}
+  function lookAtM3(e,c,u){function nr(v){var l=Math.hypot(v[0],v[1],v[2]);return[v[0]/l,v[1]/l,v[2]/l];}function cr(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}var z=nr([e[0]-c[0],e[1]-c[1],e[2]-c[2]]);var x=nr(cr(u,z));var y=cr(z,x);var m=new Float32Array(16);m[0]=x[0];m[4]=x[1];m[8]=x[2];m[12]=-dt(x,e);m[1]=y[0];m[5]=y[1];m[9]=y[2];m[13]=-dt(y,e);m[2]=z[0];m[6]=z[1];m[10]=z[2];m[14]=-dt(z,e);m[15]=1;return m;}
+  function m4m3(a,b){var m=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){var s=0;for(var k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];m[i+j*4]=s;}return m;}
+  (function frame3(){
+    t3+=0.010;
+    gl3.useProgram(p3);
+    var P3=perspM3(Math.PI/4,1,0.1,50);
+    var V3=lookAtM3(EYE3,[0,0,0],[0,1,0]);
+    gl3.uniformMatrix4fv(uMVP3,false,m4m3(P3,V3));
+    var mat=MATS[window._matIdx||0];
+    gl3.uniform3fv(uAmb3,new Float32Array(mat.amb));
+    gl3.uniform3fv(uDif3,new Float32Array(mat.dif));
+    gl3.uniform3fv(uSpe3,new Float32Array(mat.spe));
+    gl3.uniform1f(uSh3,mat.sh);
+    gl3.uniform3f(uL3,Math.cos(t3)*3,2,Math.sin(t3)*3);
+    gl3.viewport(0,0,cv3.width,cv3.height);
+    gl3.clear(gl3.COLOR_BUFFER_BIT|gl3.DEPTH_BUFFER_BIT);
+    gl3.bindBuffer(gl3.ELEMENT_ARRAY_BUFFER,IB3);
+    gl3.drawElements(gl3.TRIANGLES,idxLen3,gl3.UNSIGNED_SHORT,0);
+    requestAnimationFrame(frame3);
+  })();
 }
 
 // Demo L4 — Specular Map visualization
