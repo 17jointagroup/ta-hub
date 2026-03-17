@@ -185,6 +185,49 @@ html{font-size:17px}
 
 <script>
 
+
+// ── Canvas DPI fix for retina/iOS ──
+function setupCanvas(canvas, w, h) {
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  var ctx = canvas.getContext('2d');
+  if(ctx) ctx.scale(dpr, dpr);
+  return canvas;
+}
+function makeCanvas(w, h) {
+  var cv = document.createElement('canvas');
+  return setupCanvas(cv, w, h);
+}
+
+
+// ── Managed Animation Frame ──
+var _rafIds = {};
+function managedRAF(key, fn) {
+  if(_rafIds[key]) cancelAnimationFrame(_rafIds[key]);
+  function loop() {
+    _rafIds[key] = requestAnimationFrame(function() {
+      // Check if the canvas still exists in DOM
+      var el = document.getElementById(key);
+      if(!el || !el.isConnected) {
+        delete _rafIds[key];
+        return;
+      }
+      fn();
+      loop();
+    });
+  }
+  loop();
+}
+function stopRAF(key) {
+  if(_rafIds[key]) { cancelAnimationFrame(_rafIds[key]); delete _rafIds[key]; }
+}
+function stopAllRAF() {
+  Object.keys(_rafIds).forEach(function(k) { stopRAF(k); });
+}
+
 // ── iOS Safari Fixes ──
 // roundRect polyfill
 if(!CanvasRenderingContext2D.prototype.roundRect){
@@ -456,7 +499,7 @@ function render(){
   });
 }
 
-function toggle(id){current=current===id?null:id;render();if(current){setTimeout(()=>{const el=document.getElementById('L'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});initDemo(id);},40);}}
+function toggle(id){if(current&&current!==id)stopAllRAF();current=current===id?null:id;render();if(current){setTimeout(()=>{const el=document.getElementById('L'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});initDemo(id);},40);}}
 
 function buildBody(les,done){
   const opts=les.quiz.opts.map((o,i)=>`<div class="opt" id="opt-${les.id}-${i}" onclick="checkQ('${les.id}',${i})"><div class="opt-k">${['A','B','C','D'][i]}</div>${o}</div>`).join('');
