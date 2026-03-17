@@ -1,22 +1,575 @@
 <!DOCTYPE html>
-<html lang="zh-TW"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>光暉之城 — 城堡 5</title>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌟 進階光之城 — OpenGL 魔法王國</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#09091a;color:#dde0f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;padding:24px;}
-.lock-card{background:#111128;border:1px solid rgba(255,255,255,0.09);border-radius:16px;
-  max-width:480px;width:100%;padding:40px 32px;text-align:center;}
-.lock-icon{font-size:48px;margin-bottom:16px;}
-h1{font-size:20px;font-weight:500;margin-bottom:8px;}
-p{font-size:13px;color:#7070a0;line-height:1.7;}
-a{color:#7070a0;font-size:12px;text-decoration:none;margin-top:20px;display:inline-block;}
-</style></head><body>
-<div class="lock-card">
-  <div class="lock-icon">🔒</div>
-  <h1>城堡 5：光暉之城</h1>
-  <p>第五章尚未解鎖。完成前四章後即可進入。</p>
-  <a href="opengl-map.html">← 回到地圖</a>
+:root{
+  --bg:#100a05;--bg2:#160d07;--card:#1c1008;--border:#2d1e0e;
+  --acc:#ff9f43;--acc2:#ffd93d;--acc3:#ff6b9d;--acc4:#ff6b6b;--acc5:#00f5c4;
+  --txt:#fff3e8;--txt2:#7a5535;
+  --font:'Nunito',sans-serif;--mono:'Space Mono',monospace;
+  --glow:0 0 28px rgba(255,159,67,.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;border-radius:50%;background:#ffcc88;animation:tw var(--d,3s) var(--dl,0s) infinite}
+@keyframes tw{0%,100%{opacity:.08}50%{opacity:.7}}
+.orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;animation:drift var(--d,20s) ease-in-out infinite alternate}
+@keyframes drift{0%{transform:translate(0,0)}100%{transform:translate(var(--tx,40px),var(--ty,-40px))}}
+header{position:sticky;top:0;z-index:100;background:rgba(16,10,5,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:11px 24px;display:flex;align-items:center;gap:12px}
+.back-btn{background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:6px 14px;border-radius:100px;font-size:.78rem;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;transition:.2s}
+.back-btn:hover{color:var(--acc);border-color:var(--acc)}
+.header-title{font-size:1rem;font-weight:900;color:var(--acc)}
+.xp-bar{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:800}
+.xp-total{color:var(--acc);font-family:var(--mono)}
+.xp-track{width:110px;height:7px;background:var(--border);border-radius:100px;overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:100px;transition:width .7s cubic-bezier(.34,1.56,.64,1)}
+.hero{position:relative;z-index:1;text-align:center;padding:64px 24px 44px}
+.tower-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,159,67,.07);border:1px solid rgba(255,159,67,.22);border-radius:100px;padding:6px 18px;font-size:.78rem;font-weight:800;color:var(--acc);margin-bottom:20px}
+.hero h1{font-size:clamp(2rem,6vw,3.4rem);font-weight:900;line-height:1.1;margin-bottom:14px}
+.hero h1 span{background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--txt2);font-size:.95rem;max-width:500px;margin:0 auto 32px;line-height:1.75}
+.stats-row{display:flex;justify-content:center;gap:20px;flex-wrap:wrap}
+.stat-chip{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 22px;text-align:center}
+.stat-chip .num{font-size:1.5rem;font-weight:900;font-family:var(--mono);color:var(--acc)}
+.stat-chip .lbl{font-size:.68rem;color:var(--txt2);font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.chapter-map{position:relative;z-index:1;padding:24px;max-width:920px;margin:0 auto}
+.map-title{font-size:.75rem;font-weight:800;color:var(--txt2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px;padding-left:4px}
+.lesson{background:var(--card);border:1px solid var(--border);border-radius:22px;margin-bottom:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s;cursor:pointer}
+.lesson:hover:not(.locked){border-color:rgba(255,159,67,.4);box-shadow:var(--glow)}
+.lesson.locked{opacity:.45;cursor:not-allowed}
+.lesson.active{border-color:var(--acc);box-shadow:var(--glow)}
+.lesson.done{border-color:rgba(255,217,61,.45)}
+.lesson.boss:hover:not(.locked),.lesson.boss.active{border-color:var(--acc3);box-shadow:0 0 24px rgba(255,107,157,.3)}
+.lesson-header{display:flex;align-items:center;gap:16px;padding:16px 20px}
+.lesson-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.i-n{background:rgba(255,159,67,.07);border:1px solid rgba(255,159,67,.18)}
+.i-d{background:rgba(255,217,61,.1);border:1px solid rgba(255,217,61,.3)}
+.i-b{background:rgba(255,107,157,.07);border:1px solid rgba(255,107,157,.22)}
+.i-l{background:var(--border);filter:grayscale(1)}
+.lesson-info{flex:1}
+.lesson-title{font-size:.95rem;font-weight:900;margin-bottom:2px}
+.lesson-sub{font-size:.75rem;color:var(--txt2);font-weight:700}
+.lesson-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.xp-pill{background:rgba(255,159,67,.07);color:var(--acc);border:1px solid rgba(255,159,67,.2);border-radius:100px;padding:3px 10px;font-size:.7rem;font-weight:900;font-family:var(--mono)}
+.boss-pill{background:rgba(255,107,157,.07);color:var(--acc3);border:1px solid rgba(255,107,157,.25);border-radius:100px;padding:3px 10px;font-size:.68rem;font-weight:900}
+.chk{width:26px;height:26px;border-radius:50%;background:rgba(255,217,61,.1);color:var(--acc2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:900}
+.lck{width:26px;height:26px;border-radius:50%;background:var(--border);color:var(--txt2);display:flex;align-items:center;justify-content:center}
+.lesson-body{display:none;border-top:1px solid var(--border)}
+.lesson.active .lesson-body{display:block}
+.tab-bar{display:flex;gap:3px;padding:10px 14px 0;background:var(--bg2)}
+.tab{padding:7px 14px;border-radius:9px 9px 0 0;font-size:.76rem;font-weight:800;cursor:pointer;transition:.15s;color:var(--txt2);border:1px solid transparent;border-bottom:none}
+.tab.on{background:var(--card);color:var(--txt);border-color:var(--border)}
+.tab-content{padding:18px}
+.tab-panel{display:none}.tab-panel.on{display:block}
+.story-box{background:linear-gradient(135deg,rgba(255,159,67,.05),rgba(255,217,61,.02));border:1px solid rgba(255,159,67,.14);border-radius:18px;padding:20px;margin-bottom:16px;line-height:1.85;font-size:.91rem}
+.be{font-size:2.5rem;display:block;margin-bottom:10px;animation:bob .9s ease infinite alternate}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+.hl{background:rgba(255,159,67,.14);color:var(--acc);border-radius:4px;padding:1px 7px;font-weight:900}
+.hl2{background:rgba(255,217,61,.12);color:var(--acc2);border-radius:4px;padding:1px 7px;font-weight:900}
+.hl3{background:rgba(255,107,157,.1);color:var(--acc3);border-radius:4px;padding:1px 7px;font-weight:900}
+.hl4{background:rgba(0,245,196,.1);color:var(--acc5);border-radius:4px;padding:1px 7px;font-weight:900}
+.school-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,159,67,.06);border:1px solid rgba(255,159,67,.18);border-radius:8px;padding:6px 12px;font-size:.76rem;font-weight:800;color:var(--acc);margin-top:12px}
+.code-wrap{background:#0a0602;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:12px 0}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.code-lang{font-size:.68rem;font-weight:800;color:var(--txt2);font-family:var(--mono)}
+.copy-btn{background:none;border:1px solid var(--border);color:var(--txt2);padding:3px 9px;border-radius:5px;font-size:.65rem;font-weight:800;cursor:pointer;transition:.15s;font-family:var(--mono)}
+.copy-btn:hover{color:var(--acc);border-color:var(--acc)}
+pre{padding:14px;font-family:var(--mono);font-size:.75rem;line-height:1.7;overflow-x:auto;white-space:pre}
+.kw{color:#ff9f43}.fn{color:#89ddff}.str{color:#00f5c4}.num{color:#ffd93d}.cm{color:#3d2510}.type{color:#c792ea}
+.demo-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.demo-top{display:flex;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border)}
+.demo-label{font-size:.68rem;font-weight:800;color:var(--txt2);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 5px var(--acc);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
+canvas{display:block;width:100%}
+.ctrl-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.ctrl-btn{background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:6px 14px;border-radius:100px;font-family:var(--font);font-size:.78rem;font-weight:800;cursor:pointer;transition:.2s}
+.ctrl-btn:hover{border-color:var(--acc);color:var(--acc)}
+.ctrl-btn.on{background:rgba(255,159,67,.1);border-color:var(--acc);color:var(--acc)}
+.slider-row{display:flex;align-items:center;gap:10px;margin:6px 0}
+.slider-label{font-size:.75rem;font-weight:800;color:var(--txt2);min-width:90px}
+input[type=range]{flex:1;accent-color:var(--acc)}
+.slider-val{font-family:var(--mono);font-size:.75rem;color:var(--acc2);min-width:44px;text-align:right}
+.quiz-box{background:rgba(255,107,157,.04);border:1px solid rgba(255,107,157,.15);border-radius:14px;padding:18px;margin-top:16px}
+.quiz-title{font-size:.8rem;font-weight:900;color:var(--acc3);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.quiz-q{font-size:.88rem;line-height:1.6;color:var(--txt);margin-bottom:12px;font-weight:700}
+.opts{display:grid;gap:7px}
+.opt{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px 14px;cursor:pointer;font-size:.84rem;font-weight:700;transition:.2s;display:flex;align-items:center;gap:9px}
+.opt:hover{border-color:var(--acc);background:rgba(255,159,67,.04)}
+.opt.correct{border-color:var(--acc5);background:rgba(0,245,196,.05);color:var(--acc5);pointer-events:none}
+.opt.wrong{border-color:var(--acc4);background:rgba(255,107,107,.05);color:var(--acc4);pointer-events:none}
+.opt.disabled{pointer-events:none;opacity:.6}
+.opt-k{width:22px;height:22px;border-radius:5px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;font-family:var(--mono);flex-shrink:0}
+.explain-box{margin-top:10px;padding:11px 14px;background:rgba(0,245,196,.04);border:1px solid rgba(0,245,196,.15);border-radius:9px;font-size:.81rem;line-height:1.65;color:var(--txt2);display:none}
+.done-btn{width:100%;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0a0500;border:none;border-radius:100px;padding:12px;font-family:var(--font);font-size:.92rem;font-weight:900;cursor:pointer;margin-top:14px;transition:.25s;display:flex;align-items:center;justify-content:center;gap:8px}
+.done-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,159,67,.35)}
+.done-btn:disabled{opacity:.35;cursor:default;transform:none;box-shadow:none}
+.conn{width:2px;height:10px;background:linear-gradient(var(--border),transparent);margin:0 auto -1px;position:relative;left:21px}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--acc);border-radius:100px;padding:10px 26px;font-weight:800;font-size:.86rem;color:var(--acc);z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+.xp-pop{position:fixed;font-family:var(--mono);font-weight:900;font-size:1.2rem;color:var(--acc);pointer-events:none;z-index:999;text-shadow:0 0 20px var(--acc);animation:floatUp .9s ease-out forwards}
+
+/* ── Completion Banner ── */
+.comp-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(4,2,14,.88);backdrop-filter:blur(18px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.comp-overlay.show{display:flex;animation:fadeInComp .5s ease}
+@keyframes fadeInComp{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.comp-title{font-size:2.2rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}
+.comp-sub{font-size:.9rem;color:var(--txt2);margin-bottom:24px;line-height:1.6}
+.comp-trophy{font-size:4rem;margin-bottom:12px;animation:trophy-bob .8s ease infinite alternate}
+@keyframes trophy-bob{from{transform:translateY(0) rotate(-5deg)}to{transform:translateY(-10px) rotate(5deg)}}
+.comp-next-btn{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#050210;border:none;border-radius:100px;padding:14px 32px;font-family:var(--font);font-size:1rem;font-weight:900;cursor:pointer;-webkit-appearance:none;margin-bottom:12px;transition:.2s;box-shadow:0 6px 28px rgba(var(--acc-rgb),.4)}
+.comp-next-btn:active{opacity:.85;transform:scale(.97)}
+.comp-map-btn{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:var(--txt2);border-radius:100px;padding:10px 24px;font-family:var(--font);font-size:.85rem;font-weight:800;cursor:pointer;-webkit-appearance:none;transition:.2s}
+.comp-map-btn:active{opacity:.7}
+.comp-stars{font-size:2rem;letter-spacing:6px;margin-bottom:16px;animation:stars-in .6s .3s ease both}
+@keyframes stars-in{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+/* Firework particles */
+.fw-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.fw{position:absolute;border-radius:50%;animation:fwFly var(--d,.8s) var(--dl,0s) ease-out forwards}
+@keyframes fwFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx,0px),var(--ty,-80px)) scale(0);opacity:0}}
+
+/* ── Font size boost ── */
+html{font-size:17px}
+.lesson-title{font-size:1.05rem!important}
+.lesson-sub{font-size:.85rem!important}
+.story-box{font-size:1rem!important;line-height:1.9!important}
+.quiz-q{font-size:.98rem!important;line-height:1.7!important}
+.opt{font-size:.95rem!important}
+.done-btn{font-size:1rem!important}
+.xp-pill{font-size:.78rem!important}
+.tab{font-size:.85rem!important}
+.school-badge{font-size:.84rem!important}
+.code-wrap pre{font-size:.82rem!important}
+.map-title{font-size:.82rem!important}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="orb" style="width:380px;height:380px;background:rgba(255,159,67,.05);top:0%;left:-5%;--d:20s;--tx:70px;--ty:50px"></div>
+<div class="orb" style="width:280px;height:280px;background:rgba(255,217,61,.04);bottom:10%;right:0%;--d:24s;--tx:-50px;--ty:-40px"></div>
+<header>
+  <a href="opengl-map.html" class="back-btn">🗺️ 地圖</a>
+  <a href="index.html" class="back-btn">&#127968; 首頁</a>
+  <span class="header-title">&#127775; 進階光之城</span>
+  <div class="xp-bar">
+    <span style="color:var(--txt2)">&#9889;</span>
+    <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    <span class="xp-total" id="xp-total">0/800</span>
+  </div>
+</header>
+<section class="hero">
+  <div class="tower-badge">🌟 城堡5 · 光輝之城 · Advanced Lighting</div>
+  <h1>光的<span>終極形態</span></h1>
+  <p>Gamma、陰影、HDR、Bloom — 這些技術讓遊戲畫面從「不錯」變成「電影級」。每一個都是業界實際在用的技術 🎬</p>
+  <div class="stats-row">
+    <div class="stat-chip"><div class="num" id="done-count">0</div><div class="lbl">已完成</div></div>
+    <div class="stat-chip"><div class="num">8</div><div class="lbl">關卡數</div></div>
+    <div class="stat-chip"><div class="num">800</div><div class="lbl">總 XP</div></div>
+    <div class="stat-chip"><div class="num">&#127800;</div><div class="lbl">Boss 1關</div></div>
+  </div>
+</section>
+<div class="chapter-map">
+  <div class="map-title">&#128205; 關卡地圖</div>
+  <div id="lesson-list"></div>
 </div>
-</body></html>
+<div class="toast" id="toast"></div>
+<script>
+
+
+// ── Canvas DPI fix for retina/iOS ──
+function setupCanvas(canvas, w, h) {
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  var ctx = canvas.getContext('2d');
+  if(ctx) ctx.scale(dpr, dpr);
+  return canvas;
+}
+function makeCanvas(w, h) {
+  var cv = document.createElement('canvas');
+  return setupCanvas(cv, w, h);
+}
+
+
+// ── Managed Animation Frame ──
+var _rafIds = {};
+function managedRAF(key, fn) {
+  if(_rafIds[key]) cancelAnimationFrame(_rafIds[key]);
+  function loop() {
+    _rafIds[key] = requestAnimationFrame(function() {
+      // Check if the canvas still exists in DOM
+      var el = document.getElementById(key);
+      if(!el || !el.isConnected) {
+        delete _rafIds[key];
+        return;
+      }
+      fn();
+      loop();
+    });
+  }
+  loop();
+}
+function stopRAF(key) {
+  if(_rafIds[key]) { cancelAnimationFrame(_rafIds[key]); delete _rafIds[key]; }
+}
+function stopAllRAF() {
+  Object.keys(_rafIds).forEach(function(k) { stopRAF(k); });
+}
+
+// ── iOS Safari Fixes ──
+// roundRect polyfill
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    const R=Math.min(typeof r==='number'?r:r[0],w/2,h/2);
+    this.beginPath();this.moveTo(x+R,y);this.lineTo(x+w-R,y);
+    this.arcTo(x+w,y,x+w,y+R,R);this.lineTo(x+w,y+h-R);
+    this.arcTo(x+w,y+h,x+w-R,y+h,R);this.lineTo(x+R,y+h);
+    this.arcTo(x,y+h,x,y+h-R,R);this.lineTo(x,y+R);
+    this.arcTo(x,y,x+R,y,R);this.closePath();
+  };
+}
+// WebGL context pool - prevents iOS 8-context limit crash
+const _glPool = {};
+function safeGL(cv) {
+  if(!cv) return null;
+  const id = cv.id || 'cv_'+Math.random();
+  cv.id = id;
+  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
+  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
+  if(!gl) return null;
+  _glPool[id] = gl;
+  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  return gl;
+}
+
+const LESSONS=[
+{id:'l1',num:'5-1',icon:'✨',title:'Blinn-Phong — 鏡面光的修正',sub:'用半向量取代反射向量，解決截斷問題',xp:70,type:'normal',school:'數學：半向量 (Half Vector)，角度不等式',
+story:'<span class="be">✨</span>Phong 光照有個 bug：當視角和反射光夾角大於 90° 時，鏡面光突然消失！<br><br><span class="hl">Blinn-Phong</span> 改用<span class="hl2">半向量 H</span> = normalize(光線 + 視角)<br>用 dot(N, H) 取代 dot(V, R)<br><br>好處：<br>✅ 沒有截斷問題<br>✅ 計算比 reflect() 快<br>✅ 光斑分佈更自然<br><br>現代遊戲引擎幾乎都用 Blinn-Phong！',
+quiz:{q:'Blinn-Phong 的「半向量」是什麼？',opts:['光線方向的一半','光線方向和視角方向的中間方向 normalize(L+V)','法向量的一半','垂直於法向量的方向'],ans:1,explain:'H = normalize(L + V)，就是光線和視角方向之間的正中間方向。用 dot(N,H) 永遠不超過 90°，不會截斷！💡'}},
+{id:'l2',num:'5-2',icon:'🎨',title:'Gamma 校正 — 螢幕的謊言',sub:'線性空間 vs sRGB：物理正確的顏色計算',xp:80,type:'normal',school:'物理：人眼對亮度的非線性感知，Weber-Fechner 定律',
+story:'<span class="be">🎨</span>螢幕是<span class="hl">非線性</span>的！你設定 0.5 亮度，螢幕實際輸出 0.5^2.2 ≈ 0.218<br><br>這叫做 <span class="hl2">Gamma（γ = 2.2）</span><br><br>正確流程：<br>1️⃣ 貼圖從 sRGB → <span class="hl">線性空間</span>（decode）<br>2️⃣ 在線性空間做所有光照計算<br>3️⃣ 輸出時轉回 sRGB（encode，取 1/2.2 次方）<br><br>沒有 Gamma 校正：太暗、陰影少細節<br>有 Gamma 校正：飽和、光照自然 🌈',
+quiz:{q:'為什麼光照必須在線性空間計算？',opts:['線性空間更快','物理上光的疊加是線性的，只有線性空間的加法才符合真實物理','螢幕規定的','美觀考量'],ans:1,explain:'兩盞燈加起來 = 各自亮度相加。這是線性關係。但 sRGB 空間非線性，在裡面做加法得錯誤結果。必須轉線性空間算完再轉回 🔬'}},
+{id:'l3',num:'5-3',icon:'🌑',title:'陰影貼圖 — 黑暗的投影',sub:'Shadow Map：兩步驟生成動態陰影',xp:100,type:'normal',school:'數學：透視投影，深度值比較，偏差補償',
+story:'<span class="be">🌑</span><span class="hl">Shadow Map</span> 兩步驟：<br><br><b>第一步：從光源渲染</b><br>把攝影機放在光源位置，只存<span class="hl2">深度值</span> — 這就是 Shadow Map。<br><br><b>第二步：正常渲染 + 陰影測試</b><br>每個片段轉換到光源空間，查 Shadow Map 裡的深度。<br><span class="hl3">比 Shadow Map 深 → 在陰影裡！</span><br>比 Shadow Map 淺 → 被光照到！<br><br>⚠️ 精度不足時出現 <span class="hl">Shadow Acne</span>（斑馬紋）<br>解法：加 bias 偏移值容忍誤差！',
+quiz:{q:'Shadow Acne（陰影粉刺）的根本原因是什麼？',opts:['Shadow Map 太暗','深度浮點數精度不足導致物體自我陰影','光源位置錯誤','FPS 太低'],ans:1,explain:'Shadow Map 精度有限，深度比較出現浮點誤差，部分表面片段誤認自己在陰影裡！加 bias（如 0.005）讓比較有容忍度，避免偽陰影 🦓'}},
+{id:'l4',num:'5-4',icon:'🕯️',title:'點光源陰影 — 全方位黑暗',sub:'Cubemap Shadow Map：六面深度，360° 覆蓋',xp:100,type:'normal',school:'數學：球面座標，立體角，Cubemap 映射',
+story:'<span class="be">🕯️</span>點光源向四面八方發光，要 360° 投射陰影？<br><br>用 <span class="hl">Cubemap Shadow Map</span>！<br><br>把場景渲染 <span class="hl2">6 次</span>，各對應正方體一面：<br>+X, -X, +Y, -Y, +Z, -Z<br><br>每次用 90° 視野攝影機，存深度到 Cubemap。<br>覆蓋燈泡周圍完整 360°！<br><br>採樣時用<span class="hl3">片段到光源方向向量</span>採樣 Cubemap，<br>得到那個方向最近遮擋距離，比較實際距離 → 陰影！<br><br>代價：要渲染 6 次，效能約一般陰影的 6 倍。',
+quiz:{q:'為什麼 Cubemap Shadow Map 一定要渲染 6 次？',opts:['提高精度','要覆蓋完整球形空間需要 6 個面，每個面 90° 視野剛好拼成完整球面','OpenGL 限制','減少誤差'],ans:1,explain:'一個方形視窗只能看前方 90° 錐形空間。覆蓋完整球面需要 6 個面（立方體展開），這是填滿球面的最少正方形數！📦'}},
+{id:'l5',num:'5-5',icon:'🧱',title:'法線貼圖深入 — TBN 矩陣',sub:'切線空間：讓法線貼圖在任意朝向都能正確運作',xp:90,type:'normal',school:'線性代數：基底變換矩陣，正交化，座標系轉換',
+story:'<span class="be">🧱</span>法線貼圖存的是<span class="hl">切線空間</span>方向，不是世界空間！<br><br>切線空間以表面為基準：<br>T（Tangent）= 沿 U 方向<br>B（Bitangent）= 沿 V 方向<br>N（Normal）= 垂直表面<br><br>要在世界空間做光照，需要 <span class="hl2">TBN 矩陣</span>做座標轉換：<br><code>worldNormal = TBN × tangentNormal</code><br><br>好處：同一張法線貼圖可以用在<span class="hl3">任意朝向</span>的表面，不用為每個角度重新烘焙！',
+quiz:{q:'為什麼法線貼圖存切線空間而非世界空間？',opts:['切線空間顏色更好看','切線空間的法線是「相對於表面的擾動」，可以用在任何朝向的表面','節省記憶體','世界空間不支援法線'],ans:1,explain:'世界空間法線：向上的面和側面需要不同貼圖！切線空間存「相對表面的偏移量」，同一張磚牆法線貼圖可以貼在任意朝向的牆上 🔄'}},
+{id:'l6',num:'5-6',icon:'🪟',title:'視差貼圖 — 假造深度感',sub:'Parallax Mapping：UV 偏移模擬真實凹凸深度',xp:80,type:'normal',school:'物理：視差效應，近的東西移動比遠的快',
+story:'<span class="be">🪟</span>法線貼圖只改光照，輪廓仍是平的。<br><span class="hl">視差貼圖</span>更進一步！<br><br>核心：根據視角和<span class="hl2">高度圖</span>，<span class="hl3">偏移 UV 座標</span><br>→ 看向傾斜角度時，紋理位置會跟著移動<br>→ 模擬真實的深度視差效果！<br><br>進階版：<span class="hl">陡峭視差 Steep Parallax</span><br>沿視角方向一層層往下找交叉點，效果更真實。<br><br>效果：磚牆從斜角看磚縫真的有凸起深度感！',
+quiz:{q:'視差貼圖和法線貼圖的根本差別？',opts:['視差貼圖顏色更好','法線改變光照方向，視差改變採樣UV座標本身，模擬真實位移深度','視差更省效能','沒有差別'],ans:1,explain:'法線：改變光照計算讓凹凸感更明顯，但輪廓是平的。視差：實際偏移 UV，讓你看到的紋理隨視角移動，有真實深度感 👁️'}},
+{id:'l7',num:'5-7',icon:'☀️',title:'HDR — 超越螢幕的亮度',sub:'High Dynamic Range + ACES Tone Mapping',xp:90,type:'normal',school:'攝影：曝光值、動態範圍、底片特性曲線（S-Curve）',
+story:'<span class="be">☀️</span>真實亮度範圍：太陽 100000 lux、室內 500 lux，相差 200 倍！<br>但螢幕只能表示 0~1，超過就截斷 ✂️<br><br><span class="hl">HDR</span> 解法：<br>在<span class="hl2">浮點數 FBO</span> 裡渲染（允許超過 1）<br>太陽可以是 10.0，陰影是 0.1，全部保留<br><br>輸出時做<span class="hl3">Tone Mapping</span>：把 0~∞ 壓縮到 0~1 但保留細節！<br><br>🎬 ACES：電影級，現代遊戲最愛<br>🎞️ Reinhard：柔和自然<br>📺 Filmic：模擬底片曲線',
+quiz:{q:'為什麼 HDR 需要浮點數 FBO？',opts:['浮點數比較快','8位元 FBO 最大值 1.0，亮度超過就截斷；浮點 FBO 可存任意大亮度值','節省記憶體','普通 FBO 不支援後處理'],ans:1,explain:'8位元每通道 0~255，換算 0.0~1.0，太陽亮度 = 直接截斷成白色。浮點數 FBO (GL_RGBA16F) 可存 0.001 到數萬，保留所有亮度細節再用 Tone Mapping 壓縮 📊'}},
+{id:'l8',num:'5-8',icon:'🌸',title:'Boss：Bloom 完整實作',sub:'高亮提取 + Ping-Pong 高斯模糊 + HDR 合成',xp:190,type:'boss',school:'訊號處理：高斯函數，卷積，分離核 (Separable Kernel)',
+story:'<span class="be">🌸</span><span class="hl3">Boss 關卡！</span> 製作最有電影感的特效！<br><br><span class="hl">Bloom</span> 三步驟：<br><br>1️⃣ <span class="hl">提取高亮</span><br>用 MRT 同時輸出普通顏色 + 亮度>1 的高光區域<br><br>2️⃣ <span class="hl2">Ping-Pong 高斯模糊</span><br>兩個 FBO 交替做水平/垂直模糊，重複 10 次<br>（先水平存 FBO-B，再垂直存回 FBO-A，交替進行）<br><br>3️⃣ <span class="hl3">疊加合成</span><br>原始場景 + 模糊光暈 + HDR Tone Mapping + Gamma 校正！',
+quiz:{q:'為什麼 Bloom 模糊用 Ping-Pong（分兩次 1D）而非直接 2D 模糊？',opts:['1D 比 2D 好看','分離成水平+垂直兩次 1D 模糊效果相同，但運算量從 N² 降到 2N，大幅節省效能','FBO 不支援 2D','OpenGL 限制'],ans:1,explain:'一個 9x9 高斯核 = 81 次採樣。分離成 9 次水平 + 9 次垂直 = 18 次採樣，效果完全一樣！運算量降低 4.5 倍，這就是「分離核」的威力 ⚡'}},
+];
+
+const TOTAL_XP=LESSONS.reduce((s,l)=>s+l.xp,0);
+let earned=JSON.parse(localStorage.getItem('tower5_done')||'[]');
+let current=null;
+
+function makeStars(){const c=document.getElementById('stars');for(let i=0;i<80;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()<.25?2:1;s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;--d:${2+Math.random()*5}s;--dl:${Math.random()*5}s`;c.appendChild(s);}}
+makeStars();
+
+function updateXP(){const total=earned.reduce((s,id)=>{const l=LESSONS.find(x=>x.id===id);return s+(l?l.xp:0);},0);document.getElementById('xp-fill').style.width=(total/TOTAL_XP*100)+'%';document.getElementById('xp-total').textContent=total+'/'+TOTAL_XP;document.getElementById('done-count').textContent=earned.length;}
+function showXPPop(xp,el){const r=el.getBoundingClientRect();const d=document.createElement('div');d.className='xp-pop';d.textContent='+'+xp+' ⚡';d.style.cssText=`left:${r.left+r.width/2-25}px;top:${r.top+window.scrollY-10}px`;document.body.appendChild(d);setTimeout(()=>d.remove(),950);}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+
+function render(){
+  const list=document.getElementById('lesson-list');list.innerHTML='';
+  LESSONS.forEach((les,idx)=>{
+    const done=earned.includes(les.id),active=current===les.id;
+    const locked=!done&&!active&&idx>0&&!earned.includes(LESSONS[idx-1].id);
+    const boss=les.type==='boss';
+    const div=document.createElement('div');
+    div.className=`lesson${done?' done':''}${active?' active':''}${locked?' locked':''}${boss?' boss':''}`;
+    div.id='L'+les.id;
+    const icCls=done?'i-d':boss?'i-b':locked?'i-l':'i-n';
+    const rightHTML=(boss?'<span class="boss-pill">🌸 BOSS</span>':'')+`<span class="xp-pill">+${les.xp}</span>`+(done?'<div class="chk">✓</div>':locked?'<div class="lck">🔒</div>':'');
+    div.innerHTML=`<div class="lesson-header"><div class="lesson-icon ${icCls}">${done?'✓':les.icon}</div><div class="lesson-info"><div class="lesson-title">${les.num} ${les.title}</div><div class="lesson-sub">${les.sub}</div></div><div class="lesson-right">${rightHTML}</div></div><div class="lesson-body">${active?buildBody(les,done):''}</div>`;
+    if(!locked)div.querySelector('.lesson-header').addEventListener('click',()=>toggle(les.id));
+    list.appendChild(div);
+    if(idx<LESSONS.length-1){const c=document.createElement('div');c.className='conn';list.appendChild(c);}
+  });
+}
+function toggle(id){if(current&&current!==id)stopAllRAF();current=current===id?null:id;render();if(current){setTimeout(()=>{const el=document.getElementById('L'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});initDemo(id);},40);}}
+function buildBody(les,done){
+  const opts=les.quiz.opts.map((o,i)=>`<div class="opt" id="opt-${les.id}-${i}" onclick="checkQ('${les.id}',${i})"><div class="opt-k">${['A','B','C','D'][i]}</div>${o}</div>`).join('');
+  return `<div class="tab-bar"><div class="tab on" onclick="switchTab(this,'s-${les.id}','${les.id}')">📖 故事</div><div class="tab" onclick="switchTab(this,'d-${les.id}','${les.id}')">🎮 互動</div><div class="tab" onclick="switchTab(this,'c-${les.id}','${les.id}')">💻 程式碼</div></div><div class="tab-content"><div id="s-${les.id}" class="tab-panel on"><div class="story-box">${les.story}<div class="school-badge">📚 ${les.school}</div></div><div class="quiz-box"><div class="quiz-title">🎯 挑戰問題</div><div class="quiz-q">${les.quiz.q}</div><div class="opts">${opts}</div><div class="explain-box" id="ex-${les.id}"></div></div><button class="done-btn" id="btn-${les.id}" onclick="complete('${les.id}')" ${done?'disabled':''}>${done?'✅ 已完成！':'⚡ 完成此關 → 解鎖下一關'}</button></div><div id="d-${les.id}" class="tab-panel"><div id="dc-${les.id}"><div style="text-align:center;padding:40px;color:var(--txt2)">🎮 載入 Demo…</div></div></div><div id="c-${les.id}" class="tab-panel">${buildCode(les)}</div></div>`;
+}
+function switchTab(el,panelId,lid){const body=document.getElementById('L'+lid).querySelector('.lesson-body');body.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));body.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById(panelId).classList.add('on');if(panelId.startsWith('d-'))initDemo(lid);}
+function checkQ(lid,idx){const les=LESSONS.find(l=>l.id===lid);document.querySelectorAll(`[id^="opt-${lid}-"]`).forEach((o,i)=>{o.classList.add('disabled');if(i===les.quiz.ans)o.classList.add('correct');else if(i===idx)o.classList.add('wrong');});const ex=document.getElementById('ex-'+lid);ex.innerHTML='💡 '+les.quiz.explain;ex.style.display='block';}
+function complete(id){if(earned.includes(id))return;earned.push(id);localStorage.setItem('tower5_done',JSON.stringify(earned));setTimeout(checkCompletion,400);const les=LESSONS.find(l=>l.id===id);const btn=document.getElementById('btn-'+id);showXPPop(les.xp,btn);toast(`🌟 +${les.xp} XP！「${les.title}」完成！`);setTimeout(()=>{current=null;render();updateXP();},500);}
+
+// ─── DEMOS ───
+const inited={};
+function initDemo(id){if(inited[id])return;inited[id]=true;const cont=document.getElementById('dc-'+id);if(!cont)return;({l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6,l7:d7,l8:d8})[id]?.(cont);}
+function mkP(gl,vs,fs){const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;};const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,vs));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
+function qB(gl){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);return b;}
+function sph(r,st,sl){const v=[],n=[],i=[];for(let s=0;s<=st;s++){const phi=s/st*Math.PI;for(let q=0;q<=sl;q++){const th=q/sl*Math.PI*2;const x=Math.sin(phi)*Math.cos(th)*r,y=Math.cos(phi)*r,z=Math.sin(phi)*Math.sin(th)*r;const l=Math.sqrt(x*x+y*y+z*z)||1;v.push(x,y,z);n.push(x/l,y/l,z/l);}}for(let s=0;s<st;s++)for(let q=0;q<sl;q++){const a=s*(sl+1)+q,b=a+sl+1;i.push(a,b,a+1,b,b+1,a+1);}return{v:new Float32Array(v),n:new Float32Array(n),i:new Uint16Array(i)};}
+function perspM(fov,asp,n,f){const s=1/Math.tan(fov/2);return new Float32Array([s/asp,0,0,0,0,s,0,0,0,0,(f+n)/(n-f),-1,0,0,2*f*n/(n-f),0]);}
+function lookM(e,c,u){const z=nr([e[0]-c[0],e[1]-c[1],e[2]-c[2]]);const x=nr(cr(u,z));const y=cr(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dt(x,e),-dt(y,e),-dt(z,e),1]);}
+function m4m(a,b){const r=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let k=0;k<4;k++)r[i*4+j]+=a[i*4+k]*b[k*4+j];return r;}
+function nr(v){const l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])||1;return[v[0]/l,v[1]/l,v[2]/l];}
+function cr(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+
+function d1(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>Blinn-Phong vs Phong 比較</div></div><canvas id="cv51" width="600" height="260" style="height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn on" id="bp-blinn" onclick="setBP('blinn')">✨ Blinn-Phong</button><button class="ctrl-btn" id="bp-phong" onclick="setBP('phong')">💡 原版 Phong</button></div><div class="slider-row"><span class="slider-label">✨ 光澤度</span><input type="range" min="2" max="256" value="32" id="bp-sh"><span class="slider-val" id="bp-shv">32</span></div>';
+  document.getElementById('bp-sh').oninput=function(){document.getElementById('bp-shv').textContent=this.value;};
+  window._bpMode='blinn';window.setBP=m=>{window._bpMode=m;['blinn','phong'].forEach(x=>document.getElementById('bp-'+x).classList.toggle('on',x===m));};
+  const cv=document.getElementById('cv51');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const vs=`attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vP;uniform mat4 mvp;void main(){vN=n;vP=p;gl_Position=mvp*vec4(p,1);}`;
+  const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 vp;uniform vec3 lp;uniform float sh;uniform int mode;void main(){vec3 N=normalize(vN);vec3 L=normalize(lp-vP);vec3 V=normalize(vp-vP);float dif=max(dot(N,L),0.);float spec;if(mode==0){vec3 H=normalize(L+V);spec=pow(max(dot(N,H),0.),sh);}else{vec3 R=reflect(-L,N);spec=pow(max(dot(V,R),0.),sh);}vec3 col=vec3(.9,.6,.2);gl_FragColor=vec4(col*(0.1+dif)+vec3(spec),1);}`;
+  const prog=mkP(gl,vs,fs);const{v,n,i}=sph(1.2,24,24);
+  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,v,gl.STATIC_DRAW);
+  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,n,gl.STATIC_DRAW);
+  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,i,gl.STATIC_DRAW);
+  const pL=gl.getAttribLocation(prog,'p'),nL=gl.getAttribLocation(prog,'n');
+  const mvpL=gl.getUniformLocation(prog,'mvp'),vpL=gl.getUniformLocation(prog,'vp'),lpL=gl.getUniformLocation(prog,'lp'),shL=gl.getUniformLocation(prog,'sh'),mL=gl.getUniformLocation(prog,'mode');
+  gl.enable(gl.DEPTH_TEST);let t=0;
+  (function frame(){t+=0.01;const sh=parseInt(document.getElementById('bp-sh').value);gl.viewport(0,0,600,260);gl.clearColor(.06,.04,.02,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(prog);const mvp=m4m(perspM(45*Math.PI/180,600/260,.1,20),lookM([0,0,4],[0,0,0],[0,1,0]));gl.uniformMatrix4fv(mvpL,false,mvp);gl.uniform3f(vpL,0,0,4);gl.uniform3f(lpL,Math.cos(t)*3,2,Math.sin(t)*3);gl.uniform1f(shL,sh);gl.uniform1i(mL,window._bpMode==='blinn'?0:1);gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.drawElements(gl.TRIANGLES,i.length,gl.UNSIGNED_SHORT,0);requestAnimationFrame(frame);})();
+}
+
+function mkFullDemo(id,label,modeKey,modes,modeNames,vs,fs,draw,extras){
+  const cont=document.getElementById('dc-'+id);if(!cont)return;
+  const btns=modeNames.map((n,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="${modeKey}-${modes[i]}" onclick="setM_${id}('${modes[i]}')">${n}</button>`).join('');
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv-${id}" width="600" height="260" style="height:260px"></canvas></div><div class="ctrl-row">${btns}</div>${extras||''}`;
+  window['_m_'+id]=modes[0];
+  window['setM_'+id]=m=>{window['_m_'+id]=m;modeNames.forEach((_,i)=>document.getElementById(modeKey+'-'+modes[i]).classList.toggle('on',modes[i]===m));};
+  draw(document.getElementById('cv-'+id));
+}
+
+function d2(cont){
+  mkFullDemo('d2','Gamma 校正對比','gc',['on','off','grad'],['✅ Gamma 校正','❌ 無校正','📊 Gamma 曲線'],
+    `attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`,
+    `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;void main(){vec3 L=normalize(vec3(cos(t)*2.,1.5,sin(t)*2.));vec2 c=uv*2.-1.;float r=length(c);if(mode==2){float x=uv.x;gl_FragColor=vec4(uv.y<.5?vec3(x):vec3(pow(x,1./2.2)),1);return;}vec3 N=normalize(vec3(c,sqrt(max(0.,1.-dot(c,c)))));if(r>1.){gl_FragColor=vec4(.05,.03,.01,1);return;}float d=max(dot(N,L),0.);float s=pow(max(dot(reflect(-L,N),vec3(0,0,1)),0.),32.);vec3 col=vec3(.9,.5,.2)*(0.08+d)+vec3(s*.6);if(mode==0)col=pow(col,vec3(1./2.2));gl_FragColor=vec4(col,1);}`,
+    cv=>{const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;const prog=mkP(gl,`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`,`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;void main(){vec3 L=normalize(vec3(cos(t)*2.,1.5,sin(t)*2.));vec2 c=uv*2.-1.;float r=length(c);if(mode==2){float x=uv.x;gl_FragColor=vec4(uv.y<.5?vec3(x):vec3(pow(x,1./2.2)),1);return;}vec3 N=normalize(vec3(c,sqrt(max(0.,1.-dot(c,c)))));if(r>1.){gl_FragColor=vec4(.05,.03,.01,1);return;}float d=max(dot(N,L),0.);float s=pow(max(dot(reflect(-L,N),vec3(0,0,1)),0.),32.);vec3 col=vec3(.9,.5,.2)*(0.08+d)+vec3(s*.6);if(mode==0)col=pow(col,vec3(1./2.2));gl_FragColor=vec4(col,1);}`);const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p');const mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');let time=0;(function fr(){time+=0.01;const modes={on:0,off:1,grad:2};gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._m_d2]||0);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();}
+  );
+}
+
+function makeShaderDemo(cont,id,label,modes,modeNames,fs,extras){
+  const btns=modeNames.map((n,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="m${id}-${i}" onclick="setSD_${id}(${i})">${n}</button>`).join('');
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv-s${id}" width="600" height="260" style="height:260px"></canvas></div><div class="ctrl-row">${btns}</div>${extras||''}`;
+  window[`_sd${id}`]=0;window[`setSD_${id}`]=m=>{window[`_sd${id}`]=m;modeNames.forEach((_,i)=>document.getElementById(`m${id}-${i}`).classList.toggle('on',i===m));};
+  const cv=document.getElementById('cv-s'+id);const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const prog=mkP(gl,'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}',fs);
+  const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
+  let time=0;(function fr(){time+=0.012;gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window[`_sd${id}`]);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
+}
+
+function d3(cont){makeShaderDemo(cont,'d3','陰影貼圖 — 動態陰影',3,['🌑 陰影','🔲 Shadow Map','⚡ 無 Bias（Acne）'],
+  `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;float shadow(vec2 u,vec2 lp,float b){vec2 d=u-lp;float dist=length(d);float s=0.;for(int i=0;i<8;i++){float a=float(i)/8.*6.28;float r=length(u+vec2(cos(a),sin(a))*.04-lp);s+=r<dist+b?0.:1.;}return s/8.;}void main(){vec2 lp=vec2(cos(t)*.35+.5,sin(t*.7)*.2+.5);if(mode==1){gl_FragColor=vec4(vec3(length(uv-lp)),1);return;}float b=mode==0?.02:0.;float s=shadow(uv,lp,b);vec3 base=mix(vec3(.2,.15,.05),vec3(.55,.45,.25),mod(floor(uv.x*8.)+floor(uv.y*8.),2.));float sun=pow(max(1.-length(uv-lp)*6.,0.),3.);gl_FragColor=vec4(base*(s*.8+.2)+vec3(sun*.3,.2,.05),1);}`);}
+
+function d4(cont){makeShaderDemo(cont,'d4','點光源 Cubemap 陰影',2,['🕯️ 場景','📦 Cubemap 展開'],
+  `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;void main(){if(mode==1){vec2 g=floor(uv*vec2(4.,3.));vec2 f=fract(uv*vec2(4.,3.));int face=-1;if(g.x<.5&&g.y>1.5&&g.y<2.5)face=0;if(g.x>0.5&&g.x<1.5&&g.y>1.5&&g.y<2.5)face=1;if(g.x>1.5&&g.x<2.5&&g.y>1.5&&g.y<2.5)face=2;if(g.x>2.5&&g.y>1.5&&g.y<2.5)face=3;if(g.x>0.5&&g.x<1.5&&g.y<.5)face=4;if(g.x>0.5&&g.x<1.5&&g.y>.5&&g.y<1.5)face=5;if(face<0){gl_FragColor=vec4(.05,.03,.01,1);return;}vec3 cols[6];cols[0]=vec3(.2,.4,.9);cols[1]=vec3(.9,.3,.2);cols[2]=vec3(.2,.9,.3);cols[3]=vec3(.9,.8,.2);cols[4]=vec3(.8,.2,.9);cols[5]=vec3(.2,.8,.8);float d=length(f-.5);gl_FragColor=vec4(cols[face]*(1.-d*.4),1);return;}vec2 lp=vec2(cos(t)*.2+.5,sin(t*.8)*.2+.5);float dist=length(uv-lp);float att=1./(1.+dist*dist*6.);float glow=exp(-dist*5.);vec3 base=vec3(.15,.12,.08);gl_FragColor=vec4(base*.15+base*att*2.+vec3(.9,.7,.3)*glow*.6,1);}`);}
+
+function d5(cont){makeShaderDemo(cont,'d5','法線貼圖 TBN 空間可視化',3,['✅ 有法線貼圖','🧲 切線空間','❌ 無法線'],
+  `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;vec3 bN(vec2 u){float bx=fract(u.x*6.+(floor(u.y*4.)*.5));float by=fract(u.y*4.);float h=(step(.08,min(bx,min(1.-bx,min(by,1.-by))))==1.)?1.:0.;return normalize(vec3(dFdx(h)*4.,dFdy(h)*4.,1.));}void main(){vec3 L=normalize(vec3(cos(t)*2.,sin(t*.8)+1.,1.5));if(mode==1){gl_FragColor=vec4(bN(uv)*.5+.5,1);return;}vec3 N=mode==0?bN(uv):vec3(0,0,1);float d=max(dot(N,L),.05);float bx=fract(uv.x*6.+(floor(uv.y*4.)*.5));float by=fract(uv.y*4.);float m=step(.08,min(bx,min(1.-bx,min(by,1.-by))));vec3 col=mix(vec3(.3,.25,.15),vec3(.7,.5,.3),m);gl_FragColor=vec4(col*d,1);}`);}
+
+function d6(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>視差貼圖 — 感受深度視差</div></div><canvas id="cv-sd6" width="600" height="260" style="height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn on" id="pm-para" onclick="setPMd('para')">🪟 視差貼圖</button><button class="ctrl-btn" id="pm-norm" onclick="setPMd('norm')">🧱 只有法線</button><button class="ctrl-btn" id="pm-flat" onclick="setPMd('flat')">⬜ 平面</button></div><div class="slider-row"><span class="slider-label">📏 深度強度</span><input type="range" min="1" max="20" value="8" id="pm-dep"><span class="slider-val" id="pm-depv">0.08</span></div>';
+  document.getElementById('pm-dep').oninput=function(){document.getElementById('pm-depv').textContent=(this.value/100).toFixed(2);};
+  window._pmd='para';window.setPMd=m=>{window._pmd=m;['para','norm','flat'].forEach(x=>document.getElementById('pm-'+x).classList.toggle('on',x===m));};
+  const cv=document.getElementById('cv-sd6');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const prog=mkP(gl,'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}',
+    `precision mediump float;varying vec2 uv;uniform int mode;uniform float dep;uniform float t;float H(vec2 u){float bx=fract(u.x*5.);float by=fract(u.y*5.);return step(.1,min(bx,min(1.-bx,min(by,1.-by))));}vec3 N2(vec2 u){float h=H(u);return normalize(vec3(dFdx(h)*4.,dFdy(h)*4.,1.));}void main(){vec2 vd=vec2(cos(t*.3)*.5,sin(t*.2)*.3);vec2 tuv=uv;if(mode==0){float h=H(uv);tuv=uv+vd*(1.-h)*dep;}vec3 N=mode==2?vec3(0,0,1):N2(tuv);vec3 L=normalize(vec3(cos(t)*2.,1.5,sin(t)*2.));float d=max(dot(N,L),.05);float bx=fract(tuv.x*5.);float by=fract(tuv.y*5.);float stone=step(.1,min(bx,min(1.-bx,min(by,1.-by))));vec3 col=mix(vec3(.15,.12,.1),vec3(.5,.45,.35),stone);gl_FragColor=vec4(col*d,1);}`);
+  const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t'),dL=gl.getUniformLocation(prog,'dep');
+  let time=0;(function fr(){time+=0.012;const modes={para:0,norm:1,flat:2};gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._pmd]||0);gl.uniform1f(tL,time);gl.uniform1f(dL,document.getElementById('pm-dep').value/100);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
+}
+
+function d7(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>HDR + Tone Mapping 比較</div></div><canvas id="cv-sd7" width="600" height="260" style="height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn on" id="hm-aces" onclick="setHM('aces')">🎬 ACES</button><button class="ctrl-btn" id="hm-reinhard" onclick="setHM('reinhard')">🎞️ Reinhard</button><button class="ctrl-btn" id="hm-none" onclick="setHM('none')">❌ 截斷</button><button class="ctrl-btn" id="hm-raw" onclick="setHM('raw')">📊 Raw</button></div><div class="slider-row"><span class="slider-label">☀️ 曝光度</span><input type="range" min="1" max="50" value="12" id="hm-exp"><span class="slider-val" id="hm-expv">1.2</span></div>';
+  document.getElementById('hm-exp').oninput=function(){document.getElementById('hm-expv').textContent=(this.value/10).toFixed(1);};
+  window._hmMode='aces';window.setHM=m=>{window._hmMode=m;['aces','reinhard','none','raw'].forEach(x=>document.getElementById('hm-'+x).classList.toggle('on',x===m));};
+  const cv=document.getElementById('cv-sd7');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const prog=mkP(gl,'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}',
+    `precision mediump float;varying vec2 uv;uniform int mode;uniform float exposure;uniform float t;vec3 scene(vec2 u){vec2 c=u-.5;float r=length(c);float sun=pow(max(1.-r*2.,0.),2.)*3.;float glow=exp(-r*4.)*.8;vec3 sky=mix(vec3(.1,.2,.6),vec3(.8,.5,.2),smoothstep(.3,.7,u.y));return sky+vec3(1.,.9,.5)*sun+vec3(1.,.7,.3)*glow;}vec3 aces(vec3 x){return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.);}vec3 reinhard(vec3 x){return x/(x+vec3(1.));}void main(){vec3 hdr=scene(uv)*exposure;vec3 col;if(mode==3)col=hdr*0.08;else if(mode==0){col=aces(hdr);col=pow(col,vec3(1./2.2));}else if(mode==1){col=reinhard(hdr);col=pow(col,vec3(1./2.2));}else col=clamp(hdr,0.,1.);gl_FragColor=vec4(col,1);}`);
+  const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t'),eL=gl.getUniformLocation(prog,'exposure');
+  let time=0;(function fr(){time+=0.01;const modes={aces:0,reinhard:1,none:2,raw:3};gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._hmMode]||0);gl.uniform1f(tL,time);gl.uniform1f(eL,document.getElementById('hm-exp').value/10);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
+}
+
+function d8(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>🌸 BOSS：Bloom + HDR 完整管線</div></div><canvas id="cv-sd8" width="600" height="300" style="height:300px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn on" id="bl-full" onclick="setBL2('full')">🌸 完整效果</button><button class="ctrl-btn" id="bl-scene" onclick="setBL2('scene')">📷 無 Bloom</button><button class="ctrl-btn" id="bl-only" onclick="setBL2('only')">✨ 只看 Bloom</button></div><div class="slider-row"><span class="slider-label">🌸 Bloom 強度</span><input type="range" min="0" max="30" value="12" id="bl2-str"><span class="slider-val" id="bl2-strv">1.2</span></div><div class="slider-row"><span class="slider-label">☀️ 曝光度</span><input type="range" min="5" max="30" value="12" id="bl2-exp"><span class="slider-val" id="bl2-expv">1.2</span></div>';
+  document.getElementById('bl2-str').oninput=function(){document.getElementById('bl2-strv').textContent=(this.value/10).toFixed(1);};
+  document.getElementById('bl2-exp').oninput=function(){document.getElementById('bl2-expv').textContent=(this.value/10).toFixed(1);};
+  window._blMode2='full';window.setBL2=m=>{window._blMode2=m;['full','scene','only'].forEach(x=>document.getElementById('bl-'+x).classList.toggle('on',x===m));};
+  const cv=document.getElementById('cv-sd8');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const prog=mkP(gl,'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}',
+    `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;uniform float bloomStr;uniform float exposure;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.);}vec3 scene(vec2 u){vec3 col=vec3(.02,.01,.04);for(int i=0;i<6;i++){vec2 lp=vec2(hash(vec2(i,0))*.8+.1,hash(vec2(i,1))*.6+.2);lp.x+=sin(t*.5+float(i)*.7)*.06;vec3 lc=vec3(hash(vec2(i,2))*.8+.2,hash(vec2(i,3))*.5+.2,hash(vec2(i,4))*.8+.2);float d=length(u-lp);col+=lc*(exp(-d*12.)*2.+pow(max(1.-d*30.,0.),3.)*5.);}return col;}vec3 bloom(vec2 u){vec3 b=vec3(0);float tw=0.;for(int x=-3;x<=3;x++)for(int y=-3;y<=3;y++){vec2 off=vec2(x,y)/500.;vec3 s=scene(u+off);float w=exp(-float(x*x+y*y)*.12);b+=max(s-vec3(1.),vec3(0.))*w;tw+=w;}return b/tw;}vec3 aces(vec3 x){return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.);}void main(){vec3 s=scene(uv);vec3 bl=bloom(uv)*bloomStr;vec3 col;if(mode==1)col=aces(s*exposure);else if(mode==2)col=aces(bl);else col=aces((s+bl)*exposure);col=pow(col,vec3(1./2.2));gl_FragColor=vec4(col,1);}`);
+  const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t'),bsL=gl.getUniformLocation(prog,'bloomStr'),eL=gl.getUniformLocation(prog,'exposure');
+  let time=0;(function fr(){time+=0.012;const modes={full:0,scene:1,only:2};gl.viewport(0,0,600,300);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._blMode2]||0);gl.uniform1f(tL,time);gl.uniform1f(bsL,document.getElementById('bl2-str').value/10);gl.uniform1f(eL,document.getElementById('bl2-exp').value/10);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
+}
+
+function buildCode(les){
+  const c={
+    l1:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · Blinn-Phong</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="cm">// Phong（有截斷問題）</span>
+<span class="type">vec3</span> R = <span class="fn">reflect</span>(-lightDir, norm);
+<span class="kw">float</span> spec_phong = <span class="fn">pow</span>(<span class="fn">max</span>(<span class="fn">dot</span>(viewDir, R), <span class="num">0.0</span>), sh);
+
+<span class="cm">// Blinn-Phong（更好！）</span>
+<span class="type">vec3</span> H = <span class="fn">normalize</span>(lightDir + viewDir); <span class="cm">// 半向量</span>
+<span class="kw">float</span> spec_blinn = <span class="fn">pow</span>(<span class="fn">max</span>(<span class="fn">dot</span>(norm, H), <span class="num">0.0</span>), sh);</pre></div>`,
+    l2:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · Gamma 校正</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="cm">// 輸出時做 Gamma 校正</span>
+<span class="type">vec3</span> mapped = hdrColor;
+mapped = <span class="fn">pow</span>(mapped, <span class="type">vec3</span>(<span class="num">1.0</span>/<span class="num">2.2</span>));  <span class="cm">// encode to sRGB</span>
+FragColor = <span class="type">vec4</span>(mapped, <span class="num">1.0</span>);
+
+<span class="cm">// 貼圖設為 sRGB 讓 GPU 自動 decode：</span>
+<span class="fn">glTexImage2D</span>(..., GL_SRGB_ALPHA, ...);</pre></div>`,
+    l3:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · Shadow Map</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="kw">float</span> <span class="fn">ShadowCalc</span>(<span class="type">vec4</span> fragPosLS){
+  <span class="type">vec3</span> proj = fragPosLS.xyz/fragPosLS.w;
+  proj = proj * <span class="num">0.5</span> + <span class="num">0.5</span>;
+  <span class="kw">float</span> closest = <span class="fn">texture</span>(shadowMap,proj.xy).r;
+  <span class="kw">float</span> current = proj.z;
+  <span class="kw">float</span> bias = <span class="num">0.005</span>;  <span class="cm">// 避免 Acne</span>
+  <span class="kw">return</span> current - bias > closest ? <span class="num">1.0</span> : <span class="num">0.0</span>;
+}</pre></div>`,
+    l4:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · 點光源 Cubemap 陰影</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="kw">uniform</span> <span class="type">samplerCube</span> depthCube;
+<span class="kw">uniform</span> <span class="kw">float</span> farPlane;
+
+<span class="kw">float</span> <span class="fn">PointShadow</span>(<span class="type">vec3</span> fragPos){
+  <span class="type">vec3</span> dir = fragPos - lightPos;  <span class="cm">// 方向向量！</span>
+  <span class="kw">float</span> closest = <span class="fn">texture</span>(depthCube,dir).r * farPlane;
+  <span class="kw">float</span> current = <span class="fn">length</span>(dir);
+  <span class="kw">return</span> current - <span class="num">0.05</span> > closest ? <span class="num">1.0</span> : <span class="num">0.0</span>;
+}</pre></div>`,
+    l5:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · TBN 法線貼圖</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="cm">// 頂點著色器</span>
+<span class="type">vec3</span> T = <span class="fn">normalize</span>(<span class="type">vec3</span>(model * <span class="type">vec4</span>(aTangent,<span class="num">0</span>)));
+<span class="type">vec3</span> N = <span class="fn">normalize</span>(<span class="type">vec3</span>(model * <span class="type">vec4</span>(aNormal, <span class="num">0</span>)));
+T = <span class="fn">normalize</span>(T - <span class="fn">dot</span>(T,N)*N);  <span class="cm">// 正交化</span>
+<span class="type">vec3</span> B = <span class="fn">cross</span>(N, T);
+TBN = <span class="type">mat3</span>(T, B, N);
+<span class="cm">// 片段著色器</span>
+<span class="type">vec3</span> n = <span class="fn">texture</span>(normalMap, UV).rgb * <span class="num">2.0</span> - <span class="num">1.0</span>;
+normal = <span class="fn">normalize</span>(TBN * n);  <span class="cm">// 轉世界空間</span></pre></div>`,
+    l6:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · 視差貼圖</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="type">vec2</span> <span class="fn">ParallaxUV</span>(<span class="type">vec2</span> uv, <span class="type">vec3</span> viewDir){
+  <span class="kw">float</span> h = <span class="fn">texture</span>(heightMap, uv).r;
+  <span class="type">vec2</span> offset = viewDir.xy/viewDir.z*(h*<span class="num">0.1</span>);
+  <span class="kw">return</span> uv - offset;
+}
+<span class="cm">// 陡峭視差（更精確）</span>
+<span class="type">vec2</span> <span class="fn">SteepParallax</span>(<span class="type">vec2</span> uv, <span class="type">vec3</span> vd){
+  <span class="kw">float</span> step=<span class="num">1.0</span>/<span class="num">16.0</span>, depth=<span class="num">0.0</span>;
+  <span class="type">vec2</span> duv=vd.xy*<span class="num">0.1</span>/<span class="num">16.0</span>;
+  <span class="kw">while</span>(<span class="fn">texture</span>(heightMap,uv).r > depth){uv-=duv;depth+=step;}
+  <span class="kw">return</span> uv;
+}</pre></div>`,
+    l7:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · HDR + ACES Tone Mapping</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="type">vec3</span> <span class="fn">ACESFilm</span>(<span class="type">vec3</span> x){
+  <span class="kw">return</span> <span class="fn">clamp</span>((x*(<span class="num">2.51</span>*x+<span class="num">.03</span>))/(x*(<span class="num">2.43</span>*x+<span class="num">.59</span>)+<span class="num">.14</span>),<span class="num">0.</span>,<span class="num">1.</span>);
+}
+<span class="kw">void</span> <span class="fn">main</span>(){
+  <span class="type">vec3</span> hdr = <span class="fn">texture</span>(hdrBuffer,UV).rgb;
+  <span class="type">vec3</span> mapped = <span class="fn">ACESFilm</span>(hdr * exposure);
+  mapped = <span class="fn">pow</span>(mapped, <span class="type">vec3</span>(<span class="num">1.0</span>/<span class="num">2.2</span>));  <span class="cm">// Gamma</span>
+  FragColor = <span class="type">vec4</span>(mapped, <span class="num">1.0</span>);
+}</pre></div>`,
+    l8:`<div class="code-wrap"><div class="code-header"><span class="code-lang">C++ · Bloom Ping-Pong</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="cm">// 10 次交替水平/垂直模糊</span>
+<span class="kw">bool</span> horizontal=<span class="kw">true</span>,first=<span class="kw">true</span>;
+<span class="fn">glUseProgram</span>(blurShader);
+<span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i&lt;<span class="num">10</span>;i++){
+  <span class="fn">glBindFramebuffer</span>(GL_FRAMEBUFFER,pingpongFBO[horizontal]);
+  <span class="fn">glUniform1i</span>(horizontalLoc, horizontal);
+  <span class="fn">glBindTexture</span>(GL_TEXTURE_2D,
+    first?brightTex:pingpongTex[!horizontal]);
+  <span class="fn">RenderQuad</span>();
+  horizontal=!horizontal; first=<span class="kw">false</span>;
+}
+<span class="cm">// 合成</span>
+finalColor = hdrScene + bloomBlurred * strength;</pre></div>`
+  };return c[les.id]||'';
+}
+function cpC(btn){const t=btn.closest('.code-wrap').querySelector('pre').innerText;navigator.clipboard.writeText(t).then(()=>{btn.textContent='✓';setTimeout(()=>btn.textContent='複製',1500);});}
+updateXP();render();
+
+// ── Completion System ──
+const CASTLE_NUM = 5;
+const CASTLE_TOTAL = 8;
+const CASTLE_KEY = 'tower5_done';
+const NEXT_CASTLE = 5;
+
+function checkCompletion(){
+  const done = JSON.parse(localStorage.getItem(CASTLE_KEY)||'[]').filter(Boolean).length;
+  if(done >= CASTLE_TOTAL && !localStorage.getItem(CASTLE_KEY+'_comp_shown')){
+    localStorage.setItem(CASTLE_KEY+'_comp_shown','1');
+    setTimeout(showCompletion, 800);
+  }
+}
+
+function showCompletion(){
+  const overlay = document.getElementById('compOverlay');
+  if(!overlay) return;
+  // Fireworks
+  const fw = overlay.querySelector('.fw-wrap');
+  const colors=['#a78bfa','#34d399','#ffd700','#ff6b9d','#00d4ff','#ff9f43'];
+  for(let i=0;i<28;i++){
+    const d=document.createElement('div');
+    d.className='fw';
+    const tx=(Math.random()-.5)*300;
+    const ty=-100-Math.random()*200;
+    d.style.cssText=`width:6px;height:6px;background:${colors[i%colors.length]};left:${40+Math.random()*20}%;top:60%;--d:${.6+Math.random()*.8}s;--dl:${Math.random()*.5}s;--tx:${tx}px;--ty:${ty}px`;
+    fw.appendChild(d);
+  }
+  overlay.classList.add('show');
+}
+
+function goNextCastle(){
+  if(NEXT_CASTLE > 0){
+    window.location.href='opengl-map.html#done-'+CASTLE_NUM;
+  } else {
+    window.location.href='opengl-map.html';
+  }
+}
+
+function goMap(){ window.location.href='opengl-map.html#done-'+CASTLE_NUM; }
+
+// Auto-scroll nav to current castle
+(function(){
+  const navBar = document.querySelector('div[style*="position:sticky;top:52px"]');
+  if(!navBar) return;
+  const current = navBar.querySelector('[style*="opacity:1"]');
+  if(current) setTimeout(()=>{
+    current.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }, 300);
+})();
+
+// Hook into existing complete() function
+const _origComplete = complete;
+if(typeof complete === 'function'){
+  // Override complete to also check completion
+  window._patchedComplete = true;
+}
+// Check on page load
+document.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(checkCompletion, 500);
+});
+// Also check after any storage changes
+window.addEventListener('storage', checkCompletion);
+</script>
+
+<!-- Completion Overlay -->
+<div id="compOverlay" class="comp-overlay">
+  <div class="fw-wrap"></div>
+  <div class="comp-trophy">🏆</div>
+  <div class="comp-stars">⭐⭐⭐</div>
+  <div class="comp-title">城堡5 全通關！<br>光輝之城</div>
+  <div class="comp-sub">你已征服所有關卡<br>獲得全部 XP 獎勵！</div>
+  <button class="comp-next-btn" onclick="goNextCastle()">⚔️ 前往城堡6 →</button>
+  <button class="comp-map-btn" onclick="goMap()">🗺️ 返回地圖</button>
+</div>
+
+</body>
+</html>
