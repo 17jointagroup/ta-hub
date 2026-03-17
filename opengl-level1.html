@@ -247,15 +247,26 @@ if(!CanvasRenderingContext2D.prototype.roundRect){
 const _glPool = {};
 function safeGL(cv) {
   if(!cv) return null;
-  const id = cv.id || 'cv_'+Math.random();
+  const id = cv.id || ('cv_'+Math.random().toString(36).slice(2));
   cv.id = id;
-  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
-  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
-  if(!gl) return null;
-  _glPool[id] = gl;
-  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  if(!window._glPool) window._glPool = {};
+  const pool = window._glPool;
+  if(pool[id] && !pool[id].isContextLost()) return pool[id];
+  // Release oldest contexts if near iOS limit
+  const keys = Object.keys(pool);
+  if(keys.length >= 6) {
+    try { pool[keys[0]].getExtension('WEBGL_lose_context')?.loseContext(); } catch(e){}
+    delete pool[keys[0]];
+  }
+  const opts = {powerPreference:'low-power', preserveDrawingBuffer:false,
+    failIfMajorPerformanceCaveat:false, antialias:true};
+  const gl = cv.getContext('webgl', opts) || cv.getContext('experimental-webgl', opts);
+  if(!gl) { console.warn('WebGL unavailable:', id); return null; }
+  pool[id] = gl;
+  cv.addEventListener('webglcontextlost', e=>{e.preventDefault();delete pool[id];});
   return gl;
 }
+
 
 // ════════════════════════════════════════
 // DATA
@@ -907,7 +918,8 @@ function buildDemo_Window(cont){
   window._winMode='rainbow';
   window.setWinColor=m=>{window._winMode=m;document.querySelectorAll('.ctrl-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active')};
   const cv=document.getElementById('cv-l2');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
   if(!gl){cont.innerHTML='<p style="padding:20px;color:var(--txt2)">WebGL 不支援</p>';return;}
   const vs=`attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;uniform vec3 color;void main(){gl_FragColor=vec4(color,1);}`;
@@ -956,7 +968,8 @@ function buildDemo_Loop(cont){
     <span>⏱️ 時間: <strong id="time-display" style="color:var(--acc);font-family:var(--mono)">0.0s</strong></span>
   </div>`;
   const cv=document.getElementById('cv-l3');
-  const ctx=cv.getContext('2d');
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const ctx=cv.getContext('2d');
   let frames=0,lastFps=0,fpsCount=0,fpsTimer=0,startTime=Date.now();
   const history=new Array(60).fill(60);
   function draw(now){
@@ -1012,7 +1025,8 @@ function buildDemo_Triangle(cont){
     <button class="ctrl-btn" id="tri-mode-3" onclick="setTriMode(3)">爆炸 🎆</button>
   </div>`;
   const cv=document.getElementById('cv-l4');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
   if(!gl) return;
   window._triMode=1;
   window.setTriMode=m=>{window._triMode=m;document.querySelectorAll('[id^="tri-mode-"]').forEach(b=>b.classList.remove('active'));document.getElementById('tri-mode-'+m).classList.add('active')};
@@ -1089,7 +1103,8 @@ function buildDemo_Shader(cont){
   };
   window.setShaderFx=fx=>{window._shFx=fx;['wave','pulse','rainbow'].forEach(f=>document.getElementById('sh-'+f).classList.remove('active'));document.getElementById('sh-'+fx).classList.add('active');};
   const cv=document.getElementById('cv-l5');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
   if(!gl) return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;
@@ -1141,7 +1156,8 @@ function buildDemo_Texture(cont){
   window._texMode='uv';
   window.setTexMode=m=>{window._texMode=m;['uv','checker','wave'].forEach(f=>document.getElementById('tex-'+f).classList.remove('active'));document.getElementById('tex-'+m).classList.add('active');};
   const cv=document.getElementById('cv-l6');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
   if(!gl) return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;
@@ -1195,7 +1211,8 @@ function buildDemo_Transform(cont){
     document.getElementById('sv-sc').textContent=window._sc.toFixed(2)+'x';
   };
   const cv=document.getElementById('cv-l7');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
   if(!gl) return;
   const vs=`attribute vec2 p;attribute vec3 c;varying vec3 vc;
 uniform float tx,rot,sc;
@@ -1246,7 +1263,8 @@ function buildDemo_MVP(cont){
   <div class="slider-row"><label>🔭 FOV 視野角</label><input type="range" min="10" max="150" value="45" id="sl-fov" oninput="document.getElementById('sv-fov').textContent=this.value+'°'"><span class="slider-val" id="sv-fov">45°</span></div>
   <div class="slider-row"><label>📏 攝影機距離</label><input type="range" min="1" max="10" value="3" step=".1" id="sl-dist" oninput="document.getElementById('sv-dist').textContent=this.value"><span class="slider-val" id="sv-dist">3</span></div>`;
   const cv=document.getElementById('cv-l8');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
   if(!gl) return;
   const vs=`attribute vec3 p;attribute vec3 c;varying vec3 vc;
 uniform mat4 mvp;
@@ -1299,7 +1317,8 @@ function buildDemo_Camera(cont){
   </div>
   <div style="font-size:.8rem;color:var(--txt2);margin-top:8px;text-align:center">攝影機 Position: <span id="cam-pos" style="font-family:var(--mono);color:var(--acc4)">0, 0, 3</span></div>`;
   const cv=document.getElementById('cv-l9');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
   if(!gl) return;
   gl.enable(gl.DEPTH_TEST);
   const vs=`attribute vec3 p;attribute vec3 c;varying vec3 vc;uniform mat4 mvp;void main(){gl_Position=mvp*vec4(p,1);vc=c;}`;
