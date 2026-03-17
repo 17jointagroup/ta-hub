@@ -160,8 +160,8 @@ async function putFile(token, path, b64Content, sha, commitMsg) {
 // ══════════════════════════════════════════════════════
 async function startDeploy() {
   const token = document.getElementById('token').value.trim();
-  if (!token || !token.startsWith('gh')) {
-    alert('請先輸入有效的 GitHub Token（ghp_ 開頭）');
+  if (!token || (!token.startsWith('ghp_') && !token.startsWith('github_pat_'))) {
+    alert('請先輸入有效的 GitHub Token（ghp_ 或 github_pat_ 開頭）');
     return;
   }
 
