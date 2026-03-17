@@ -886,11 +886,9 @@ function d4(cont){
 
 // Demo L5 — Three Light Types
 function d5(cont){
-  cont.innerHTML=`
-  <div class="demo-wrap">
-    <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>三種光源比較</div></div>
-    <canvas id="cv-d5" width="600" height="280" style="height:280px"></canvas>
-  </div>
+  window._ltMode='dir';
+  window.setLT=function(m){window._ltMode=m;['dir','pt','spot'].forEach(function(x){document.getElementById('lt-'+x).classList.toggle('on',x===m);});document.getElementById('cutoff-row').style.display=m==='spot'?'flex':'none';};
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>三種光源比較</div></div><canvas id="cv-d5"></canvas></div>
   <div class="ctrl-row">
     <button class="ctrl-btn on" id="lt-dir" onclick="setLT('dir')">☀️ 方向光</button>
     <button class="ctrl-btn" id="lt-pt" onclick="setLT('pt')">💡 點光源</button>
@@ -898,195 +896,100 @@ function d5(cont){
   </div>
   <div class="slider-row" id="cutoff-row" style="display:none">
     <span class="slider-label">🔦 光束角度</span>
-    <input type="range" min="5" max="60" value="20" id="cutoff-val">
+    <input type="range" min="5" max="60" value="20" id="cutoff-val" oninput="document.getElementById('cutoff-disp').textContent=this.value+'°'">
     <span class="slider-val" id="cutoff-disp">20°</span>
   </div>`;
-  document.getElementById('cutoff-val').oninput=function(){document.getElementById('cutoff-disp').textContent=this.value+'°';};
-  window._ltMode='dir';
-  window.setLT=m=>{
-    window._ltMode=m;
-    ['dir','pt','spot'].forEach(x=>document.getElementById('lt-'+x).classList.toggle('on',x===m));
-    document.getElementById('cutoff-row').style.display=m==='spot'?'flex':'none';
-  };
-  const cv=document.getElementById('cv-d5');
-  
-  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
-  const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
-    void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
-  const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
-    uniform int ltype;uniform vec3 lightPos;uniform vec3 lightDir;
-    uniform float cutoff;uniform vec3 vp;
-    void main(){
-      vec3 N=normalize(vN);vec3 V=normalize(vp-vP);
-      vec3 L;float att=1.0;float inten=1.0;
-      if(ltype==0){L=normalize(-lightDir);}
-      else if(ltype==1){
-        L=normalize(lightPos-vP);
-        float d=length(lightPos-vP);
-        att=1.0/(1.0+0.09*d+0.032*d*d);
-      } else {
-        L=normalize(lightPos-vP);
-        float theta=dot(L,normalize(-lightDir));
-        float edge=0.92;
-        inten=clamp((theta-cutoff)/(edge-cutoff),0.0,1.0);
-        att=inten;
-      }
-      vec3 R=reflect(-L,N);
-      float dif=max(dot(N,L),0.0);
-      float spec=pow(max(dot(V,R),0.0),32.0);
-      vec3 col=vec3(0.4,0.6,0.9);
-      vec3 result=col*(0.08+dif*att)+vec3(spec*att*0.8);
-      gl_FragColor=vec4(result,1);
-    }`;
-  const prog=mkProg(gl,vs,fs);
-  // ground plane grid
-  const {verts,norms,idx}=genGrid(20,20,10);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
-  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,norms,gl.STATIC_DRAW);
-  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
-  const posL=gl.getAttribLocation(prog,'pos'),normL=gl.getAttribLocation(prog,'norm');
-  const mvpL=gl.getUniformLocation(prog,'mvp'),ltL=gl.getUniformLocation(prog,'ltype');
-  const lpL=gl.getUniformLocation(prog,'lightPos'),ldL=gl.getUniformLocation(prog,'lightDir');
-  const coL=gl.getUniformLocation(prog,'cutoff'),vpL=gl.getUniformLocation(prog,'vp');
-  gl.enable(gl.DEPTH_TEST);
-  let t=0;
-  function frame(){
-    t+=0.01;
-    const types={'dir':0,'pt':1,'spot':2};
-    const co=Math.cos(parseInt(document.getElementById('cutoff-val').value)*Math.PI/180);
-    const lx=Math.cos(t)*5,lz=Math.sin(t)*5;
-    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(prog);
-    const mvp=m4mul(m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,50),lookAtM([0,6,8],[0,0,0],[0,1,0])),identM());
-    gl.uniformMatrix4fv(mvpL,false,mvp);
-    gl.uniform1i(ltL,types[window._ltMode]||0);
-    gl.uniform3f(lpL,lx,4,lz);
-    gl.uniform3f(ldL,lx*.3,- 1,lz*.3);
-    gl.uniform1f(coL,co);
-    gl.uniform3f(vpL,0,6,8);
-    gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(posL);gl.vertexAttribPointer(posL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(normL);gl.vertexAttribPointer(normL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
-    gl.drawElements(gl.TRIANGLES,idx.length,gl.UNSIGNED_SHORT,0);
-    requestAnimationFrame(frame);
-  }
-  frame();
+  var cv5=document.getElementById('cv-d5');
+  cv5.width=420;cv5.height=420;cv5.style.width='420px';cv5.style.height='420px';cv5.style.display='block';cv5.style.margin='0 auto';
+  var gl5=cv5.getContext('webgl');if(!gl5){console.error('WebGL n/a d5');return;}
+  var VS5=`attribute vec3 aP,aN;uniform mat4 uMVP;varying vec3 vN,vP;void main(){vP=aP;vN=aN;gl_Position=uMVP*vec4(aP,1.0);}`;
+  var FS5=`precision mediump float;varying vec3 vN,vP;uniform int uLT;uniform vec3 uLP,uLD,uEye;uniform float uCO;void main(){vec3 N=normalize(vN);vec3 V=normalize(uEye-vP);vec3 L;float att=1.0;if(uLT==0){L=normalize(-uLD);}else if(uLT==1){L=normalize(uLP-vP);float d=length(uLP-vP);att=1.0/(1.0+0.09*d+0.032*d*d);}else{L=normalize(uLP-vP);float th=dot(L,normalize(-uLD));att=th>uCO?smoothstep(uCO,uCO+0.05,th):0.0;}vec3 R=reflect(-L,N);float dif=max(dot(N,L),0.0);float spec=pow(max(dot(V,R),0.0),32.0);vec3 col=vec3(0.38,0.62,1.0);gl_FragColor=vec4(col*(0.1+dif*att)+vec3(spec*att*0.8),1.0);}`;
+  function mkS5(t,s){var sh=gl5.createShader(t);gl5.shaderSource(sh,s);gl5.compileShader(sh);if(!gl5.getShaderParameter(sh,gl5.COMPILE_STATUS))console.error(gl5.getShaderInfoLog(sh));return sh;}
+  var p5=gl5.createProgram();gl5.attachShader(p5,mkS5(gl5.VERTEX_SHADER,VS5));gl5.attachShader(p5,mkS5(gl5.FRAGMENT_SHADER,FS5));gl5.linkProgram(p5);gl5.useProgram(p5);
+  // sphere geometry
+  var pos5=[],nor5=[],idx5=[];
+  for(var i=0;i<=48;i++){var phi=Math.PI*i/48;for(var j=0;j<=48;j++){var th=2*Math.PI*j/48;var x=Math.sin(phi)*Math.cos(th),y=Math.cos(phi),z=Math.sin(phi)*Math.sin(th);pos5.push(x,y,z);nor5.push(x,y,z);}}
+  for(var i=0;i<48;i++)for(var j=0;j<48;j++){var a=i*49+j,b=a+49;idx5.push(a,b,a+1,b,b+1,a+1);}
+  var PB5=gl5.createBuffer();gl5.bindBuffer(gl5.ARRAY_BUFFER,PB5);gl5.bufferData(gl5.ARRAY_BUFFER,new Float32Array(pos5),gl5.STATIC_DRAW);
+  var NB5=gl5.createBuffer();gl5.bindBuffer(gl5.ARRAY_BUFFER,NB5);gl5.bufferData(gl5.ARRAY_BUFFER,new Float32Array(nor5),gl5.STATIC_DRAW);
+  var IB5=gl5.createBuffer();gl5.bindBuffer(gl5.ELEMENT_ARRAY_BUFFER,IB5);gl5.bufferData(gl5.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx5),gl5.STATIC_DRAW);
+  var pL5=gl5.getAttribLocation(p5,'aP'),nL5=gl5.getAttribLocation(p5,'aN');
+  gl5.bindBuffer(gl5.ARRAY_BUFFER,PB5);gl5.enableVertexAttribArray(pL5);gl5.vertexAttribPointer(pL5,3,gl5.FLOAT,false,0,0);
+  gl5.bindBuffer(gl5.ARRAY_BUFFER,NB5);gl5.enableVertexAttribArray(nL5);gl5.vertexAttribPointer(nL5,3,gl5.FLOAT,false,0,0);
+  var uMVP5=gl5.getUniformLocation(p5,'uMVP'),uLT5=gl5.getUniformLocation(p5,'uLT');
+  var uLP5=gl5.getUniformLocation(p5,'uLP'),uLD5=gl5.getUniformLocation(p5,'uLD');
+  var uEye5=gl5.getUniformLocation(p5,'uEye'),uCO5=gl5.getUniformLocation(p5,'uCO');
+  var EYE5=[0,0,3];gl5.uniform3fv(uEye5,new Float32Array(EYE5));
+  gl5.enable(gl5.DEPTH_TEST);gl5.clearColor(0.024,0.024,0.06,1);
+  var idxLen5=idx5.length;var t5=0;
+  function persp5(fov,asp,n,f){var ta=Math.tan(fov/2),d=f-n,m=new Float32Array(16);m[0]=1/(ta*asp);m[5]=1/ta;m[10]=-(f+n)/d;m[11]=-1;m[14]=-2*f*n/d;return m;}
+  function lookAt5(e,c){function nr(v){var l=Math.hypot(v[0],v[1],v[2]);return[v[0]/l,v[1]/l,v[2]/l];}function cr(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}var z=nr([e[0]-c[0],e[1]-c[1],e[2]-c[2]]);var x=nr(cr([0,1,0],z));var y=cr(z,x);var m=new Float32Array(16);m[0]=x[0];m[4]=x[1];m[8]=x[2];m[12]=-dt(x,e);m[1]=y[0];m[5]=y[1];m[9]=y[2];m[13]=-dt(y,e);m[2]=z[0];m[6]=z[1];m[10]=z[2];m[14]=-dt(z,e);m[15]=1;return m;}
+  function m4m5(a,b){var m=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){var s=0;for(var k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];m[i+j*4]=s;}return m;}
+  (function frame5(){
+    t5+=0.013;
+    gl5.useProgram(p5);
+    gl5.uniformMatrix4fv(uMVP5,false,m4m5(persp5(Math.PI/4,1,0.1,50),lookAt5(EYE5,[0,0,0])));
+    var lt={'dir':0,'pt':1,'spot':2}[window._ltMode]||0;
+    gl5.uniform1i(uLT5,lt);
+    if(lt===0){gl5.uniform3f(uLP5,0,0,0);gl5.uniform3f(uLD5,Math.cos(t5),0.5,Math.sin(t5));}
+    else{gl5.uniform3f(uLP5,2.2*Math.cos(t5),1.5,2.2*Math.sin(t5));gl5.uniform3f(uLD5,-Math.cos(t5),-0.5,-Math.sin(t5));}
+    var co=parseInt(document.getElementById('cutoff-val')?document.getElementById('cutoff-val').value:20);
+    gl5.uniform1f(uCO5,Math.cos(co*Math.PI/180));
+    gl5.viewport(0,0,cv5.width,cv5.height);
+    gl5.clear(gl5.COLOR_BUFFER_BIT|gl5.DEPTH_BUFFER_BIT);
+    gl5.bindBuffer(gl5.ELEMENT_ARRAY_BUFFER,IB5);
+    gl5.drawElements(gl5.TRIANGLES,idxLen5,gl5.UNSIGNED_SHORT,0);
+    requestAnimationFrame(frame5);
+  })();
 }
 
 // Demo L6 — Boss: Night City Multi-lights
 function d6(cont){
-  cont.innerHTML=`
-  <div class="demo-wrap">
-    <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>👑 BOSS：夜晚城市 — 多光源場景</div></div>
-    <canvas id="cv-d6" width="600" height="320" style="height:320px;cursor:grab"></canvas>
-  </div>
-  <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
-    <div style="font-size:.78rem;font-weight:800;color:var(--txt2)">光源數：<span id="light-count" style="color:var(--acc);font-family:var(--mono)">6</span></div>
-    <div style="font-size:.78rem;font-weight:800;color:var(--txt2)">月光：<span id="moon-info" style="color:#aaccff;font-family:var(--mono)">ON</span></div>
-    <div style="font-size:.78rem;font-weight:800;color:var(--txt2)">手電筒：<span id="spot-info" style="color:var(--acc2);font-family:var(--mono)">ON</span></div>
+  window._mlState={moon:true,spot:true,lampCount:4};
+  window.toggleLight=function(k){window._mlState[k]=!window._mlState[k];document.getElementById('ml-'+k).classList.toggle('on',window._mlState[k]);document.getElementById(k==='moon'?'moon-info':'spot-info').textContent=window._mlState[k]?'ON':'OFF';updateCount6();};
+  window.addLights=function(){if(window._mlState.lampCount<10)window._mlState.lampCount+=1;updateCount6();};
+  function updateCount6(){var c=(window._mlState.moon?1:0)+(window._mlState.spot?1:0)+window._mlState.lampCount;document.getElementById('light-count').textContent=c;}
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>👑 BOSS：夜晚城市 — 多光源場景</div></div><canvas id="cv-d6" style="display:block;width:100%;border-radius:0 0 8px 8px;cursor:grab;"></canvas></div>
+  <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;padding:0 4px">
+    <span style="font-size:.78rem;font-weight:800;color:var(--txt2)">光源數：<span id="light-count" style="color:var(--acc);font-family:var(--mono)">6</span></span>
+    <span style="font-size:.78rem;font-weight:800;color:var(--txt2)">月光：<span id="moon-info" style="color:#aaccff;font-family:var(--mono)">ON</span></span>
+    <span style="font-size:.78rem;font-weight:800;color:var(--txt2)">手電筒：<span id="spot-info" style="color:var(--acc2);font-family:var(--mono)">ON</span></span>
   </div>
   <div class="ctrl-row">
     <button class="ctrl-btn on" id="ml-moon" onclick="toggleLight('moon')">🌙 月光</button>
     <button class="ctrl-btn on" id="ml-spot" onclick="toggleLight('spot')">🔦 手電筒</button>
     <button class="ctrl-btn" id="ml-more" onclick="addLights()">+ 增加路燈</button>
   </div>`;
-  window._mlState={moon:true,spot:true,ptCount:4};
-  window.toggleLight=k=>{
-    window._mlState[k]=!window._mlState[k];
-    document.getElementById('ml-'+k).classList.toggle('on',window._mlState[k]);
-    document.getElementById(k==='moon'?'moon-info':'spot-info').textContent=window._mlState[k]?'ON':'OFF';
-    updateCount();
-  };
-  window.addLights=()=>{if(window._mlState.ptCount<12)window._mlState.ptCount+=2;updateCount();};
-  function updateCount(){
-    const c=(window._mlState.moon?1:0)+(window._mlState.spot?1:0)+window._mlState.ptCount;
-    document.getElementById('light-count').textContent=c;
-  }
-  const cv=document.getElementById('cv-d6');
-  
-  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
-  const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
-    void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
-  const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
-    uniform bool useMoon;uniform bool useSpot;uniform int ptCount;
-    uniform vec3 ptPos[12];uniform vec3 ptCol[12];
-    uniform vec3 spotPos;uniform vec3 spotDir;
-    uniform vec3 vp;
-    void main(){
-      vec3 N=normalize(vN);vec3 V=normalize(vp-vP);
-      vec3 total=vec3(0.02,0.02,0.05);
-      if(useMoon){
-        vec3 L=normalize(vec3(0.3,1,0.5));
-        float d=max(dot(N,L),0.0);
-        total+=vec3(0.2,0.25,0.4)*d*0.3;
-      }
-      for(int i=0;i<12;i++){
-        if(i>=ptCount)break;
-        vec3 L=normalize(ptPos[i]-vP);
-        float dist=length(ptPos[i]-vP);
-        float att=1.0/(1.0+0.3*dist+0.1*dist*dist);
-        float d=max(dot(N,L),0.0);
-        vec3 R=reflect(-L,N);float s=pow(max(dot(V,R),0.0),16.0);
-        total+=ptCol[i]*(d*att+s*att*0.5);
-      }
-      if(useSpot){
-        vec3 L=normalize(spotPos-vP);
-        float theta=dot(L,normalize(-spotDir));
-        float inten=smoothstep(0.9,0.95,theta);
-        float d=max(dot(N,L),0.0);
-        total+=vec3(1.0,0.9,0.7)*d*inten*0.8;
-      }
-      gl_FragColor=vec4(clamp(total,0.0,1.0),1);
-    }`;
-  const prog=mkProg(gl,vs,fs);
-  const {verts,norms,idx}=genGrid(30,30,10);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
-  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,norms,gl.STATIC_DRAW);
-  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
-  const posL=gl.getAttribLocation(prog,'pos'),normL=gl.getAttribLocation(prog,'norm');
-  const mvpL=gl.getUniformLocation(prog,'mvp');
-  const moonL=gl.getUniformLocation(prog,'useMoon'),spotL2=gl.getUniformLocation(prog,'useSpot');
-  const ptCntL=gl.getUniformLocation(prog,'ptCount');
-  const spotPosL=gl.getUniformLocation(prog,'spotPos'),spotDirL=gl.getUniformLocation(prog,'spotDir');
-  const vpL=gl.getUniformLocation(prog,'vp');
-  gl.enable(gl.DEPTH_TEST);
-  // Camera drag
-  let camYaw=0.3,camPitch=0.5,isDrag=false,lx=0,ly=0;
-  cv.addEventListener('mousedown',e=>{isDrag=true;lx=e.clientX;ly=e.clientY;cv.style.cursor='grabbing';});
-  cv.addEventListener('mouseup',()=>{isDrag=false;cv.style.cursor='grab';});
-  cv.addEventListener('mousemove',e=>{if(!isDrag)return;camYaw+=(e.clientX-lx)*.005;camPitch-=(e.clientY-ly)*.005;camPitch=Math.max(.1,Math.min(1.4,camPitch));lx=e.clientX;ly=e.clientY;});
-  let t=0;
-  function frame(){
-    t+=0.008;
-    const {moon,spot,ptCount}=window._mlState;
-    const ptPos=[],ptCol=[];
-    for(let i=0;i<ptCount;i++){
-      const a=i/ptCount*Math.PI*2+t*.2;
-      ptPos.push(Math.cos(a)*6,0.5,Math.sin(a)*6);
-      const hue=i/ptCount;
-      ptCol.push(.5+Math.sin(hue*6)*.5,.5+Math.sin(hue*6+2)*.5,.5+Math.sin(hue*6+4)*.5);
-    }
-    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.02,.01,.06,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(prog);
-    const ex=Math.cos(camPitch)*Math.cos(camYaw)*9;
-    const ey=Math.sin(camPitch)*9;
-    const ez=Math.cos(camPitch)*Math.sin(camYaw)*9;
-    const mvp=m4mul(m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,60),lookAtM([ex,ey,ez],[0,0,0],[0,1,0])),identM());
-    gl.uniformMatrix4fv(mvpL,false,mvp);
-    gl.uniform1i(moonL,moon?1:0);gl.uniform1i(spotL2,spot?1:0);
-    gl.uniform1i(ptCntL,ptCount);
-    if(ptPos.length)gl.uniform3fv(gl.getUniformLocation(prog,'ptPos'),new Float32Array(ptPos.slice(0,36)));
-    if(ptCol.length)gl.uniform3fv(gl.getUniformLocation(prog,'ptCol'),new Float32Array(ptCol.slice(0,36)));
-    gl.uniform3f(spotPosL,Math.cos(t*.5)*3,3,Math.sin(t*.5)*3);
-    gl.uniform3f(spotDirL,0,-1,0);
-    gl.uniform3f(vpL,ex,ey,ez);
-    gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(posL);gl.vertexAttribPointer(posL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(normL);gl.vertexAttribPointer(normL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
-    gl.drawElements(gl.TRIANGLES,idx.length,gl.UNSIGNED_SHORT,0);
-    requestAnimationFrame(frame);
-  }
-  frame();
+  var cv6=document.getElementById('cv-d6');
+  cv6.width=600;cv6.height=320;cv6.style.height='320px';
+  var ctx6=cv6.getContext('2d');var W=600,H=320;
+  // generate buildings once
+  var bldgs=[];
+  var bx=0;while(bx<W){var bw=18+Math.floor(Math.random()*28),bh=40+Math.floor(Math.random()*110);bldgs.push({x:bx,w:bw,h:bh,c:Math.random()});bx+=bw+1+Math.floor(Math.random()*4);}
+  var t6=0;
+  (function frame6(){
+    t6+=0.016;
+    var st=window._mlState;
+    ctx6.clearRect(0,0,W,H);
+    // sky
+    var sky=ctx6.createLinearGradient(0,0,0,H*0.72);sky.addColorStop(0,'#030310');sky.addColorStop(1,'#08091e');
+    ctx6.fillStyle=sky;ctx6.fillRect(0,0,W,H*0.72);
+    ctx6.fillStyle='#060614';ctx6.fillRect(0,H*0.72,W,H*0.28);
+    // stars
+    for(var i=0;i<60;i++){var sx=(i*137)%W,sy=(i*97)%(H*0.55);ctx6.fillStyle='rgba(255,255,255,'+(0.2+0.5*Math.abs(Math.sin(t6*0.3+i)))+')';ctx6.fillRect(sx,sy,1,1);}
+    // moon
+    if(st.moon){var mg=ctx6.createRadialGradient(W*0.82,H*0.13,2,W*0.82,H*0.13,42);mg.addColorStop(0,'rgba(180,210,255,0.22)');mg.addColorStop(1,'rgba(100,130,255,0)');ctx6.fillStyle=mg;ctx6.fillRect(0,0,W,H);ctx6.fillStyle='#dde8ff';ctx6.beginPath();ctx6.arc(W*0.82,H*0.13,11,0,Math.PI*2);ctx6.fill();}
+    // street lamps glow
+    var lampCount=st.lampCount;
+    for(var i=0;i<lampCount;i++){var lx=W*0.08+i*(W*0.84)/(Math.max(lampCount-1,1)),ly=H*0.65;var lg=ctx6.createRadialGradient(lx,ly,0,lx,ly,80);lg.addColorStop(0,'rgba(255,200,80,0.28)');lg.addColorStop(1,'rgba(255,200,80,0)');ctx6.fillStyle=lg;ctx6.beginPath();ctx6.ellipse(lx,ly,80,55,0,0,Math.PI*2);ctx6.fill();}
+    // flashlight
+    if(st.spot){var fx=W*0.5+Math.sin(t6*0.8)*80,fy=H+20,tx=W*0.5+Math.sin(t6*0.8)*30,ty=H*0.35;var fg=ctx6.createRadialGradient(fx,fy,0,tx,ty,65);fg.addColorStop(0,'rgba(220,240,255,0.22)');fg.addColorStop(1,'rgba(220,240,255,0)');ctx6.save();ctx6.globalCompositeOperation='screen';ctx6.fillStyle=fg;ctx6.beginPath();ctx6.moveTo(fx,fy);ctx6.lineTo(tx-50,ty);ctx6.lineTo(tx+50,ty);ctx6.closePath();ctx6.fill();ctx6.restore();}
+    // buildings
+    bldgs.forEach(function(b){ctx6.fillStyle='#0c0c24';ctx6.fillRect(b.x,H*0.72-b.h,b.w,b.h+H*0.28);for(var wy=H*0.72-b.h+5;wy<H*0.72-8;wy+=10)for(var wx=b.x+3;wx<b.x+b.w-3;wx+=7){if(Math.random()>0.45){ctx6.fillStyle='rgba(255,230,120,'+(0.15+Math.random()*0.4)+')';ctx6.fillRect(wx,wy,3,5);}}});
+    // lamp posts
+    for(var i=0;i<lampCount;i++){var lx=W*0.08+i*(W*0.84)/(Math.max(lampCount-1,1));ctx6.strokeStyle='#2a2a44';ctx6.lineWidth=2;ctx6.beginPath();ctx6.moveTo(lx,H*0.9);ctx6.lineTo(lx,H*0.65);ctx6.stroke();ctx6.fillStyle='#ffd060';ctx6.beginPath();ctx6.arc(lx,H*0.65,4,0,Math.PI*2);ctx6.fill();}
+    requestAnimationFrame(frame6);
+  })();
 }
 
 // ══════════════════════════════════════════════════════
