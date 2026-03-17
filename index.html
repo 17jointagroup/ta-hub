@@ -1474,33 +1474,6 @@ function pickDaily(dateStr, pool=POOL){
   return out;
 }
 
-function pickDailyFresh(dateStr, pool, count) {
-  // Pick articles that are NOT already in ta_daily/art_daily for today
-  const dailyKey = channel==='ta' ? 'ta_daily' : 'art_daily';
-  let alreadyCollected = [];
-  try{ alreadyCollected = JSON.parse(store.get(dailyKey)||'[]'); }catch(e){}
-  const todayCollected = new Set(alreadyCollected.filter(a=>a.date===dateStr).map(a=>a.title));
-  
-  // Shuffle pool deterministically by date+time for variety
-  const seed = dateStr.split('-').reduce(function(a,b){return a+parseInt(b);},0) + new Date().getHours();
-  const available = pool.filter(a=>!todayCollected.has(a.title));
-  if(available.length===0) {
-    // All collected today - reset and pick fresh
-    alreadyCollected = alreadyCollected.filter(a=>a.date!==dateStr);
-    try{ store.set(dailyKey, JSON.stringify(alreadyCollected)); }catch(e){}
-    return pickDailyFresh(dateStr, pool, count);
-  }
-  const out = [];
-  for(let i=0;i<available.length&&out.length<count;i++){
-    const idx=(seed*7+i*17+i*i*3)%available.length;
-    const a=available[idx];
-    if(!out.find(x=>x.title===a.title)){
-      out.push({...a, id:'d_'+dateStr+'_'+i, date:dateStr, isNew:true});
-    }
-  }
-  return out;
-}
-
 // ─── TAG / SOURCE BADGE HTML ─────────────────────────────────────────────────
 function tagPillHTML(tag, clickable=true){
   const col = TAG_COL[tag]||'#aaa';
@@ -2007,28 +1980,23 @@ async function runCollect(){
   addLog('🔍 掃描 12 個來源中...');
 
   const pool = channel==='ta' ? POOL : ART_POOL;
-  // Pick 8 articles today (more variety)
-  const candidates = pickDailyFresh(today(), pool, 8);
+  const candidates=pickDaily(today(), pool);
+  const fresh=candidates.filter(a=>!A.find(x=>x.title===a.title));
 
-  for(const a of candidates){
-    await delay(280);
-    addLog(`✓ ${a.src}：${a.title.slice(0,48)}...`);
+  for(const a of fresh){
+    await delay(300);
+    addLog(`✓ ${a.src}：${a.title.slice(0,45)}...`);
   }
   await delay(400);
-  addLog(`✅ 完成！新增 ${candidates.length} 篇文章`);
+  addLog(`✅ 完成！新增 ${fresh.length} 篇文章`);
 
-  // Save to daily store (separate from base articles)
-  const dailyKey = channel==='ta' ? 'ta_daily' : 'art_daily';
-  let existing = [];
-  try{ existing = JSON.parse(store.get(dailyKey)||'[]'); }catch(e){}
-  // Prepend new, keep last 200
-  const merged = [...candidates, ...existing].slice(0,200);
-  store.set(dailyKey, JSON.stringify(merged));
+  // Prepend new articles
+  A = [...fresh, ...A];
   lastCollect = today();
+  const saveKey = channel==='ta' ? 'ta_articles' : channel==='art' ? 'art_articles' : null;
+  if(!saveKey) return;
+  store.set(saveKey, JSON.stringify(A.slice(0,250)));
   store.set('ta_lastCollect', today());
-
-  // Rebuild A to include new daily articles
-  rebuildArticles();
 
   updateStats(); render(); updateCollectStatus();
 
