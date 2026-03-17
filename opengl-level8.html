@@ -197,15 +197,26 @@ if(!CanvasRenderingContext2D.prototype.roundRect){
 const _glPool = {};
 function safeGL(cv) {
   if(!cv) return null;
-  const id = cv.id || 'cv_'+Math.random();
+  const id = cv.id || ('cv_'+Math.random().toString(36).slice(2));
   cv.id = id;
-  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
-  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
-  if(!gl) return null;
-  _glPool[id] = gl;
-  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  if(!window._glPool) window._glPool = {};
+  const pool = window._glPool;
+  if(pool[id] && !pool[id].isContextLost()) return pool[id];
+  // Release oldest contexts if near iOS limit
+  const keys = Object.keys(pool);
+  if(keys.length >= 6) {
+    try { pool[keys[0]].getExtension('WEBGL_lose_context')?.loseContext(); } catch(e){}
+    delete pool[keys[0]];
+  }
+  const opts = {powerPreference:'low-power', preserveDrawingBuffer:false,
+    failIfMajorPerformanceCaveat:false, antialias:true};
+  const gl = cv.getContext('webgl', opts) || cv.getContext('experimental-webgl', opts);
+  if(!gl) { console.warn('WebGL unavailable:', id); return null; }
+  pool[id] = gl;
+  cv.addEventListener('webglcontextlost', e=>{e.preventDefault();delete pool[id];});
   return gl;
 }
+
 
 const LESSONS=[
 {id:'l1',num:'8-1',icon:'⚡',title:'Compute Shader — GPU 通用計算',sub:'GPGPU：把 GPU 變成超級計算機',xp:100,type:'normal',school:'電腦架構：SIMD、Warp/Wavefront、記憶體層級',
@@ -279,10 +290,10 @@ function mkSD8(cont,id,label,mnames,fs,extras){
   const btns=mnames.map((n,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="m8${id}${i}" onclick="setM8_${id}(${i})">${n}</button>`).join('');
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv8${id}" width="600" height="280" style="height:280px"></canvas></div><div class="ctrl-row">${btns}</div>${extras||''}`;
   window[`_m8${id}`]=0;window[`setM8_${id}`]=m=>{window[`_m8${id}`]=m;mnames.forEach((_,i)=>document.getElementById(`m8${id}${i}`).classList.toggle('on',i===m));};
-  const cv=document.getElementById('cv8'+id);const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv8'+id);const gl=safeGL(cv);if(!gl)return;
   const prog=mkP(gl,VS,fs);if(!prog)return;
   const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
-  let time=0;(function fr(){time+=0.016;gl.viewport(0,0,600,280);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window[`_m8${id}`]);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
+  let time=0;(function fr(){time+=0.016;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window[`_m8${id}`]);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
 }
 
 function d1(cont){mkSD8(cont,'1','Compute Shader — GPU 並行可視化',['⚡ 並行計算','🔲 工作群組','📊 記憶體模型'],
@@ -491,7 +502,8 @@ function d8(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>⭐ BOSS：純 Shader 世界 — Raymarching + 大氣天空 + 體積霧</div></div><canvas id="cv8boss" width="600" height="320" style="height:320px;cursor:crosshair"></canvas></div><div class="ctrl-row"><button class="ctrl-btn on" id="b8-full" onclick="setB8(\'full\')">🌌 完整場景</button><button class="ctrl-btn" id="b8-wire" onclick="setB8(\'wire\')">🔮 SDF 線框</button><button class="ctrl-btn" id="b8-norm" onclick="setB8(\'norm\')">🧲 法線貼圖</button></div><div class="slider-row"><span class="slider-label">⏰ 時間速度</span><input type="range" min="0" max="30" value="10" id="b8-spd"><span class="slider-val" id="b8-spdv">1.0x</span></div>';
   document.getElementById('b8-spd').oninput=function(){document.getElementById('b8-spdv').textContent=(this.value/10).toFixed(1)+'x';};
   window._b8='full';window.setB8=m=>{window._b8=m;['full','wire','norm'].forEach(x=>document.getElementById('b8-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv8boss');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv8boss');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const fs=`precision mediump float;varying vec2 uv;uniform float t;uniform int mode;
   float sdSphere(vec3 p,float r){return length(p)-r;}
   float sdBox(vec3 p,vec3 b){vec3 q=abs(p)-b;return length(max(q,0.))+min(max(q.x,max(q.y,q.z)),0.);}
@@ -534,7 +546,7 @@ function d8(cont){
   const prog=mkP(gl,VS,fs);const buf=qB(gl);
   const pL=gl.getAttribLocation(prog,'p'),tL=gl.getUniformLocation(prog,'t'),mL=gl.getUniformLocation(prog,'mode');
   let time=0;const modes={full:0,wire:1,norm:2};
-  (function fr(){time+=0.016*(document.getElementById('b8-spd').value/10);gl.viewport(0,0,600,320);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1f(tL,time);gl.uniform1i(mL,modes[window._b8]||0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
+  (function fr(){time+=0.016*(document.getElementById('b8-spd').value/10);gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1f(tL,time);gl.uniform1i(mL,modes[window._b8]||0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
 }
 
 function buildCode(les){
