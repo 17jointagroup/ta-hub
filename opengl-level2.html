@@ -658,86 +658,53 @@ function d2(cont){
     <button class="ctrl-btn" id="ph-dif" onclick="setPhong('dif')">只有 Diffuse</button>
     <button class="ctrl-btn" id="ph-spe" onclick="setPhong('spe')">只有 Specular</button>
   </div>
-  <div class="slider-row"><span class="slider-label">✨ 光澤度</span><input type="range" min="1" max="128" value="32" id="sh-val"><span class="slider-val" id="sh-disp">32</span></div>`;
-  document.getElementById('sh-val').oninput=function(){document.getElementById('sh-disp').textContent=this.value;};
+  <div class="slider-row"><span class="slider-label">✨ 光澤度</span><input type="range" min="1" max="128" value="32" id="sh-val" oninput="document.getElementById('sh-disp').textContent=this.value"><span class="slider-val" id="sh-disp">32</span></div>`;
   window._phMode='all';
   window.setPhong=m=>{window._phMode=m;document.querySelectorAll('[id^="ph-"]').forEach(b=>b.classList.remove('on'));document.getElementById('ph-'+m).classList.add('on');};
   const cv=document.getElementById('cv-d2');
-  
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
-  const vs=`
-    attribute vec3 pos;attribute vec3 norm;
-    uniform mat4 mvp;uniform mat4 model;
-    varying vec3 vN;varying vec3 vP;
-    void main(){
-      vN=normalize(mat3(model)*norm);
-      vP=(model*vec4(pos,1.0)).xyz;
-      gl_Position=mvp*vec4(pos,1.0);
-    }`;
-  const fs=`
-    precision mediump float;
-    varying vec3 vN;varying vec3 vP;
-    uniform vec3 lightPos;uniform vec3 viewPos;
-    uniform int mode;uniform float shininess;
-    void main(){
-      vec3 N=normalize(vN);
-      vec3 L=normalize(lightPos-vP);
-      vec3 V=normalize(viewPos-vP);
-      vec3 R=reflect(-L,N);
-      float amb=0.1;
-      float dif=max(dot(N,L),0.0);
-      float spec=pow(max(dot(V,R),0.0),shininess);
-      vec3 col=vec3(0.9,0.5,0.2);
-      vec3 result;
-      if(mode==0) result=col*(amb+dif)+vec3(spec);
-      else if(mode==1) result=col*amb;
-      else if(mode==2) result=col*dif;
-      else result=vec3(spec);
-      gl_FragColor=vec4(result,1.0);
-    }`;
-  const prog=mkProg(gl,vs,fs);
-  const {verts,norms,idx}=genSphere(32,32);
+  // Responsive canvas size
+  let pw=0;let el2=cv.parentElement;while(el2&&pw<10){pw=el2.clientWidth||el2.offsetWidth;el2=el2.parentElement;}
+  cv.width=pw>10?pw:600; cv.height=Math.round(cv.width*0.48);
+  cv.style.height=cv.height+'px';
+  const gl=safeGL(cv);if(!gl)return;
+  // Shaders (from phong_sphere_fixed.html - known working)
+  const VS=`attribute vec3 aP,aN;uniform mat4 uMVP;varying vec3 vN,vP;void main(){vP=aP;vN=aN;gl_Position=uMVP*vec4(aP,1.0);}`;
+  const FS=`precision mediump float;varying vec3 vN,vP;uniform vec3 uLight,uEye;uniform float uShine;uniform int uMode;void main(){vec3 col=vec3(0.38,0.62,1.0);vec3 N=normalize(vN);vec3 L=normalize(uLight-vP);vec3 V=normalize(uEye-vP);vec3 R=reflect(-L,N);vec3 amb=0.18*col;float d=max(dot(N,L),0.0);vec3 dif=d*col;float s=pow(max(dot(V,R),0.0),uShine);vec3 spec=s*vec3(1.0);vec3 res;if(uMode==1)res=amb;else if(uMode==2)res=amb*0.3+dif;else if(uMode==3)res=vec3(0.02)+spec;else res=amb+dif+spec;gl_FragColor=vec4(res,1.0);}`;
+  const prog=mkProg(gl,VS,FS);
+  // Build sphere
+  const {verts,norms,idx}=genSphere(48,48);
   const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
   const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,norms,gl.STATIC_DRAW);
   const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
-  const posL=gl.getAttribLocation(prog,'pos');
-  const normL=gl.getAttribLocation(prog,'norm');
-  const mvpL=gl.getUniformLocation(prog,'mvp');
-  const modL=gl.getUniformLocation(prog,'model');
-  const lpL=gl.getUniformLocation(prog,'lightPos');
-  const vpL=gl.getUniformLocation(prog,'viewPos');
-  const modeL=gl.getUniformLocation(prog,'mode');
-  const shinL=gl.getUniformLocation(prog,'shininess');
-  gl.enable(gl.DEPTH_TEST);
+  const pL=gl.getAttribLocation(prog,'aP'),nL=gl.getAttribLocation(prog,'aN');
+  const uMVP=gl.getUniformLocation(prog,'uMVP');
+  const uLight=gl.getUniformLocation(prog,'uLight');
+  const uEye=gl.getUniformLocation(prog,'uEye');
+  const uShine=gl.getUniformLocation(prog,'uShine');
+  const uMode=gl.getUniformLocation(prog,'uMode');
+  const EYE=[0,0.3,3];
+  gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
+  gl.uniform3fv(uEye,new Float32Array(EYE));
+  gl.enable(gl.DEPTH_TEST);gl.clearColor(0.024,0.024,0.06,1);
+  const modeMap={all:0,amb:1,dif:2,spe:3};
   let t=0;
-  function frame(){
-    t+=0.008;
-    const lx=Math.cos(t)*3,ly=2,lz=Math.sin(t)*3;
-    const sh=parseInt(document.getElementById('sh-val').value);
-    const modes={'all':0,'amb':1,'dif':2,'spe':3};
+  (function frame(){
+    t+=0.012;
+    const sh=parseInt(document.getElementById('sh-val').value)||32;
+    const P=perspM(Math.PI/4,cv.width/cv.height,0.1,100);
+    const V2=lookAtM(EYE,[0,0,0],[0,1,0]);
+    const MVP=m4mul(P,V2);
+    gl.uniformMatrix4fv(uMVP,false,MVP);
+    gl.uniform3f(uLight,2.2*Math.cos(t),1.2+0.4*Math.sin(t*0.7),2.2*Math.sin(t));
+    gl.uniform1f(uShine,sh);
+    gl.uniform1i(uMode,modeMap[window._phMode]||0);
     gl.viewport(0,0,cv.width,cv.height);
-    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(prog);
-    const proj=perspM(45*Math.PI/180,cv.width/cv.height,.1,50);
-    const view=lookAtM([0,0,4],[0,0,0],[0,1,0]);
-    const model=identM();
-    const mvp=m4mul(m4mul(proj,view),model);
-    gl.uniformMatrix4fv(mvpL,false,mvp);
-    gl.uniformMatrix4fv(modL,false,model);
-    gl.uniform3f(lpL,lx,ly,lz);
-    gl.uniform3f(vpL,0,0,4);
-    gl.uniform1i(modeL,modes[window._phMode]||0);
-    gl.uniform1f(shinL,sh);
-    gl.bindBuffer(gl.ARRAY_BUFFER,vb);
-    gl.enableVertexAttribArray(posL);gl.vertexAttribPointer(posL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,nb);
-    gl.enableVertexAttribArray(normL);gl.vertexAttribPointer(normL,3,gl.FLOAT,false,0,0);
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
     gl.drawElements(gl.TRIANGLES,idx.length,gl.UNSIGNED_SHORT,0);
-    // draw light indicator (small circle in canvas 2d overlay)
     requestAnimationFrame(frame);
-  }
-  frame();
+  })();
 }
 
 // Demo L3 — Material Presets
