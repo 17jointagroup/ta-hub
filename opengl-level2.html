@@ -557,16 +557,22 @@ function mkGL(cont,w=600,h=260,label='WebGL Demo'){
     <canvas id="cv-${Math.random().toString(36).slice(2)}" width="${w}" height="${h}" style="height:${h}px"></canvas>
   </div>`;
   const cv=cont.querySelector('canvas');
-  const gl=safeGL(cv);
+  const gl=cv.getContext("webgl");
   return {cv,gl};
 }
 
 function mkProg(gl,vs,fs){
-  const mkS=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;};
+  const mkS=(type,src)=>{
+    const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))console.error('Shader error:',gl.getShaderInfoLog(s),src.slice(0,100));
+    return s;
+  };
   const p=gl.createProgram();
   gl.attachShader(p,mkS(gl.VERTEX_SHADER,vs));
   gl.attachShader(p,mkS(gl.FRAGMENT_SHADER,fs));
-  gl.linkProgram(p);return p;
+  gl.linkProgram(p);
+  if(!gl.getProgramParameter(p,gl.LINK_STATUS))console.error('Program link error:',gl.getProgramInfoLog(p));
+  return p;
 }
 
 function quadBuf(gl){
@@ -650,7 +656,7 @@ function d2(cont){
   cont.innerHTML=`
   <div class="demo-wrap">
     <div class="demo-top"><div class="demo-label"><div class="live-dot"></div>Phong 光照 — 即時球體</div></div>
-    <canvas id="cv-d2" width="600" height="280" style="height:280px"></canvas>
+    <canvas id="cv-d2" style="display:block;width:100%;border-radius:8px;background:#06060f;"></canvas>
   </div>
   <div class="ctrl-row">
     <button class="ctrl-btn on" id="ph-all" onclick="setPhong('all')">全部三層</button>
@@ -660,50 +666,61 @@ function d2(cont){
   </div>
   <div class="slider-row"><span class="slider-label">✨ 光澤度</span><input type="range" min="1" max="128" value="32" id="sh-val" oninput="document.getElementById('sh-disp').textContent=this.value"><span class="slider-val" id="sh-disp">32</span></div>`;
   window._phMode='all';
-  window.setPhong=m=>{window._phMode=m;document.querySelectorAll('[id^="ph-"]').forEach(b=>b.classList.remove('on'));document.getElementById('ph-'+m).classList.add('on');};
-  const cv=document.getElementById('cv-d2');
-  // Responsive canvas size
-  let pw=0;let el2=cv.parentElement;while(el2&&pw<10){pw=el2.clientWidth||el2.offsetWidth;el2=el2.parentElement;}
-  cv.width=pw>10?pw:600; cv.height=Math.round(cv.width*0.48);
-  cv.style.height=cv.height+'px';
-  const gl=safeGL(cv);if(!gl)return;
-  // Shaders (from phong_sphere_fixed.html - known working)
-  const VS=`attribute vec3 aP,aN;uniform mat4 uMVP;varying vec3 vN,vP;void main(){vP=aP;vN=aN;gl_Position=uMVP*vec4(aP,1.0);}`;
-  const FS=`precision mediump float;varying vec3 vN,vP;uniform vec3 uLight,uEye;uniform float uShine;uniform int uMode;void main(){vec3 col=vec3(0.38,0.62,1.0);vec3 N=normalize(vN);vec3 L=normalize(uLight-vP);vec3 V=normalize(uEye-vP);vec3 R=reflect(-L,N);vec3 amb=0.18*col;float d=max(dot(N,L),0.0);vec3 dif=d*col;float s=pow(max(dot(V,R),0.0),uShine);vec3 spec=s*vec3(1.0);vec3 res;if(uMode==1)res=amb;else if(uMode==2)res=amb*0.3+dif;else if(uMode==3)res=vec3(0.02)+spec;else res=amb+dif+spec;gl_FragColor=vec4(res,1.0);}`;
-  const prog=mkProg(gl,VS,FS);
-  // Build sphere
-  const {verts,norms,idx}=genSphere(48,48);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
-  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,norms,gl.STATIC_DRAW);
-  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
-  const pL=gl.getAttribLocation(prog,'aP'),nL=gl.getAttribLocation(prog,'aN');
-  const uMVP=gl.getUniformLocation(prog,'uMVP');
-  const uLight=gl.getUniformLocation(prog,'uLight');
-  const uEye=gl.getUniformLocation(prog,'uEye');
-  const uShine=gl.getUniformLocation(prog,'uShine');
-  const uMode=gl.getUniformLocation(prog,'uMode');
-  const EYE=[0,0.3,3];
-  gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
-  gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
-  gl.uniform3fv(uEye,new Float32Array(EYE));
-  gl.enable(gl.DEPTH_TEST);gl.clearColor(0.024,0.024,0.06,1);
-  const modeMap={all:0,amb:1,dif:2,spe:3};
-  let t=0;
-  (function frame(){
-    t+=0.012;
-    const sh=parseInt(document.getElementById('sh-val').value)||32;
-    const P=perspM(Math.PI/4,cv.width/cv.height,0.1,100);
-    const V2=lookAtM(EYE,[0,0,0],[0,1,0]);
-    const MVP=m4mul(P,V2);
-    gl.uniformMatrix4fv(uMVP,false,MVP);
-    gl.uniform3f(uLight,2.2*Math.cos(t),1.2+0.4*Math.sin(t*0.7),2.2*Math.sin(t));
-    gl.uniform1f(uShine,sh);
-    gl.uniform1i(uMode,modeMap[window._phMode]||0);
-    gl.viewport(0,0,cv.width,cv.height);
+  window.setPhong=function(m){window._phMode=m;document.querySelectorAll('[id^="ph-"]').forEach(function(b){b.classList.remove('on');});document.getElementById('ph-'+m).classList.add('on');};
+  // ── exactly from phong_sphere_fixed.html ──
+  var canvas=document.getElementById('cv-d2');
+  canvas.width=420; canvas.height=420;
+  canvas.style.width='420px'; canvas.style.height='420px';
+  canvas.style.display='block'; canvas.style.margin='0 auto';
+  var gl=canvas.getContext('webgl');
+  if(!gl){console.error('WebGL not available');return;}
+  var VS=`attribute vec3 aP,aN;uniform mat4 uMVP;varying vec3 vN,vP;void main(){vP=aP;vN=aN;gl_Position=uMVP*vec4(aP,1.0);}`;
+  var FS=`precision mediump float;varying vec3 vN,vP;uniform vec3 uLight,uEye;uniform float uShine;uniform int uMode;void main(){vec3 col=vec3(0.38,0.62,1.0);vec3 N=normalize(vN);vec3 L=normalize(uLight-vP);vec3 V=normalize(uEye-vP);vec3 R=reflect(-L,N);vec3 amb=0.18*col;float d=max(dot(N,L),0.0);vec3 dif=d*col;float s=pow(max(dot(V,R),0.0),uShine);vec3 spec=s*vec3(1.0);vec3 res;if(uMode==1)res=amb;else if(uMode==2)res=amb*0.3+dif;else if(uMode==3)res=vec3(0.02)+spec;else res=amb+dif+spec;gl_FragColor=vec4(res,1.0);}`;
+  function mkS2(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(s));return s;}
+  var prog2=gl.createProgram();
+  gl.attachShader(prog2,mkS2(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog2,mkS2(gl.FRAGMENT_SHADER,FS));
+  gl.linkProgram(prog2);gl.useProgram(prog2);
+  // sphere geometry
+  var pos2=[],nor2=[],idx2=[];
+  var ST=48,SL=48;
+  for(var i=0;i<=ST;i++){var phi=Math.PI*i/ST;for(var j=0;j<=SL;j++){var th=2*Math.PI*j/SL;var x=Math.sin(phi)*Math.cos(th),y=Math.cos(phi),z=Math.sin(phi)*Math.sin(th);pos2.push(x,y,z);nor2.push(x,y,z);}}
+  for(var i=0;i<ST;i++)for(var j=0;j<SL;j++){var a=i*(SL+1)+j,b=a+SL+1;idx2.push(a,b,a+1,b,b+1,a+1);}
+  var PB2=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,PB2);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos2),gl.STATIC_DRAW);
+  var NB2=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,NB2);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(nor2),gl.STATIC_DRAW);
+  var IB2=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,IB2);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx2),gl.STATIC_DRAW);
+  var pL2=gl.getAttribLocation(prog2,'aP'),nL2=gl.getAttribLocation(prog2,'aN');
+  gl.bindBuffer(gl.ARRAY_BUFFER,PB2);gl.enableVertexAttribArray(pL2);gl.vertexAttribPointer(pL2,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,NB2);gl.enableVertexAttribArray(nL2);gl.vertexAttribPointer(nL2,3,gl.FLOAT,false,0,0);
+  var uMVP2=gl.getUniformLocation(prog2,'uMVP');
+  var uLight2=gl.getUniformLocation(prog2,'uLight');
+  var uEye2=gl.getUniformLocation(prog2,'uEye');
+  var uShine2=gl.getUniformLocation(prog2,'uShine');
+  var uMode2=gl.getUniformLocation(prog2,'uMode');
+  var EYE2=[0,0.3,3];
+  gl.uniform3fv(uEye2,new Float32Array(EYE2));
+  gl.enable(gl.DEPTH_TEST);
+  gl.clearColor(0.024,0.024,0.06,1);
+  var modeMap2={all:0,amb:1,dif:2,spe:3};
+  var t2=0;
+  var idxLen2=idx2.length;
+  function perspM2(fov,asp,n,f){var ta=Math.tan(fov/2),d=f-n,m=new Float32Array(16);m[0]=1/(ta*asp);m[5]=1/ta;m[10]=-(f+n)/d;m[11]=-1;m[14]=-2*f*n/d;return m;}
+  function lookAtM2(e,c,u){function nrm(v){var l=Math.hypot(v[0],v[1],v[2]);return[v[0]/l,v[1]/l,v[2]/l];}function crs(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}var z=nrm([e[0]-c[0],e[1]-c[1],e[2]-c[2]]);var x=nrm(crs(u,z));var y=crs(z,x);var m=new Float32Array(16);m[0]=x[0];m[4]=x[1];m[8]=x[2];m[12]=-dt(x,e);m[1]=y[0];m[5]=y[1];m[9]=y[2];m[13]=-dt(y,e);m[2]=z[0];m[6]=z[1];m[10]=z[2];m[14]=-dt(z,e);m[15]=1;return m;}
+  function m4mul2(a,b){var m=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){var s=0;for(var k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];m[i+j*4]=s;}return m;}
+  (function frame2(){
+    t2+=0.012;
+    gl.useProgram(prog2);
+    var P2=perspM2(Math.PI/4,canvas.width/canvas.height,0.1,100);
+    var V2=lookAtM2(EYE2,[0,0,0],[0,1,0]);
+    gl.uniformMatrix4fv(uMVP2,false,m4mul2(P2,V2));
+    gl.uniform3f(uLight2,2.2*Math.cos(t2),1.2+0.4*Math.sin(t2*0.7),2.2*Math.sin(t2));
+    gl.uniform1f(uShine2,parseInt(document.getElementById('sh-val').value)||32);
+    gl.uniform1i(uMode2,modeMap2[window._phMode]||0);
+    gl.viewport(0,0,canvas.width,canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
-    gl.drawElements(gl.TRIANGLES,idx.length,gl.UNSIGNED_SHORT,0);
-    requestAnimationFrame(frame);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,IB2);
+    gl.drawElements(gl.TRIANGLES,idxLen2,gl.UNSIGNED_SHORT,0);
+    requestAnimationFrame(frame2);
   })();
 }
 
@@ -732,7 +749,7 @@ function d3(cont){
   window.setMat=(i)=>{window._matIdx=i;document.querySelectorAll('#mat-btns .ctrl-btn').forEach((b,j)=>b.classList.toggle('on',i===j));};
   const cv=document.getElementById('cv-d3');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
     void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
@@ -792,7 +809,7 @@ function d4(cont){
   window.setSM=m=>{window._smMode=m;['final','spec','map','diff'].forEach(x=>document.getElementById('sm-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv-d4');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   // Make procedural textures
   function makeChecker(gl,w,h,col1,col2){
     const data=new Uint8Array(w*h*4);
@@ -887,7 +904,7 @@ function d5(cont){
   };
   const cv=document.getElementById('cv-d5');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
     void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
@@ -981,7 +998,7 @@ function d6(cont){
   }
   const cv=document.getElementById('cv-d6');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec3 pos;attribute vec3 norm;uniform mat4 mvp;varying vec3 vN;varying vec3 vP;
     void main(){vN=norm;vP=pos;gl_Position=mvp*vec4(pos,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;
