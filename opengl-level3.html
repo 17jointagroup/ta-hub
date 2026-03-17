@@ -201,15 +201,26 @@ if(!CanvasRenderingContext2D.prototype.roundRect){
 const _glPool = {};
 function safeGL(cv) {
   if(!cv) return null;
-  const id = cv.id || 'cv_'+Math.random();
+  const id = cv.id || ('cv_'+Math.random().toString(36).slice(2));
   cv.id = id;
-  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
-  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
-  if(!gl) return null;
-  _glPool[id] = gl;
-  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  if(!window._glPool) window._glPool = {};
+  const pool = window._glPool;
+  if(pool[id] && !pool[id].isContextLost()) return pool[id];
+  // Release oldest contexts if near iOS limit
+  const keys = Object.keys(pool);
+  if(keys.length >= 6) {
+    try { pool[keys[0]].getExtension('WEBGL_lose_context')?.loseContext(); } catch(e){}
+    delete pool[keys[0]];
+  }
+  const opts = {powerPreference:'low-power', preserveDrawingBuffer:false,
+    failIfMajorPerformanceCaveat:false, antialias:true};
+  const gl = cv.getContext('webgl', opts) || cv.getContext('experimental-webgl', opts);
+  if(!gl) { console.warn('WebGL unavailable:', id); return null; }
+  pool[id] = gl;
+  cv.addEventListener('webglcontextlost', e=>{e.preventDefault();delete pool[id];});
   return gl;
 }
+
 
 const LESSONS=[
 {id:'l1',num:'3-1',icon:'📦',title:'Assimp — 萬能模型翻譯機',
@@ -336,7 +347,8 @@ function d1(cont){
   window._fmt='obj';
   window.setFmt=f=>{window._fmt=f;['obj','fbx','gltf'].forEach(x=>document.getElementById('ft-'+x).classList.toggle('on',x===f));};
   const cv=document.getElementById('cv-d1');
-  const ctx=cv.getContext('2d');
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const ctx=cv.getContext('2d');
   const trees={
     obj:{name:'Scene',col:'#00e5a0',children:[{name:'Mesh_Body',col:'#7fffb0',children:[]},{name:'Mesh_Head',col:'#7fffb0',children:[]},{name:'Material_0',col:'#ffd93d',children:[]}]},
     fbx:{name:'Scene',col:'#00e5a0',children:[{name:'Armature',col:'#ff6b6b',children:[{name:'Bone_Root',col:'#ff9999',children:[{name:'Bone_Spine',col:'#ffbbbb',children:[]}]},{name:'Mesh_Skin',col:'#7fffb0',children:[]}]},{name:'Animations',col:'#ffd93d',children:[{name:'Walk',col:'#ffe088',children:[]},{name:'Run',col:'#ffe088',children:[]}]}]},
@@ -388,7 +400,8 @@ function d2(cont){
   window._mv='solid';
   window.setMV=m=>{window._mv=m;['solid','wire','norm','uv'].forEach(x=>document.getElementById('mv-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv-d2');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec3 pos;attribute vec3 norm;attribute vec2 uv;varying vec3 vN;varying vec3 vP;varying vec2 vUV;uniform mat4 mvp;void main(){vN=norm;vP=pos;vUV=uv;gl_Position=mvp*vec4(pos,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;varying vec2 vUV;uniform int mode;uniform float t;void main(){
     if(mode==0){vec3 L=normalize(vec3(sin(t),1,cos(t)));float d=max(dot(normalize(vN),L),.1);gl_FragColor=vec4(vec3(.2,.7,.4)*d+.05,1);}
@@ -409,9 +422,9 @@ function d2(cont){
   function frame(){
     t+=0.012;
     const modes={solid:0,wire:1,norm:2,uv:3};
-    gl.viewport(0,0,600,280);gl.clearColor(.05,.08,.05,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.05,.08,.05,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
-    const mvp=m4mul(m4mul(perspM(45*Math.PI/180,600/280,.1,50),lookAtM([0,0,3.5],[0,0,0],[0,1,0])),rotY(t*.4));
+    const mvp=m4mul(m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,50),lookAtM([0,0,3.5],[0,0,0],[0,1,0])),rotY(t*.4));
     gl.uniformMatrix4fv(mvpL,false,mvp);gl.uniform1i(mL,modes[window._mv]||0);gl.uniform1f(tL,t);
     gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
@@ -432,7 +445,8 @@ function d3(cont){
   window._m3='tex';
   window.setM3=m=>{window._m3=m;['tex','norm','wire','x'].forEach(x=>document.getElementById('m3-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv-d3');
-  const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   // Build a stylized "character" from multiple meshes
   const meshes=buildCharacter();
   document.getElementById('vtx-cnt').textContent=meshes.reduce((s,m)=>s+m.vc,0);
@@ -457,8 +471,8 @@ function d3(cont){
     const modes={tex:0,norm:1,wire:2,x:3};
     const ex=Math.cos(camP)*Math.cos(camY)*6,ey=Math.sin(camP)*6+1,ez=Math.cos(camP)*Math.sin(camY)*6;
     const view=lookAtM([ex,ey,ez],[0,1,0],[0,1,0]);
-    const proj=perspM(45*Math.PI/180,600/320,.1,50);
-    gl.viewport(0,0,600,320);gl.clearColor(.05,.08,.05,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    const proj=perspM(45*Math.PI/180,cv.width/cv.height,.1,50);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.05,.08,.05,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
     const modeInt=modes[window._m3]||0;
     gl.uniform1i(gl.getUniformLocation(prog,'mode'),modeInt);
