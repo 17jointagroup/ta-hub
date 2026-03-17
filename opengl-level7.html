@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚔️ 競技之城 — OpenGL 魔法王國</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0505;--bg2:#130707;--card:#180a0a;--border:#2e1010;
+  --acc:#ff4757;--acc2:#ff6b81;--acc3:#ffd93d;--acc4:#ff6b6b;--acc5:#00f5c4;
+  --txt:#ffe8e8;--txt2:#6e3535;
+  --font:'Nunito',sans-serif;--mono:'Space Mono',monospace;
+  --glow:0 0 28px rgba(255,71,87,.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;border-radius:50%;background:#ff9999;animation:tw var(--d,3s) var(--dl,0s) infinite}
+@keyframes tw{0%,100%{opacity:.06}50%{opacity:.6}}
+.orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;animation:drift var(--d,20s) ease-in-out infinite alternate}
+@keyframes drift{0%{transform:translate(0,0)}100%{transform:translate(var(--tx,40px),var(--ty,-40px))}}
+header{position:sticky;top:0;z-index:100;background:rgba(14,5,5,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:11px 24px;display:flex;align-items:center;gap:12px}
+.back-btn{background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:6px 14px;border-radius:100px;font-size:.78rem;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;transition:.2s}
+.back-btn:hover{color:var(--acc);border-color:var(--acc)}
+.header-title{font-size:1rem;font-weight:900;color:var(--acc)}
+.xp-bar{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:800}
+.xp-total{color:var(--acc);font-family:var(--mono)}
+.xp-track{width:110px;height:7px;background:var(--border);border-radius:100px;overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:100px;transition:width .7s cubic-bezier(.34,1.56,.64,1)}
+.hero{position:relative;z-index:1;text-align:center;padding:64px 24px 44px}
+.tower-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,71,87,.07);border:1px solid rgba(255,71,87,.22);border-radius:100px;padding:6px 18px;font-size:.78rem;font-weight:800;color:var(--acc);margin-bottom:20px}
+.hero h1{font-size:clamp(2rem,6vw,3.4rem);font-weight:900;line-height:1.1;margin-bottom:14px}
+.hero h1 span{background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--txt2);font-size:.95rem;max-width:500px;margin:0 auto 32px;line-height:1.75}
+.stats-row{display:flex;justify-content:center;gap:20px;flex-wrap:wrap}
+.stat-chip{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 22px;text-align:center}
+.stat-chip .num{font-size:1.5rem;font-weight:900;font-family:var(--mono);color:var(--acc)}
+.stat-chip .lbl{font-size:.68rem;color:var(--txt2);font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.chapter-map{position:relative;z-index:1;padding:24px;max-width:920px;margin:0 auto}
+.map-title{font-size:.75rem;font-weight:800;color:var(--txt2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px;padding-left:4px}
+.lesson{background:var(--card);border:1px solid var(--border);border-radius:22px;margin-bottom:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s;cursor:pointer}
+.lesson:hover:not(.locked){border-color:rgba(255,71,87,.4);box-shadow:var(--glow)}
+.lesson.locked{opacity:.45;cursor:not-allowed}
+.lesson.active{border-color:var(--acc);box-shadow:var(--glow)}
+.lesson.done{border-color:rgba(255,107,129,.4)}
+.lesson.boss:hover:not(.locked),.lesson.boss.active{border-color:var(--acc3);box-shadow:0 0 24px rgba(255,217,61,.3)}
+.lesson-header{display:flex;align-items:center;gap:16px;padding:16px 20px}
+.lesson-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.i-n{background:rgba(255,71,87,.07);border:1px solid rgba(255,71,87,.18)}
+.i-d{background:rgba(255,107,129,.1);border:1px solid rgba(255,107,129,.3)}
+.i-b{background:rgba(255,217,61,.07);border:1px solid rgba(255,217,61,.22)}
+.i-l{background:var(--border);filter:grayscale(1)}
+.lesson-info{flex:1}
+.lesson-title{font-size:.95rem;font-weight:900;margin-bottom:2px}
+.lesson-sub{font-size:.75rem;color:var(--txt2);font-weight:700}
+.lesson-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.xp-pill{background:rgba(255,71,87,.07);color:var(--acc);border:1px solid rgba(255,71,87,.2);border-radius:100px;padding:3px 10px;font-size:.7rem;font-weight:900;font-family:var(--mono)}
+.boss-pill{background:rgba(255,217,61,.07);color:var(--acc3);border:1px solid rgba(255,217,61,.25);border-radius:100px;padding:3px 10px;font-size:.68rem;font-weight:900}
+.chk{width:26px;height:26px;border-radius:50%;background:rgba(255,107,129,.1);color:var(--acc2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:900}
+.lck{width:26px;height:26px;border-radius:50%;background:var(--border);color:var(--txt2);display:flex;align-items:center;justify-content:center}
+.lesson-body{display:none;border-top:1px solid var(--border)}
+.lesson.active .lesson-body{display:block}
+.tab-bar{display:flex;gap:3px;padding:10px 14px 0;background:var(--bg2)}
+.tab{padding:7px 14px;border-radius:9px 9px 0 0;font-size:.76rem;font-weight:800;cursor:pointer;transition:.15s;color:var(--txt2);border:1px solid transparent;border-bottom:none}
+.tab.on{background:var(--card);color:var(--txt);border-color:var(--border)}
+.tab-content{padding:18px}
+.tab-panel{display:none}.tab-panel.on{display:block}
+.story-box{background:linear-gradient(135deg,rgba(255,71,87,.05),rgba(255,107,129,.02));border:1px solid rgba(255,71,87,.14);border-radius:18px;padding:20px;margin-bottom:16px;line-height:1.85;font-size:.91rem}
+.be{font-size:2.5rem;display:block;margin-bottom:10px;animation:bob .9s ease infinite alternate}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+.hl{background:rgba(255,71,87,.14);color:var(--acc);border-radius:4px;padding:1px 7px;font-weight:900}
+.hl2{background:rgba(255,107,129,.12);color:var(--acc2);border-radius:4px;padding:1px 7px;font-weight:900}
+.hl3{background:rgba(255,217,61,.1);color:var(--acc3);border-radius:4px;padding:1px 7px;font-weight:900}
+.hl4{background:rgba(0,245,196,.1);color:var(--acc5);border-radius:4px;padding:1px 7px;font-weight:900}
+.school-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.18);border-radius:8px;padding:6px 12px;font-size:.76rem;font-weight:800;color:var(--acc);margin-top:12px}
+.code-wrap{background:#0a0202;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:12px 0}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.code-lang{font-size:.68rem;font-weight:800;color:var(--txt2);font-family:var(--mono)}
+.copy-btn{background:none;border:1px solid var(--border);color:var(--txt2);padding:3px 9px;border-radius:5px;font-size:.65rem;font-weight:800;cursor:pointer;transition:.15s;font-family:var(--mono)}
+.copy-btn:hover{color:var(--acc);border-color:var(--acc)}
+pre{padding:14px;font-family:var(--mono);font-size:.75rem;line-height:1.7;overflow-x:auto;white-space:pre}
+.kw{color:#ff4757}.fn{color:#ff9f43}.str{color:#00f5c4}.num{color:#ffd93d}.cm{color:#2e1010}.type{color:#c792ea}
+.demo-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.demo-top{display:flex;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border)}
+.demo-label{font-size:.68rem;font-weight:800;color:var(--txt2);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 5px var(--acc);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
+canvas{display:block;width:100%}
+.ctrl-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.ctrl-btn{background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:6px 14px;border-radius:100px;font-family:var(--font);font-size:.78rem;font-weight:800;cursor:pointer;transition:.2s}
+.ctrl-btn:hover{border-color:var(--acc);color:var(--acc)}
+.ctrl-btn.on{background:rgba(255,71,87,.1);border-color:var(--acc);color:var(--acc)}
+.slider-row{display:flex;align-items:center;gap:10px;margin:6px 0}
+.slider-label{font-size:.75rem;font-weight:800;color:var(--txt2);min-width:90px}
+input[type=range]{flex:1;accent-color:var(--acc)}
+.slider-val{font-family:var(--mono);font-size:.75rem;color:var(--acc3);min-width:44px;text-align:right}
+.quiz-box{background:rgba(255,217,61,.04);border:1px solid rgba(255,217,61,.15);border-radius:14px;padding:18px;margin-top:16px}
+.quiz-title{font-size:.8rem;font-weight:900;color:var(--acc3);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.quiz-q{font-size:.88rem;line-height:1.6;color:var(--txt);margin-bottom:12px;font-weight:700}
+.opts{display:grid;gap:7px}
+.opt{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px 14px;cursor:pointer;font-size:.84rem;font-weight:700;transition:.2s;display:flex;align-items:center;gap:9px}
+.opt:hover{border-color:var(--acc);background:rgba(255,71,87,.04)}
+.opt.correct{border-color:var(--acc5);background:rgba(0,245,196,.05);color:var(--acc5);pointer-events:none}
+.opt.wrong{border-color:var(--acc4);background:rgba(255,107,107,.05);color:var(--acc4);pointer-events:none}
+.opt.disabled{pointer-events:none;opacity:.6}
+.opt-k{width:22px;height:22px;border-radius:5px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;font-family:var(--mono);flex-shrink:0}
+.explain-box{margin-top:10px;padding:11px 14px;background:rgba(0,245,196,.04);border:1px solid rgba(0,245,196,.15);border-radius:9px;font-size:.81rem;line-height:1.65;color:var(--txt2);display:none}
+.done-btn{width:100%;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0a0000;border:none;border-radius:100px;padding:12px;font-family:var(--font);font-size:.92rem;font-weight:900;cursor:pointer;margin-top:14px;transition:.25s;display:flex;align-items:center;justify-content:center;gap:8px}
+.done-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,71,87,.35)}
+.done-btn:disabled{opacity:.35;cursor:default;transform:none;box-shadow:none}
+.conn{width:2px;height:10px;background:linear-gradient(var(--border),transparent);margin:0 auto -1px;position:relative;left:21px}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--acc);border-radius:100px;padding:10px 26px;font-weight:800;font-size:.86rem;color:var(--acc);z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+.xp-pop{position:fixed;font-family:var(--mono);font-weight:900;font-size:1.2rem;color:var(--acc);pointer-events:none;z-index:999;text-shadow:0 0 20px var(--acc);animation:floatUp .9s ease-out forwards}
+
+/* ── Completion Banner ── */
+.comp-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(4,2,14,.88);backdrop-filter:blur(18px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.comp-overlay.show{display:flex;animation:fadeInComp .5s ease}
+@keyframes fadeInComp{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.comp-title{font-size:2.2rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}
+.comp-sub{font-size:.9rem;color:var(--txt2);margin-bottom:24px;line-height:1.6}
+.comp-trophy{font-size:4rem;margin-bottom:12px;animation:trophy-bob .8s ease infinite alternate}
+@keyframes trophy-bob{from{transform:translateY(0) rotate(-5deg)}to{transform:translateY(-10px) rotate(5deg)}}
+.comp-next-btn{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#050210;border:none;border-radius:100px;padding:14px 32px;font-family:var(--font);font-size:1rem;font-weight:900;cursor:pointer;-webkit-appearance:none;margin-bottom:12px;transition:.2s;box-shadow:0 6px 28px rgba(var(--acc-rgb),.4)}
+.comp-next-btn:active{opacity:.85;transform:scale(.97)}
+.comp-map-btn{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:var(--txt2);border-radius:100px;padding:10px 24px;font-family:var(--font);font-size:.85rem;font-weight:800;cursor:pointer;-webkit-appearance:none;transition:.2s}
+.comp-map-btn:active{opacity:.7}
+.comp-stars{font-size:2rem;letter-spacing:6px;margin-bottom:16px;animation:stars-in .6s .3s ease both}
+@keyframes stars-in{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+/* Firework particles */
+.fw-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.fw{position:absolute;border-radius:50%;animation:fwFly var(--d,.8s) var(--dl,0s) ease-out forwards}
+@keyframes fwFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx,0px),var(--ty,-80px)) scale(0);opacity:0}}
+
+/* ── Font size boost ── */
+html{font-size:17px}
+.lesson-title{font-size:1.05rem!important}
+.lesson-sub{font-size:.85rem!important}
+.story-box{font-size:1rem!important;line-height:1.9!important}
+.quiz-q{font-size:.98rem!important;line-height:1.7!important}
+.opt{font-size:.95rem!important}
+.done-btn{font-size:1rem!important}
+.xp-pill{font-size:.78rem!important}
+.tab{font-size:.85rem!important}
+.school-badge{font-size:.84rem!important}
+.code-wrap pre{font-size:.82rem!important}
+.map-title{font-size:.82rem!important}
+</style></head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="orb" style="width:400px;height:400px;background:rgba(255,71,87,.05);top:0%;left:-5%;--d:20s;--tx:70px;--ty:50px"></div>
+<div class="orb" style="width:260px;height:260px;background:rgba(255,107,129,.04);bottom:5%;right:0%;--d:24s;--tx:-50px;--ty:-40px"></div>
+<header>
+  <a href="opengl-map.html" class="back-btn">🗺️ 地圖</a>
+  <a href="index.html" class="back-btn">&#127968; 首頁</a>
+  <span class="header-title">&#9876; 競技之城</span>
+  <div class="xp-bar">
+    <span style="color:var(--txt2)">&#9889;</span>
+    <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    <span class="xp-total" id="xp-total">0/870</span>
+  </div>
+</header>
+<section class="hero">
+  <div class="tower-badge">🔥 城堡7 · 競技之城 · Game Dev</div>
+  <h1>讓場景<span>活起來</span></h1>
+  <p>粒子、骨骼動畫、地形、水面、LOD — 真實遊戲裡必用的技術，一次全部學會 🎮</p>
+  <div class="stats-row">
+    <div class="stat-chip"><div class="num" id="done-count">0</div><div class="lbl">已完成</div></div>
+    <div class="stat-chip"><div class="num">9</div><div class="lbl">關卡數</div></div>
+    <div class="stat-chip"><div class="num">870</div><div class="lbl">總 XP</div></div>
+    <div class="stat-chip"><div class="num">&#127381;</div><div class="lbl">Boss 1關</div></div>
+  </div>
+</section>
+<div class="chapter-map">
+  <div class="map-title">&#128205; 關卡地圖</div>
+  <div id="lesson-list"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+
+// ── iOS Safari Fixes ──
+// roundRect polyfill
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    const R=Math.min(typeof r==='number'?r:r[0],w/2,h/2);
+    this.beginPath();this.moveTo(x+R,y);this.lineTo(x+w-R,y);
+    this.arcTo(x+w,y,x+w,y+R,R);this.lineTo(x+w,y+h-R);
+    this.arcTo(x+w,y+h,x+w-R,y+h,R);this.lineTo(x+R,y+h);
+    this.arcTo(x,y+h,x,y+h-R,R);this.lineTo(x,y+R);
+    this.arcTo(x,y,x+R,y,R);this.closePath();
+  };
+}
+// WebGL context pool - prevents iOS 8-context limit crash
+const _glPool = {};
+function safeGL(cv) {
+  if(!cv) return null;
+  const id = cv.id || 'cv_'+Math.random();
+  cv.id = id;
+  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
+  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
+  if(!gl) return null;
+  _glPool[id] = gl;
+  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  return gl;
+}
+
+const LESSONS=[
+{id:'l1',num:'7-1',icon:'✨',title:'粒子系統 — 生命的誕生',sub:'CPU 粒子：生命週期、速度、重力、淡出',xp:70,type:'normal',school:'物理：運動學方程，隨機過程',
+story:'<span class="be">✨</span><span class="hl">粒子系統</span>是遊戲最萬能的工具！<br>火焰、爆炸、下雨、魔法、煙霧 — 全靠它！<br><br>每個粒子有這些屬性：<br>• <span class="hl2">位置</span> pos = pos + vel * dt<br>• <span class="hl">速度</span> vel = vel + gravity * dt<br>• <span class="hl3">生命</span> life -= dt（到 0 就消失重生）<br>• 大小、顏色（隨生命衰減淡出）<br><br>每幀：<br>1️⃣ 更新所有粒子物理（CPU）<br>2️⃣ 上傳位置到 VBO（動態緩衝）<br>3️⃣ 用 <span class="hl">Billboard</span> 渲染：永遠朝向攝影機的四邊形<br><br>優化：用<span class="hl2">粒子池</span>，死掉的粒子重設，不刪不建！',
+quiz:{q:'Billboard 技術的用途是什麼？',opts:['讓粒子更大','讓四邊形永遠正對攝影機，避免側面看起來只是一條線','讓粒子更亮','加速渲染'],ans:1,explain:'一個四邊形從側面看幾乎看不見。Billboard 讓每個粒子的四邊形永遠旋轉朝向攝影機，從任何角度看都像圓形。用攝影機的 right 和 up 向量構建四邊形角落 📷'}},
+{id:'l2',num:'7-2',icon:'🦴',title:'骨骼動畫 — 讓角色動起來',sub:'Skinning：骨骼 + 蒙皮 + 線性混合',xp:90,type:'normal',school:'線性代數：矩陣層次結構，線性混合，四元數插值',
+story:'<span class="be">🦴</span>遊戲角色怎麼跑跳揮劍？答案是<span class="hl">骨骼動畫</span>！<br><br>三個層次：<br>🦴 <span class="hl">骨骼 Skeleton</span>：一棵樹狀結構（臀部→脊椎→胸→肩→臂→手）<br>🎭 <span class="hl2">蒙皮 Skinning</span>：每個頂點被 1~4 根骨骼影響，有各自的<span class="hl">權重</span><br>🎬 <span class="hl3">動畫 Animation</span>：每幀每根骨骼的旋轉/位移關鍵幀<br><br>渲染時：<br>1️⃣ 計算每根骨骼的全局矩陣（從根往葉子累乘）<br>2️⃣ 頂點最終位置 = Σ(骨骼矩陣 × 原始位置 × 權重)<br><br>動畫混合：走路 → 奔跑之間可以<span class="hl2">線性插值</span>過渡！',
+quiz:{q:'為什麼骨骼動畫中每個頂點最多只受 4 根骨骼影響？',opts:['物理限制','GPU 的 vec4 剛好存 4 個權重，超過 4 個幾乎無感知差異，是效能和品質的最佳平衡','骨骼不夠','美觀考量'],ans:1,explain:'GPU shader 用 vec4 存 4 個骨骼索引和 4 個權重，剛好一個向量。實驗證明 4 骨骼影響的效果和 8 骨骼幾乎看不出差別，但計算量少一半！現代 AAA 遊戲標準是 4 個影響骨骼 🎯'}},
+{id:'l3',num:'7-3',icon:'🏔️',title:'程序地形 — 無限世界',sub:'Heightmap + Tessellation：無限延伸的大地',xp:80,type:'normal',school:'數學：Perlin Noise、分形布朗運動（fBM）',
+story:'<span class="be">🏔️</span>開放世界遊戲的地形是怎麼做的？<br><br>最簡單的方法：<span class="hl">高度圖 Heightmap</span><br>一張灰度圖，白=山峰，黑=低谷。<br>把圖片的像素值當做 Y 座標！<br><br>但美術畫的高度圖不夠自然。<br>用<span class="hl2">程序生成</span>更好：<br><br><b>Perlin Noise / 分形雜訊</b><br>多層不同頻率的 Noise 疊加：<br>低頻（大山）+ 中頻（山丘）+ 高頻（石礫）= 真實地形！<br><br>進階：<span class="hl3">曲面細分 Tessellation</span><br>近處的地形三角形更細，遠處的更粗。<br>同樣的 GPU 資源，近處更精細！',
+quiz:{q:'為什麼地形生成要疊加多層不同頻率的 Noise？',opts:['讓顏色更好看','模擬真實地形的分形結構：大山（低頻）上有山丘（中頻），山丘上有碎石（高頻）','讓計算更快','OpenGL 要求'],ans:1,explain:'真實山脈是分形的：大尺度看是連綿山脈，中等尺度是山丘，小尺度是岩石紋路。用多層 fBM（分形布朗運動）精準模擬這個自相似結構，比任何單層 Noise 都更自然 🏔️'}},
+{id:'l4',num:'7-4',icon:'🌊',title:'水面渲染 — 波光粼粼',sub:'反射 + 折射 + Gerstner Wave：真實的水',xp:90,type:'normal',school:'物理：波動方程，Snell 折射定律，菲涅耳',
+story:'<span class="be">🌊</span>遊戲水面的三個魔法：<br><br>1️⃣ <span class="hl">Gerstner 波浪</span><br>比 sin 波更真實的海浪公式！<br>頂點在水平方向也有位移，形成特有的「尖峰」<br><br>2️⃣ <span class="hl2">反射</span> — 水面照出天空<br>用 FBO 渲染鏡像場景，貼到水面<br>（攝影機 Y 軸翻轉，clip plane 剪掉水面以下）<br><br>3️⃣ <span class="hl3">折射</span> — 水下的扭曲<br>用另一個 FBO 渲染水下視角<br>用 DuDv 貼圖擾動 UV，讓水底看起來在晃動<br><br>最後用<span class="hl">菲涅耳</span>混合反射和折射！<br>正視 → 看到水底（折射），掠射 → 看到天空（反射）',
+quiz:{q:'為什麼水面渲染通常需要兩個額外的 FBO？',opts:['提高精度','一個存反射畫面（鏡像攝影機渲染），一個存折射畫面（水下渲染），分別採樣再混合','節省效能','OpenGL 要求'],ans:1,explain:'反射和折射是兩個完全不同視角的渲染結果：反射FBO用Y軸翻轉的攝影機，折射FBO用水下視角攝影機。最後在水面 Shader 裡根據菲涅耳值混合這兩個貼圖 🌊'}},
+{id:'l5',num:'7-5',icon:'🌿',title:'植被 Instancing — 千棵樹一瞬間',sub:'GPU Instancing：一次 DrawCall 渲染百萬顆草',xp:80,type:'normal',school:'電腦科學：批次處理，GPU 平行計算特性',
+story:'<span class="be">🌿</span>草地、樹林、岩石 — 同樣的模型要畫幾萬次！<br>一個個 DrawCall 會讓 FPS 崩潰！<br><br><span class="hl">GPU Instancing</span> 一次 DrawCall 畫所有！<br><br>方法：<br>1️⃣ 只上傳<span class="hl2">一個</span>草葉模型（頂點）<br>2️⃣ 另外上傳每棵草的<span class="hl3">位置/旋轉/大小矩陣陣列</span><br>3️⃣ 一次 `glDrawElementsInstanced(N)` 畫 N 個！<br><br>在頂點著色器裡用 `gl_InstanceID` 取得當前是第幾個實例：<br>`vec3 pos = instancePos[gl_InstanceID]`<br><br>加上隨機偏轉、風吹動畫（sin 波），草就活了！<br>現代 GPU 可以用 Instancing 一幀畫<span class="hl">百萬顆草</span>！',
+quiz:{q:'Instancing 的最大優點是什麼？',opts:['讓模型更精細','把 N 次 DrawCall 減少成 1 次，消除 CPU-GPU 通訊瓶頸，利用 GPU 大量平行計算能力','增加顏色數量','簡化程式碼'],ans:1,explain:'每次 DrawCall 都有 CPU-GPU 命令傳輸開銷（state change, dispatch overhead）。5000 棵樹 = 5000 次 DrawCall，CPU 成為瓶頸！Instancing 把傳輸壓縮成 1 次，GPU 並行處理所有實例 ⚡'}},
+{id:'l6',num:'7-6',icon:'📐',title:'LOD — 遠近有別',sub:'Level of Detail：距離決定模型精細度',xp:70,type:'normal',school:'感知心理學：Weber 定律，遠處細節不可辨',
+story:'<span class="be">📐</span>遠處的敵人和近處的敵人，需要一樣多的三角形嗎？<br><br>不需要！這就是 <span class="hl">LOD（Level of Detail）</span>的核心思想。<br><br>同一個模型準備多個精細度版本：<br>0~10m：<span class="hl2">LOD 0</span> — 10000 個三角形，高精細<br>10~50m：<span class="hl">LOD 1</span> — 3000 個三角形<br>50~200m：<span class="hl3">LOD 2</span> — 500 個三角形<br>200m 以上：<span class="hl">Impostor</span> — 只是一張貼圖！<br><br>配合 <span class="hl2">Frustum Culling</span>（攝影機視錐體剔除）和<br><span class="hl3">Occlusion Culling</span>（遮擋剔除）：<br>看不到的東西完全不渲染！<br><br>OpenGL：<span class="hl">glDrawElementsBaseVertex</span> + 距離判斷切換 LOD。',
+quiz:{q:'Frustum Culling 和 Occlusion Culling 的區別？',opts:['沒有差別','Frustum 剔除攝影機視錐體外的物件（不在畫面裡），Occlusion 剔除被其他物件遮住的物件（在畫面裡但看不到）','Frustum 更快','只有 Frustum 是 GPU 支援的'],ans:1,explain:'Frustum Culling：攝影機只看前方 FOV 範圍，視錐體外的物件完全不必渲染（CPU 端快速 AABB 測試）。Occlusion Culling：視錐體內但被牆擋住的物件也不需要渲染（更複雜，用遮擋查詢）。兩者搭配能省去大量不可見物件的渲染 🎯'}},
+{id:'l7',num:'7-7',icon:'💨',title:'GPU 粒子 — 百萬粒子不卡頓',sub:'Transform Feedback / SSBO：粒子物理全在 GPU 算',xp:90,type:'normal',school:'電腦科學：Transform Feedback, GPGPU, 流水線平行',
+story:'<span class="be">💨</span>CPU 粒子系統幾千個就開始卡，但 GPU 粒子可以跑幾十萬！<br><br><span class="hl">Transform Feedback</span>（OpenGL 的 GPGPU）：<br><br>Vertex Shader 不只讀頂點，還能<span class="hl2">輸出頂點</span>！<br>輸出的資料存回 VBO，下幀再當輸入。<br><br>流程：<br>1️⃣ VBO-A（粒子現在的位置/速度）→ 頂點著色器<br>2️⃣ Transform Feedback 把更新後的位置/速度寫入 VBO-B<br>3️⃣ 用 VBO-B 渲染粒子<br>4️⃣ 下幀交換 A 和 B（Ping-Pong！）<br><br>好處：粒子物理完全在 GPU 算，<br>CPU 完全不需要參與更新！<br>從幾千個粒子擴展到<span class="hl3">幾十萬</span>！',
+quiz:{q:'Transform Feedback 的核心機制是什麼？',opts:['讓貼圖反饋到頂點','讓 Vertex Shader 把處理結果寫回 VBO，實現 GPU 端的粒子物理計算，不需要 CPU 參與','讓幾何著色器輸出更多三角形','加速著色器編譯'],ans:1,explain:'Transform Feedback 打破了 GPU 管線單向（頂點→像素）的限制，讓頂點著色器的輸出可以捕獲回 Buffer。這樣粒子的物理模擬（位置+速度更新）可以完全在 GPU 完成，CPU 只發送一次 Draw Call ⚡'}},
+{id:'l8',num:'7-8',icon:'🎬',title:'後處理總管線 — 電影感的最後一哩',sub:'Motion Blur + DoF + Chromatic Aberration + Vignette',xp:80,type:'normal',school:'攝影：景深原理，攝影機運動模糊，鏡頭色差',
+story:'<span class="be">🎬</span>後處理讓遊戲有電影感！一條管線集大成：<br><br>📷 <span class="hl">景深 Depth of Field</span><br>焦點外的物體模糊，像真實攝影機鏡頭<br>用深度圖決定每個像素的模糊強度<br><br>🏃 <span class="hl2">動態模糊 Motion Blur</span><br>快速移動的物體留下殘影<br>用速度緩衝（Velocity Buffer）決定模糊方向<br><br>🌈 <span class="hl3">色差 Chromatic Aberration</span><br>RGB 三通道稍微偏移，模擬劣質鏡頭效果<br>邊緣顏色分裂，有電影感<br><br>🔲 <span class="hl">暈影 Vignette</span><br>畫面邊緣漸暗，引導視線到中心<br><br>全部疊加 = 電影級後處理！',
+quiz:{q:'Motion Blur 的速度緩衝（Velocity Buffer）存的是什麼？',opts:['速度大小','每個像素在螢幕空間的移動向量（從上幀到這幀移動了多少像素），用來決定模糊方向','攝影機速度','物件顏色'],ans:1,explain:'速度緩衝存每個像素的 2D 螢幕空間位移：把當前幀和上一幀的 MVP 矩陣分別投影同一個世界座標，相減得到螢幕位移向量。沿這個方向做多次採樣疊加，就得到動態模糊效果 🎬'}},
+{id:'l9',num:'7-9',icon:'🏆',title:'Boss：完整遊戲場景',sub:'地形 + 植被 + 水面 + 粒子 + 後處理全整合',xp:210,type:'boss',school:'系統工程：渲染管線架構，效能剖析，Draw Call 優化',
+story:'<span class="be">🏆</span><span class="hl3">城堡7 最終 Boss！</span>🏆<br><br>把這座塔學到的全部技術整合！<br><br>一個完整遊戲場景的渲染順序：<br><br>1️⃣ <span class="hl">Shadow Pass</span> — 從光源渲染深度圖<br>2️⃣ <span class="hl2">Geometry Pass</span> — G-Buffer（延遲渲染）<br>3️⃣ <span class="hl">Terrain Pass</span> — 地形 + LOD + Tessellation<br>4️⃣ <span class="hl3">Vegetation Pass</span> — 草地/樹木 Instancing<br>5️⃣ <span class="hl2">Water Pass</span> — 反射/折射/波浪<br>6️⃣ <span class="hl">Lighting Pass</span> — PBR + IBL + 陰影<br>7️⃣ <span class="hl3">Particle Pass</span> — 透明/加法混合粒子<br>8️⃣ <span class="hl2">Post-Process</span> — Bloom/DoF/Motion Blur/Tone Map<br><br>每一步都建立在前面塔學到的知識上！這就是一個完整的遊戲渲染引擎 🎮',
+quiz:{q:'為什麼透明物件（粒子、水面）要在不透明物件渲染完之後才畫？',opts:['透明物件比較慢','透明物件需要深度測試讀取但不寫入深度值，且需要正確的背景顏色做混合，必須等不透明物件先畫完','OpenGL 規定','美觀考量'],ans:1,explain:'Alpha 混合：finalColor = srcColor*alpha + dstColor*(1-alpha)。dstColor 是背景，必須先有正確的不透明背景！且粒子要從後往前畫（畫家算法），否則互相遮擋時混合結果錯誤 🎨'}},
+];
+
+const TOTAL_XP=LESSONS.reduce((s,l)=>s+l.xp,0);
+let earned=JSON.parse(localStorage.getItem('tower7_done')||'[]');
+let current=null;
+
+function makeStars(){const c=document.getElementById('stars');for(let i=0;i<80;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()<.25?2:1;s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;--d:${2+Math.random()*5}s;--dl:${Math.random()*5}s`;c.appendChild(s);}}
+makeStars();
+function updateXP(){const total=earned.reduce((s,id)=>{const l=LESSONS.find(x=>x.id===id);return s+(l?l.xp:0);},0);document.getElementById('xp-fill').style.width=(total/TOTAL_XP*100)+'%';document.getElementById('xp-total').textContent=total+'/'+TOTAL_XP;document.getElementById('done-count').textContent=earned.length;}
+function showXPPop(xp,el){const r=el.getBoundingClientRect();const d=document.createElement('div');d.className='xp-pop';d.textContent='+'+xp+' ⚡';d.style.cssText=`left:${r.left+r.width/2-25}px;top:${r.top+window.scrollY-10}px`;document.body.appendChild(d);setTimeout(()=>d.remove(),950);}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+function render(){
+  const list=document.getElementById('lesson-list');list.innerHTML='';
+  LESSONS.forEach((les,idx)=>{
+    const done=earned.includes(les.id),active=current===les.id;
+    const locked=!done&&!active&&idx>0&&!earned.includes(LESSONS[idx-1].id);
+    const boss=les.type==='boss';
+    const div=document.createElement('div');
+    div.className=`lesson${done?' done':''}${active?' active':''}${locked?' locked':''}${boss?' boss':''}`;
+    div.id='L'+les.id;
+    const icCls=done?'i-d':boss?'i-b':locked?'i-l':'i-n';
+    const rightHTML=(boss?'<span class="boss-pill">🏆 BOSS</span>':'')+`<span class="xp-pill">+${les.xp}</span>`+(done?'<div class="chk">✓</div>':locked?'<div class="lck">🔒</div>':'');
+    div.innerHTML=`<div class="lesson-header"><div class="lesson-icon ${icCls}">${done?'✓':les.icon}</div><div class="lesson-info"><div class="lesson-title">${les.num} ${les.title}</div><div class="lesson-sub">${les.sub}</div></div><div class="lesson-right">${rightHTML}</div></div><div class="lesson-body">${active?buildBody(les,done):''}</div>`;
+    if(!locked)div.querySelector('.lesson-header').addEventListener('click',()=>toggle(les.id));
+    list.appendChild(div);
+    if(idx<LESSONS.length-1){const c=document.createElement('div');c.className='conn';list.appendChild(c);}
+  });
+}
+function toggle(id){current=current===id?null:id;render();if(current){setTimeout(()=>{const el=document.getElementById('L'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});initDemo(id);},40);}}
+function buildBody(les,done){
+  const opts=les.quiz.opts.map((o,i)=>`<div class="opt" id="opt-${les.id}-${i}" onclick="checkQ('${les.id}',${i})"><div class="opt-k">${['A','B','C','D'][i]}</div>${o}</div>`).join('');
+  return `<div class="tab-bar"><div class="tab on" onclick="switchTab(this,'s-${les.id}','${les.id}')">📖 故事</div><div class="tab" onclick="switchTab(this,'d-${les.id}','${les.id}')">🎮 互動</div><div class="tab" onclick="switchTab(this,'c-${les.id}','${les.id}')">💻 程式碼</div></div><div class="tab-content"><div id="s-${les.id}" class="tab-panel on"><div class="story-box">${les.story}<div class="school-badge">📚 ${les.school}</div></div><div class="quiz-box"><div class="quiz-title">🎯 挑戰問題</div><div class="quiz-q">${les.quiz.q}</div><div class="opts">${opts}</div><div class="explain-box" id="ex-${les.id}"></div></div><button class="done-btn" id="btn-${les.id}" onclick="complete('${les.id}')" ${done?'disabled':''}>${done?'✅ 已完成！':'⚡ 完成此關 → 解鎖下一關'}</button></div><div id="d-${les.id}" class="tab-panel"><div id="dc-${les.id}"><div style="text-align:center;padding:40px;color:var(--txt2)">🎮 載入 Demo…</div></div></div><div id="c-${les.id}" class="tab-panel">${buildCode(les)}</div></div>`;
+}
+function switchTab(el,panelId,lid){const body=document.getElementById('L'+lid).querySelector('.lesson-body');body.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));body.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById(panelId).classList.add('on');if(panelId.startsWith('d-'))initDemo(lid);}
+function checkQ(lid,idx){const les=LESSONS.find(l=>l.id===lid);document.querySelectorAll(`[id^="opt-${lid}-"]`).forEach((o,i)=>{o.classList.add('disabled');if(i===les.quiz.ans)o.classList.add('correct');else if(i===idx)o.classList.add('wrong');});const ex=document.getElementById('ex-'+lid);ex.innerHTML='💡 '+les.quiz.explain;ex.style.display='block';}
+function complete(id){if(earned.includes(id))return;earned.push(id);localStorage.setItem('tower7_done',JSON.stringify(earned));setTimeout(checkCompletion,400);const les=LESSONS.find(l=>l.id===id);const btn=document.getElementById('btn-'+id);showXPPop(les.xp,btn);toast(`⚔️ +${les.xp} XP！「${les.title}」完成！`);setTimeout(()=>{current=null;render();updateXP();},500);}
+
+const inited={};
+function initDemo(id){if(inited[id])return;inited[id]=true;const cont=document.getElementById('dc-'+id);if(!cont)return;const fn={l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6,l7:d7,l8:d8,l9:d9};fn[id]?.(cont);}
+function mkP(gl,vs,fs){const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;};const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,vs));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
+function qB(gl){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);return b;}
+function mkSD(cont,id,label,mnames,fs,extras){
+  const btns=mnames.map((n,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="m7${id}${i}" onclick="setM7_${id}(${i})">${n}</button>`).join('');
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv7${id}" width="600" height="280" style="height:280px"></canvas></div><div class="ctrl-row">${btns}</div>${extras||''}`;
+  window[`_m7${id}`]=0;window[`setM7_${id}`]=m=>{window[`_m7${id}`]=m;mnames.forEach((_,i)=>document.getElementById(`m7${id}${i}`).classList.toggle('on',i===m));};
+  const cv=document.getElementById('cv7'+id);const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const prog=mkP(gl,'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}',fs);
+  const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
+  let time=0;(function fr(){time+=0.016;gl.viewport(0,0,600,280);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window[`_m7${id}`]);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
+}
+
+function d1(cont){
+  // Particle system demo using WebGL instanced-style drawing
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>粒子系統 — CPU 粒子</div></div><canvas id="cv7p1" width="600" height="280" style="height:280px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn on" id="pe-fire" onclick="setPE(\'fire\')">🔥 火焰</button><button class="ctrl-btn" id="pe-magic" onclick="setPE(\'magic\')">✨ 魔法</button><button class="ctrl-btn" id="pe-rain" onclick="setPE(\'rain\')">🌧️ 雨</button></div><div class="slider-row"><span class="slider-label">粒子數量</span><input type="range" min="50" max="500" value="200" id="pe-cnt"><span class="slider-val" id="pe-cntv">200</span></div>';
+  document.getElementById('pe-cnt').oninput=function(){document.getElementById('pe-cntv').textContent=this.value;};
+  window._pe='fire';window.setPE=m=>{window._pe=m;['fire','magic','rain'].forEach(x=>document.getElementById('pe-'+x).classList.toggle('on',x===m));};
+  const cv=document.getElementById('cv7p1');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
+  const vs=`attribute vec2 pos;attribute float life;uniform mat4 mvp;void main(){float s=life*4.+1.;gl_PointSize=s;gl_Position=vec4(pos,0,1);}`;
+  const fs=`precision mediump float;uniform int mode;uniform float t;varying float vLife;void main(){vec2 c=gl_PointCoord-.5;float r=length(c);if(r>.5)discard;float a=(1.-r*2.)*vLife;vec3 col;if(mode==0)col=mix(vec3(1.,.3,.0),vec3(1.,.9,.2),vLife);else if(mode==1)col=vec3(abs(sin(t+vLife*3.)),vLife,1.);else col=vec3(.4,.7,1.);gl_FragColor=vec4(col,a*(.3+vLife*.7));}`;
+  // Note: varying not set in VS for simplicity - use uniform trick
+  const vs2=`attribute vec2 pos;attribute float life;void main(){gl_PointSize=max(1.,life*8.);gl_Position=vec4(pos,0,1);}`;
+  const fs2=`precision mediump float;uniform int mode;uniform float t;void main(){vec2 c=gl_PointCoord-.5;float r=length(c);if(r>.5)discard;gl_FragColor=vec4(1.,.5,.1,.5);}`;
+  // Simple approach: use 2D canvas for particles, convert to WebGL
+  cv.getContext('webgl',{powerPreference:'low-power'});
+  // Use 2D canvas overlay
+  const ctx2=document.createElement('canvas');ctx2.width=600;ctx2.height=280;ctx2.style.cssText='position:absolute;top:0;left:0;width:100%;height:280px;pointer-events:none';
+  cv.parentElement.style.position='relative';cv.parentElement.appendChild(ctx2);
+  const c2=ctx2.getContext('2d');
+  let particles=[];
+  function spawnP(n){
+    const mode=window._pe;
+    for(let i=0;i<n;i++){
+      let p={x:300,y:200,vx:0,vy:0,life:1,maxLife:1};
+      if(mode==='fire'){p.x=250+Math.random()*100;p.y=260;p.vx=(Math.random()-.5)*1.5;p.vy=-2-Math.random()*3;p.maxLife=.6+Math.random()*.8;}
+      else if(mode==='magic'){p.x=100+Math.random()*400;p.y=50+Math.random()*230;const a=Math.random()*Math.PI*2;p.vx=Math.cos(a)*(1+Math.random()*2);p.vy=Math.sin(a)*(1+Math.random()*2);p.maxLife=.4+Math.random()*.6;}
+      else{p.x=Math.random()*600;p.y=-10;p.vx=(Math.random()-.5)*.5;p.vy=3+Math.random()*4;p.maxLife=.5+Math.random()*.5;}
+      p.life=p.maxLife;particles.push(p);
+    }
+  }
+  spawnP(200);
+  let last=performance.now();
+  (function fr(){const now=performance.now();const dt=(now-last)/1000;last=now;
+    const cnt=parseInt(document.getElementById('pe-cnt').value);
+    const mode=window._pe;
+    c2.clearRect(0,0,600,280);
+    // spawn
+    while(particles.length<cnt)spawnP(1);
+    particles.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(mode==='fire')p.vy-=.05;
+      else if(mode==='rain')p.vy+=.1;
+      p.life-=dt*1.2;
+      const t=p.life/p.maxLife;
+      if(t<0)return;
+      const r=Math.max(1,t*6);
+      c2.save();c2.globalAlpha=t*.8;
+      if(mode==='fire'){const g=c2.createRadialGradient(p.x,p.y,0,p.x,p.y,r);g.addColorStop(0,'#fff8dc');g.addColorStop(.5,'#ff6a00');g.addColorStop(1,'rgba(255,50,0,0)');c2.fillStyle=g;}
+      else if(mode==='magic'){c2.fillStyle=`hsl(${(Date.now()/20+p.x)%360},100%,70%)`;}
+      else{c2.strokeStyle='rgba(180,220,255,.6)';c2.lineWidth=1;c2.beginPath();c2.moveTo(p.x,p.y);c2.lineTo(p.x+p.vx*3,p.y+p.vy*3);c2.stroke();c2.restore();return;}
+      c2.beginPath();c2.arc(p.x,p.y,r,0,Math.PI*2);c2.fill();c2.restore();
+    });
+    particles=particles.filter(p=>p.life/p.maxLife>0);
+    while(particles.length<cnt)spawnP(1);
+    requestAnimationFrame(fr);
+  })();
+}
+
+function d2(cont){mkSD(cont,'2','骨骼動畫 — Skinning 視覺化',['🦴 骨骼','🎭 蒙皮','🎬 動畫'],
+  `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
+  float seg(vec2 p,vec2 a,vec2 b,float r){vec2 ab=b-a,ap=p-a;float h=clamp(dot(ap,ab)/dot(ab,ab),0.,1.);return length(ap-ab*h)-r;}
+  void main(){
+    vec2 p=uv*2.-1.;
+    float hip_r=sin(t*.8)*.2;
+    float knee_r=sin(t*.8+.5)*.3-0.1;
+    vec2 hip=vec2(.0,.5);
+    vec2 knee=hip+vec2(sin(hip_r)*.4,-cos(hip_r)*.4);
+    vec2 foot=knee+vec2(sin(knee_r+hip_r)*.35,-cos(knee_r+hip_r)*.35);
+    if(mode==0){
+      float bone=min(seg(p,hip,knee,.025),seg(p,knee,foot,.02));
+      float joints=min(min(length(p-hip)-.04,length(p-knee)-.03),length(p-foot)-.025);
+      vec3 col=vec3(.06,.02,.02);
+      col=mix(col,vec3(1.,.6,.2),smoothstep(.01,0.,bone));
+      col=mix(col,vec3(.3,.8,1.),smoothstep(.01,0.,joints));
+      gl_FragColor=vec4(col,1.);return;
+    }
+    if(mode==1){
+      // Show weight influence
+      float w0=clamp(1.-length(p-hip)*2.,0.,1.);
+      float w1=clamp(1.-length(p-knee)*1.5,0.,1.);
+      float w2=clamp(1.-length(p-foot)*2.,0.,1.);
+      float tot=w0+w1+w2+.001;
+      vec3 col=vec3(.06,.02,.02);
+      col+=vec3(1.,.2,.2)*w0/tot*.7;
+      col+=vec3(.2,.8,.2)*w1/tot*.7;
+      col+=vec3(.2,.2,1.)*w2/tot*.7;
+      gl_FragColor=vec4(col,1.);return;
+    }
+    // Animation mode - draw full figure
+    float s=sin(t*.8);
+    vec2 body_top=vec2(0.,.9);vec2 body_bot=vec2(0.,.4);
+    vec2 shoulder_l=body_top+vec2(-.2,-.05);vec2 shoulder_r=body_top+vec2(.2,-.05);
+    vec2 elbow_l=shoulder_l+vec2(-sin(s)*.25,-cos(s*.7)*.2+.05);
+    vec2 elbow_r=shoulder_r+vec2(sin(s)*.25,-cos(s*.7+1.)*.2+.05);
+    float stick=1e9;
+    stick=min(stick,seg(p,body_top,body_bot,.03));
+    stick=min(stick,seg(p,shoulder_l,elbow_l,.025));
+    stick=min(stick,seg(p,shoulder_r,elbow_r,.025));
+    stick=min(stick,seg(p,body_bot,knee,.025));
+    stick=min(stick,seg(p,knee,foot,.02));
+    float head=length(p-body_top-vec2(0.,.12))-.1;
+    vec3 col=vec3(.06,.02,.02);
+    col=mix(col,vec3(.9,.8,.6),smoothstep(.01,0.,min(stick,head)));
+    gl_FragColor=vec4(col,1.);
+  }`);}
+
+function d3(cont){mkSD(cont,'3','程序地形 — Perlin Noise 高度圖',['🏔️ 3D 地形','🗺️ 高度圖','🌈 分層噪聲'],
+  `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
+  float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}
+  float noise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);f=f*f*(3.-2.*f);float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}
+  float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p*=2.1;a*=.5;}return v;}
+  void main(){
+    if(mode==1){float h=fbm(uv*4.);gl_FragColor=vec4(vec3(h),1.);return;}
+    if(mode==2){
+      float h1=noise(uv*2.)*.5;float h2=noise(uv*6.)*.25;float h3=noise(uv*14.)*.12;
+      gl_FragColor=vec4(vec3(h1),1.)*vec4(1,0,0,1)+vec4(vec3(h2),1.)*vec4(0,1,0,1)+vec4(vec3(h3),1.)*vec4(0,0,1,1);return;
+    }
+    vec2 pos=(uv-.5)*4.;
+    float h=fbm(pos+vec2(t*.1,0.));
+    vec3 sky=mix(vec3(.4,.6,.9),vec3(.8,.6,.4),smoothstep(.5,1.,uv.y));
+    vec3 snow=vec3(.95,.97,1.);vec3 rock=vec3(.4,.35,.3);vec3 grass=vec3(.2,.5,.15);vec3 sand=vec3(.7,.65,.45);vec3 water=vec3(.1,.3,.6);
+    float terrain_h=h*.7-.1;
+    float view_h=uv.y-.5;
+    vec3 land;
+    if(view_h<terrain_h-.3)land=water;
+    else if(view_h<terrain_h-.15)land=sand;
+    else if(view_h<terrain_h+.05)land=grass;
+    else if(view_h<terrain_h+.2)land=rock;
+    else land=snow;
+    float isLand=step(-.3,view_h-terrain_h+.3)*step(view_h-terrain_h+.3,.6);
+    gl_FragColor=vec4(view_h>terrain_h?sky:land,1.);
+  }`);}
+
+function d4(cont){mkSD(cont,'4','水面渲染 — 反射 + 折射 + 波浪',['🌊 完整效果','🔵 只看反射','🫧 只看折射'],
+  `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
+  float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.);}
+  float wave(vec2 p,float t2){return sin(p.x*8.+t2)*sin(p.y*6.+t2*.7)*.015+sin(p.x*13.-t2*.5)*sin(p.y*11.+t2*.8)*.01;}
+  void main(){
+    float wl=.45;float isWater=step(uv.y,wl);
+    vec2 wp=uv+vec2(wave(uv*5.,t),wave(uv*5.+1.,t));
+    float NdotV=abs(uv.y-wl)*4.;float F0=.02;float F=F0+(1.-F0)*pow(max(1.-NdotV,0.),5.);
+    // Reflect: mirror above waterline
+    vec2 refUV=vec2(wp.x,wl*2.-wp.y);
+    vec3 sky=mix(vec3(.4,.6,.9),vec3(.85,.7,.4),clamp(refUV.y,0.,1.));
+    vec3 refl=sky;
+    // Refract: below with distortion
+    vec2 refrUV=vec2(wp.x,wp.y*.7);
+    float sand=mod(floor(refrUV.x*20.)+floor(refrUV.y*20.),2.);
+    vec3 refr=mix(vec3(.1,.25,.4),vec3(.15,.35,.55),sand)*(refrUV.y*.5+.5);
+    if(mode==1){if(isWater>0.)gl_FragColor=vec4(refl,1.);else gl_FragColor=vec4(sky*(uv.y*.5+.5),1.);return;}
+    if(mode==2){if(isWater>0.)gl_FragColor=vec4(refr,1.);else gl_FragColor=vec4(sky*(uv.y*.5+.5),1.);return;}
+    if(isWater>0.){vec3 water=mix(refr,refl,F);gl_FragColor=vec4(water,1.);}
+    else{gl_FragColor=vec4(sky*(uv.y*.5+.5)+vec3(.02,.04,.06),1.);}
+  }`);}
+
+function d5(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>GPU Instancing — 植被渲染</div></div><canvas id="cv7i5" width="600" height="280" style="height:280px"></canvas></div><div class="slider-row"><span class="slider-label">🌿 植被數量</span><input type="range" min="100" max="3000" value="800" id="ins-cnt"><span class="slider-val" id="ins-v">800</span></div><div class="ctrl-row"><button class="ctrl-btn on" id="ins-grass" onclick="setIns(\'grass\')">🌿 草地</button><button class="ctrl-btn" id="ins-tree" onclick="setIns(\'tree\')">🌲 樹林</button></div>';
+  document.getElementById('ins-cnt').oninput=function(){document.getElementById('ins-v').textContent=this.value;};
+  window._ins='grass';window.setIns=m=>{window._ins=m;['grass','tree'].forEach(x=>document.getElementById('ins-'+x).classList.toggle('on',x===m));};
+  const cv=document.getElementById('cv7i5');const ctx=cv.getContext('2d');
+  (function fr(){ctx.fillStyle='#0e0505';ctx.fillRect(0,0,600,280);
+    // Ground
+    ctx.fillStyle='#1a3a10';ctx.fillRect(0,180,600,100);
+    const cnt=parseInt(document.getElementById('ins-cnt').value);
+    const t=performance.now()/1000;
+    const mode=window._ins;
+    for(let i=0;i<cnt;i++){
+      const x=(i/cnt*600+Math.sin(i*7.3)*50+300)%600;
+      const baseY=180+Math.random()*20; // fixed per instance
+      const phase=i*.3;
+      const wind=Math.sin(t*.8+phase)*.03;
+      if(mode==='grass'){
+        const h=15+Math.sin(i*3.7)*8;
+        ctx.strokeStyle=`hsl(${100+Math.sin(i*5)*20},${50+Math.sin(i*3)*20}%,${25+Math.sin(i*7)*10}%)`;
+        ctx.lineWidth=1+Math.random();ctx.beginPath();
+        const by=180+((i*73+37)%40);
+        ctx.moveTo(x,by);
+        ctx.quadraticCurveTo(x+wind*h*2,by-h*.6,x+wind*h*3,by-h);
+        ctx.stroke();
+      } else {
+        const s=.4+Math.sin(i*1.7)*.3;const by=180+((i*37+13)%35)-s*40;
+        ctx.fillStyle=`hsl(${120+Math.sin(i*2)*20},${40+Math.sin(i*5)*15}%,${20+Math.sin(i*3)*8}%)`;
+        ctx.beginPath();ctx.arc(x,by,s*18,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#3d2010';ctx.fillRect(x-s*3,by+s*8,s*6,s*30);
+      }
+    }
+    requestAnimationFrame(fr);
+  })();
+}
+
+function d6(cont){mkSD(cont,'6','LOD — 距離決定精細度',['📐 LOD 可視化','🔲 Frustum Culling','🗺️ 頂視圖'],
+  `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
+  float box(vec2 p,vec2 s){vec2 d=abs(p)-s;return length(max(d,0.))+min(max(d.x,d.y),0.);}
+  void main(){
+    if(mode==1){
+      // Frustum culling - top view
+      vec2 c=uv*2.-1.;
+      vec2 camPos=vec2(sin(t*.4)*.5,cos(t*.3)*.5);
+      float fovAngle=.7;vec2 fwdDir=normalize(vec2(sin(t*.5),cos(t*.4)));
+      vec2 toP=normalize(c-camPos);float angle=acos(clamp(dot(toP,fwdDir),-1.,1.));
+      float inFrustum=step(angle,fovAngle)*step(length(c-camPos),.0001)*0.+1.;
+      bool insideFrustum=angle<fovAngle&&length(c-camPos)<1.5;
+      vec3 col=vec3(.06,.02,.02);
+      // Draw frustum cone
+      float dist=length(c-camPos);
+      float frustumEdge=abs(angle-fovAngle);
+      if(insideFrustum&&dist<1.5)col=vec3(.1,.04,.04);
+      // Objects
+      for(int i=0;i<8;i++){
+        float ox=sin(float(i)*1.7)*.8,oy=cos(float(i)*2.3)*.8;
+        float d=length(c-vec2(ox,oy));
+        if(d<.08){
+          bool vis=angle<fovAngle&&length(vec2(ox,oy)-camPos)<1.5;
+          float ang2=acos(clamp(dot(normalize(vec2(ox,oy)-camPos),fwdDir),-1.,1.));
+          bool vis2=ang2<fovAngle&&length(vec2(ox,oy)-camPos)<1.5;
+          col=vis2?vec3(0.,.8,.4):vec3(.5,.1,.1);
+        }
+      }
+      if(length(c-camPos)<.06)col=vec3(.3,.7,1.);
+      gl_FragColor=vec4(col,1.);return;
+    }
+    if(mode==2){
+      // overhead view
+      vec2 c=uv*2.-1.;float d=length(c);
+      vec3 col=vec3(.04,.01,.01);
+      float ring1=abs(d-.4)-.005,ring2=abs(d-.8)-.005,ring3=abs(d-1.2)-.005;
+      col=mix(col,vec3(.6,.2,.1),smoothstep(.01,0.,min(ring1,min(ring2,ring3))));
+      float cam=length(c)-.03;col=mix(col,vec3(.3,.8,1.),smoothstep(.01,0.,cam));
+      gl_FragColor=vec4(col,1.);return;
+    }
+    // LOD visualization
+    vec2 c=uv*2.-1.;
+    float dist=length(c);
+    // Progressively simpler sphere
+    int lod=dist<.5?0:dist<.9?1:dist<1.3?2:3;
+    vec3 col=vec3(.04,.01,.01);
+    float r=length(c)-.3;
+    if(abs(r)<.02){
+      vec3 lodCols[4];lodCols[0]=vec3(.1,.9,.3);lodCols[1]=vec3(.9,.7,.1);lodCols[2]=vec3(.9,.4,.1);lodCols[3]=vec3(.9,.1,.1);
+      col=lod==0?lodCols[0]:lod==1?lodCols[1]:lod==2?lodCols[2]:lodCols[3];
+    }
+    gl_FragColor=vec4(col,1.);
+  }`);}
+
+function d7(cont){mkSD(cont,'7','GPU 粒子 Transform Feedback',['💨 GPU 粒子爆炸','🌪️ 漩渦場','⚡ 電漿'],
+  `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
+  float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.);}
+  void main(){
+    vec2 c=uv*2.-1.;vec3 col=vec3(.04,.01,.01);
+    int N=60;
+    for(int i=0;i<60;i++){
+      float seed=float(i)*1.3;float a=hash(vec2(seed,.0))*6.28;float spd=hash(vec2(seed,1.))*1.5+.5;
+      float life=fract(t*.3+hash(vec2(seed,2.)));
+      vec2 vel=vec2(cos(a),sin(a))*spd;
+      if(mode==1){float ang=atan(c.y,c.x)+t*.5;vel=vec2(cos(ang+1.57),sin(ang+1.57))*spd*.5;}
+      if(mode==2){vel=vec2(sin(a+t)*.8,cos(a+t*.7)*.8);}
+      vec2 pos=vel*life;
+      float d=length(c-pos);float r=.02*(1.-life)+.005;
+      if(d<r){float glow=1.-d/r;vec3 pc=mode==0?mix(vec3(1.,.4,0.),vec3(1.,1.,.5),life):mode==1?vec3(.2,.5,1.)*life:vec3(life,0.,1.-life);col+=pc*glow*glow*(1.-life+.1);}
+    }
+    gl_FragColor=vec4(col,1.);
+  }`);}
+
+function d8(cont){mkSD(cont,'8','後處理管線 — 電影感',['🎬 完整後處理','📷 景深 DoF','🌈 色差','🔲 暈影'],
+  `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
+  float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.);}
+  vec3 scene(vec2 u){
+    vec3 col=vec3(.04,.01,.02);
+    for(int i=0;i<5;i++){
+      float f=float(i);vec2 lp=vec2(cos(t*.4+f*1.2)*.35+.5,sin(t*.3+f*.9)*.3+.5);
+      vec3 lc=vec3(hash(vec2(f,0.))*.8+.2,hash(vec2(f,1.))*.8+.2,hash(vec2(f,2.))*.8+.2);
+      col+=lc*exp(-length(u-lp)*12.)*1.5;
+    }
+    return col;
+  }
+  void main(){
+    if(mode==0){
+      // Full pipeline: DoF + CA + Vignette + Bloom
+      vec2 c=uv-.5;float vign=1.-length(c)*1.4;
+      vec2 ca_off=c*.008;
+      float r=scene(uv+ca_off).r,g=scene(uv).g,b=scene(uv-ca_off).b;
+      vec3 col=vec3(r,g,b);
+      // Bloom
+      vec3 bloom=vec3(0.);for(int i=-2;i<=2;i++)for(int j=-2;j<=2;j++){vec2 off=vec2(i,j)/400.;bloom+=max(scene(uv+off)-1.,0.);}
+      col+=bloom*.1;
+      col=col/(col+1.);col=pow(col,vec3(1./2.2));col*=vign;
+      gl_FragColor=vec4(col,1.);return;
+    }
+    if(mode==1){
+      // DoF: blur based on distance from focal plane
+      float focal=.5;float dof=abs(uv.x-focal)*8.;
+      vec3 col=vec3(0.);float s=dof*.015;
+      for(int i=-4;i<=4;i++)for(int j=-4;j<=4;j++)col+=scene(uv+vec2(i,j)*s);col/=81.;
+      col=col/(col+1.);gl_FragColor=vec4(pow(col,vec3(1./2.2)),1.);return;
+    }
+    if(mode==2){
+      // Chromatic aberration
+      vec2 c2=uv-.5;vec2 off=c2*.015;
+      float r2=scene(uv+off).r,g2=scene(uv).g,b2=scene(uv-off).b;
+      vec3 col=vec3(r2,g2,b2);col=col/(col+1.);gl_FragColor=vec4(pow(col,vec3(1./2.2)),1.);return;
+    }
+    // Vignette
+    vec3 col=scene(uv);col=col/(col+1.);col=pow(col,vec3(1./2.2));
+    vec2 c3=uv-.5;col*=smoothstep(.7,.2,length(c3));
+    gl_FragColor=vec4(col,1.);
+  }`);}
+
+function d9(cont){mkSD(cont,'9','完整遊戲場景 — 技術疊加',['🎮 完整場景','🗺️ 渲染通道圖','📊 效能分析'],
+  `precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
+  float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.);}
+  float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*fract(sin(dot(p,vec2(127.1,311.7)))*43758.);p*=2.1;a*=.5;}return v;}
+  void main(){
+    if(mode==1){
+      // Render pass diagram
+      float x6=uv.x*6.;int pass=int(x6);float lx=fract(x6);
+      vec3 cols[6];cols[0]=vec3(.3,.1,.1);cols[1]=vec3(.1,.1,.3);cols[2]=vec3(.1,.3,.1);cols[3]=vec3(.3,.3,.1);cols[4]=vec3(.3,.1,.3);cols[5]=vec3(.1,.3,.3);
+      float border=step(.05,lx)*step(lx,.95);
+      vec3 col=pass<6?cols[pass]*border*(uv.y*.5+.6):vec3(0.);
+      gl_FragColor=vec4(col,1.);return;
+    }
+    if(mode==2){
+      // Performance chart
+      float x=uv.x;float bars[6];
+      bars[0]=.35;bars[1]=.15;bars[2]=.12;bars[3]=.08;bars[4]=.18;bars[5]=.12;
+      vec3 col=vec3(.04,.01,.01);
+      for(int i=0;i<6;i++){float bx=float(i)/6.;if(x>bx&&x<bx+.14){float h=bars[i];if(uv.y<h)col=vec3(.9,.3,.1)*(1.-uv.y*.5);}}
+      gl_FragColor=vec4(col,1.);return;
+    }
+    // Full game scene
+    vec3 col=vec3(.04,.01,.08);
+    // Sky gradient
+    col=mix(vec3(.05,.02,.12),vec3(.2,.15,.4),uv.y);
+    // Terrain
+    float terrain=fbm(vec2(uv.x*3.,0.))*.3+.2;
+    if(uv.y<terrain){
+      float grass=smoothstep(terrain-.02,terrain+.02,uv.y);
+      col=mix(vec3(.1,.25,.05),vec3(.15,.35,.08),fbm(uv*8.));
+      if(uv.y<.15)col=mix(col,vec3(.4,.35,.25),smoothstep(.15,.0,uv.y));
+    }
+    // Water
+    if(uv.y<.12&&uv.y>.05){
+      float w=sin(uv.x*20.+t)*sin(uv.x*13.-t*.7)*.003;
+      col=mix(vec3(.05,.15,.35),vec3(.1,.25,.5),sin(uv.x*8.+t+w)*sin(uv.y*5.+t*.8)*.5+.5);
+    }
+    // Trees (instanced)
+    for(int i=0;i<8;i++){float tx=hash(vec2(float(i),0.))*.9+.05;float th=fbm(vec2(tx*3.,0.))*.3+.2;float s=.04+hash(vec2(float(i),1.))*.03;if(abs(uv.x-tx)<s*.6&&uv.y>th&&uv.y<th+s*2.)col=vec3(.12,.28,.07);}
+    // Particles (fire)
+    for(int i=0;i<12;i++){float px=.15+hash(vec2(float(i),.5))*.1;float py=.25+hash(vec2(float(i),.6))*.05+fract(t*.4+hash(vec2(float(i),.7)))*.15;float d=length(uv-vec2(px,py));col+=vec3(1.,.4,.1)*exp(-d*40.)*.4;}
+    // Post: vignette + bloom
+    vec2 c=uv-.5;col*=(1.-length(c)*1.2);
+    col=col/(col+1.);col=pow(col,vec3(1./2.2));
+    gl_FragColor=vec4(col,1.);
+  }`);}
+
+function buildCode(les){
+  const codes={
+    l1:`<div class="code-wrap"><div class="code-header"><span class="code-lang">C++ · CPU 粒子系統</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="kw">struct</span> <span class="type">Particle</span>{
+  <span class="type">vec3</span> pos, vel;
+  <span class="kw">float</span> life, maxLife;
+  <span class="type">vec4</span> color;
+};
+
+<span class="kw">void</span> <span class="fn">Update</span>(<span class="kw">float</span> dt){
+  <span class="kw">for</span>(<span class="kw">auto</span>& p : particles){
+    p.pos += p.vel * dt;
+    p.vel += gravity * dt;
+    p.life -= dt;
+    <span class="cm">// 死亡就重生</span>
+    <span class="kw">if</span>(p.life &lt;= 0) <span class="fn">Respawn</span>(p);
+  }
+  <span class="cm">// 上傳位置到 VBO（動態緩衝）</span>
+  <span class="fn">glBufferSubData</span>(GL_ARRAY_BUFFER, 0,
+    particles.size()*<span class="kw">sizeof</span>(<span class="type">Particle</span>), particles.data());
+}</pre></div>`,
+    l2:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · 骨骼蒙皮</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="kw">attribute</span> <span class="type">vec4</span> boneWeights;   <span class="cm">// 4 個骨骼的權重</span>
+<span class="kw">attribute</span> <span class="type">ivec4</span> boneIndices;  <span class="cm">// 4 個骨骼的索引</span>
+<span class="kw">uniform</span> <span class="type">mat4</span> boneMatrices[64]; <span class="cm">// 最多 64 根骨骼</span>
+
+<span class="kw">void</span> <span class="fn">main</span>(){
+  <span class="type">mat4</span> skinMat =
+    boneMatrices[boneIndices.x] * boneWeights.x +
+    boneMatrices[boneIndices.y] * boneWeights.y +
+    boneMatrices[boneIndices.z] * boneWeights.z +
+    boneMatrices[boneIndices.w] * boneWeights.w;
+  gl_Position = mvp * skinMat * <span class="type">vec4</span>(position, <span class="num">1.0</span>);
+}</pre></div>`,
+    l3:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · fBM 地形噪聲</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="kw">float</span> <span class="fn">fbm</span>(<span class="type">vec2</span> p){
+  <span class="kw">float</span> value = <span class="num">0.0</span>;
+  <span class="kw">float</span> amplitude = <span class="num">0.5</span>;
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>; i&lt;<span class="num">6</span>; i++){
+    value += amplitude * <span class="fn">noise</span>(p);
+    p *= <span class="num">2.1</span>;        <span class="cm">// 頻率加倍</span>
+    amplitude *= <span class="num">0.5</span>; <span class="cm">// 振幅減半</span>
+  }
+  <span class="kw">return</span> value;
+}
+<span class="cm">// 頂點著色器中用作高度</span>
+<span class="kw">float</span> h = <span class="fn">fbm</span>(worldXZ * scale);
+pos.y = h * heightScale;</pre></div>`,
+    l4:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · 水面菲涅耳混合</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="cm">// 用 DuDv 貼圖擾動 UV</span>
+<span class="type">vec2</span> distort = <span class="fn">texture</span>(dudvMap, uv+t*.05).rg*<span class="num">2.</span>-<span class="num">1.</span>;
+<span class="type">vec2</span> reflUV = <span class="fn">clamp</span>(reflCoord + distort*.04, <span class="num">0.</span>,<span class="num">1.</span>);
+<span class="type">vec2</span> refrUV = <span class="fn">clamp</span>(refrCoord + distort*.04, <span class="num">0.</span>,<span class="num">1.</span>);
+
+<span class="type">vec3</span> refl = <span class="fn">texture</span>(reflTex, reflUV).rgb;
+<span class="type">vec3</span> refr = <span class="fn">texture</span>(refrTex, refrUV).rgb;
+
+<span class="cm">// 菲涅耳混合</span>
+<span class="kw">float</span> F = <span class="num">0.02</span>+<span class="num">0.98</span>*<span class="fn">pow</span>(<span class="num">1.</span>-NdotV, <span class="num">5.</span>);
+<span class="kw">return</span> <span class="fn">mix</span>(refr, refl, F);</pre></div>`,
+    l5:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · GPU Instancing</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="kw">attribute</span> <span class="type">vec3</span> position;
+<span class="kw">attribute</span> <span class="type">mat4</span> instanceMatrix; <span class="cm">// 每個實例的矩陣</span>
+<span class="kw">uniform</span> <span class="kw">float</span> time;
+
+<span class="kw">void</span> <span class="fn">main</span>(){
+  <span class="type">vec3</span> pos = position;
+  <span class="cm">// 風吹動畫（頂部搖擺）</span>
+  <span class="kw">float</span> sway = <span class="fn">sin</span>(time + instanceMatrix[3].x) * pos.y * <span class="num">0.05</span>;
+  pos.x += sway;
+  gl_Position = viewProj * instanceMatrix * <span class="type">vec4</span>(pos, <span class="num">1.0</span>);
+}
+<span class="cm">// C++: 一次 DrawCall 畫 N 個</span>
+<span class="fn">glDrawElementsInstanced</span>(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, <span class="num">0</span>, N);</pre></div>`,
+    l6:`<div class="code-wrap"><div class="code-header"><span class="code-lang">C++ · LOD 選擇</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="kw">int</span> <span class="fn">SelectLOD</span>(<span class="kw">float</span> distToCamera){
+  <span class="kw">if</span>(distToCamera &lt; <span class="num">10.f</span>)  <span class="kw">return</span> <span class="num">0</span>; <span class="cm">// 高精</span>
+  <span class="kw">if</span>(distToCamera &lt; <span class="num">50.f</span>)  <span class="kw">return</span> <span class="num">1</span>; <span class="cm">// 中等</span>
+  <span class="kw">if</span>(distToCamera &lt; <span class="num">200.f</span>) <span class="kw">return</span> <span class="num">2</span>; <span class="cm">// 低精</span>
+  <span class="kw">return</span> <span class="num">3</span>; <span class="cm">// Impostor（貼圖替代）</span>
+}
+<span class="cm">// Frustum Culling</span>
+<span class="kw">bool</span> <span class="fn">InFrustum</span>(AABB box){
+  <span class="kw">for</span>(<span class="kw">auto</span>& plane : frustumPlanes)
+    <span class="kw">if</span>(<span class="fn">SignedDist</span>(plane, box) &lt; <span class="num">0</span>) <span class="kw">return</span> <span class="kw">false</span>;
+  <span class="kw">return</span> <span class="kw">true</span>;
+}</pre></div>`,
+    l7:`<div class="code-wrap"><div class="code-header"><span class="code-lang">C++ · Transform Feedback</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="cm">// 設定捕獲哪些輸出</span>
+<span class="kw">const char</span>* varyings[] = {<span class="str">"outPos"</span>, <span class="str">"outVel"</span>, <span class="str">"outLife"</span>};
+<span class="fn">glTransformFeedbackVaryings</span>(updateProg, <span class="num">3</span>, varyings, GL_INTERLEAVED_ATTRIBS);
+<span class="fn">glLinkProgram</span>(updateProg);
+
+<span class="cm">// 每幀：更新 + 渲染（Ping-Pong）</span>
+<span class="fn">glBindTransformFeedback</span>(GL_TRANSFORM_FEEDBACK, tfb);
+<span class="fn">glBeginTransformFeedback</span>(GL_POINTS);
+  <span class="fn">glDrawArrays</span>(GL_POINTS, <span class="num">0</span>, particleCount);
+<span class="fn">glEndTransformFeedback</span>();
+<span class="fn">std::swap</span>(vboA, vboB); <span class="cm">// Ping-Pong！</span></pre></div>`,
+    l8:`<div class="code-wrap"><div class="code-header"><span class="code-lang">GLSL · 後處理管線</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="cm">// Chromatic Aberration</span>
+<span class="type">vec2</span> offset = (uv-<span class="num">.5</span>) * caStrength;
+<span class="kw">float</span> r = <span class="fn">texture</span>(hdrTex, uv+offset).r;
+<span class="kw">float</span> g = <span class="fn">texture</span>(hdrTex, uv).g;
+<span class="kw">float</span> b = <span class="fn">texture</span>(hdrTex, uv-offset).b;
+
+<span class="cm">// Vignette</span>
+<span class="type">vec2</span> c = uv - <span class="num">.5</span>;
+<span class="kw">float</span> vign = <span class="fn">smoothstep</span>(<span class="num">.8</span>, <span class="num">.2</span>, <span class="fn">length</span>(c));
+
+<span class="cm">// Film Grain</span>
+<span class="kw">float</span> grain = <span class="fn">hash</span>(uv + time) * <span class="num">0.03</span>;
+
+<span class="type">vec3</span> col = <span class="type">vec3</span>(r,g,b) * vign + grain;
+col = <span class="fn">ACESFilm</span>(col * exposure);</pre></div>`,
+    l9:`<div class="code-wrap"><div class="code-header"><span class="code-lang">C++ · 完整渲染管線</span><button class="copy-btn" onclick="cpC(this)">複製</button></div><pre><span class="kw">void</span> <span class="fn">RenderFrame</span>(){
+  <span class="fn">ShadowPass</span>();          <span class="cm">// Shadow Map</span>
+  <span class="fn">GeometryPass</span>();        <span class="cm">// G-Buffer</span>
+  <span class="fn">SSAOPass</span>();            <span class="cm">// 環境遮蔽</span>
+  <span class="fn">LightingPass</span>();        <span class="cm">// PBR + IBL</span>
+  <span class="cm">// 透明物件（從後往前！）</span>
+  <span class="fn">SortByDistance</span>(transparents);
+  <span class="fn">WaterPass</span>();
+  <span class="fn">ParticlePass</span>();
+  <span class="fn">VegetationPass</span>();      <span class="cm">// Instancing</span>
+  <span class="cm">// 後處理</span>
+  <span class="fn">BloomPass</span>();
+  <span class="fn">PostProcessPass</span>();    <span class="cm">// DoF/MB/CA</span>
+  <span class="fn">ToneMappingPass</span>();
+}</pre></div>`
+  };
+  return codes[les.id]||'';
+}
+function cpC(btn){const t=btn.closest('.code-wrap').querySelector('pre').innerText;navigator.clipboard.writeText(t).then(()=>{btn.textContent='✓';setTimeout(()=>btn.textContent='複製',1500);});}
+updateXP();render();
+
+// ── Completion System ──
+const CASTLE_NUM = 7;
+const CASTLE_TOTAL = 9;
+const CASTLE_KEY = 'tower7_done';
+const NEXT_CASTLE = 7;
+
+function checkCompletion(){
+  const done = JSON.parse(localStorage.getItem(CASTLE_KEY)||'[]').filter(Boolean).length;
+  if(done >= CASTLE_TOTAL && !localStorage.getItem(CASTLE_KEY+'_comp_shown')){
+    localStorage.setItem(CASTLE_KEY+'_comp_shown','1');
+    setTimeout(showCompletion, 800);
+  }
+}
+
+function showCompletion(){
+  const overlay = document.getElementById('compOverlay');
+  if(!overlay) return;
+  // Fireworks
+  const fw = overlay.querySelector('.fw-wrap');
+  const colors=['#a78bfa','#34d399','#ffd700','#ff6b9d','#00d4ff','#ff9f43'];
+  for(let i=0;i<28;i++){
+    const d=document.createElement('div');
+    d.className='fw';
+    const tx=(Math.random()-.5)*300;
+    const ty=-100-Math.random()*200;
+    d.style.cssText=`width:6px;height:6px;background:${colors[i%colors.length]};left:${40+Math.random()*20}%;top:60%;--d:${.6+Math.random()*.8}s;--dl:${Math.random()*.5}s;--tx:${tx}px;--ty:${ty}px`;
+    fw.appendChild(d);
+  }
+  overlay.classList.add('show');
+}
+
+function goNextCastle(){
+  if(NEXT_CASTLE > 0){
+    window.location.href='opengl-map.html#done-'+CASTLE_NUM;
+  } else {
+    window.location.href='opengl-map.html';
+  }
+}
+
+function goMap(){ window.location.href='opengl-map.html#done-'+CASTLE_NUM; }
+
+// Auto-scroll nav to current castle
+(function(){
+  const navBar = document.querySelector('div[style*="position:sticky;top:52px"]');
+  if(!navBar) return;
+  const current = navBar.querySelector('[style*="opacity:1"]');
+  if(current) setTimeout(()=>{
+    current.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }, 300);
+})();
+
+// Hook into existing complete() function
+const _origComplete = complete;
+if(typeof complete === 'function'){
+  // Override complete to also check completion
+  window._patchedComplete = true;
+}
+// Check on page load
+document.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(checkCompletion, 500);
+});
+// Also check after any storage changes
+window.addEventListener('storage', checkCompletion);
+</script>
+
+<!-- Completion Overlay -->
+<div id="compOverlay" class="comp-overlay">
+  <div class="fw-wrap"></div>
+  <div class="comp-trophy">🏆</div>
+  <div class="comp-stars">⭐⭐⭐</div>
+  <div class="comp-title">城堡7 全通關！<br>競技之城</div>
+  <div class="comp-sub">你已征服所有關卡<br>獲得全部 XP 獎勵！</div>
+  <button class="comp-next-btn" onclick="goNextCastle()">⚔️ 前往城堡8 →</button>
+  <button class="comp-map-btn" onclick="goMap()">🗺️ 返回地圖</button>
+</div>
+
+</body></html>
