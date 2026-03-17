@@ -201,15 +201,26 @@ if(!CanvasRenderingContext2D.prototype.roundRect){
 const _glPool = {};
 function safeGL(cv) {
   if(!cv) return null;
-  const id = cv.id || 'cv_'+Math.random();
+  const id = cv.id || ('cv_'+Math.random().toString(36).slice(2));
   cv.id = id;
-  if(_glPool[id] && !_glPool[id].isContextLost()) return _glPool[id];
-  const gl = cv.getContext('webgl',{powerPreference:'low-power',preserveDrawingBuffer:false,failIfMajorPerformanceCaveat:false});
-  if(!gl) return null;
-  _glPool[id] = gl;
-  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();delete _glPool[id];});
+  if(!window._glPool) window._glPool = {};
+  const pool = window._glPool;
+  if(pool[id] && !pool[id].isContextLost()) return pool[id];
+  // Release oldest contexts if near iOS limit
+  const keys = Object.keys(pool);
+  if(keys.length >= 6) {
+    try { pool[keys[0]].getExtension('WEBGL_lose_context')?.loseContext(); } catch(e){}
+    delete pool[keys[0]];
+  }
+  const opts = {powerPreference:'low-power', preserveDrawingBuffer:false,
+    failIfMajorPerformanceCaveat:false, antialias:true};
+  const gl = cv.getContext('webgl', opts) || cv.getContext('experimental-webgl', opts);
+  if(!gl) { console.warn('WebGL unavailable:', id); return null; }
+  pool[id] = gl;
+  cv.addEventListener('webglcontextlost', e=>{e.preventDefault();delete pool[id];});
   return gl;
 }
+
 
 const LESSONS=[
 {id:'l1',num:'4-1',icon:'🔲',title:'深度測試 — 誰在前面？',
@@ -489,7 +500,8 @@ function d1(cont){
   <div class="ctrl-row"><button class="ctrl-btn on" id="dt-on" onclick="setDT(true)">✅ 開啟深度測試</button><button class="ctrl-btn" id="dt-off" onclick="setDT(false)">❌ 關閉深度測試</button><button class="ctrl-btn" id="dt-vis" onclick="setDT('vis')">🔲 視覺化 Z-Buffer</button></div>`;
   window._dtMode=true;
   window.setDT=m=>{window._dtMode=m;document.getElementById('dt-on').classList.toggle('on',m===true);document.getElementById('dt-off').classList.toggle('on',m===false);document.getElementById('dt-vis').classList.toggle('on',m==='vis');};
-  const cv=document.getElementById('cv4-1');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv4-1');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec3 p;attribute vec3 c;varying vec3 vc;uniform mat4 mvp;void main(){vc=c;gl_Position=mvp*vec4(p,1);}`;
   const fs=`precision mediump float;varying vec3 vc;uniform bool visDepth;void main(){if(visDepth){float d=gl_FragCoord.z;gl_FragColor=vec4(d,d,d,1);}else{gl_FragColor=vec4(vc,1);}}`;
   const prog=mkProg(gl,vs,fs);
@@ -506,10 +518,10 @@ function d1(cont){
     t+=0.01;
     const m=window._dtMode;
     if(m===true)gl.enable(gl.DEPTH_TEST);else gl.disable(gl.DEPTH_TEST);
-    gl.viewport(0,0,600,260);gl.clearColor(.05,.04,.1,1);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.05,.04,.1,1);
     gl.clear(gl.COLOR_BUFFER_BIT|(m!==false?gl.DEPTH_BUFFER_BIT:0));
     gl.useProgram(prog);
-    const mvp=m4mul(perspM(45*Math.PI/180,600/260,.1,10),lookAtM([Math.sin(t)*.5,.5,3],[0,0,0],[0,1,0]));
+    const mvp=m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,10),lookAtM([Math.sin(t)*.5,.5,3],[0,0,0],[0,1,0]));
     gl.uniformMatrix4fv(mvpL,false,mvp);gl.uniform1i(vdL,m==='vis'?1:0);
     const s=6*4;
     gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,s,0);
@@ -528,7 +540,8 @@ function d2(cont){
   document.getElementById('outline-w').oninput=function(){document.getElementById('outline-wv').textContent=this.value;};
   window._stMode='on';window._stHue=0;
   window.setST=m=>{if(m==='col'){window._stHue=(window._stHue+30)%360;return;}window._stMode=m;['on','off'].forEach(x=>document.getElementById('st-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-2');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv4-2');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   gl.enable(gl.DEPTH_TEST);
   const vs=`attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vP;uniform mat4 mvp;void main(){vN=n;vP=p;gl_Position=mvp*vec4(p,1);}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 col;void main(){vec3 L=normalize(vec3(2,3,4));float d=max(dot(normalize(vN),L),.1);gl_FragColor=vec4(col*d+.05,1);}`;
@@ -552,8 +565,8 @@ function d2(cont){
     t+=0.01;
     const ow=parseInt(document.getElementById('outline-w').value)/100+1;
     const hue=window._stHue;
-    gl.viewport(0,0,600,260);gl.clearColor(.05,.04,.1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    const mvp=m4mul(perspM(45*Math.PI/180,600/260,.1,50),lookAtM([Math.sin(t)*4,2,Math.cos(t)*4],[0,0,0],[0,1,0]));
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.05,.04,.1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    const mvp=m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,50),lookAtM([Math.sin(t)*4,2,Math.cos(t)*4],[0,0,0],[0,1,0]));
     gl.useProgram(prog);
     if(window._stMode==='on'){
       // Simulate outline with two-pass scale trick
@@ -578,7 +591,8 @@ function d3(cont){
   document.getElementById('alpha-sl').oninput=function(){document.getElementById('alpha-v').textContent=(this.value/100).toFixed(2);};
   window._abMode='glass';
   window.setAB=m=>{window._abMode=m;['glass','smoke','fire'].forEach(x=>document.getElementById('ab-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-3');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv4-3');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform float alpha;uniform int mode;uniform float t;void main(){
     vec3 bg=vec3(.1+uv.x*.2,uv.y*.3,.4+sin(uv.x*8.+t)*.1);
@@ -595,7 +609,7 @@ function d3(cont){
   function frame(){
     time+=0.016;
     const modes={glass:0,smoke:1,fire:2};
-    gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(prog);
     gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);
     gl.uniform1f(aL,document.getElementById('alpha-sl').value/100);
@@ -612,7 +626,8 @@ function d4(cont){
   <div class="ctrl-row"><button class="ctrl-btn on" id="pp-none" onclick="setPP(0)">📷 原始</button><button class="ctrl-btn" id="pp-blur" onclick="setPP(1)">🌊 模糊</button><button class="ctrl-btn" id="pp-edge" onclick="setPP(2)">✏️ 邊緣</button><button class="ctrl-btn" id="pp-gray" onclick="setPP(3)">⚫ 灰階</button><button class="ctrl-btn" id="pp-crt" onclick="setPP(4)">📺 CRT</button></div>`;
   window._ppMode=0;
   window.setPP=m=>{window._ppMode=m;[0,1,2,3,4].forEach(x=>document.getElementById('pp-'+['none','blur','edge','gray','crt'][x]).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-4');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv4-4');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
   vec3 scene(vec2 u){
@@ -645,7 +660,7 @@ function d4(cont){
   const prog=mkProg(gl,vs,fs);const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
   const mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
   let time=0;
-  function frame(){time+=0.012;gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window._ppMode);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
+  function frame(){time+=0.012;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window._ppMode);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
   frame();
 }
 
@@ -655,7 +670,8 @@ function d5(cont){
   <div class="ctrl-row"><button class="ctrl-btn on" id="cm-sky" onclick="setCM('sky')">🌅 天空盒</button><button class="ctrl-btn" id="cm-ref" onclick="setCM('ref')">🔮 環境反射</button><button class="ctrl-btn" id="cm-refr" onclick="setCM('refr')">💎 折射</button></div>`;
   window._cmMode='sky';
   window.setCM=m=>{window._cmMode=m;['sky','ref','refr'].forEach(x=>document.getElementById('cm-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-5');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv4-5');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;uniform vec2 cam;
   vec3 skyColor(vec3 d){
@@ -701,7 +717,7 @@ function d5(cont){
   cv.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.style.cursor='grabbing';});
   cv.addEventListener('mouseup',()=>{drag=false;cv.style.cursor='grab';});
   cv.addEventListener('mousemove',e=>{if(!drag)return;camX+=(e.clientX-lx)*.005;camY-=(e.clientY-ly)*.003;camY=Math.max(-.5,Math.min(.5,camY));lx=e.clientX;ly=e.clientY;});
-  function frame(){time+=0.01;const modes={sky:0,ref:1,refr:2};gl.viewport(0,0,600,280);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._cmMode]||0);gl.uniform1f(tL,time);gl.uniform2f(camL,camX,camY);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
+  function frame(){time+=0.01;const modes={sky:0,ref:1,refr:2};gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._cmMode]||0);gl.uniform1f(tL,time);gl.uniform2f(camL,camX,camY);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
   frame();
 }
 
@@ -710,7 +726,8 @@ function d6(cont){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>進階 GLSL — Shader 效果庫</div></div><canvas id="cv4-6" width="600" height="260" style="height:260px"></canvas></div>
   <div class="ctrl-row"><button class="ctrl-btn on" id="gs-sdf" onclick="setGS('sdf')">⭕ SDF 圓形</button><button class="ctrl-btn" id="gs-noise" onclick="setGS('noise')">🌊 Noise</button><button class="ctrl-btn" id="gs-grid" onclick="setGS('grid')">📐 Shader 格線</button><button class="ctrl-btn" id="gs-fract" onclick="setGS('fract')">🔮 分形</button></div>`;
   window._gsMode='sdf';window.setGS=m=>{window._gsMode=m;['sdf','noise','grid','fract'].forEach(x=>document.getElementById('gs-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-6');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv4-6');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
   float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -741,7 +758,7 @@ function d6(cont){
   const prog=mkProg(gl,vs,fs);const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
   const mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
   let time=0;
-  function frame(){time+=0.012;const modes={sdf:0,noise:1,grid:2,fract:3};gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._gsMode]||0);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
+  function frame(){time+=0.012;const modes={sdf:0,noise:1,grid:2,fract:3};gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._gsMode]||0);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
   frame();
 }
 
@@ -753,7 +770,8 @@ function d7(cont){
   document.getElementById('explode-str').oninput=function(){document.getElementById('explode-sv').textContent=(this.value/100).toFixed(2);};
   window._geMode='sphere';
   window.setGE=m=>{window._geMode=m;['sphere','explode','norm'].forEach(x=>document.getElementById('ge-'+x).classList.toggle('on',x===m));document.getElementById('explode-row').style.display=m==='explode'?'flex':'none';};
-  const cv=document.getElementById('cv4-7');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv4-7');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vP;uniform mat4 mvp;uniform float explode;uniform float t;
   void main(){
     vec3 pos=p;
@@ -782,9 +800,9 @@ function d7(cont){
     t+=0.015;
     const modes={sphere:0,explode:1,norm:2};
     const ex=window._geMode==='explode'?document.getElementById('explode-str').value/100:0;
-    gl.viewport(0,0,600,280);gl.clearColor(.05,.04,.1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.05,.04,.1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
-    const mvp=m4mul(perspM(45*Math.PI/180,600/280,.1,20),lookAtM([0,0,5],[0,0,0],[0,1,0]));
+    const mvp=m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,20),lookAtM([0,0,5],[0,0,0],[0,1,0]));
     gl.uniformMatrix4fv(mvpL,false,mvp);gl.uniform1f(exL,ex);gl.uniform1f(tL,t);gl.uniform1i(mL,modes[window._geMode]||0);
     gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
@@ -802,7 +820,8 @@ function d8(cont){
   <div class="slider-row"><span class="slider-label">🌾 草的數量</span><input type="range" min="100" max="5000" value="2000" step="100" id="grass-n"><span class="slider-val" id="grass-nv">2000</span></div>
   <div style="font-size:.78rem;color:var(--txt2);margin-top:6px">Draw Calls: <span id="dc-count" style="color:var(--acc3);font-family:var(--mono)">1</span>（不管多少棵都是 1 次！）</div>`;
   document.getElementById('grass-n').oninput=function(){document.getElementById('grass-nv').textContent=this.value;rebuildGrass();};
-  const cv=document.getElementById('cv4-8');const gl=cv.getContext('webgl',{powerPreference:'low-power'});
+  const cv=document.getElementById('cv4-8');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
   if(!gl)return;
   const ext=gl.getExtension('ANGLE_instanced_arrays');if(!ext){cont.innerHTML+='<p style="color:var(--acc4);padding:10px">需要 ANGLE_instanced_arrays 擴充</p>';return;}
   const vs=`attribute vec2 base;attribute vec2 offset;attribute float height;attribute float hue;varying vec3 vC;uniform float t;
@@ -834,7 +853,7 @@ function d8(cont){
   function frame(){
     time+=0.016;
     const n=parseInt(document.getElementById('grass-n').value);
-    gl.viewport(0,0,600,280);gl.clearColor(.05,.07,.04,1);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.05,.07,.04,1);gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(prog);gl.uniform1f(tL,time);
     gl.bindBuffer(gl.ARRAY_BUFFER,baseBuf);gl.enableVertexAttribArray(baseL);gl.vertexAttribPointer(baseL,2,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,offBuf);gl.enableVertexAttribArray(offL);gl.vertexAttribPointer(offL,2,gl.FLOAT,false,0,0);ext.vertexAttribDivisorANGLE(offL,1);
@@ -851,7 +870,8 @@ function d9(cont){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>反鋸齒比較 — 放大看邊緣</div></div><canvas id="cv4-9" width="600" height="260" style="height:260px"></canvas></div>
   <div class="ctrl-row"><button class="ctrl-btn on" id="aa-0" onclick="setAA(0)">❌ 無 AA（鋸齒）</button><button class="ctrl-btn" id="aa-2" onclick="setAA(2)">MSAA 2x</button><button class="ctrl-btn" id="aa-4" onclick="setAA(4)">MSAA 4x</button><button class="ctrl-btn" id="aa-8" onclick="setAA(8)">MSAA 8x</button></div>`;
   window._aaLevel=0;window.setAA=n=>{window._aaLevel=n;[0,2,4,8].forEach(x=>document.getElementById('aa-'+x).classList.toggle('on',x===n));};
-  const cv=document.getElementById('cv4-9');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv4-9');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform float aa;uniform float t;void main(){
     vec2 c=uv-.5;float angle=t*.3;
@@ -873,7 +893,7 @@ function d9(cont){
   const prog=mkProg(gl,vs,fs);const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
   const aaL=gl.getUniformLocation(prog,'aa'),tL=gl.getUniformLocation(prog,'t');
   let time=0;
-  function frame(){time+=0.01;gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1f(aaL,window._aaLevel);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
+  function frame(){time+=0.01;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1f(aaL,window._aaLevel);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
   frame();
 }
 
@@ -882,7 +902,8 @@ function d10(cont){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>法線貼圖 — 假的凹凸感</div></div><canvas id="cv4-10" width="600" height="260" style="height:260px"></canvas></div>
   <div class="ctrl-row"><button class="ctrl-btn on" id="nm-on" onclick="setNM('on')">✅ 法線貼圖</button><button class="ctrl-btn" id="nm-off" onclick="setNM('off')">❌ 關閉（看差異）</button><button class="ctrl-btn" id="nm-show" onclick="setNM('show')">🗺️ 顯示法線圖</button></div>`;
   window._nmMode='on';window.setNM=m=>{window._nmMode=m;['on','off','show'].forEach(x=>document.getElementById('nm-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-10');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv4-10');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
   vec3 normalMap(vec2 u){
@@ -905,7 +926,7 @@ function d10(cont){
   const prog=mkProg(gl,vs,fs);const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
   const mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
   let time=0;
-  function frame(){time+=0.012;const modes={on:0,off:1,show:2};gl.viewport(0,0,600,260);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._nmMode]||0);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
+  function frame(){time+=0.012;const modes={on:0,off:1,show:2};gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._nmMode]||0);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
   frame();
 }
 
@@ -921,7 +942,8 @@ function d11(cont){
   </div>`;
   window._pfx={vignette:true,chroma:true,bloom:true,grain:true,crt:false};
   window.toggleFX=k=>{window._pfx[k]=!window._pfx[k];document.getElementById('pfx-'+k).classList.toggle('on',window._pfx[k]);};
-  const cv=document.getElementById('cv4-11');const gl=cv.getContext('webgl',{powerPreference:'low-power'});if(!gl)return;
+  const cv=document.getElementById('cv4-11');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform float t;
   uniform bool vignette,chroma,bloom,grain,crt;
@@ -965,7 +987,7 @@ function d11(cont){
   const fxNames=['vignette','chroma','bloom','grain','crt'];
   let time=0;
   function frame(){
-    time+=0.012;gl.viewport(0,0,600,300);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);
+    time+=0.012;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);
     gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);
     gl.uniform1f(tL,time);
     fxNames.forEach(fx=>gl.uniform1i(gl.getUniformLocation(prog,fx),window._pfx[fx]?1:0));
