@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>城堡 1：召喚之城</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#09091a;--card:#111128;--bd:rgba(255,255,255,0.09);
+  --t:#dde0f0;--mt:#7070a0;--gold:#d4a017;--blue:#4f80e8;
+  --green:#38c66b;--pink:#e0508a;--purple:#9060d8;--teal:#30b0a0;
+  --accent:#4f80e8;}
+body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  display:flex;flex-direction:column;align-items:center;padding:20px 12px;gap:10px;}
+canvas{display:block;}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;width:100%;max-width:720px;overflow:hidden;}
+.card.boss{border-color:rgba(224,80,138,0.6);}
+.hdr{display:flex;align-items:center;gap:12px;padding:15px 18px;}
+.ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--accent);}
+.ico.boss{background:linear-gradient(135deg,#6a1030,#e0508a);}
+.ttl{flex:1;}.ttl h2{font-size:14px;font-weight:500;}.ttl p{font-size:11px;color:var(--mt);margin-top:2px;}
+.xp{border:1px solid var(--gold);color:var(--gold);font-size:11px;padding:3px 9px;border-radius:20px;}
+.xp.boss{border-color:var(--pink);color:var(--pink);}
+.tabs{display:flex;gap:4px;padding:0 14px 10px;}
+.tab{display:flex;align-items:center;gap:5px;padding:5px 13px;border-radius:8px;font-size:12px;
+  cursor:pointer;border:1px solid transparent;color:var(--mt);background:transparent;transition:.15s;}
+.tab.on{background:rgba(100,80,200,.2);border-color:#8060c8;color:#b090f0;}
+.pnl{display:none;padding:0 14px 14px;}.pnl.on{display:block;}
+.plbl{font-size:10px;letter-spacing:.07em;color:var(--mt);display:flex;align-items:center;gap:5px;margin-bottom:7px;}
+.dot{width:7px;height:7px;border-radius:50%;background:#4f80e8;flex-shrink:0;}
+.dot.boss{background:#e0508a;}
+.gc{width:100%;border-radius:10px;background:#060610;display:block;}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0 6px;}
+.btn{border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;
+  transition:.15s;border:1px solid var(--bd);background:transparent;color:var(--mt);}
+.btn.on{background:var(--gold);color:#1a1200;border:none;font-weight:500;}
+.btn.on.g{background:var(--green);color:#021a08;}
+.btn.on.p{background:var(--purple);color:#fff;}
+.btn.on.pk{background:var(--pink);color:#fff;}
+.btn.on.t{background:var(--teal);color:#001a18;}
+.slr{display:flex;align-items:center;gap:10px;margin-top:4px;}
+.sll{font-size:12px;color:var(--mt);white-space:nowrap;}
+input[type=range]{-webkit-appearance:none;flex:1;height:4px;border-radius:2px;background:#1a1a38;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg);}
+.slv{font-size:12px;font-weight:500;min-width:26px;text-align:right;}
+.sb{font-size:11px;color:var(--mt);margin-bottom:5px;}.sb span{color:var(--gold);}
+.story{font-size:13px;line-height:1.85;color:var(--mt);}.story strong{color:var(--t);font-weight:500;}
+.cb{background:rgba(0,0,0,.4);border:1px solid var(--bd);border-radius:9px;
+  padding:13px;font-size:11px;font-family:"SF Mono","Fira Code",monospace;color:#8ab4f8;
+  line-height:1.8;overflow-x:auto;margin:8px 0;}
+.cb .k{color:#c792ea}.cb .c{color:#546e7a}.cb .n{color:#f78c6c}
+.qbox{background:rgba(255,255,255,0.03);border:1px solid var(--bd);border-radius:9px;padding:13px;margin-top:8px;}
+.qq{font-size:13px;font-weight:500;margin-bottom:9px;}
+.qopts{display:flex;flex-direction:column;gap:5px;}
+.qopt{padding:7px 12px;border-radius:7px;border:1px solid var(--bd);font-size:12px;cursor:pointer;
+  transition:.15s;background:transparent;color:var(--t);text-align:left;}
+.qopt:hover{background:rgba(255,255,255,0.05);}
+.qopt.ok{background:rgba(56,198,107,0.15);border-color:var(--green);color:var(--green);}
+.qopt.bad{background:rgba(224,80,138,0.15);border-color:var(--pink);color:var(--pink);}
+.done-banner{display:none;background:rgba(212,160,23,0.08);border:1px solid var(--gold);
+  border-radius:9px;padding:11px;text-align:center;margin-top:8px;font-size:13px;}
+.done-banner.show{display:block;}
+.nav-row{width:100%;max-width:720px;display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
+.nav-btn{font-size:12px;color:var(--mt);text-decoration:none;padding:6px 14px;border:1px solid var(--bd);border-radius:20px;transition:.15s;}
+.nav-btn:hover{color:var(--t);border-color:rgba(255,255,255,0.25);}
+.castle-hdr{width:100%;max-width:720px;padding:4px 0 8px;}
+.castle-hdr h1{font-size:17px;font-weight:500;}.castle-hdr p{font-size:11px;color:var(--mt);margin-top:3px;}
+.progress-wrap{width:100%;max-width:720px;}
+.progress-bar{height:4px;background:#1a1a38;border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#9060d8);border-radius:2px;transition:width .4s;}
+.progress-txt{font-size:10px;color:var(--mt);margin-top:3px;text-align:right;}
+.ch-divider{width:100%;max-width:720px;font-size:10px;letter-spacing:.1em;color:var(--mt);text-transform:uppercase;padding-left:2px;}
+.complete-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;}
+.complete-modal.show{display:flex;}
+.cm-box{background:#111128;border:1px solid var(--gold);border-radius:16px;padding:32px;text-align:center;max-width:380px;width:90%;}
+.cm-box h2{font-size:20px;margin-bottom:8px;}.cm-box p{font-size:13px;color:var(--mt);margin-bottom:20px;line-height:1.7;}
+.cm-btn{display:inline-block;background:var(--gold);color:#1a1200;border:none;border-radius:20px;
+  padding:10px 28px;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="nav-row">
+  <span></span>
+  <a class="nav-btn" href="opengl-map.html">🗺 地圖</a>
+  <a class="nav-btn" href="opengl-castle2.html">城堡 2 →</a>
+</div>
+
+<div class="castle-hdr">
+  <h1>🏰 城堡 1：召喚之城</h1>
+  <p>OpenGL 基礎、渲染管線</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="progress-txt" id="prog-txt">載入中...</div>
+</div>
+
+<div class="card boss" id="1-1">
+  <div class="hdr">
+    <div class="ico boss">👑</div>
+    <div class="ttl"><h2>渲染管線 — 頂點到像素 CPU→VBO→VS→光柵化→FS→畫面</h2><p>+80</p></div>
+    <div class="xp boss">BOSS</div>
+    <div class="xp boss">False</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-c="1-1" data-p="s"><span>📖</span>故事</div>
+    <div class="tab on" data-c="1-1" data-p="i"><span>🎮</span>互動</div>
+    <div class="tab" data-c="1-1" data-p="c"><span>💻</span>程式碼</div>
+  </div>
+  <div class="pnl" id="1-1-s">
+    <div class="story">渲染管線 — 即時三角形</div>
+    <div class="qbox">
+      <div class="qq">❓ Fragment Shader 的主要職責是什麼？</div>
+      <div class="qopts" id="q_1-1" data-ans="1">
+        <button class="qopt">決定頂點位置</button><button class="qopt">決定像素顏色</button><button class="qopt">上傳頂點資料</button><button class="qopt">計算物理碰撞</button>
+      </div>
+      <div class="done-banner" id="done_1-1">✅ 正確！<span style="color:var(--gold)">False XP 獲得</span></div>
+    </div>
+  </div>
+  <div class="pnl on" id="1-1-i">
+    <div class="plbl"><span class="dot boss"></span>280</div>
+    <canvas class="gc" id="cv_1-1" data-h="<button class="btn on" data-m="solid">▲ 實體</button><button class="btn " data-m="wire">⬡ 線框</button><button class="btn " data-m="vc">🌈 頂點色</button>"></canvas>
+    <div class="btns" id="b_1-1"></div>
+    attribute vec3 aPos;<br><span class="k">uniform</span> mat4 uMVP;<br><span class="k">void</span> main(){<br>  gl_Position = uMVP * <span class="k">vec4</span>(aPos,<span class="n">1.0</span>);<br>}
+  </div>
+  <div class="pnl" id="1-1-c">
+    <div class="cb"><span class="c">// 參考上方說明</span></div>
+  </div>
+</div>
+<div class="card boss" id="1-2">
+  <div class="hdr">
+    <div class="ico boss">👑</div>
+    <div class="ttl"><h2>GLSL 著色器 — 第一個程式 uniform/attribute/varying 三大關鍵字</h2><p>+90</p></div>
+    <div class="xp boss">BOSS</div>
+    <div class="xp boss">False</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-c="1-2" data-p="s"><span>📖</span>故事</div>
+    <div class="tab on" data-c="1-2" data-p="i"><span>🎮</span>互動</div>
+    <div class="tab" data-c="1-2" data-p="c"><span>💻</span>程式碼</div>
+  </div>
+  <div class="pnl" id="1-2-s">
+    <div class="story">GLSL — 即時著色球體</div>
+    <div class="qbox">
+      <div class="qq">❓ varying 變數在三角形內部的值如何決定？</div>
+      <div class="qopts" id="q_1-2" data-ans="1">
+        <button class="qopt">固定為0</button><button class="qopt">由頂點值自動插值</button><button class="qopt">由 CPU 設定</button><button class="qopt">每個像素相同</button>
+      </div>
+      <div class="done-banner" id="done_1-2">✅ 正確！<span style="color:var(--gold)">False XP 獲得</span></div>
+    </div>
+  </div>
+  <div class="pnl on" id="1-2-i">
+    <div class="plbl"><span class="dot boss"></span>300</div>
+    <canvas class="gc" id="cv_1-2" data-h="<button class="btn on" data-m="time">⏱ 時間</button><button class="btn " data-m="uv">🗺 UV</button><button class="btn " data-m="wave">〰 波浪</button>"></canvas>
+    <div class="btns" id="b_1-2"></div>
+    <span class="k">uniform</span> float uTime;<br><span class="k">void</span> main(){<br>  float r=sin(uTime)*<span class="n">0.5</span>+<span class="n">0.5</span>;<br>  gl_FragColor=<span class="k">vec4</span>(r,<span class="n">0.5</span>,<span class="n">1</span>-r,<span class="n">1</span>);<br>}
+  </div>
+  <div class="pnl" id="1-2-c">
+    <div class="cb"><span class="c">// 參考上方說明</span></div>
+  </div>
+</div>
+<div class="card boss" id="1-3">
+  <div class="hdr">
+    <div class="ico boss">👑</div>
+    <div class="ttl"><h2>VBO/VAO — 資料送上 GPU 頂點緩衝物件，告訴 GPU 資料格式</h2><p>+90</p></div>
+    <div class="xp boss">BOSS</div>
+    <div class="xp boss">False</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-c="1-3" data-p="s"><span>📖</span>故事</div>
+    <div class="tab on" data-c="1-3" data-p="i"><span>🎮</span>互動</div>
+    <div class="tab" data-c="1-3" data-p="c"><span>💻</span>程式碼</div>
+  </div>
+  <div class="pnl" id="1-3-s">
+    <div class="story">VBO/VAO — 資料視覺化</div>
+    <div class="qbox">
+      <div class="qq">❓ VAO 的主要作用是？</div>
+      <div class="qopts" id="q_1-3" data-ans="1">
+        <button class="qopt">儲存頂點座標</button><button class="qopt">記錄 VBO 資料格式的說明書</button><button class="qopt">執行頂點著色器</button><button class="qopt">壓縮紋理</button>
+      </div>
+      <div class="done-banner" id="done_1-3">✅ 正確！<span style="color:var(--gold)">False XP 獲得</span></div>
+    </div>
+  </div>
+  <div class="pnl on" id="1-3-i">
+    <div class="plbl"><span class="dot boss"></span>280</div>
+    <canvas class="gc" id="cv_1-3" data-h="<button class="btn on" data-m="pos">📍 位置</button><button class="btn " data-m="nor">🧭 法向量</button><button class="btn " data-m="uv">🗺 UV</button>"></canvas>
+    <div class="btns" id="b_1-3"></div>
+    GLuint vbo;<br>glGenBuffers(<span class="n">1</span>,&vbo);<br>glBindBuffer(GL_ARRAY_BUFFER,vbo);<br>glBufferData(GL_ARRAY_BUFFER,size,data,GL_STATIC_DRAW);<br>glVertexAttribPointer(<span class="n">0</span>,<span class="n">3</span>,GL_FLOAT,GL_FALSE,stride,offset);
+  </div>
+  <div class="pnl" id="1-3-c">
+    <div class="cb"><span class="c">// 參考上方說明</span></div>
+  </div>
+</div>
+<div class="card boss" id="1-4">
+  <div class="hdr">
+    <div class="ico boss">👑</div>
+    <div class="ttl"><h2>紋理 — 圖片貼上模型 UV 座標、Wrapping、Filtering</h2><p>+90</p></div>
+    <div class="xp boss">BOSS</div>
+    <div class="xp boss">False</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-c="1-4" data-p="s"><span>📖</span>故事</div>
+    <div class="tab on" data-c="1-4" data-p="i"><span>🎮</span>互動</div>
+    <div class="tab" data-c="1-4" data-p="c"><span>💻</span>程式碼</div>
+  </div>
+  <div class="pnl" id="1-4-s">
+    <div class="story">紋理 — UV 映射演示</div>
+    <div class="qbox">
+      <div class="qq">❓ UV 座標的正常範圍是？</div>
+      <div class="qopts" id="q_1-4" data-ans="2">
+        <button class="qopt">0~255</button><button class="qopt">−1~1</button><button class="qopt">0~1</button><button class="qopt">0~100</button>
+      </div>
+      <div class="done-banner" id="done_1-4">✅ 正確！<span style="color:var(--gold)">False XP 獲得</span></div>
+    </div>
+  </div>
+  <div class="pnl on" id="1-4-i">
+    <div class="plbl"><span class="dot boss"></span>300</div>
+    <canvas class="gc" id="cv_1-4" data-h="<button class="btn on" data-m="checker">🔲 棋盤</button><button class="btn " data-m="grad">🌈 漸層</button><button class="btn " data-m="brick">🧱 磚塊</button>"></canvas>
+    <div class="btns" id="b_1-4"></div>
+    <span class="k">uniform</span> sampler2D uTex;<br>varying vec2 vUV;<br><span class="k">void</span> main(){<br>  gl_FragColor=texture2D(uTex,vUV);<br>}
+  </div>
+  <div class="pnl" id="1-4-c">
+    <div class="cb"><span class="c">// 參考上方說明</span></div>
+  </div>
+</div>
+<div class="card boss" id="1-5">
+  <div class="hdr">
+    <div class="ico boss">👑</div>
+    <div class="ttl"><h2>MVP 矩陣 — 平移旋轉縮放 Model × View × Projection 的空間魔法</h2><p>+100</p></div>
+    <div class="xp boss">BOSS</div>
+    <div class="xp boss">False</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-c="1-5" data-p="s"><span>📖</span>故事</div>
+    <div class="tab on" data-c="1-5" data-p="i"><span>🎮</span>互動</div>
+    <div class="tab" data-c="1-5" data-p="c"><span>💻</span>程式碼</div>
+  </div>
+  <div class="pnl" id="1-5-s">
+    <div class="story">MVP — 即時變換</div>
+    <div class="qbox">
+      <div class="qq">❓ MVP 矩陣的乘法順序（從右讀）是？</div>
+      <div class="qopts" id="q_1-5" data-ans="2">
+        <button class="qopt">Proj→View→Model</button><button class="qopt">View→Model→Proj</button><button class="qopt">Model→View→Proj</button><button class="qopt">無所謂</button>
+      </div>
+      <div class="done-banner" id="done_1-5">✅ 正確！<span style="color:var(--gold)">False XP 獲得</span></div>
+    </div>
+  </div>
+  <div class="pnl on" id="1-5-i">
+    <div class="plbl"><span class="dot boss"></span>300</div>
+    <canvas class="gc" id="cv_1-5" data-h="<button class="btn on" data-m="all">完整 MVP</button><button class="btn " data-m="model">只有 Model</button><button class="btn " data-m="ortho">正交投影</button>"></canvas>
+    <div class="btns" id="b_1-5"></div>
+    <span class="k">uniform</span> mat4 uModel,uView,uProj;<br><span class="k">void</span> main(){<br>  gl_Position=uProj*uView*uModel*<span class="k">vec4</span>(aPos,<span class="n">1.0</span>);<br>}
+  </div>
+  <div class="pnl" id="1-5-c">
+    <div class="cb"><span class="c">// 參考上方說明</span></div>
+  </div>
+</div>
+<div class="card boss" id="1-6">
+  <div class="hdr">
+    <div class="ico boss">👑</div>
+    <div class="ttl"><h2>座標系統 — 從物件到螢幕 Local→World→View→Clip→NDC→Screen</h2><p>+90</p></div>
+    <div class="xp boss">BOSS</div>
+    <div class="xp boss">False</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-c="1-6" data-p="s"><span>📖</span>故事</div>
+    <div class="tab on" data-c="1-6" data-p="i"><span>🎮</span>互動</div>
+    <div class="tab" data-c="1-6" data-p="c"><span>💻</span>程式碼</div>
+  </div>
+  <div class="pnl" id="1-6-s">
+    <div class="story">座標空間 — 逐步轉換</div>
+    <div class="qbox">
+      <div class="qq">❓ NDC（標準化設備座標）的範圍是？</div>
+      <div class="qopts" id="q_1-6" data-ans="2">
+        <button class="qopt">0~1</button><button class="qopt">0~100</button><button class="qopt">−1~1</button><button class="qopt">−180~180</button>
+      </div>
+      <div class="done-banner" id="done_1-6">✅ 正確！<span style="color:var(--gold)">False XP 獲得</span></div>
+    </div>
+  </div>
+  <div class="pnl on" id="1-6-i">
+    <div class="plbl"><span class="dot boss"></span>300</div>
+    <canvas class="gc" id="cv_1-6" data-h="<button class="btn on" data-m="world">World</button><button class="btn " data-m="view">View</button><button class="btn " data-m="ndc">NDC</button>"></canvas>
+    <div class="btns" id="b_1-6"></div>
+    <span class="c">// NDC 範圍 -1 到 1</span><br>vec4 clipPos = uProj * uView * uModel * <span class="k">vec4</span>(aPos,<span class="n">1.0</span>);<br><span class="c">// NDC = clipPos.xyz / clipPos.w（GPU 自動）</span>
+  </div>
+  <div class="pnl" id="1-6-c">
+    <div class="cb"><span class="c">// 參考上方說明</span></div>
+  </div>
+</div>
+<div class="card boss" id="1-7">
+  <div class="hdr">
+    <div class="ico boss">👑</div>
+    <div class="ttl"><h2>攝影機 — lookAt 眼睛位置、目標、上方向三參數</h2><p>+90</p></div>
+    <div class="xp boss">BOSS</div>
+    <div class="xp boss">False</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-c="1-7" data-p="s"><span>📖</span>故事</div>
+    <div class="tab on" data-c="1-7" data-p="i"><span>🎮</span>互動</div>
+    <div class="tab" data-c="1-7" data-p="c"><span>💻</span>程式碼</div>
+  </div>
+  <div class="pnl" id="1-7-s">
+    <div class="story">攝影機 — 拖曳旋轉</div>
+    <div class="qbox">
+      <div class="qq">❓ lookAt 需要幾個向量參數？</div>
+      <div class="qopts" id="q_1-7" data-ans="2">
+        <button class="qopt">1個</button><button class="qopt">2個</button><button class="qopt">3個</button><button class="qopt">4個</button>
+      </div>
+      <div class="done-banner" id="done_1-7">✅ 正確！<span style="color:var(--gold)">False XP 獲得</span></div>
+    </div>
+  </div>
+  <div class="pnl on" id="1-7-i">
+    <div class="plbl"><span class="dot boss"></span>300</div>
+    <canvas class="gc" id="cv_1-7" data-h="<button class="btn on" data-m="orbit">🔄 環繞</button><button class="btn " data-m="fov">🔭 廣角</button><button class="btn " data-m="ortho">📐 正交</button>"></canvas>
+    <div class="btns" id="b_1-7"></div>
+    mat4 view = glm::lookAt(<br>  <span class="k">vec3</span>(<span class="n">0</span>,<span class="n">0</span>,<span class="n">3</span>), <span class="c">// eye</span><br>  <span class="k">vec3</span>(<span class="n">0</span>,<span class="n">0</span>,<span class="n">0</span>), <span class="c">// center</span><br>  <span class="k">vec3</span>(<span class="n">0</span>,<span class="n">1</span>,<span class="n">0</span>)  <span class="c">// up</span><br>);
+  </div>
+  <div class="pnl" id="1-7-c">
+    <div class="cb"><span class="c">// 參考上方說明</span></div>
+  </div>
+</div>
+<div class="card boss" id="1-8">
+  <div class="hdr">
+    <div class="ico boss">👑</div>
+    <div class="ttl"><h2>Gamma 校正 — 線性色彩空間 sRGB、Gamma 2.2、線性光照計算</h2><p>+80</p></div>
+    <div class="xp boss">BOSS</div>
+    <div class="xp boss">False</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-c="1-8" data-p="s"><span>📖</span>故事</div>
+    <div class="tab on" data-c="1-8" data-p="i"><span>🎮</span>互動</div>
+    <div class="tab" data-c="1-8" data-p="c"><span>💻</span>程式碼</div>
+  </div>
+  <div class="pnl" id="1-8-s">
+    <div class="story">Gamma 校正 — 線性 vs sRGB</div>
+    <div class="qbox">
+      <div class="qq">❓ 典型顯示器的 Gamma 值約為？</div>
+      <div class="qopts" id="q_1-8" data-ans="1">
+        <button class="qopt">1.0</button><button class="qopt">2.2</button><button class="qopt">3.14</button><button class="qopt">0.5</button>
+      </div>
+      <div class="done-banner" id="done_1-8">✅ 正確！<span style="color:var(--gold)">False XP 獲得</span></div>
+    </div>
+  </div>
+  <div class="pnl on" id="1-8-i">
+    <div class="plbl"><span class="dot boss"></span>280</div>
+    <canvas class="gc" id="cv_1-8" data-h="<button class="btn on" data-m="linear">線性空間</button><button class="btn " data-m="gamma">Gamma 校正</button><button class="btn " data-m="compare">左右對比</button>"></canvas>
+    <div class="btns" id="b_1-8"></div>
+    <span class="c">// 線性空間計算後 Gamma encode</span><br>vec3 gc = pow(linearColor, <span class="k">vec3</span>(<span class="n">1.0</span>/<span class="n">2.2</span>));<br>gl_FragColor = <span class="k">vec4</span>(gc,<span class="n">1.0</span>);<br><span class="c">// 或</span> glEnable(GL_FRAMEBUFFER_SRGB);
+  </div>
+  <div class="pnl" id="1-8-c">
+    <div class="cb"><span class="c">// 參考上方說明</span></div>
+  </div>
+</div>
+<div class="card boss" id="1-9 👑">
+  <div class="hdr">
+    <div class="ico boss">👑</div>
+    <div class="ttl"><h2>Boss：第一個完整 3D 場景 整合管線：多立方體 + MVP + 拖曳旋轉</h2><p>+120</p></div>
+    <div class="xp boss">BOSS</div>
+    <div class="xp boss">True</div>
+  </div>
+  <div class="tabs">
+    <div class="tab" data-c="1-9 👑" data-p="s"><span>📖</span>故事</div>
+    <div class="tab on" data-c="1-9 👑" data-p="i"><span>🎮</span>互動</div>
+    <div class="tab" data-c="1-9 👑" data-p="c"><span>💻</span>程式碼</div>
+  </div>
+  <div class="pnl" id="1-9 👑-s">
+    <div class="story">BOSS — 旋轉立方體群（拖曳旋轉）</div>
+    <div class="qbox">
+      <div class="qq">❓ 渲染 10 個不同位置的立方體，最有效率的方式是？</div>
+      <div class="qopts" id="q_1-9 👑" data-ans="2">
+        <button class="qopt">10 個 VBO</button><button class="qopt">10 個著色器</button><button class="qopt">迴圈設定不同 Model Matrix</button><button class="qopt">把資料全部合成一個大 VBO</button>
+      </div>
+      <div class="done-banner" id="done_1-9 👑">✅ 正確！<span style="color:var(--gold)">True XP 獲得</span></div>
+    </div>
+  </div>
+  <div class="pnl on" id="1-9 👑-i">
+    <div class="plbl"><span class="dot boss"></span>360</div>
+    <canvas class="gc" id="cv_1-9 👑" data-h="<button class="btn on" data-m="solid">實體</button><button class="btn " data-m="wire">線框</button><button class="btn " data-m="rainbow">彩虹</button>"></canvas>
+    <div class="btns" id="b_1-9 👑"></div>
+    <span class="c">// 多個立方體各自的 Model Matrix</span><br><span class="k">for</span>(<span class="k">int</span> i=<span class="n">0</span>;i<<span class="n">10</span>;i++){<br>  model=glm::translate(mat,positions[i]);<br>  model=glm::rotate(model,time,<span class="k">vec3</span>(<span class="n">1</span>,<span class="n">1</span>,<span class="n">0</span>));<br>  shader.setMat4("uModel",model);<br>  glDrawArrays(GL_TRIANGLES,<span class="n">0</span>,<span class="n">36</span>);<br>}
+  </div>
+  <div class="pnl" id="1-9 👑-c">
+    <div class="cb"><span class="c">// 參考上方說明</span></div>
+  </div>
+</div>
+<div class="complete-modal" id="comp-modal">
+  <div class="cm-box">
+    <div style="font-size:48px;margin-bottom:12px">🏆</div>
+    <h2>城堡 1 通關！</h2>
+    <p>恭喜完成「召喚之城」的所有 9 個關卡！<br>繼續征服下一座城堡吧！</p>
+    <a class="cm-btn" href="opengl-castle2.html">前往城堡 2 →</a>
+    <br><button onclick="document.getElementById('comp-modal').classList.remove('show')" style="background:transparent;border:none;color:#7070a0;font-size:12px;margin-top:12px;cursor:pointer;">繼續留在這裡</button>
+  </div>
+</div>
+
+<script>
+window.CASTLE_NUM = 1;
+window.TOTAL_LESSONS = 9;
+</script>
+
+<script>
+// ── Matrix utils ──
+const M={
+  p(fov,asp,n,f){const t=Math.tan(fov/2),d=f-n,m=new Float32Array(16);m[0]=1/(t*asp);m[5]=1/t;m[10]=-(f+n)/d;m[11]=-1;m[14]=-2*f*n/d;return m;},
+  v(ex,ey,ez){let fx=-ex,fy=-ey,fz=-ez;const fl=Math.hypot(fx,fy,fz);fx/=fl;fy/=fl;fz/=fl;let rx=fy*0-fz*1,ry=fz*0-fx*0,rz=fx*1-fy*0;const rl=Math.hypot(rx,ry,rz);rx/=rl;ry/=rl;rz/=rl;const ux=ry*fz-rz*fy,uy=rz*fx-rx*fz,uz=rx*fy-ry*fx;const m=new Float32Array(16);m[0]=rx;m[4]=ry;m[8]=rz;m[12]=-(rx*ex+ry*ey+rz*ez);m[1]=ux;m[5]=uy;m[9]=uz;m[13]=-(ux*ex+uy*ey+uz*ez);m[2]=-fx;m[6]=-fy;m[10]=-fz;m[14]=(fx*ex+fy*ey+fz*ez);m[15]=1;return m;},
+  mul(a,b){const m=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];m[i+j*4]=s;}return m;},
+  tr(x,y,z){const m=new Float32Array(16);m[0]=m[5]=m[10]=m[15]=1;m[12]=x;m[13]=y;m[14]=z;return m;},
+  sc(s){const m=new Float32Array(16);m[0]=m[5]=m[10]=s;m[15]=1;return m;},
+  ry(a){const c=Math.cos(a),s=Math.sin(a),m=new Float32Array(16);m[0]=c;m[2]=s;m[5]=1;m[8]=-s;m[10]=c;m[15]=1;return m;}
+};
+const RAF={};
+function mkGL(id){
+  const c=document.getElementById(id);if(!c)return null;
+  const dpr=window.devicePixelRatio||1;
+  c.width=Math.round(c.parentElement.clientWidth*dpr);
+  c.height=Math.round(parseInt(c.dataset.h||320)*dpr);
+  c.style.width='100%';c.style.height=(c.height/dpr)+'px';
+  const gl=c.getContext('webgl',{stencil:true,antialias:true});
+  if(!gl)return null;gl._c=c;return gl;
+}
+function mkC2(id){
+  const c=document.getElementById(id);if(!c)return null;
+  const dpr=window.devicePixelRatio||1;
+  const pw=c.parentElement.clientWidth;
+  const ph=parseInt(c.dataset.h||300);
+  c.width=Math.round(pw*dpr);c.height=Math.round(ph*dpr);
+  c.style.width='100%';c.style.height=ph+'px';
+  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);
+  ctx._W=pw;ctx._H=ph;return ctx;
+}
+function prog(gl,vs,fs){
+  const p=gl.createProgram();
+  [gl.VERTEX_SHADER,gl.FRAGMENT_SHADER].forEach((t,i)=>{
+    const s=gl.createShader(t);gl.shaderSource(s,[vs,fs][i]);gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(s));
+    gl.attachShader(p,s);
+  });
+  gl.linkProgram(p);gl.useProgram(p);return p;
+}
+function buf(gl,data,t=gl.ARRAY_BUFFER){const b=gl.createBuffer();gl.bindBuffer(t,b);gl.bufferData(t,data,gl.STATIC_DRAW);return b;}
+function attr(gl,p,name,b,sz=3){const l=gl.getAttribLocation(p,name);if(l<0)return;gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,sz,gl.FLOAT,false,0,0);}
+function mvp(gl,ex,ey,ez,fov=Math.PI/4){const c=gl._c;return M.mul(M.p(fov,c.width/c.height,0.1,100),M.v(ex,ey,ez));}
+function vp(gl){gl.viewport(0,0,gl._c.width,gl._c.height);}
+function sphere(st=32,sl=32){
+  const pos=[],nor=[],uv=[],idx=[];
+  for(let i=0;i<=st;i++){const phi=Math.PI*i/st;for(let j=0;j<=sl;j++){const th=2*Math.PI*j/sl;const x=Math.sin(phi)*Math.cos(th),y=Math.cos(phi),z=Math.sin(phi)*Math.sin(th);pos.push(x,y,z);nor.push(x,y,z);uv.push(j/sl,i/st);}}
+  for(let i=0;i<st;i++)for(let j=0;j<sl;j++){const a=i*(sl+1)+j,b=a+sl+1;idx.push(a,b,a+1,b,b+1,a+1);}
+  return{p:new Float32Array(pos),n:new Float32Array(nor),u:new Float32Array(uv),i:new Uint16Array(idx)};
+}
+function cube(){
+  const p=new Float32Array([-1,-1,1,1,-1,1,1,1,1,-1,1,1,-1,-1,-1,-1,1,-1,1,1,-1,1,-1,-1,-1,1,-1,-1,1,1,1,1,1,1,1,-1,-1,-1,-1,1,-1,-1,1,-1,1,-1,-1,1,1,-1,-1,1,1,-1,1,1,1,1,-1,1,-1,-1,-1,-1,-1,1,-1,1,1,-1,1,-1]);
+  const n=new Float32Array([0,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0]);
+  const idx=[];for(let f=0;f<6;f++){const b=f*4;idx.push(b,b+1,b+2,b,b+2,b+3);}
+  return{p,n,i:new Uint16Array(idx)};
+}
+// Phong shader strings
+const PVS=`attribute vec3 aP,aN;attribute vec2 aUV;uniform mat4 uM;varying vec3 vN,vP;varying vec2 vUV;void main(){vP=aP;vN=aN;vUV=aUV;gl_Position=uM*vec4(aP,1.0);}`;
+const PFS=`precision mediump float;varying vec3 vN,vP;varying vec2 vUV;uniform vec3 uL,uE,uA,uD,uS;uniform float uSh;uniform int uMd,uLT;void main(){vec3 N=normalize(vN),V=normalize(uE-vP);vec3 L;float att=1.0;if(uLT==0){L=normalize(-uL);}else if(uLT==1){vec3 d=uL-vP;float dist=length(d);L=normalize(d);att=1.0/(1.0+0.1*dist+0.04*dist*dist);}else{vec3 d=uL-vP;L=normalize(d);float th=dot(L,normalize(vec3(0,-1,-1)));att=th>0.93?pow(th,24.0):0.0;}vec3 R=reflect(-L,N);vec3 a=uA,d2=max(dot(N,L),0.0)*uD*att,s=pow(max(dot(V,R),0.0),uSh)*uS*att;vec3 res;if(uMd==1)res=a;else if(uMd==2)res=a*0.2+d2;else if(uMd==3)res=s+vec3(0.02);else res=a+d2+s;gl_FragColor=vec4(res,1.0);}`;
+function phongSphere(glId,cfg){
+  const gl=mkGL(glId);if(!gl)return;
+  const m=sphere();const p=prog(gl,PVS,PFS);
+  const PB=buf(gl,m.p),NB=buf(gl,m.n),UVB=buf(gl,m.u);
+  buf(gl,m.i,gl.ELEMENT_ARRAY_BUFFER);
+  attr(gl,p,'aP',PB);attr(gl,p,'aN',NB);attr(gl,p,'aUV',UVB,2);
+  const set=(n,v)=>{if(typeof v==='number')gl.uniform1f(gl.getUniformLocation(p,n),v);else if(typeof v==='number[]'||v instanceof Float32Array)gl.uniform3fv(gl.getUniformLocation(p,n),new Float32Array(v));};
+  gl.enable(gl.DEPTH_TEST);gl.clearColor(0.024,0.024,0.06,1);
+  const EYE=[0,0.2,3];gl.uniform3fv(gl.getUniformLocation(p,'uE'),new Float32Array(EYE));
+  let t=0,mode=cfg.mode||'all',sh=cfg.sh||32,lt=cfg.lt||0;
+  const mmap={all:0,ambient:1,diffuse:2,specular:3};
+  const ltmap={dir:0,point:1,spot:2};
+  function setMat(mat){
+    ['uA','uD','uS'].forEach((k,i)=>gl.uniform3fv(gl.getUniformLocation(p,k),new Float32Array(mat[i])));
+    gl.uniform1f(gl.getUniformLocation(p,'uSh'),mat[3]);
+  }
+  if(cfg.mat)setMat(cfg.mat);
+  if(cfg.btns){document.getElementById(cfg.btns)&&document.getElementById(cfg.btns).addEventListener('click',e=>{
+    const btn=e.target.closest('.btn');if(!btn)return;
+    const m2=btn.dataset.m;
+    if(mmap[m2]!==undefined)mode=m2;
+    if(ltmap[m2]!==undefined)lt=ltmap[m2];
+    if(cfg.mats&&cfg.mats[m2])setMat(cfg.mats[m2]);
+    document.querySelectorAll('#'+cfg.btns+' .btn').forEach(b=>b.classList.remove('on','g','p','pk','t'));
+    btn.classList.add('on');
+  });}
+  if(cfg.sh_id){const sl=document.getElementById(cfg.sh_id);sl&&sl.addEventListener('input',function(){sh=+this.value;const sv=document.getElementById(cfg.sv_id);if(sv)sv.textContent=this.value;});}
+  function frame(){
+    t+=0.013;
+    gl.uniformMatrix4fv(gl.getUniformLocation(p,'uM'),false,mvp(gl,...EYE));
+    if(lt===0)gl.uniform3fv(gl.getUniformLocation(p,'uL'),new Float32Array([-Math.cos(t),-0.3,-Math.sin(t)]));
+    else if(lt===1)gl.uniform3fv(gl.getUniformLocation(p,'uL'),new Float32Array([2.2*Math.cos(t),1.2,2.2*Math.sin(t)]));
+    else gl.uniform3fv(gl.getUniformLocation(p,'uL'),new Float32Array([0,0,2.5]));
+    gl.uniform1f(gl.getUniformLocation(p,'uSh'),sh);
+    gl.uniform1i(gl.getUniformLocation(p,'uMd'),mmap[mode]??0);
+    gl.uniform1i(gl.getUniformLocation(p,'uLT'),lt);
+    vp(gl);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.drawElements(gl.TRIANGLES,m.i.length,gl.UNSIGNED_SHORT,0);
+    RAF[glId]=requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+// ── Tab switching ──
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    const cid=tab.dataset.c,p2=tab.dataset.p;
+    document.querySelectorAll('#'+cid+' .tab').forEach(t=>t.classList.remove('on'));
+    document.querySelectorAll('#'+cid+' .pnl').forEach(x=>x.classList.remove('on'));
+    tab.classList.add('on');
+    document.getElementById(cid+'-'+p2).classList.add('on');
+  });
+});
+
+// ── Quiz ──
+document.querySelectorAll('.qopts').forEach(qb=>{
+  const qid=qb.id;const ans=parseInt(qb.dataset.ans||'0');
+  const opts=qb.querySelectorAll('.qopt');
+  opts.forEach((opt,i)=>{
+    opt.addEventListener('click',()=>{
+      if(opt.classList.contains('ok')||opt.classList.contains('bad'))return;
+      opts.forEach(o=>o.style.pointerEvents='none');
+      opt.classList.add(i===ans?'ok':'bad');
+      if(i!==ans)setTimeout(()=>opts[ans].classList.add('ok'),500);
+      else{
+        const b=document.getElementById('done_'+qid.replace('q_',''));
+        if(b)b.classList.add('show');
+        // Save progress
+        const cid2=qid.split('_')[1];
+        const key='tower'+window.CASTLE_NUM+'_done';
+        const done=JSON.parse(localStorage.getItem(key)||'[]');
+        if(!done.includes(cid2)){done.push(cid2);localStorage.setItem(key,JSON.stringify(done));}
+        updateProgress();
+      }
+    });
+  });
+});
+
+// ── Progress ──
+function updateProgress(){
+  const key='tower'+window.CASTLE_NUM+'_done';
+  const done=JSON.parse(localStorage.getItem(key)||'[]');
+  const total=window.TOTAL_LESSONS||1;
+  const pct=Math.round(done.length/total*100);
+  const fill=document.getElementById('prog-fill');
+  const txt=document.getElementById('prog-txt');
+  if(fill)fill.style.width=pct+'%';
+  if(txt)txt.textContent=done.length+'/'+total+' 關卡完成 ('+pct+'%)';
+  if(done.length>=total){
+    const modal=document.getElementById('comp-modal');
+    const key2='tower'+window.CASTLE_NUM+'_done_comp_shown';
+    if(modal&&!localStorage.getItem(key2)){localStorage.setItem(key2,'1');modal.classList.add('show');}
+  }
+}
+updateProgress();
+</script>
+
+<script>
+
+// ── Generic demo initializer ──
+function runDemos() {
+
+// 1-1 Triangle pipeline
+(function(){
+  const gl=mkGL('cv_c11');if(!gl)return;
+  const VS=`attribute vec3 aP;attribute vec3 aC;uniform mat4 uM;varying vec3 vC;void main(){vC=aC;gl_Position=uM*vec4(aP,1.0);}`;
+  const FS=`precision mediump float;varying vec3 vC;uniform int uMd;void main(){if(uMd==2)gl_FragColor=vec4(vC,1.0);else gl_FragColor=vec4(0.5,0.4,1.0,1.0);}`;
+  const p=prog(gl,VS,FS);
+  const PB=buf(gl,new Float32Array([0,.85,0,-.9,-.75,0,.9,-.75,0]));
+  const CB=buf(gl,new Float32Array([1,.2,.2,.2,1,.4,.2,.4,1]));
+  buf(gl,new Uint16Array([0,1,2]),gl.ELEMENT_ARRAY_BUFFER);
+  gl.enable(gl.DEPTH_TEST);gl.clearColor(.03,.02,.07,1);
+  let mode='solid';
+  document.getElementById('b_c11')?.addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;mode=b.dataset.m;document.querySelectorAll('#b_c11 .btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+  (function fr(){gl.uniformMatrix4fv(gl.getUniformLocation(p,'uM'),false,mvp(gl,0,0,2.2));gl.uniform1i(gl.getUniformLocation(p,'uMd'),mode==='vc'?2:0);attr(gl,p,'aP',PB);attr(gl,p,'aC',CB);vp(gl);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);if(mode==='wire')gl.drawArrays(gl.LINE_LOOP,0,3);else gl.drawElements(gl.TRIANGLES,3,gl.UNSIGNED_SHORT,0);RAF['cv_c11']=requestAnimationFrame(fr);})();
+})();
+// 1-2 GLSL
+(function(){
+  const gl=mkGL('cv_c12');if(!gl)return;
+  const m=sphere(20,20);
+  const VS=`attribute vec3 aP;attribute vec2 aUV;uniform mat4 uM;varying vec2 vU;void main(){vU=aUV;gl_Position=uM*vec4(aP,1.0);}`;
+  const FS=`precision mediump float;varying vec2 vU;uniform float uT;uniform int uMd;void main(){if(uMd==0){float r=sin(uT)*.5+.5,g=sin(uT+2.09)*.5+.5,b=sin(uT+4.19)*.5+.5;gl_FragColor=vec4(r,g,b,1);}else if(uMd==1){gl_FragColor=vec4(vU.x,vU.y,.5,1);}else{float w=sin(vU.x*14.+uT*2.5)*.5+.5;gl_FragColor=vec4(w*.3,w*.7,1,1);}}`;
+  const p=prog(gl,VS,FS);const PB=buf(gl,m.p),UVB=buf(gl,m.u);buf(gl,m.i,gl.ELEMENT_ARRAY_BUFFER);
+  attr(gl,p,'aP',PB);attr(gl,p,'aUV',UVB,2);gl.enable(gl.DEPTH_TEST);gl.clearColor(.02,.02,.06,1);
+  const uM=gl.getUniformLocation(p,'uM'),uT=gl.getUniformLocation(p,'uT'),uMd=gl.getUniformLocation(p,'uMd');
+  const mmap={time:0,uv:1,wave:2};let mode='time',t=0;
+  document.getElementById('b_c12')?.addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;mode=b.dataset.m;document.querySelectorAll('#b_c12 .btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+  (function fr(){t+=.02;gl.uniformMatrix4fv(uM,false,mvp(gl,0,0,3));gl.uniform1f(uT,t);gl.uniform1i(uMd,mmap[mode]??0);vp(gl);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.drawElements(gl.TRIANGLES,m.i.length,gl.UNSIGNED_SHORT,0);RAF['cv_c12']=requestAnimationFrame(fr);})();
+})();
+// 1-3 VBO viz (Canvas 2D)
+(function(){
+  const ctx=mkC2('cv_c13');if(!ctx)return;const W=ctx._W,H=ctx._H;
+  let mode='pos';document.getElementById('b_c13')?.addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;mode=b.dataset.m;document.querySelectorAll('#b_c13 .btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+  const pts=[{x:.0,y:.8},{x:-.8,y:-.7},{x:.8,y:-.7}];
+  const nors=[{x:.0,y:1},{x:-.7,y:-.7},{x:.7,y:-.7}];
+  const uvs=[{u:.5,v:.0},{u:.0,v:1},{u:1,v:1}];
+  function px(x,y){return{sx:W*.5+x*W*.26,sy:H*.5-y*H*.33};}
+  const cols={pos:'#4f80e8',nor:'#e05050',uv:'#38c66b'};
+  (function fr(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#06060f';ctx.fillRect(0,0,W,H);
+  const pp=pts.map(v=>px(v.x,v.y));
+  ctx.strokeStyle='rgba(255,255,255,.1)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pp[0].sx,pp[0].sy);pp.slice(1).forEach(p=>ctx.lineTo(p.sx,p.sy));ctx.closePath();ctx.stroke();
+  const c=cols[mode]||'#fff';
+  pp.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.sx,p.sy,7,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();
+  let lbl='';if(mode==='pos'){lbl=`(${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)},0)`;}else if(mode==='nor'){lbl=`(${nors[i].x.toFixed(1)},${nors[i].y.toFixed(1)},0)`;}else{lbl=`(${uvs[i].u.toFixed(1)},${uvs[i].v.toFixed(1)})`;}
+  ctx.fillStyle=c;ctx.font='11px monospace';ctx.textAlign='center';
+  const off=i===0?{dx:0,dy:-18}:i===1?{dx:-22,dy:14}:{dx:22,dy:14};
+  ctx.fillText(lbl,p.sx+off.dx,p.sy+off.dy);
+  if(mode==='nor'){const ne=px(pts[i].x+nors[i].x*.25,pts[i].y+nors[i].y*.25);ctx.strokeStyle='rgba(224,80,80,.6)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.sx,p.sy);ctx.lineTo(ne.sx,ne.sy);ctx.stroke();}
+  });ctx.fillStyle='rgba(255,255,255,.35)';ctx.font='12px sans-serif';ctx.textAlign='left';ctx.fillText({pos:'Position (X,Y,Z)',nor:'Normal (NX,NY,NZ)',uv:'UV (U,V)'}[mode]||'',10,22);RAF['cv_c13']=requestAnimationFrame(fr);})();
+})();
+// 1-4 Textures
+(function(){
+  const gl=mkGL('cv_c14');if(!gl)return;const m=sphere(28,28);
+  const VS=`attribute vec3 aP;attribute vec2 aUV;uniform mat4 uM;varying vec2 vU;void main(){vU=aUV;gl_Position=uM*vec4(aP,1.0);}`;
+  const FS=`precision mediump float;varying vec2 vU;uniform int uMd;void main(){float u=vU.x,v=vU.y;if(uMd==0){float c=mod(floor(u*8.)+floor(v*8.),2.);gl_FragColor=vec4(c*.8+.1,c*.8+.1,c*.8+.1,1);}else if(uMd==1){gl_FragColor=vec4(u,v,.4,1);}else{float row=floor(v*4.);float bx=mod(u*6.+(mod(row,2.)*.5),1.),by=mod(v*4.,1.);bool mort=bx<.05||bx>.95||by<.1||by>.9;float sh=.8+by*.25;if(mort)gl_FragColor=vec4(.42,.38,.34,1.);else gl_FragColor=vec4(.72*sh,.33*sh,.22*sh,1.);}}`;
+  const p=prog(gl,VS,FS);const PB=buf(gl,m.p),UVB=buf(gl,m.u);buf(gl,m.i,gl.ELEMENT_ARRAY_BUFFER);
+  attr(gl,p,'aP',PB);attr(gl,p,'aUV',UVB,2);gl.enable(gl.DEPTH_TEST);gl.clearColor(.03,.03,.08,1);
+  const uM=gl.getUniformLocation(p,'uM'),uMd=gl.getUniformLocation(p,'uMd');
+  const mmap={checker:0,grad:1,brick:2};let mode='checker';
+  document.getElementById('b_c14')?.addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;mode=b.dataset.m;document.querySelectorAll('#b_c14 .btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+  (function fr(){gl.uniformMatrix4fv(uM,false,mvp(gl,0,0,3));gl.uniform1i(uMd,mmap[mode]??0);vp(gl);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.drawElements(gl.TRIANGLES,m.i.length,gl.UNSIGNED_SHORT,0);RAF['cv_c14']=requestAnimationFrame(fr);})();
+})();
+// 1-5 MVP
+(function(){
+  const gl=mkGL('cv_c15');if(!gl)return;const c2=cube();
+  const VS=`attribute vec3 aP,aN;uniform mat4 uM;varying vec3 vN;void main(){vN=aN;gl_Position=uM*vec4(aP,1.0);}`;
+  const FS=`precision mediump float;varying vec3 vN;uniform vec3 uC;void main(){float d=max(dot(normalize(vN),normalize(vec3(1,2,1))),.1);gl_FragColor=vec4(uC*d,1);}`;
+  const p=prog(gl,VS,FS);const PB=buf(gl,c2.p),NB=buf(gl,c2.n);buf(gl,c2.i,gl.ELEMENT_ARRAY_BUFFER);
+  attr(gl,p,'aP',PB);attr(gl,p,'aN',NB);gl.enable(gl.DEPTH_TEST);gl.clearColor(.03,.02,.07,1);
+  const uM=gl.getUniformLocation(p,'uM'),uC=gl.getUniformLocation(p,'uC');let mode='all',t=0;
+  document.getElementById('b_c15')?.addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;mode=b.dataset.m;document.querySelectorAll('#b_c15 .btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+  (function fr(){t+=.012;const asp=gl._c.width/gl._c.height;let MVP;
+  if(mode==='ortho'){const P=new Float32Array(16),s=1.6;P[0]=1/s;P[5]=asp/s;P[10]=-2/99.9;P[15]=1;MVP=M.mul(M.mul(P,M.v(0,1.5,4)),M.ry(t));}
+  else{MVP=M.mul(mvp(gl,0,1.5,4),mode==='model'?M.mul(M.ry(t),M.sc(1.3)):M.ry(t));}
+  gl.uniformMatrix4fv(uM,false,MVP);gl.uniform3fv(uC,new Float32Array([.4,.6,1]));
+  vp(gl);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.drawElements(gl.TRIANGLES,c2.i.length,gl.UNSIGNED_SHORT,0);RAF['cv_c15']=requestAnimationFrame(fr);})();
+})();
+// 1-6 Coord systems
+(function(){
+  const gl=mkGL('cv_c16');if(!gl)return;const c2=cube();
+  const VS=`attribute vec3 aP,aN;uniform mat4 uM;varying vec3 vN,vP;void main(){vP=aP;vN=aN;gl_Position=uM*vec4(aP,1.0);}`;
+  const FS=`precision mediump float;varying vec3 vN,vP;uniform int uMd;void main(){float d=max(dot(normalize(vN),normalize(vec3(1,2,1))),.08);if(uMd==0)gl_FragColor=vec4(vec3(.38,.6,1)*d,1);else if(uMd==1)gl_FragColor=vec4(vec3(.4,1,.5)*d,1);else gl_FragColor=vec4((vP*.5+.5)*d,1);}`;
+  const p=prog(gl,VS,FS);const PB=buf(gl,c2.p),NB=buf(gl,c2.n);buf(gl,c2.i,gl.ELEMENT_ARRAY_BUFFER);
+  attr(gl,p,'aP',PB);attr(gl,p,'aN',NB);gl.enable(gl.DEPTH_TEST);gl.clearColor(.03,.02,.08,1);
+  const uM=gl.getUniformLocation(p,'uM'),uMd=gl.getUniformLocation(p,'uMd');
+  const mmap={world:0,view:1,ndc:2};let mode='world',t=0;
+  document.getElementById('b_c16')?.addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;mode=b.dataset.m;document.querySelectorAll('#b_c16 .btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+  (function fr(){t+=.01;gl.uniformMatrix4fv(uM,false,M.mul(mvp(gl,0,1.5,4),M.ry(t)));gl.uniform1i(uMd,mmap[mode]??0);vp(gl);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.drawElements(gl.TRIANGLES,c2.i.length,gl.UNSIGNED_SHORT,0);RAF['cv_c16']=requestAnimationFrame(fr);})();
+})();
+// 1-7 Camera
+(function(){
+  const gl=mkGL('cv_c17');if(!gl)return;const c2=cube();
+  const VS=`attribute vec3 aP,aN;uniform mat4 uM;varying vec3 vN;void main(){vN=aN;gl_Position=uM*vec4(aP,1.0);}`;
+  const FS=`precision mediump float;varying vec3 vN;uniform vec3 uC;void main(){float d=max(dot(normalize(vN),normalize(vec3(1,2,1))),.1);gl_FragColor=vec4(uC*d,1);}`;
+  const p=prog(gl,VS,FS);const PB=buf(gl,c2.p),NB=buf(gl,c2.n);buf(gl,c2.i,gl.ELEMENT_ARRAY_BUFFER);
+  attr(gl,p,'aP',PB);attr(gl,p,'aN',NB);gl.enable(gl.DEPTH_TEST);gl.clearColor(.02,.02,.06,1);
+  const uM=gl.getUniformLocation(p,'uM'),uC=gl.getUniformLocation(p,'uC');let mode='orbit',t=0;
+  document.getElementById('b_c17')?.addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;mode=b.dataset.m;document.querySelectorAll('#b_c17 .btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+  const COLS=[[.5,.7,1],[.9,.5,.2],[.4,.9,.5]];
+  (function fr(){t+=.012;const asp=gl._c.width/gl._c.height;
+  let P;if(mode==='ortho'){P=new Float32Array(16);const s=1.8;P[0]=1/s;P[5]=asp/s;P[10]=-2/99.9;P[15]=1;}else P=M.p(mode==='fov'?Math.PI/2:Math.PI/4,asp,.1,100);
+  const r=3.5,ex=r*Math.cos(t),ez=r*Math.sin(t);const V=M.v(ex,1.2,ez);
+  vp(gl);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  [[-1.5,0,0],[0,0,0],[1.5,0,0]].forEach(([tx,ty,tz],i)=>{gl.uniformMatrix4fv(uM,false,M.mul(M.mul(P,V),M.tr(tx,ty,tz)));gl.uniform3fv(uC,new Float32Array(COLS[i]));gl.drawElements(gl.TRIANGLES,c2.i.length,gl.UNSIGNED_SHORT,0);});RAF['cv_c17']=requestAnimationFrame(fr);})();
+})();
+// 1-8 Gamma
+(function(){
+  const gl=mkGL('cv_c18');if(!gl)return;const m=sphere(28,28);
+  const VS=`attribute vec3 aP,aN;uniform mat4 uM;varying vec3 vN,vP;void main(){vN=aN;vP=aP;gl_Position=uM*vec4(aP,1.0);}`;
+  const FS=`precision mediump float;varying vec3 vN,vP;uniform int uMd;void main(){vec3 N=normalize(vN);float d=max(dot(N,normalize(vec3(1,1,.5))),0.);vec3 lin=vec3(.1)+d*vec3(.4,.6,1)+pow(d,32.)*vec3(.6);vec3 gc=pow(lin,vec3(1./2.2));if(uMd==0)gl_FragColor=vec4(lin,1);else if(uMd==1)gl_FragColor=vec4(gc,1);else{if(vP.x<0.)gl_FragColor=vec4(lin,1);else gl_FragColor=vec4(gc,1);}}`;
+  const p=prog(gl,VS,FS);const PB=buf(gl,m.p),NB=buf(gl,m.n);buf(gl,m.i,gl.ELEMENT_ARRAY_BUFFER);
+  attr(gl,p,'aP',PB);attr(gl,p,'aN',NB);gl.enable(gl.DEPTH_TEST);gl.clearColor(.03,.03,.08,1);
+  const uM=gl.getUniformLocation(p,'uM'),uMd=gl.getUniformLocation(p,'uMd');
+  const mmap={linear:0,gamma:1,compare:2};let mode='linear';
+  document.getElementById('b_c18')?.addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;mode=b.dataset.m;document.querySelectorAll('#b_c18 .btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+  (function fr(){gl.uniformMatrix4fv(uM,false,mvp(gl,0,0,3));gl.uniform1i(uMd,mmap[mode]??0);vp(gl);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.drawElements(gl.TRIANGLES,m.i.length,gl.UNSIGNED_SHORT,0);RAF['cv_c18']=requestAnimationFrame(fr);})();
+})();
+// 1-9 Boss: cube grid (Canvas 2D isometric)
+(function(){
+  const ctx=mkC2('cv_c19');if(!ctx)return;const W=ctx._W,H=ctx._H;
+  let mode='solid',rotY=0,drag=false,lx=0;
+  const cv=document.getElementById('cv_c19');
+  cv.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;});
+  cv.addEventListener('mousemove',e=>{if(!drag)return;rotY+=(e.clientX-lx)*.015;lx=e.clientX;});
+  cv.addEventListener('mouseup',()=>drag=false);
+  cv.addEventListener('touchstart',e=>{drag=true;lx=e.touches[0].clientX;},{passive:true});
+  cv.addEventListener('touchmove',e=>{if(!drag)return;rotY+=(e.touches[0].clientX-lx)*.015;lx=e.touches[0].clientX;},{passive:true});
+  cv.addEventListener('touchend',()=>drag=false);
+  document.getElementById('b_c19')?.addEventListener('click',e=>{const b=e.target.closest('.btn');if(!b)return;mode=b.dataset.m;document.querySelectorAll('#b_c19 .btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+  const cubes=Array.from({length:10},()=>({x:(Math.random()-.5)*4,y:(Math.random()-.5)*2,z:(Math.random()-.5)*4,c:[Math.random(),Math.random()*.5+.5,Math.random()*.5+.5]}));
+  function pr(x,y,z){const cos=Math.cos(rotY),sin=Math.sin(rotY);const rx=x*cos-z*sin,rz=x*sin+z*cos;const sc=6/(6+rz+3);return{sx:W/2+rx*sc*60,sy:H/2+y*sc*60};}
+  function dc(cx,cy,cz,col){const sz=.42;const C=[[-sz,-sz,-sz],[sz,-sz,-sz],[sz,sz,-sz],[-sz,sz,-sz],[-sz,-sz,sz],[sz,-sz,sz],[sz,sz,sz],[-sz,sz,sz]].map(([x,y,z])=>pr(cx+x,cy+y,cz+z));[[0,1,2,3],[4,5,6,7],[0,4,7,3],[1,5,6,2],[0,1,5,4],[3,2,6,7]].forEach((f,fi)=>{const pts=f.map(i=>C[i]);const ax=pts[1].sx-pts[0].sx,ay=pts[1].sy-pts[0].sy,bx=pts[2].sx-pts[0].sx,by=pts[2].sy-pts[0].sy;if(ax*by-ay*bx>0)return;ctx.beginPath();ctx.moveTo(pts[0].sx,pts[0].sy);pts.slice(1).forEach(q=>ctx.lineTo(q.sx,q.sy));ctx.closePath();const sh=[.9,.7,.5,.5,.8,.4][fi];if(mode==='wire'){ctx.strokeStyle='rgba(80,200,255,.6)';ctx.lineWidth=1;ctx.stroke();}else if(mode==='rainbow'){ctx.fillStyle=`rgb(${Math.round(col[0]*sh*255)},${Math.round(col[1]*sh*255)},${Math.round(col[2]*sh*255)})`;ctx.fill();ctx.strokeStyle='rgba(0,0,0,.1)';ctx.lineWidth=.5;ctx.stroke();}else{const v=Math.round(sh*60);ctx.fillStyle=`rgb(${v},${Math.round(sh*90)},${Math.round(sh*180)})`;ctx.fill();ctx.strokeStyle='rgba(0,0,0,.15)';ctx.lineWidth=.5;ctx.stroke();}});}
+  (function fr(){if(!drag)rotY+=.008;ctx.clearRect(0,0,W,H);ctx.fillStyle='#060810';ctx.fillRect(0,0,W,H);[...cubes].sort((a,b)=>{const cos=Math.cos(rotY),sin=Math.sin(rotY);return(b.x*sin+b.z*cos)-(a.x*sin+a.z*cos);}).forEach(c=>dc(c.x,c.y,c.z,c.c));RAF['cv_c19']=requestAnimationFrame(fr);})();
+})();
+}
+runDemos();
+
+</script>
+</body>
+</html>
