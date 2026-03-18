@@ -30,6 +30,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
 <style>
+html{font-size:20px;}
+@media(max-width:480px){html{font-size:18px;}}
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --bg:#0a0a0c;--surf:#111116;--surf2:#18181f;--bdr:#2a2a38;
@@ -1972,44 +1974,65 @@ async function runCollect(){
   const logEl=document.getElementById('collect-log');
   const lines=document.getElementById('clog-lines');
   logEl.style.display='block'; lines.innerHTML='';
-
   const addLog=m=>{ lines.innerHTML+=`<div class="clog-line">${m}</div>`; };
 
   addLog(`📡 ${today()} 開始每日收集...`);
-  await delay(500);
-  addLog('🔍 掃描 12 個來源中...');
+  await delay(400);
+  addLog('🔍 掃描來源中...');
+  await delay(400);
 
   const pool = channel==='ta' ? POOL : ART_POOL;
-  const candidates=pickDaily(today(), pool);
-  const fresh=candidates.filter(a=>!A.find(x=>x.title===a.title));
+  const todayStr = today();
+
+  // Pick 8 articles that haven't been featured today yet
+  // Use date+time as seed for variety each time button is clicked
+  const seed = todayStr.split('-').reduce((a,b)=>a+parseInt(b),0) + Math.floor(Date.now()/60000);
+  const shuffled = [...pool].sort((a,b)=>{
+    const ha = ((seed*2654435761 + pool.indexOf(a)*1234567)>>>0);
+    const hb = ((seed*2654435761 + pool.indexOf(b)*1234567)>>>0);
+    return ha - hb;
+  });
+
+  // Take first 8 that are not already marked as today
+  const fresh = [];
+  for(const a of shuffled){
+    if(fresh.length >= 8) break;
+    // Mark with today's date to show as "new"
+    fresh.push({...a, id: 'd_'+todayStr+'_'+fresh.length, date: todayStr, isNew: true});
+  }
 
   for(const a of fresh){
-    await delay(300);
+    await delay(250);
     addLog(`✓ ${a.src}：${a.title.slice(0,45)}...`);
   }
-  await delay(400);
-  addLog(`✅ 完成！新增 ${fresh.length} 篇文章`);
+  await delay(300);
+  addLog(`✅ 完成！精選 ${fresh.length} 篇文章`);
 
-  // Prepend new articles
-  A = [...fresh, ...A];
-  lastCollect = today();
+  // Remove old "today" articles, prepend new ones
+  A = [...fresh, ...A.filter(a=>a.date !== todayStr || !a.isNew)];
+  lastCollect = todayStr;
   const saveKey = channel==='ta' ? 'ta_articles' : channel==='art' ? 'art_articles' : null;
-  if(!saveKey) return;
-  store.set(saveKey, JSON.stringify(A.slice(0,250)));
-  store.set('ta_lastCollect', today());
+  if(saveKey){
+    store.set(saveKey, JSON.stringify(A.slice(0,300)));
+  }
+  // Always save collect date
+  store.set('ta_lastCollect', todayStr);
 
   updateStats(); render(); updateCollectStatus();
 
-  if(fresh.length>0){
-    const banner=document.getElementById('new-banner');
-    banner.textContent=`+${fresh.length} 新文章已置頂 ↑`;
+  const banner=document.getElementById('new-banner');
+  if(banner){
+    banner.textContent=`+${fresh.length} 篇精選已更新 ↑`;
     banner.style.display='block';
     setTimeout(()=>{ banner.style.display='none'; },4000);
   }
 
-  await delay(3000);
+  await delay(2500);
   logEl.style.display='none';
   btn.disabled=false; btn.textContent='⟳ 立即收集';
+  // Force update header date display
+  const hdrEl=document.getElementById('last-collect-hdr');
+  if(hdrEl) hdrEl.textContent='上次收集：今天 ✓';
   collecting=false;
 }
 
