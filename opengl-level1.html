@@ -6,6 +6,8 @@
 <title>🏰 召喚之城 — OpenGL 魔法王國</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+html{font-size:20px;}
+@media(max-width:480px){html{font-size:18px;}}
 :root {
   --bg: #0a0b14;
   --bg2: #0f1120;
@@ -92,7 +94,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(10,11,20,.9);backdrop-f
 .school-link{display:inline-flex;align-items:center;gap:6px;background:rgba(255,217,61,.08);border:1px solid rgba(255,217,61,.25);border-radius:8px;padding:6px 12px;font-size:.8rem;font-weight:800;color:var(--acc4);margin-top:12px}
 
 /* Code block */
-.code-block{background:#070a14;border:1px solid var(--border);border-radius:12px;padding:16px;font-family:var(--mono);font-size:.8rem;line-height:1.7;overflow-x:auto;position:relative;margin:16px 0}
+.code-block{background:#070a14;border:1px solid var(--border);border-radius:12px;padding:16px;font-family:var(--mono);font-size:.8rem;line-height:1.7;overflow-x:auto;position:relative;margin:16px 0;white-space:pre-wrap;tab-size:2}
 .code-block .comment{color:#4a5568}
 .code-block .keyword{color:#7c6dfa}
 .code-block .string{color:#00f5c4}
@@ -176,7 +178,6 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 @keyframes fwFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx,0px),var(--ty,-80px)) scale(0);opacity:0}}
 
 /* ── Font size boost ── */
-html{font-size:17px}
 .lesson-title{font-size:1.05rem!important}
 .lesson-sub{font-size:.85rem!important}
 .story-box{font-size:1rem!important;line-height:1.9!important}
@@ -919,7 +920,7 @@ function buildDemo_Window(cont){
   window.setWinColor=m=>{window._winMode=m;document.querySelectorAll('.ctrl-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active')};
   const cv=document.getElementById('cv-l2');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
+  cv.width=600;cv.height=260;cv.style.width='100%';const gl=cv.getContext('webgl');
   if(!gl){cont.innerHTML='<p style="padding:20px;color:var(--txt2)">WebGL 不支援</p>';return;}
   const vs=`attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;uniform vec3 color;void main(){gl_FragColor=vec4(color,1);}`;
@@ -1026,8 +1027,7 @@ function buildDemo_Triangle(cont){
   </div>`;
   const cv=document.getElementById('cv-l4');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
-  if(!gl) return;
+  cv.width=600;cv.height=parseInt(cv.style.height)||260;cv.style.width='100%';const gl=cv.getContext('webgl');if(!gl)return;
   window._triMode=1;
   window.setTriMode=m=>{window._triMode=m;document.querySelectorAll('[id^="tri-mode-"]').forEach(b=>b.classList.remove('active'));document.getElementById('tri-mode-'+m).classList.add('active')};
   const vs=`attribute vec2 p;attribute vec3 c;varying vec3 vc;uniform float t;void main(){float s=sin(t+p.x*3.14)*0.05;gl_Position=vec4(p.x,p.y+s,0,1);vc=c;}`;
@@ -1104,8 +1104,7 @@ function buildDemo_Shader(cont){
   window.setShaderFx=fx=>{window._shFx=fx;['wave','pulse','rainbow'].forEach(f=>document.getElementById('sh-'+f).classList.remove('active'));document.getElementById('sh-'+fx).classList.add('active');};
   const cv=document.getElementById('cv-l5');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
-  if(!gl) return;
+  cv.width=600;cv.height=parseInt(cv.style.height)||260;cv.style.width='100%';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;
 uniform float t;uniform vec3 col;uniform int fx;varying vec2 uv;
@@ -1157,8 +1156,7 @@ function buildDemo_Texture(cont){
   window.setTexMode=m=>{window._texMode=m;['uv','checker','wave'].forEach(f=>document.getElementById('tex-'+f).classList.remove('active'));document.getElementById('tex-'+m).classList.add('active');};
   const cv=document.getElementById('cv-l6');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
-  if(!gl) return;
+  cv.width=600;cv.height=parseInt(cv.style.height)||260;cv.style.width='100%';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;
 uniform int mode;uniform float t;varying vec2 uv;
@@ -1212,8 +1210,7 @@ function buildDemo_Transform(cont){
   };
   const cv=document.getElementById('cv-l7');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
-  if(!gl) return;
+  cv.width=600;cv.height=parseInt(cv.style.height)||260;cv.style.width='100%';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec2 p;attribute vec3 c;varying vec3 vc;
 uniform float tx,rot,sc;
 void main(){
@@ -1264,8 +1261,7 @@ function buildDemo_MVP(cont){
   <div class="slider-row"><label>📏 攝影機距離</label><input type="range" min="1" max="10" value="3" step=".1" id="sl-dist" oninput="document.getElementById('sv-dist').textContent=this.value"><span class="slider-val" id="sv-dist">3</span></div>`;
   const cv=document.getElementById('cv-l8');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
-  if(!gl) return;
+  cv.width=600;cv.height=parseInt(cv.style.height)||260;cv.style.width='100%';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec3 p;attribute vec3 c;varying vec3 vc;
 uniform mat4 mvp;
 void main(){gl_Position=mvp*vec4(p,1);vc=c;}`;
@@ -1293,7 +1289,7 @@ void main(){gl_Position=mvp*vec4(p,1);vc=c;}`;
     const fov=parseInt(document.getElementById('sl-fov').value)*Math.PI/180;
     const dist=parseFloat(document.getElementById('sl-dist').value);
     // simple MVP
-    const mvp=makeMVP(t,t*.7,dist,fov,600/260);
+    const mvp=makeMVP(t,t*.7,dist,fov,cv.width/cv.height);
     gl.clearColor(.04,.05,.1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
     gl.bindBuffer(gl.ARRAY_BUFFER,buf);
@@ -1318,8 +1314,7 @@ function buildDemo_Camera(cont){
   <div style="font-size:.8rem;color:var(--txt2);margin-top:8px;text-align:center">攝影機 Position: <span id="cam-pos" style="font-family:var(--mono);color:var(--acc4)">0, 0, 3</span></div>`;
   const cv=document.getElementById('cv-l9');
   
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);
-  if(!gl) return;
+  cv.width=600;cv.height=parseInt(cv.style.height)||260;cv.style.width='100%';const gl=cv.getContext('webgl');if(!gl)return;
   gl.enable(gl.DEPTH_TEST);
   const vs=`attribute vec3 p;attribute vec3 c;varying vec3 vc;uniform mat4 mvp;void main(){gl_Position=mvp*vec4(p,1);vc=c;}`;
   const fs=`precision mediump float;varying vec3 vc;void main(){gl_FragColor=vec4(vc,1);}`;
