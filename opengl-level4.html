@@ -6,8 +6,8 @@
 <title>⚔️ 術式之城 — OpenGL 魔法王國</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-html{font-size:20px;}
-@media(max-width:480px){html{font-size:18px;}}
+html{font-size:17px;}
+@media(max-width:480px){html{font-size:16px;}}
 :root{
   --bg:#0d0a14;--bg2:#120e1c;--card:#160f22;--border:#231a35;
   --acc:#c792ea;--acc2:#89ddff;--acc3:#ffd93d;--acc4:#ff6b6b;--acc5:#00f5c4;
@@ -500,9 +500,17 @@ function complete(id){if(earned.includes(id))return;earned.push(id);localStorage
 // WEBGL DEMOS
 // ══════════════════════════════════════════════════════
 const inited={};
-function initDemo(id){if(inited[id])return;inited[id]=true;const cont=document.getElementById('dc-'+id);if(!cont)return;
-const demos={l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6,l7:d7,l8:d8,l9:d9,l10:d10,l11:d11};
-demos[id]?.(cont);}
+function initDemo(id){
+  const cont=document.getElementById('dc-'+id);if(!cont)return;
+  if(inited[id])return;
+  // Release all WebGL contexts before creating this one
+  releaseAllGL();
+  // Reset all inited flags so other demos can reinit after context release
+  Object.keys(inited).forEach(k=>{if(k!==id)inited[k]=false;});
+  inited[id]=true;
+  const demos={l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6,l7:d7,l8:d8,l9:d9,l10:d10,l11:d11};
+  demos[id]?.(cont);
+}
 
 function mkProg(gl,vs,fs){const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;};const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,vs));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
 function qBuf(gl){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);return b;}
