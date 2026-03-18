@@ -187,7 +187,7 @@ function clamp(){
   const vw=window.innerWidth,vh=window.innerHeight-60;
   const mw=MW*sc,mh=MH*sc;
   panX=Math.min(0,Math.max(panX,vw-mw));
-  panY=Math.min(HUDH,Math.max(panY,vh-mh));
+  panY=Math.min(0,Math.max(panY,vh-mh-HUDH));
 }
 
 outer.addEventListener('touchstart',function(e){
@@ -212,8 +212,8 @@ outer.addEventListener('mouseup',function(){dragging=false;});
 outer.addEventListener('wheel',function(e){e.preventDefault();var ns=Math.min(2.5,Math.max(0.35,sc*Math.exp(-e.deltaY*.001)));panX=e.clientX-(e.clientX-panX)*ns/sc;panY=e.clientY-(e.clientY-panY)*ns/sc;sc=ns;clamp();applyT();},{passive:false});
 
 function scrollToPos(x,y){
-  var vw=window.innerWidth,vh=window.innerHeight-60;
-  panX=vw/2-x*sc; panY=vh/2-y*sc; clamp(); applyT();
+  var vw=window.innerWidth,vh=window.innerHeight-60-HUDH;
+  panX=vw/2-x*sc; panY=HUDH+(vh/2)-y*sc; clamp(); applyT();
 }
 
 // ── Draw SVG Map Background ──
