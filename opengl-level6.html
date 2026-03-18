@@ -285,7 +285,7 @@ function checkQ(lid,idx){const les=LESSONS.find(l=>l.id===lid);document.querySel
 function complete(id){if(earned.includes(id))return;earned.push(id);localStorage.setItem('tower6_done',JSON.stringify(earned));setTimeout(checkCompletion,400);const les=LESSONS.find(l=>l.id===id);const btn=document.getElementById('btn-'+id);showXPPop(les.xp,btn);toast(`⚗️ +${les.xp} XP！「${les.title}」完成！`);setTimeout(()=>{current=null;render();updateXP();},500);}
 
 const inited={};
-function initDemo(id){if(inited[id])return;inited[id]=true;const cont=document.getElementById('dc-'+id);if(!cont)return;const fn={l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6,l7:d7,l8:d8,l9:d9};fn[id]?.(cont);}
+function initDemo(id){const cont=document.getElementById('dc-'+id);if(!cont)return;if(inited[id])return;if(window._glPool){Object.values(window._glPool).forEach(function(g){try{var e=g.getExtension('WEBGL_lose_context');if(e)e.loseContext();}catch(e2){}});window._glPool={};}Object.keys(inited).forEach(function(k){if(k!==id)inited[k]=false;});inited[id]=true;const fn={l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6,l7:d7,l8:d8,l9:d9};fn[id]?.(cont);}
 function mkP(gl,vs,fs){const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;};const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,vs));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
 function qB(gl){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);return b;}
 
@@ -345,7 +345,7 @@ const VS3D=`attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vP;un
 
 function makePBRScene(cont,id,label,rows,getParams){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv6-${id}" width="600" height="300" style="height:300px;cursor:grab"></canvas></div>`;
-  const cv=document.getElementById(`cv6-${id}`);const gl=safeGL(cv);if(!gl)return;
+  const cv=document.getElementById(`cv6-${id}`);const gl=cv.getContext('webgl');if(!gl)return;
   gl.enable(gl.DEPTH_TEST);
   const prog=mkP(gl,VS3D,PBR_FS);
   const{vb,nb,ib,ic}=makeSphBufs(gl);
@@ -405,7 +405,7 @@ function d1(cont){
   }`;
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>PBR 渲染方程可視化</div></div><canvas id="cv6d1" width="600" height="260" style="height:260px"></canvas></div>';
   const cv=document.getElementById('cv6d1');
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   const prog=mkP(gl,vs,fs);const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),tL=gl.getUniformLocation(prog,'t');
   let time=0;(function fr(){time+=0.012;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
 }
@@ -414,7 +414,7 @@ function d2(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>金屬度 Metallic 0 → 1（拖曳旋轉）</div></div><canvas id="cv6-d2" width="600" height="260" style="height:260px;cursor:grab"></canvas></div><div class="slider-row"><span class="slider-label">🪞 金屬度</span><input type="range" min="0" max="100" value="50" id="met-sl"><span class="slider-val" id="met-v">0.50</span></div>';
   document.getElementById('met-sl').oninput=function(){document.getElementById('met-v').textContent=(this.value/100).toFixed(2);};
   const cv=document.getElementById('cv6-d2');
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;gl.enable(gl.DEPTH_TEST);
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;gl.enable(gl.DEPTH_TEST);
   const prog=mkP(gl,VS3D,PBR_FS);const{vb,nb,ib,ic}=makeSphBufs(gl);
   const pL=gl.getAttribLocation(prog,'p'),nL=gl.getAttribLocation(prog,'n');
   const mvpL=gl.getUniformLocation(prog,'mvp'),modelL=gl.getUniformLocation(prog,'model');
@@ -473,7 +473,7 @@ function makeShaderDemo2(cont,id,label,modes,modeNames,fs){
   const btns=modeNames.map((n,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="m6${id}-${i}" onclick="setSD6_${id}(${i})">${n}</button>`).join('');
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv6s-${id}" width="600" height="260" style="height:260px"></canvas></div><div class="ctrl-row">${btns}</div>`;
   window[`_sd6${id}`]=0;window[`setSD6_${id}`]=m=>{window[`_sd6${id}`]=m;modeNames.forEach((_,i)=>document.getElementById(`m6${id}-${i}`).classList.toggle('on',i===m));};
-  const cv=document.getElementById('cv6s-'+id);const gl=safeGL(cv);if(!gl)return;
+  const cv=document.getElementById('cv6s-'+id);const gl=cv.getContext('webgl');if(!gl)return;
   const prog=mkP(gl,'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}',fs);
   const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
   let time=0;(function fr(){time+=0.012;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window[`_sd6${id}`]);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
@@ -514,7 +514,7 @@ function d6(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>PBR 材質球庫</div></div><canvas id="cv6-d6" width="600" height="240" style="height:240px;cursor:grab"></canvas></div><div class="ctrl-row">'+materials.map((m,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="mat${i}" onclick="selMat(${i})">${m.name}</button>`).join('')+'</div>';
   window.selMat=i=>{sel=i;materials.forEach((_,j)=>document.getElementById('mat'+j).classList.toggle('on',j===i));};
   const cv=document.getElementById('cv6-d6');
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;gl.enable(gl.DEPTH_TEST);
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;gl.enable(gl.DEPTH_TEST);
   const prog=mkP(gl,VS3D,PBR_FS);const{vb,nb,ib,ic}=makeSphBufs(gl);
   const pL=gl.getAttribLocation(prog,'p'),nL=gl.getAttribLocation(prog,'n');
   const mvpL=gl.getUniformLocation(prog,'mvp'),modelL=gl.getUniformLocation(prog,'model');
@@ -541,7 +541,7 @@ function d6(cont){
 function d7(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>IBL + PBR 完整整合 — 5×5 材質矩陣（拖曳旋轉）</div></div><canvas id="cv6-d7" width="600" height="300" style="height:300px;cursor:grab"></canvas></div>';
   const cv=document.getElementById('cv6-d7');
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;gl.enable(gl.DEPTH_TEST);
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;gl.enable(gl.DEPTH_TEST);
   const prog=mkP(gl,VS3D,PBR_FS);const{vb,nb,ib,ic}=makeSphBufs(gl);
   const pL=gl.getAttribLocation(prog,'p'),nL=gl.getAttribLocation(prog,'n');
   const mvpL=gl.getUniformLocation(prog,'mvp'),modelL=gl.getUniformLocation(prog,'model');
@@ -584,7 +584,7 @@ function d9(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>👑 BOSS：完整 PBR + 延遲渲染架構可視化</div></div><canvas id="cv6-d9" width="600" height="300" style="height:300px;cursor:grab"></canvas></div><div class="ctrl-row"><button class="ctrl-btn on" id="dr-final" onclick="setDR('final')">🎨 最終渲染</button><button class="ctrl-btn" id="dr-albedo" onclick="setDR('albedo')">🎭 G-Buffer: Albedo</button><button class="ctrl-btn" id="dr-normal" onclick="setDR('normal')">🧲 G-Buffer: 法線</button><button class="ctrl-btn" id="dr-rough" onclick="setDR('rough')">🪨 G-Buffer: Roughness/Metallic</button></div>';
   window._drMode='final';window.setDR=m=>{window._drMode=m;['final','albedo','normal','rough'].forEach(x=>document.getElementById('dr-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv6-d9');
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;gl.enable(gl.DEPTH_TEST);
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;gl.enable(gl.DEPTH_TEST);
   const prog=mkP(gl,VS3D,`precision mediump float;
 varying vec3 vN;varying vec3 vP;
 uniform vec3 albedo;uniform float metallic;uniform float roughness;uniform vec3 camPos;uniform float t;uniform int gmode;
