@@ -179,6 +179,8 @@ let player=null, panX=0,panY=0,sc=1,lx=0,ly=0,dragging=false,lastDist=0;
 const outer=document.getElementById('outer');
 const stage=document.getElementById('stage');
 const HUDH=72;
+// Fix: offset outer below HUD so map content isn't hidden behind the HUD bar
+outer.style.top=HUDH+'px';
 
 function applyT(){stage.style.transform='translate('+panX+'px,'+panY+'px) scale('+sc+')';}
 function clamp(){
