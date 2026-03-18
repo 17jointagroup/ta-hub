@@ -455,7 +455,7 @@ function d3(cont){
   
   cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   // Build a stylized "character" from multiple meshes
-  const meshes=buildCharacter();
+  const meshes=buildCharacter(gl);
   document.getElementById('vtx-cnt').textContent=meshes.reduce((s,m)=>s+m.vc,0);
   document.getElementById('tri-cnt').textContent=meshes.reduce((s,m)=>s+m.tc,0);
   const vs=`attribute vec3 pos;attribute vec3 norm;varying vec3 vN;varying vec3 vP;varying vec3 vC;attribute vec3 col;uniform mat4 mvp;uniform float clipX;void main(){vN=norm;vP=pos;vC=col;gl_Position=mvp*vec4(pos,1);}`;
@@ -502,14 +502,13 @@ function d3(cont){
   frame();
 }
 
-function buildCharacter(){
+function buildCharacter(gl){
   const meshes=[];
-  function addMesh(verts,idx,model,color){
+  function addMesh(gl,verts,idx,model,color){
     const interleaved=[];
     for(let i=0;i<verts.length/6;i++){
       interleaved.push(verts[i*6],verts[i*6+1],verts[i*6+2],verts[i*6+3],verts[i*6+4],verts[i*6+5],...color);
     }
-    const gl=document.getElementById('cv-d3').getContext('webgl',{powerPreference:'low-power'});
     const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(interleaved),gl.STATIC_DRAW);
     const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx),gl.STATIC_DRAW);
     meshes.push({vb,ib,ic:idx.length,vc:verts.length/6,tc:Math.floor(idx.length/3),model});
@@ -523,7 +522,7 @@ function buildCharacter(){
     {fn:genCylV,args:[.22,.22,.9,8],model:transl(-.3,.1,0),col:[.35,.7,.48]},
     {fn:genCylV,args:[.22,.22,.9,8],model:transl(.3,.1,0),col:[.35,.7,.48]},
   ];
-  parts.forEach(p=>{const {v,i}=p.fn(...p.args);addMesh(v,i,p.model,p.col);});
+  parts.forEach(p=>{const {v,i}=p.fn(...p.args);addMesh(gl,v,i,p.model,p.col);});
   return meshes;
 }
 
