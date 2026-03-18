@@ -329,7 +329,7 @@ function showGraduation(){
 
 // ─── DEMOS ───
 const inited={};
-function initDemo(id){if(inited[id])return;inited[id]=true;const cont=document.getElementById('dc-'+id);if(!cont)return;const fn={l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6,l7:d7,l8:d8};fn[id]?.(cont);}
+function initDemo(id){const cont=document.getElementById('dc-'+id);if(!cont)return;if(inited[id])return;if(window._glPool){Object.values(window._glPool).forEach(function(g){try{var e=g.getExtension('WEBGL_lose_context');if(e)e.loseContext();}catch(e2){}});window._glPool={};}Object.keys(inited).forEach(function(k){if(k!==id)inited[k]=false;});inited[id]=true;const fn={l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6,l7:d7,l8:d8};fn[id]?.(cont);}
 function mkP(gl,vs,fs){const mk=(t,src)=>{const sh=gl.createShader(t);gl.shaderSource(sh,src);gl.compileShader(sh);return sh;};const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,vs));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
 function qB(gl){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);return b;}
 const VS='attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}';
