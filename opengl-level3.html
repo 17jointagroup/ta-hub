@@ -453,7 +453,9 @@ function d3(cont){
   window.setM3=m=>{window._m3=m;['tex','norm','wire','x'].forEach(x=>document.getElementById('m3-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv-d3');
   
-  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';
+  releaseAllGL3();
+  const gl=cv.getContext('webgl');if(!gl)return;
   // Build a stylized "character" from multiple meshes
   const meshes=buildCharacter(gl);
   document.getElementById('vtx-cnt').textContent=meshes.reduce((s,m)=>s+m.vc,0);
@@ -539,6 +541,15 @@ function rotY(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,
 function nrm(v){const l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])||1;return[v[0]/l,v[1]/l,v[2]/l];}
 function crs(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
 function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+
+function releaseAllGL3(){
+  if(window._glPool){
+    Object.values(window._glPool).forEach(function(g){
+      try{var ext=g.getExtension('WEBGL_lose_context');if(ext)ext.loseContext();}catch(e){}
+    });
+    window._glPool={};
+  }
+}
 
 function buildCode(les){
   const codes={
