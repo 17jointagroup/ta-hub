@@ -178,7 +178,7 @@ html{font-size:17px}
 </section>
 
 <div class="chapter-map">
-  <div class="map-title">📍 關卡地圖</div>
+  
   <div id="lesson-list"></div>
 </div>
 <div class="toast" id="toast"></div>
@@ -496,99 +496,124 @@ function qBuf(gl){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.
 
 // Demo L1 - Depth Test visualizer
 function d1(cont){
-  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>深度測試 — Z-Buffer 可視化</div></div><canvas id="cv4-1" width="600" height="260" style="height:260px"></canvas></div>
-  <div class="ctrl-row"><button class="ctrl-btn on" id="dt-on" onclick="setDT(1)">✅ 開啟深度測試</button><button class="ctrl-btn" id="dt-off" onclick="setDT(0)">❌ 關閉深度測試</button><button class="ctrl-btn" id="dt-vis" onclick="setDT(2)">🔲 視覺化 Z-Buffer</button></div>`;
   window._dtMode=1;
-  window.setDT=m=>{window._dtMode=m;[['dt-on',1],['dt-off',0],['dt-vis',2]].forEach(([id,v])=>document.getElementById(id).classList.toggle('on',v===m));};
-  const cv=document.getElementById('cv4-1');
-  let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;
-  const gl=safeGL(cv);if(!gl)return;
-  const vs=`attribute vec3 p;attribute vec3 c;varying vec3 vc;uniform mat4 mvp;void main(){vc=c;gl_Position=mvp*vec4(p,1.0);}`;
-  const fs=`precision mediump float;varying vec3 vc;uniform int vd;void main(){if(vd==1){float d=gl_FragCoord.z;gl_FragColor=vec4(d,d,d,1.0);}else{gl_FragColor=vec4(vc,1.0);}}`;
-  const prog=mkProg(gl,vs,fs);
-  const verts=new Float32Array([
-    -1.2,-1.0,-0.3, 1.0,0.3,0.3,  1.2,-1.0,-0.3, 1.0,0.3,0.3,
-     1.2, 1.0,-0.3, 1.0,0.3,0.3, -1.2, 1.0,-0.3, 1.0,0.3,0.3,
-    -0.8,-0.8, 0.3, 0.3,0.6,1.0,  0.8,-0.8, 0.3, 0.3,0.6,1.0,
-     0.8, 0.8, 0.3, 0.3,0.6,1.0, -0.8, 0.8, 0.3, 0.3,0.6,1.0]);
-  const idx=new Uint16Array([0,1,2,0,2,3, 4,5,6,4,6,7]);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
-  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
-  const pL=gl.getAttribLocation(prog,'p'),cL=gl.getAttribLocation(prog,'c');
-  const mvpL=gl.getUniformLocation(prog,'mvp'),vdL=gl.getUniformLocation(prog,'vd');
-  let t=0;
-  (function frame(){
-    t+=0.01;
-    const m=window._dtMode;
+  window.setDT=function(m){window._dtMode=m;[['dt-on',1],['dt-off',0],['dt-vis',2]].forEach(function(p){document.getElementById(p[0]).classList.toggle('on',p[1]===m);});};
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>深度測試 — Z-Buffer 可視化</div></div><canvas id="cv4-1"></canvas></div>
+  <div class="ctrl-row"><button class="ctrl-btn on" id="dt-on" onclick="setDT(1)">✅ 開啟深度測試</button><button class="ctrl-btn" id="dt-off" onclick="setDT(0)">❌ 關閉深度測試</button><button class="ctrl-btn" id="dt-vis" onclick="setDT(2)">🔲 視覺化 Z-Buffer</button></div>`;
+
+  function _mkS(gl,t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(sh));return sh;}
+  function _mkP(gl,vs,fs){var p=gl.createProgram();gl.attachShader(p,_mkS(gl,gl.VERTEX_SHADER,vs));gl.attachShader(p,_mkS(gl,gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
+  function _sph(r,st,sl){var v=[],n=[],i=[];for(var a=0;a<=st;a++){var phi=Math.PI*a/st;for(var b=0;b<=sl;b++){var th=2*Math.PI*b/sl;var x=Math.sin(phi)*Math.cos(th)*r,y=Math.cos(phi)*r,z=Math.sin(phi)*Math.sin(th)*r;var l=Math.sqrt(x*x+y*y+z*z)||1;v.push(x,y,z);n.push(x/l,y/l,z/l);}}for(var a=0;a<st;a++)for(var b=0;b<sl;b++){var p0=a*(sl+1)+b,q=p0+sl+1;i.push(p0,q,p0+1,q,q+1,p0+1);}return{v:new Float32Array(v),n:new Float32Array(n),i:new Uint16Array(i)};}
+  function _persp(fov,asp,n,f){var ta=Math.tan(fov/2),d=f-n,m=new Float32Array(16);m[0]=1/(ta*asp);m[5]=1/ta;m[10]=-(f+n)/d;m[11]=-1;m[14]=-2*f*n/d;return m;}
+  function _look(e,c){function nr(v){var l=Math.hypot(v[0],v[1],v[2]);return[v[0]/l,v[1]/l,v[2]/l];}function cr(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}var z=nr([e[0]-c[0],e[1]-c[1],e[2]-c[2]]);var x=nr(cr([0,1,0],z));var y=cr(z,x);var m=new Float32Array(16);m[0]=x[0];m[4]=x[1];m[8]=x[2];m[12]=-dt(x,e);m[1]=y[0];m[5]=y[1];m[9]=y[2];m[13]=-dt(y,e);m[2]=z[0];m[6]=z[1];m[10]=z[2];m[14]=-dt(z,e);m[15]=1;return m;}
+  function _mul(a,b){var m=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){var s=0;for(var k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];m[i+j*4]=s;}return m;}
+  function _gl(id){var cv=document.getElementById(id);var w=Math.min(300,window.innerWidth-80);cv.width=w;cv.height=w;cv.style.cssText='display:block;width:'+w+'px;height:'+w+'px;margin:0 auto;';var gl=cv.getContext('webgl');if(!gl)console.error('WebGL n/a '+id);return{cv,gl};}
+  var _=_gl('cv4-1');var cv=_.cv,gl=_.gl;if(!gl)return;
+  var VS=`attribute vec3 aP,aC;varying vec3 vC;uniform mat4 uM;void main(){vC=aC;gl_Position=uM*vec4(aP,1.0);}`;
+  var FS=`precision mediump float;varying vec3 vC;uniform int uVD;void main(){if(uVD==1){float d=gl_FragCoord.z;gl_FragColor=vec4(d,d,d,1.0);}else{gl_FragColor=vec4(vC,1.0);}}`;
+  var prog=_mkP(gl,VS,FS);gl.useProgram(prog);
+  var verts=new Float32Array([-1.2,-1.0,-0.3,1.0,0.3,0.3,1.2,-1.0,-0.3,1.0,0.3,0.3,1.2,1.0,-0.3,1.0,0.3,0.3,-1.2,1.0,-0.3,1.0,0.3,0.3,-0.8,-0.8,0.3,0.3,0.6,1.0,0.8,-0.8,0.3,0.3,0.6,1.0,0.8,0.8,0.3,0.3,0.6,1.0,-0.8,0.8,0.3,0.3,0.6,1.0]);
+  var idx=new Uint16Array([0,1,2,0,2,3,4,5,6,4,6,7]);
+  var vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
+  var ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
+  var pL=gl.getAttribLocation(prog,'aP'),cL=gl.getAttribLocation(prog,'aC');
+  var uM=gl.getUniformLocation(prog,'uM'),uVD=gl.getUniformLocation(prog,'uVD');
+  gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(cL);gl.vertexAttribPointer(cL,3,gl.FLOAT,false,24,12);
+  var t=0;
+  // Two separate index buffers for controlled draw order
+  var ibRed=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibRed);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array([0,1,2,0,2,3]),gl.STATIC_DRAW);
+  var ibBlue=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibBlue);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array([4,5,6,4,6,7]),gl.STATIC_DRAW);
+  (function fr(){
+    t+=0.01;var m=window._dtMode;
     if(m>=1)gl.enable(gl.DEPTH_TEST);else gl.disable(gl.DEPTH_TEST);
-    gl.viewport(0,0,cv.width,cv.height);
-    gl.clearColor(0.05,0.04,0.1,1.0);
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.05,.04,.1,1);
     gl.clear(gl.COLOR_BUFFER_BIT|(m>=1?gl.DEPTH_BUFFER_BIT:0));
     gl.useProgram(prog);
-    const mvp=m4mul(perspM(45*Math.PI/180,cv.width/cv.height,0.1,10),lookAtM([Math.sin(t)*0.5,0.5,3],[0,0,0],[0,1,0]));
-    gl.uniformMatrix4fv(mvpL,false,mvp);
-    gl.uniform1i(vdL,m===2?1:0);
-    const s=24;
-    gl.bindBuffer(gl.ARRAY_BUFFER,vb);
-    gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,s,0);
-    gl.enableVertexAttribArray(cL);gl.vertexAttribPointer(cL,3,gl.FLOAT,false,s,12);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
-    gl.drawElements(gl.TRIANGLES,12,gl.UNSIGNED_SHORT,0);
-    requestAnimationFrame(frame);
+    gl.uniformMatrix4fv(uM,false,_mul(_persp(Math.PI/4,1,.1,10),_look([Math.sin(t)*.5,.5,3],[0,0,0])));
+    gl.uniform1i(uVD,m===2?1:0);
+    if(m===0){
+      // Depth OFF: draw BLUE first, then RED → red covers blue (wrong order = visible difference)
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibBlue);gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_SHORT,0);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibRed);gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_SHORT,0);
+    } else {
+      // Depth ON: draw RED first (behind), BLUE second (in front) → depth buffer decides correctly
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibRed);gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_SHORT,0);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibBlue);gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_SHORT,0);
+    }
+    requestAnimationFrame(fr);
   })();
 }
 
 // Demo L2 - Stencil outline effect
 function d2(cont){
-  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>模板測試 — 物體發光邊框</div></div><canvas id="cv4-2" width="600" height="260" style="height:260px"></canvas></div>
-  <div class="ctrl-row"><button class="ctrl-btn on" id="st-on" onclick="setST('on')">✅ 邊框開啟</button><button class="ctrl-btn" id="st-off" onclick="setST('off')">❌ 邊框關閉</button><button class="ctrl-btn" id="st-col" onclick="setST('col')">🎨 換邊框顏色</button></div>
-  <div class="slider-row"><span class="slider-label">📏 邊框厚度</span><input type="range" min="1" max="20" value="6" id="outline-w"><span class="slider-val" id="outline-wv">6</span></div>`;
-  document.getElementById('outline-w').oninput=function(){document.getElementById('outline-wv').textContent=this.value;};
   window._stMode='on';window._stHue=0;
-  window.setST=m=>{if(m==='col'){window._stHue=(window._stHue+60)%360;return;}window._stMode=m;['on','off'].forEach(x=>document.getElementById('st-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-2');
-  let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;
-  const gl=safeGL(cv);if(!gl)return;
+  window.setST=function(m){if(m==='col'){window._stHue=(window._stHue+60)%360;return;}window._stMode=m;['on','off'].forEach(function(x){document.getElementById('st-'+x).classList.toggle('on',x===m);});};
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>模板測試 — 物體發光邊框</div></div><canvas id="cv4-2"></canvas></div>
+  <div class="ctrl-row"><button class="ctrl-btn on" id="st-on" onclick="setST('on')">✅ 邊框開啟</button><button class="ctrl-btn" id="st-off" onclick="setST('off')">❌ 邊框關閉</button><button class="ctrl-btn" id="st-col" onclick="setST('col')">🎨 換邊框顏色</button></div>
+  <div class="slider-row"><span class="slider-label">📏 邊框厚度</span><input type="range" min="1" max="20" value="6" id="outline-w" oninput="document.getElementById('outline-wv').textContent=this.value"><span class="slider-val" id="outline-wv">6</span></div>`;
+  var cv=document.getElementById('cv4-2');
+  var _cw=Math.min(300,window.innerWidth-80);cv.width=_cw;cv.height=_cw;cv.style.cssText='display:block;width:'+_cw+'px;height:'+_cw+'px;margin:0 auto;';
+  var gl=cv.getContext('webgl');if(!gl)return;
+  function mkS(t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(sh));return sh;}
+  function mkP(vs,fs){var p=gl.createProgram();gl.attachShader(p,mkS(gl.VERTEX_SHADER,vs));gl.attachShader(p,mkS(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
+  // Sphere prog: lit
+  var VS=`attribute vec3 aP,aN;varying vec3 vN;uniform mat4 uM;void main(){vN=aN;gl_Position=uM*vec4(aP,1.);}`;
+  var FS=`precision mediump float;varying vec3 vN;uniform vec3 uCol;void main(){vec3 L=normalize(vec3(2.,3.,4.));float d=max(dot(normalize(vN),L),.12);gl_FragColor=vec4(uCol*d,1.);}`;
+  // Outline prog: flat color, no lighting
+  var VS2=`attribute vec3 aP;uniform mat4 uM;void main(){gl_Position=uM*vec4(aP,1.);}`;
+  var FS2=`precision mediump float;uniform vec3 uCol;void main(){gl_FragColor=vec4(uCol,1.);}`;
+  var prog=mkP(VS,FS);
+  var prog2=mkP(VS2,FS2);
+  // Sphere geometry
+  function sph(r,st,sl){var v=[],n=[],i=[];for(var a=0;a<=st;a++){var phi=Math.PI*a/st;for(var b=0;b<=sl;b++){var th=2*Math.PI*b/sl;var x=Math.sin(phi)*Math.cos(th)*r,y=Math.cos(phi)*r,z=Math.sin(phi)*Math.sin(th)*r;var l=Math.sqrt(x*x+y*y+z*z)||1;v.push(x,y,z);n.push(x/l,y/l,z/l);}}for(var a=0;a<st;a++)for(var b=0;b<sl;b++){var p0=a*(sl+1)+b,q=p0+sl+1;i.push(p0,q,p0+1,q,q+1,p0+1);}return{v:new Float32Array(v),n:new Float32Array(n),i:new Uint16Array(i)};}
+  var s=sph(1,32,32);
+  var vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,s.v,gl.STATIC_DRAW);
+  var nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,s.n,gl.STATIC_DRAW);
+  var ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,s.i,gl.STATIC_DRAW);
+  // Math helpers
+  function persp(fov,n,f){var ta=Math.tan(fov/2),d=f-n,m=new Float32Array(16);m[0]=1/ta;m[5]=1/ta;m[10]=-(f+n)/d;m[11]=-1;m[14]=-2*f*n/d;return m;}
+  function look(e,c){function nr(v){var l=Math.hypot(v[0],v[1],v[2]);return[v[0]/l,v[1]/l,v[2]/l];}function cr(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}var z=nr([e[0]-c[0],e[1]-c[1],e[2]-c[2]]);var x=nr(cr([0,1,0],z));var y=cr(z,x);var m=new Float32Array(16);m[0]=x[0];m[4]=x[1];m[8]=x[2];m[12]=-dt(x,e);m[1]=y[0];m[5]=y[1];m[9]=y[2];m[13]=-dt(y,e);m[2]=z[0];m[6]=z[1];m[10]=z[2];m[14]=-dt(z,e);m[15]=1;return m;}
+  function mul(a,b){var m=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){var s=0;for(var k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];m[i+j*4]=s;}return m;}
+  function scale(sc){return new Float32Array([sc,0,0,0,0,sc,0,0,0,0,sc,0,0,0,0,1]);}
+  function hsl(h,s,l){var a=s*Math.min(l,1-l);function f(n){var k=(n+h/30)%12;return l-a*Math.max(-1,Math.min(k-3,9-k,1));}return[f(0),f(8),f(4)];}
   gl.enable(gl.DEPTH_TEST);
-  const vs=`attribute vec3 p;attribute vec3 n;varying vec3 vN;uniform mat4 mvp;void main(){vN=n;gl_Position=mvp*vec4(p,1.0);}`;
-  const fs=`precision mediump float;varying vec3 vN;uniform vec3 col;void main(){vec3 L=normalize(vec3(2.0,3.0,4.0));float d=max(dot(normalize(vN),L),0.1);gl_FragColor=vec4(col*d,1.0);}`;
-  const prog=mkProg(gl,vs,fs);
-  const {v:sv,n:sn,i:si}=genSphI(1.0,24,24);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,sv,gl.STATIC_DRAW);
-  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,sn,gl.STATIC_DRAW);
-  const ib2=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib2);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,si,gl.STATIC_DRAW);
-  const pL=gl.getAttribLocation(prog,'p'),nL=gl.getAttribLocation(prog,'n');
-  const mvpL=gl.getUniformLocation(prog,'mvp'),colL=gl.getUniformLocation(prog,'col');
-  function hsl(h,s,l){const a=s*Math.min(l,1-l),f=n=>{const k=(n+h/30)%12;return l-a*Math.max(-1,Math.min(k-3,9-k,1));};return[f(0),f(8),f(4)];}
-  function drawSphere(scale,color,mvpMat){
-    const s=scale===1?mvpMat:m4mul(mvpMat,new Float32Array([scale,0,0,0, 0,scale,0,0, 0,0,scale,0, 0,0,0,1]));
-    gl.uniformMatrix4fv(mvpL,false,s);gl.uniform3fv(colL,new Float32Array(color));
+  var t=0;
+  (function fr(){
+    t+=.013;
+    var ow=1+parseInt(document.getElementById('outline-w').value)/14;
+    var eyeX=Math.sin(t)*4, eyeY=2, eyeZ=Math.cos(t)*4;
+    var vp=look([eyeX,eyeY,eyeZ],[0,0,0]);
+    var pj=persp(Math.PI/4,0.1,50);
+    var mvp=mul(pj,vp);
+    var mvpBig=mul(pj,mul(vp,scale(ow)));
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.05,.04,.1,1);
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    // ── Pass 1: draw outline sphere FIRST (back faces, large) ──
+    if(window._stMode==='on'){
+      gl.useProgram(prog2);
+      gl.enable(gl.CULL_FACE);gl.cullFace(gl.FRONT);
+      gl.disable(gl.DEPTH_TEST);
+      var uM2=gl.getUniformLocation(prog2,'uM'),uCol2=gl.getUniformLocation(prog2,'uCol');
+      gl.uniformMatrix4fv(uM2,false,mvpBig);
+      gl.uniform3fv(uCol2,new Float32Array(hsl(window._stHue,1,.65)));
+      gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(gl.getAttribLocation(prog2,'aP'));gl.vertexAttribPointer(gl.getAttribLocation(prog2,'aP'),3,gl.FLOAT,false,0,0);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
+      gl.drawElements(gl.TRIANGLES,s.i.length,gl.UNSIGNED_SHORT,0);
+      gl.disable(gl.CULL_FACE);
+      gl.enable(gl.DEPTH_TEST);
+    }
+    // ── Pass 2: draw main sphere ON TOP ──
+    gl.useProgram(prog);
+    var pL=gl.getAttribLocation(prog,'aP'),nL=gl.getAttribLocation(prog,'aN');
+    var uM=gl.getUniformLocation(prog,'uM'),uCol=gl.getUniformLocation(prog,'uCol');
+    gl.uniformMatrix4fv(uM,false,mvp);
+    gl.uniform3fv(uCol,new Float32Array([.3,.5,.9]));
     gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib2);gl.drawElements(gl.TRIANGLES,si.length,gl.UNSIGNED_SHORT,0);
-  }
-  let t=0;
-  (function frame(){
-    t+=0.012;
-    const ow=1.0+parseInt(document.getElementById('outline-w').value)/18;
-    gl.viewport(0,0,cv.width,cv.height);
-    gl.clearColor(0.05,0.04,0.1,1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(prog);
-    const mvp=m4mul(perspM(45*Math.PI/180,cv.width/cv.height,0.1,50),lookAtM([Math.sin(t)*4,2,Math.cos(t)*4],[0,0,0],[0,1,0]));
-    if(window._stMode==='on'){
-      // Draw main sphere (blue)
-      drawSphere(1,[0.3,0.5,0.9],mvp);
-      // Draw slightly larger sphere for outline effect (disable depth write)
-      gl.depthMask(false);
-      gl.enable(gl.CULL_FACE);gl.cullFace(gl.FRONT);
-      const oc=hsl(window._stHue,1,0.65);
-      drawSphere(ow,oc,mvp);
-      gl.disable(gl.CULL_FACE);gl.depthMask(true);
-    } else {
-      drawSphere(1,[0.3,0.5,0.9],mvp);
-    }
-    requestAnimationFrame(frame);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
+    gl.drawElements(gl.TRIANGLES,s.i.length,gl.UNSIGNED_SHORT,0);
+    requestAnimationFrame(fr);
   })();
 }
 
@@ -601,7 +626,7 @@ function d3(cont){
   window._abMode='glass';
   window.setAB=m=>{window._abMode=m;['glass','smoke','fire'].forEach(x=>document.getElementById('ab-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv4-3');
-  if(cv){let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform float alpha;uniform int mode;uniform float t;void main(){
     vec3 bg=vec3(.1+uv.x*.2,uv.y*.3,.4+sin(uv.x*8.+t)*.1);
@@ -611,7 +636,7 @@ function d3(cont){
     else{float h=1.-uv.y;float n=sin(uv.x*20.+t*3.)*.5+.5;fg=mix(vec3(1.,.3,0.),vec3(1.,.9,.1),h);a=h*n*alpha;}
     gl_FragColor=vec4(mix(bg,fg,a),1);
   }`;
-  const prog=mkProg(gl,vs,fs);
+  function _mS2(t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;}const prog=gl.createProgram();gl.attachShader(prog,_mS2(gl.VERTEX_SHADER,vs));gl.attachShader(prog,_mS2(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);
   const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
   const aL=gl.getUniformLocation(prog,'alpha'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
   let time=0;
@@ -636,7 +661,7 @@ function d4(cont){
   window._ppMode=0;
   window.setPP=m=>{window._ppMode=m;[0,1,2,3,4].forEach(x=>document.getElementById('pp-'+['none','blur','edge','gray','crt'][x]).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv4-4');
-  if(cv){let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
   vec3 scene(vec2 u){
@@ -666,7 +691,7 @@ function d4(cont){
       gl_FragColor=vec4(c*scanline*max(vignette,.2),1);
     }
   }`;
-  const prog=mkProg(gl,vs,fs);const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
+  function _mS(t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;}const prog=gl.createProgram();gl.attachShader(prog,_mS(gl.VERTEX_SHADER,vs));gl.attachShader(prog,_mS(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const pL=gl.getAttribLocation(prog,'p');
   const mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
   let time=0;
   function frame(){time+=0.012;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window._ppMode);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
@@ -680,7 +705,7 @@ function d5(cont){
   window._cmMode='sky';
   window.setCM=m=>{window._cmMode=m;['sky','ref','refr'].forEach(x=>document.getElementById('cm-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv4-5');
-  if(cv){let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;uniform vec2 cam;
   vec3 skyColor(vec3 d){
@@ -720,7 +745,7 @@ function d5(cont){
       } else {gl_FragColor=vec4(skyColor(d)*.5,1.);}
     }
   }`;
-  const prog=mkProg(gl,vs,fs);const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
+  function _mS(t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;}const prog=gl.createProgram();gl.attachShader(prog,_mS(gl.VERTEX_SHADER,vs));gl.attachShader(prog,_mS(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const pL=gl.getAttribLocation(prog,'p');
   const mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t'),camL=gl.getUniformLocation(prog,'cam');
   let time=0,camX=0,camY=0,drag=false,lx=0,ly=0;
   cv.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.style.cursor='grabbing';});
@@ -736,7 +761,7 @@ function d6(cont){
   <div class="ctrl-row"><button class="ctrl-btn on" id="gs-sdf" onclick="setGS('sdf')">⭕ SDF 圓形</button><button class="ctrl-btn" id="gs-noise" onclick="setGS('noise')">🌊 Noise</button><button class="ctrl-btn" id="gs-grid" onclick="setGS('grid')">📐 Shader 格線</button><button class="ctrl-btn" id="gs-fract" onclick="setGS('fract')">🔮 分形</button></div>`;
   window._gsMode='sdf';window.setGS=m=>{window._gsMode=m;['sdf','noise','grid','fract'].forEach(x=>document.getElementById('gs-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv4-6');
-  if(cv){let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
   float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -764,7 +789,7 @@ function d6(cont){
       float v=float(i)/32.;gl_FragColor=vec4(v*vec3(.4+v*.6,.2,.8-v*.5),1);
     }
   }`;
-  const prog=mkProg(gl,vs,fs);const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
+  function _mS(t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;}const prog=gl.createProgram();gl.attachShader(prog,_mS(gl.VERTEX_SHADER,vs));gl.attachShader(prog,_mS(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const pL=gl.getAttribLocation(prog,'p');
   const mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
   let time=0;
   function frame(){time+=0.012;const modes={sdf:0,noise:1,grid:2,fract:3};gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._gsMode]||0);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
@@ -773,54 +798,34 @@ function d6(cont){
 
 // Demo L7 - Geometry shader explosion simulation
 function d7(cont){
-  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>幾何著色器模擬 — 爆炸特效</div></div><canvas id="cv4-7" width="600" height="280" style="height:280px"></canvas></div>
-  <div class="ctrl-row"><button class="ctrl-btn on" id="ge-sphere" onclick="setGE('sphere')">⚽ 球體</button><button class="ctrl-btn" id="ge-explode" onclick="setGE('explode')">💥 爆炸！</button><button class="ctrl-btn" id="ge-norm" onclick="setGE('norm')">🧲 法向量線</button></div>
-  <div class="slider-row" id="explode-row" style="display:none"><span class="slider-label">💥 爆炸強度</span><input type="range" min="0" max="100" value="30" id="explode-str"><span class="slider-val" id="explode-sv">0.30</span></div>`;
-  document.getElementById('explode-str').oninput=function(){document.getElementById('explode-sv').textContent=(this.value/100).toFixed(2);};
   window._geMode='sphere';
-  window.setGE=m=>{window._geMode=m;['sphere','explode','norm'].forEach(x=>document.getElementById('ge-'+x).classList.toggle('on',x===m));document.getElementById('explode-row').style.display=m==='explode'?'flex':'none';};
-  const cv=document.getElementById('cv4-7');
-  if(cv){let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;}const gl=safeGL(cv);if(!gl)return;
-  const vs=`attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vP;uniform mat4 mvp;uniform float explode;uniform float t;
-  void main(){
-    vec3 pos=p;
-    if(explode>0.){
-      float e=explode*(sin(t*2.+dot(p,vec3(1)))*0.5+0.5);
-      pos=p+n*e;
-    }
-    vN=n;vP=pos;gl_Position=mvp*vec4(pos,1);
-  }`;
-  const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;uniform int mode;uniform float t;void main(){
-    vec3 L=normalize(vec3(sin(t),1,cos(t))*3.);
-    float d=max(dot(normalize(vN),L),.05);
-    if(mode==2){gl_FragColor=vec4(normalize(vN)*.5+.5,1);}
-    else{vec3 c=mix(vec3(.8,.3,.2),vec3(1.,.6,.1),d);gl_FragColor=vec4(c*d+.03,1);}
-  }`;
-  const prog=mkProg(gl,vs,fs);
-  const {v:sv,n:sn,i:si}=genSphI(1.2,24,24);
-  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,sv,gl.STATIC_DRAW);
-  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,sn,gl.STATIC_DRAW);
-  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,si,gl.STATIC_DRAW);
-  const pL=gl.getAttribLocation(prog,'p'),nL=gl.getAttribLocation(prog,'n');
-  const mvpL=gl.getUniformLocation(prog,'mvp'),exL=gl.getUniformLocation(prog,'explode'),tL=gl.getUniformLocation(prog,'t'),mL=gl.getUniformLocation(prog,'mode');
+  window.setGE=function(m){window._geMode=m;['sphere','explode','norm'].forEach(function(x){document.getElementById('ge-'+x).classList.toggle('on',x===m);});document.getElementById('explode-row').style.display=m==='explode'?'flex':'none';};
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>幾何著色器模擬 — 爆炸特效</div></div><canvas id="cv4-7"></canvas></div>
+  <div class="ctrl-row"><button class="ctrl-btn on" id="ge-sphere" onclick="setGE('sphere')">⚽ 球體</button><button class="ctrl-btn" id="ge-explode" onclick="setGE('explode')">💥 爆炸！</button><button class="ctrl-btn" id="ge-norm" onclick="setGE('norm')">🧲 法向量線</button></div>
+  <div class="slider-row" id="explode-row" style="display:none"><span class="slider-label">💥 爆炸強度</span><input type="range" min="0" max="100" value="30" id="explode-str" oninput="document.getElementById('explode-sv').textContent=(this.value/100).toFixed(2)"><span class="slider-val" id="explode-sv">0.30</span></div>`;
+
+  function _mkS(gl,t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(sh));return sh;}
+  function _mkP(gl,vs,fs){var p=gl.createProgram();gl.attachShader(p,_mkS(gl,gl.VERTEX_SHADER,vs));gl.attachShader(p,_mkS(gl,gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
+  function _sph(r,st,sl){var v=[],n=[],i=[];for(var a=0;a<=st;a++){var phi=Math.PI*a/st;for(var b=0;b<=sl;b++){var th=2*Math.PI*b/sl;var x=Math.sin(phi)*Math.cos(th)*r,y=Math.cos(phi)*r,z=Math.sin(phi)*Math.sin(th)*r;var l=Math.sqrt(x*x+y*y+z*z)||1;v.push(x,y,z);n.push(x/l,y/l,z/l);}}for(var a=0;a<st;a++)for(var b=0;b<sl;b++){var p0=a*(sl+1)+b,q=p0+sl+1;i.push(p0,q,p0+1,q,q+1,p0+1);}return{v:new Float32Array(v),n:new Float32Array(n),i:new Uint16Array(i)};}
+  function _persp(fov,asp,n,f){var ta=Math.tan(fov/2),d=f-n,m=new Float32Array(16);m[0]=1/(ta*asp);m[5]=1/ta;m[10]=-(f+n)/d;m[11]=-1;m[14]=-2*f*n/d;return m;}
+  function _look(e,c){function nr(v){var l=Math.hypot(v[0],v[1],v[2]);return[v[0]/l,v[1]/l,v[2]/l];}function cr(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}var z=nr([e[0]-c[0],e[1]-c[1],e[2]-c[2]]);var x=nr(cr([0,1,0],z));var y=cr(z,x);var m=new Float32Array(16);m[0]=x[0];m[4]=x[1];m[8]=x[2];m[12]=-dt(x,e);m[1]=y[0];m[5]=y[1];m[9]=y[2];m[13]=-dt(y,e);m[2]=z[0];m[6]=z[1];m[10]=z[2];m[14]=-dt(z,e);m[15]=1;return m;}
+  function _mul(a,b){var m=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){var s=0;for(var k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];m[i+j*4]=s;}return m;}
+  function _gl(id){var cv=document.getElementById(id);var w=Math.min(300,window.innerWidth-80);cv.width=w;cv.height=w;cv.style.cssText='display:block;width:'+w+'px;height:'+w+'px;margin:0 auto;';var gl=cv.getContext('webgl');if(!gl)console.error('WebGL n/a '+id);return{cv,gl};}
+  var _=_gl('cv4-7');var cv=_.cv,gl=_.gl;if(!gl)return;
+  var VS=`attribute vec3 aP,aN;varying vec3 vN,vP;uniform mat4 uM;uniform float uEx,uT;void main(){vec3 pos=aP;if(uEx>0.){float e=uEx*(sin(uT*2.+dot(aP,vec3(1.)))*0.5+0.5);pos=aP+aN*e;}vN=aN;vP=pos;gl_Position=uM*vec4(pos,1.);}`;
+  var FS=`precision mediump float;varying vec3 vN,vP;uniform int uMd;uniform float uT;void main(){vec3 L=normalize(vec3(sin(uT),1.,cos(uT))*3.);float d=max(dot(normalize(vN),L),.05);if(uMd==2){gl_FragColor=vec4(normalize(vN)*.5+.5,1.);}else{vec3 c=mix(vec3(.8,.3,.2),vec3(1.,.6,.1),d);gl_FragColor=vec4(c*d+.03,1.);}}`;
+  var prog=_mkP(gl,VS,FS);gl.useProgram(prog);
+  var sph=_sph(1.2,24,24);
+  var vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,sph.v,gl.STATIC_DRAW);
+  var nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,sph.n,gl.STATIC_DRAW);
+  var ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,sph.i,gl.STATIC_DRAW);
+  var pL=gl.getAttribLocation(prog,'aP'),nL=gl.getAttribLocation(prog,'aN');
+  gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
+  var uM=gl.getUniformLocation(prog,'uM'),uEx=gl.getUniformLocation(prog,'uEx'),uT=gl.getUniformLocation(prog,'uT'),uMd=gl.getUniformLocation(prog,'uMd');
   gl.enable(gl.DEPTH_TEST);
-  let t=0;
-  function frame(){
-    t+=0.015;
-    const modes={sphere:0,explode:1,norm:2};
-    const ex=window._geMode==='explode'?document.getElementById('explode-str').value/100:0;
-    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.05,.04,.1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(prog);
-    const mvp=m4mul(perspM(45*Math.PI/180,cv.width/cv.height,.1,20),lookAtM([0,0,5],[0,0,0],[0,1,0]));
-    gl.uniformMatrix4fv(mvpL,false,mvp);gl.uniform1f(exL,ex);gl.uniform1f(tL,t);gl.uniform1i(mL,modes[window._geMode]||0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(nL);gl.vertexAttribPointer(nL,3,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
-    if(window._geMode==='norm')gl.drawElements(gl.LINES,si.length,gl.UNSIGNED_SHORT,0);
-    else gl.drawElements(gl.TRIANGLES,si.length,gl.UNSIGNED_SHORT,0);
-    requestAnimationFrame(frame);
-  }
-  frame();
+  var t=0;
+  (function fr(){t+=.015;var ex=window._geMode==='explode'?(document.getElementById('explode-str').value/100):0;gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.05,.04,.1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(prog);gl.uniformMatrix4fv(uM,false,_mul(_persp(Math.PI/4,1,.1,20),_look([0,0,5],[0,0,0])));gl.uniform1f(uEx,ex);gl.uniform1f(uT,t);gl.uniform1i(uMd,{sphere:0,explode:1,norm:2}[window._geMode]||0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);if(window._geMode==='norm')gl.drawElements(gl.LINES,sph.i.length,gl.UNSIGNED_SHORT,0);else gl.drawElements(gl.TRIANGLES,sph.i.length,gl.UNSIGNED_SHORT,0);requestAnimationFrame(fr);})();
 }
 
 // Demo L8 - Instancing: 1 million grass blades
@@ -830,7 +835,7 @@ function d8(cont){
   <div style="font-size:.78rem;color:var(--txt2);margin-top:6px">Draw Calls: <span id="dc-count" style="color:var(--acc3);font-family:var(--mono)">1</span>（不管多少棵都是 1 次！）</div>`;
   document.getElementById('grass-n').oninput=function(){document.getElementById('grass-nv').textContent=this.value;rebuildGrass();};
   const cv=document.getElementById('cv4-8');
-  if(cv){let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;}const gl=safeGL(cv);
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');
   if(!gl)return;
   const ext=gl.getExtension('ANGLE_instanced_arrays');if(!ext){cont.innerHTML+='<p style="color:var(--acc4);padding:10px">需要 ANGLE_instanced_arrays 擴充</p>';return;}
   const vs=`attribute vec2 base;attribute vec2 offset;attribute float height;attribute float hue;varying vec3 vC;uniform float t;
@@ -841,7 +846,7 @@ function d8(cont){
     gl_Position=vec4(pos,0,1);
   }`;
   const fs=`precision mediump float;varying vec3 vC;void main(){gl_FragColor=vec4(vC,1);}`;
-  const prog=mkProg(gl,vs,fs);
+  function _mS2(t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;}const prog=gl.createProgram();gl.attachShader(prog,_mS2(gl.VERTEX_SHADER,vs));gl.attachShader(prog,_mS2(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);
   // Grass blade shape: 3 vertices
   const baseBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,baseBuf);
   gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-.02,0, .02,0, 0,1]),gl.STATIC_DRAW);
@@ -880,7 +885,7 @@ function d9(cont){
   <div class="ctrl-row"><button class="ctrl-btn on" id="aa-0" onclick="setAA(0)">❌ 無 AA（鋸齒）</button><button class="ctrl-btn" id="aa-2" onclick="setAA(2)">MSAA 2x</button><button class="ctrl-btn" id="aa-4" onclick="setAA(4)">MSAA 4x</button><button class="ctrl-btn" id="aa-8" onclick="setAA(8)">MSAA 8x</button></div>`;
   window._aaLevel=0;window.setAA=n=>{window._aaLevel=n;[0,2,4,8].forEach(x=>document.getElementById('aa-'+x).classList.toggle('on',x===n));};
   const cv=document.getElementById('cv4-9');
-  if(cv){let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform float aa;uniform float t;void main(){
     vec2 c=uv-.5;float angle=t*.3;
@@ -899,7 +904,7 @@ function d9(cont){
     }
     gl_FragColor=vec4(col,1);
   }`;
-  const prog=mkProg(gl,vs,fs);const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
+  function _mS(t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;}const prog=gl.createProgram();gl.attachShader(prog,_mS(gl.VERTEX_SHADER,vs));gl.attachShader(prog,_mS(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const pL=gl.getAttribLocation(prog,'p');
   const aaL=gl.getUniformLocation(prog,'aa'),tL=gl.getUniformLocation(prog,'t');
   let time=0;
   function frame(){time+=0.01;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1f(aaL,window._aaLevel);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
@@ -908,35 +913,41 @@ function d9(cont){
 
 // Demo L10 - Normal map visualization
 function d10(cont){
-  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>法線貼圖 — 假的凹凸感</div></div><canvas id="cv4-10" width="600" height="260" style="height:260px"></canvas></div>
+  window._nmMode='on';
+  window.setNM=function(m){window._nmMode=m;['on','off','show'].forEach(function(x){document.getElementById('nm-'+x).classList.toggle('on',x===m);});};
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>法線貼圖 — 假的凹凸感</div></div><canvas id="cv4-10"></canvas></div>
   <div class="ctrl-row"><button class="ctrl-btn on" id="nm-on" onclick="setNM('on')">✅ 法線貼圖</button><button class="ctrl-btn" id="nm-off" onclick="setNM('off')">❌ 關閉（看差異）</button><button class="ctrl-btn" id="nm-show" onclick="setNM('show')">🗺️ 顯示法線圖</button></div>`;
-  window._nmMode='on';window.setNM=m=>{window._nmMode=m;['on','off','show'].forEach(x=>document.getElementById('nm-'+x).classList.toggle('on',x===m));};
-  const cv=document.getElementById('cv4-10');
-  if(cv){let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;}const gl=safeGL(cv);if(!gl)return;
-  const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
-  const fs=`precision mediump float;varying vec2 uv;uniform int mode;uniform float t;
-  vec3 normalMap(vec2 u){
-    float brickX=fract(u.x*4.+(floor(u.y*4.)*.5));float brickY=fract(u.y*4.);
-    float mortar=smoothstep(.05,.08,min(brickX,min(1.-brickX,min(brickY,1.-brickY))));
-    vec2 grad=vec2(dFdx(brickX*mortar),dFdy(brickY*mortar));
-    vec3 n=normalize(vec3(grad*2.,1.));
-    return n*.5+.5;
+  var cv=document.getElementById('cv4-10');
+  cv.width=600;cv.height=320;cv.style.cssText='display:block;width:100%;height:320px;';
+  var gl=cv.getContext('webgl');if(!gl)return;
+  // Precompute brick normal map as texture (avoid dFdx/dFdy which needs extension)
+  var NW=256,NH=192,nmD=new Uint8Array(NW*NH*4),albD=new Uint8Array(NW*NH*4);
+  for(var py=0;py<NH;py++)for(var px=0;px<NW;px++){
+    var fx=(px/NW)*6,fy=(py/NH)*4;
+    var row=Math.floor(fy),fxO=row%2===0?fx:fx+.5;
+    var bx=fxO%1,by=fy%1;
+    var mort=bx<.05||bx>.95||by<.08||by>.92;
+    var idx=(py*NW+px)*4;
+    if(mort){nmD[idx]=128;nmD[idx+1]=128;nmD[idx+2]=255;nmD[idx+3]=255;albD[idx]=90;albD[idx+1]=82;albD[idx+2]=74;albD[idx+3]=255;}
+    else{var cx=(bx-.5)*2,cy=(by-.5)*2;var nx=cx*.7,ny=cy*.7,nz=1;var nl=Math.sqrt(nx*nx+ny*ny+nz*nz);nx/=nl;ny/=nl;nz/=nl;
+      nmD[idx]=Math.round((nx*.5+.5)*255);nmD[idx+1]=Math.round((ny*.5+.5)*255);nmD[idx+2]=Math.round((nz*.5+.5)*255);nmD[idx+3]=255;
+      var sh=.8+by*.35;albD[idx]=Math.min(255,Math.round(165*sh));albD[idx+1]=Math.min(255,Math.round(76*sh));albD[idx+2]=Math.min(255,Math.round(48*sh));albD[idx+3]=255;}
   }
-  void main(){
-    vec3 N;
-    if(mode==2){gl_FragColor=vec4(normalMap(uv),1);return;}
-    if(mode==0){vec3 nm=normalMap(uv)*2.-1.;N=normalize(nm);}
-    else{N=vec3(0,0,1);}
-    vec3 L=normalize(vec3(cos(t)*2.,sin(t*.7),1.5));
-    float d=max(dot(N,L),0.05);
-    vec3 brick=mix(vec3(.6,.35,.2),vec3(.75,.45,.25),fract(uv.x*4.+floor(uv.y*4.)*.5)*fract(uv.y*4.));
-    gl_FragColor=vec4(brick*d,1);
-  }`;
-  const prog=mkProg(gl,vs,fs);const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
-  const mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
-  let time=0;
-  function frame(){time+=0.012;const modes={on:0,off:1,show:2};gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,modes[window._nmMode]||0);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
-  frame();
+  function mkTex(d,w,h){var tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,d);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);return tex;}
+  var nmTex=mkTex(nmD,NW,NH),albTex=mkTex(albD,NW,NH);
+  var VS=`attribute vec2 aP;varying vec2 vUV;void main(){vUV=aP*.5+.5;gl_Position=vec4(aP,0.,1.);}`;
+  var FS=`precision mediump float;varying vec2 vUV;uniform sampler2D uAlb,uNM;uniform int uMd;uniform float uT;void main(){vec3 alb=texture2D(uAlb,vUV).rgb;vec3 ns=texture2D(uNM,vUV).rgb;if(uMd==2){gl_FragColor=vec4(ns,1.);return;}vec3 N;if(uMd==0){N=normalize(ns*2.-1.);N.y=-N.y;}else{N=vec3(0.,0.,1.);}vec3 L=normalize(vec3(cos(uT)*1.8,sin(uT*.6)*.5+.5,1.2));float d=max(dot(N,L),.05);float s=pow(max(dot(reflect(-L,N),vec3(0.,0.,1.)),0.),48.);gl_FragColor=vec4(alb*(.1+d*.9)+vec3(s*.35),1.);}`;
+  function mkS(t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(sh));return sh;}
+  var prog=gl.createProgram();gl.attachShader(prog,mkS(gl.VERTEX_SHADER,VS));gl.attachShader(prog,mkS(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);gl.useProgram(prog);
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  var prog=gl.createProgram();gl.attachShader(prog,mkS(gl.VERTEX_SHADER,VS));gl.attachShader(prog,mkS(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);gl.useProgram(prog);
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  var pL=gl.getAttribLocation(prog,'aP');gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);
+  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,albTex);gl.uniform1i(gl.getUniformLocation(prog,'uAlb'),0);
+  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,nmTex);gl.uniform1i(gl.getUniformLocation(prog,'uNM'),1);
+  var uMd=gl.getUniformLocation(prog,'uMd'),uT=gl.getUniformLocation(prog,'uT');
+  var t=0;
+  (function fr(){t+=.012;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.uniform1i(uMd,{on:0,off:1,show:2}[window._nmMode]||0);gl.uniform1f(uT,t);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
 }
 
 // Demo L11 - Boss: full post-processing pipeline
@@ -952,7 +963,7 @@ function d11(cont){
   window._pfx={vignette:true,chroma:true,bloom:true,grain:true,crt:false};
   window.toggleFX=k=>{window._pfx[k]=!window._pfx[k];document.getElementById('pfx-'+k).classList.toggle('on',window._pfx[k]);};
   const cv=document.getElementById('cv4-11');
-  if(cv){let pw=0;let el=cv.parentElement;while(el&&pw<10){pw=el.clientWidth||el.offsetWidth;el=el.parentElement;}cv.width=pw>10?pw:600;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;
   const fs=`precision mediump float;varying vec2 uv;uniform float t;
   uniform bool vignette,chroma,bloom,grain,crt;
@@ -991,7 +1002,7 @@ function d11(cont){
     if(crt){float scan=sin(uv.y*300.)*.05+.95;col*=scan;}
     gl_FragColor=vec4(clamp(col,0.,1.),1);
   }`;
-  const prog=mkProg(gl,vs,fs);const buf=qBuf(gl);const pL=gl.getAttribLocation(prog,'p');
+  function _mS(t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;}const prog=gl.createProgram();gl.attachShader(prog,_mS(gl.VERTEX_SHADER,vs));gl.attachShader(prog,_mS(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const pL=gl.getAttribLocation(prog,'p');
   const tL=gl.getUniformLocation(prog,'t');
   const fxNames=['vignette','chroma','bloom','grain','crt'];
   let time=0;
