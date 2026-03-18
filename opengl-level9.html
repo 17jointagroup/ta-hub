@@ -273,7 +273,7 @@ function render(){
   const list=document.getElementById('lesson-list');list.innerHTML='';
   LESSONS.forEach((les,idx)=>{
     const done=earned.includes(les.id),active=current===les.id;
-    const locked=!done&&!active&&idx>0&&!earned.includes(LESSONS[idx-1].id);
+    const locked=false; // all unlocked
     const isFinal=les.type==='final',isBoss=les.type==='boss';
     const div=document.createElement('div');
     div.className=`lesson${done?' done':''}${active?' active':''}${locked?' locked':''}${isFinal?' final':''}${isBoss?' boss':''}`;
