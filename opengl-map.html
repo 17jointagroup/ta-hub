@@ -14,20 +14,20 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
   padding:max(10px,env(safe-area-inset-top)) 12px 8px;
   background:rgba(3,1,16,.95);border-bottom:1px solid rgba(180,130,255,.15);
   display:flex;align-items:center;gap:10px;backdrop-filter:blur(12px)}
-.av{width:36px;height:36px;border-radius:50%;border:2px solid #c084fc;background:#100828;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.av{width:36px;height:36px;border-radius:50%;border:2px solid #c084fc;background:#100828;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2.4rem}
 .pi{flex:1;min-width:0}
 .pnr{display:flex;align-items:center;gap:6px;margin-bottom:3px}
-.pn{font-size:.9rem;font-weight:900;color:#f0e8ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lv{background:linear-gradient(135deg,#c084fc,#34d399);color:#050210;font-size:.6rem;font-weight:900;padding:2px 7px;border-radius:100px;flex-shrink:0}
-.ttl{font-size:.6rem;font-weight:800;color:#a78bfa;flex-shrink:0}
+.pn{font-size:1.8rem;font-weight:900;color:#f0e8ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv{background:linear-gradient(135deg,#c084fc,#34d399);color:#050210;font-size:1.2rem;font-weight:900;padding:2px 7px;border-radius:100px;flex-shrink:0}
+.ttl{font-size:1.2rem;font-weight:800;color:#a78bfa;flex-shrink:0}
 .brs{display:flex;flex-direction:column;gap:3px}
 .br{display:flex;align-items:center;gap:5px}
-.brl{font-size:.58rem;font-weight:800;color:#3d2a60;min-width:18px}
+.brl{font-size:1.16rem;font-weight:800;color:#3d2a60;min-width:18px}
 .brb{flex:1;height:5px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
 .brf{height:100%;border-radius:100px;transition:width .4s}
 .hb{background:linear-gradient(90deg,#ef4444,#f87171)}
 .xb{background:linear-gradient(90deg,#f59e0b,#fcd34d)}
-.hbtn{background:rgba(192,132,252,.12);border:1px solid rgba(192,132,252,.22);color:#c084fc;border-radius:9px;padding:6px 10px;font-size:.7rem;font-weight:800;cursor:pointer;flex-shrink:0;font-family:inherit}
+.hbtn{background:rgba(192,132,252,.12);border:1px solid rgba(192,132,252,.22);color:#c084fc;border-radius:9px;padding:6px 10px;font-size:1.4rem;font-weight:800;cursor:pointer;flex-shrink:0;font-family:inherit}
 
 /* ── SCROLL AREA ── */
 .outer{position:fixed;top:0;left:0;right:0;bottom:60px;overflow:hidden;cursor:grab}
@@ -42,26 +42,26 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 .castle.locked{cursor:not-allowed;opacity:.35}
 .c-tower{display:flex;flex-direction:column;align-items:center;position:relative;transition:transform .2s}
 .castle:not(.locked):active .c-tower{transform:scale(.92)}
-.c-icon{font-size:2.8rem;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6));position:relative;z-index:2}
+.c-icon{font-size:5.6rem;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6));position:relative;z-index:2}
 .castle.locked .c-icon{filter:grayscale(1) brightness(.4)}
 .castle.done .c-icon{filter:drop-shadow(0 0 14px gold)}
 .castle.current .c-icon{animation:pulse-castle 2s ease infinite}
 @keyframes pulse-castle{0%,100%{filter:drop-shadow(0 4px 12px rgba(0,0,0,.6)) drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 4px 12px rgba(0,0,0,.6)) drop-shadow(0 0 18px var(--cc,#c084fc))}}
 .c-base{width:56px;height:14px;border-radius:50%;margin-top:-4px;position:relative;z-index:1}
 .c-lbl{text-align:center;margin-top:6px}
-.c-name{font-size:.72rem;font-weight:900;color:#f0e8ff;text-shadow:0 2px 8px rgba(0,0,0,.9);line-height:1.3}
-.c-stars{font-size:.65rem;letter-spacing:1px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,.8)}
-.c-pct{font-size:.6rem;font-weight:900;color:#a0f8ff;margin-top:2px;background:rgba(0,0,0,.5);border-radius:100px;padding:1px 7px}
-.c-num{position:absolute;top:-6px;right:-8px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:900;color:white;border:1.5px solid rgba(255,255,255,.4);z-index:5}
+.c-name{font-size:1.44rem;font-weight:900;color:#f0e8ff;text-shadow:0 2px 8px rgba(0,0,0,.9);line-height:1.3}
+.c-stars{font-size:1.3rem;letter-spacing:1px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.c-pct{font-size:1.2rem;font-weight:900;color:#a0f8ff;margin-top:2px;background:rgba(0,0,0,.5);border-radius:100px;padding:1px 7px}
+.c-num{position:absolute;top:-6px;right:-8px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.24rem;font-weight:900;color:white;border:1.5px solid rgba(255,255,255,.4);z-index:5}
 
 /* ── PATH ── */
 .map-path{position:absolute;top:0;left:0;pointer-events:none;z-index:5}
 
 /* ── PLAYER PIN ── */
 .pp{position:absolute;transform:translate(-50%,-100%);z-index:50;pointer-events:none;text-align:center;transition:left .9s cubic-bezier(.34,1.56,.64,1),top .9s cubic-bezier(.34,1.56,.64,1)}
-.pp-av{font-size:2rem;filter:drop-shadow(0 4px 12px rgba(192,132,252,.8));animation:pp-bob .9s ease infinite alternate}
+.pp-av{font-size:4.0rem;filter:drop-shadow(0 4px 12px rgba(192,132,252,.8));animation:pp-bob .9s ease infinite alternate}
 @keyframes pp-bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
-.pp-name{font-size:.6rem;font-weight:900;color:#c084fc;background:rgba(5,2,14,.8);border-radius:100px;padding:1px 8px;margin-top:2px;white-space:nowrap}
+.pp-name{font-size:1.2rem;font-weight:900;color:#c084fc;background:rgba(5,2,14,.8);border-radius:100px;padding:1px 8px;margin-top:2px;white-space:nowrap}
 .pp-dot{width:8px;height:8px;background:#c084fc;border-radius:50%;margin:3px auto 0;box-shadow:0 0 10px #c084fc;animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
 
@@ -72,21 +72,21 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
   transition:height .3s cubic-bezier(.4,0,.2,1);height:60px;overflow:hidden}
 .sp.open{height:230px}
 .spt{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;cursor:pointer}
-.sptl{display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:800;color:#c084fc}
+.sptl{display:flex;align-items:center;gap:10px;font-size:1.64rem;font-weight:800;color:#c084fc}
 .spar{color:#3d2a60;transition:.25s}
 .sp.open .spar{transform:rotate(180deg)}
 .spb{padding:8px 14px 4px;overflow-y:auto;height:170px}
 .eqg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
 .eq{background:rgba(192,132,252,.05);border:1px dashed rgba(192,132,252,.18);border-radius:10px;padding:8px 4px;text-align:center;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 .eq.fl{border-style:solid;border-color:rgba(192,132,252,.35);background:rgba(192,132,252,.08)}
-.eq-ic{font-size:1.25rem}.eq-nm{font-size:.58rem;font-weight:800;color:#c084fc}.eq-st{font-size:.54rem;color:#34d399}.eq-em{font-size:.6rem;color:#2d1a50;font-weight:800}
+.eq-ic{font-size:2.5rem}.eq-nm{font-size:1.16rem;font-weight:800;color:#c084fc}.eq-st{font-size:1.08rem;color:#34d399}.eq-em{font-size:1.2rem;color:#2d1a50;font-weight:800}
 .fsg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .fs{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:9px;padding:7px 3px;text-align:center}
-.fsv{font-size:1.1rem;font-weight:900;font-family:monospace}
-.fsl{font-size:.58rem;color:#3d2a60;font-weight:800;letter-spacing:.04em;margin-top:2px}
+.fsv{font-size:2.2rem;font-weight:900;font-family:monospace}
+.fsl{font-size:1.16rem;color:#3d2a60;font-weight:800;letter-spacing:.04em;margin-top:2px}
 
 /* ── LEVEL UP TOAST ── */
-.lut{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120px);background:linear-gradient(135deg,#c084fc,#34d399);color:#04020e;border-radius:100px;padding:10px 22px;font-size:.9rem;font-weight:900;z-index:300;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none}
+.lut{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120px);background:linear-gradient(135deg,#c084fc,#34d399);color:#04020e;border-radius:100px;padding:10px 22px;font-size:1.8rem;font-weight:900;z-index:300;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none}
 .lut.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
@@ -97,8 +97,8 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
   <div class="pi">
     <div class="pnr"><span class="pn" id="hudN">冒險者</span><span class="lv" id="hudLv">Lv.1</span><span class="ttl" id="hudTtl">初學者</span></div>
     <div class="brs">
-      <div class="br"><span class="brl">HP</span><div class="brb"><div class="brf hb" id="hpB" style="width:100%"></div></div><span style="font-size:.58rem;color:#f87171;font-weight:800;min-width:38px;text-align:right" id="hpT">100/100</span></div>
-      <div class="br"><span class="brl">XP</span><div class="brb"><div class="brf xb" id="xpB" style="width:0%"></div></div><span style="font-size:.58rem;color:#fcd34d;font-weight:800;min-width:38px;text-align:right" id="xpT">0/500</span></div>
+      <div class="br"><span class="brl">HP</span><div class="brb"><div class="brf hb" id="hpB" style="width:100%"></div></div><span style="font-size:1.16rem;color:#f87171;font-weight:800;min-width:38px;text-align:right" id="hpT">100/100</span></div>
+      <div class="br"><span class="brl">XP</span><div class="brb"><div class="brf xb" id="xpB" style="width:0%"></div></div><span style="font-size:1.16rem;color:#fcd34d;font-weight:800;min-width:38px;text-align:right" id="xpT">0/500</span></div>
     </div>
   </div>
   <button class="hbtn" onclick="location.href='index.html'">🏠</button>
@@ -128,7 +128,7 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 
 <div class="sp" id="sp">
   <div class="spt" onclick="document.getElementById('sp').classList.toggle('open')">
-    <div class="sptl"><span>⚔️ 裝備 &amp; 能力值</span><span id="spSum" style="font-size:.66rem;color:#3d2a60"></span></div>
+    <div class="sptl"><span>⚔️ 裝備 &amp; 能力值</span><span id="spSum" style="font-size:1.32rem;color:#3d2a60"></span></div>
     <span class="spar">▲</span>
   </div>
   <div class="spb">
