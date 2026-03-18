@@ -30,7 +30,7 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 .hbtn{background:rgba(192,132,252,.12);border:1px solid rgba(192,132,252,.22);color:#c084fc;border-radius:9px;padding:6px 10px;font-size:1.4rem;font-weight:800;cursor:pointer;flex-shrink:0;font-family:inherit}
 
 /* ── SCROLL AREA ── */
-.outer{position:fixed;top:0;left:0;right:0;bottom:60px;overflow:hidden;cursor:grab}
+.outer{position:fixed;top:0;left:0;right:0;bottom:44px;overflow:hidden;cursor:grab}
 .outer:active{cursor:grabbing}
 .stage{position:absolute;transform-origin:0 0;will-change:transform}
 
@@ -66,24 +66,21 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 @keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
 
 /* ── BOTTOM PANEL ── */
-.sp{position:fixed;bottom:0;left:0;right:0;z-index:200;
-  background:rgba(3,1,16,.97);border-top:1px solid rgba(192,132,252,.15);
-  padding-bottom:max(8px,env(safe-area-inset-bottom));
-  transition:height .3s cubic-bezier(.4,0,.2,1);height:60px;overflow:hidden}
-.sp.open{height:230px}
+.sp{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(3,1,16,.97);border-top:1px solid rgba(192,132,252,.15);padding:6px 14px max(6px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+
 .spt{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;cursor:pointer}
-.sptl{display:flex;align-items:center;gap:10px;font-size:1.64rem;font-weight:800;color:#c084fc}
-.spar{color:#3d2a60;transition:.25s}
-.sp.open .spar{transform:rotate(180deg)}
-.spb{padding:8px 14px 4px;overflow-y:auto;height:170px}
-.eqg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
-.eq{background:rgba(192,132,252,.05);border:1px dashed rgba(192,132,252,.18);border-radius:10px;padding:8px 4px;text-align:center;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.sptl{display:flex;align-items:center;gap:10px;display:none}
+.spar{display:none}
+
+.spb{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex:1;overflow:hidden}
+.eqg{display:flex;gap:8px;align-items:center}
+.eq{background:rgba(192,132,252,.05);border:1px dashed rgba(192,132,252,.18);border-radius:7px;padding:8px 4px;text-align:center;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 .eq.fl{border-style:solid;border-color:rgba(192,132,252,.35);background:rgba(192,132,252,.08)}
-.eq-ic{font-size:2.5rem}.eq-nm{font-size:1.16rem;font-weight:800;color:#c084fc}.eq-st{font-size:1.08rem;color:#34d399}.eq-em{font-size:1.2rem;color:#2d1a50;font-weight:800}
-.fsg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.eq-ic{font-size:1.2rem}.eq-nm{font-size:.72rem;font-weight:800;color:#c084fc;white-space:nowrap}.eq-st{font-size:.68rem;color:#34d399;white-space:nowrap}.eq-em{font-size:.9rem;color:#2d1a50;font-weight:800}
+.fsg{display:flex;gap:10px;align-items:center}
 .fs{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:9px;padding:7px 3px;text-align:center}
-.fsv{font-size:2.2rem;font-weight:900;font-family:monospace}
-.fsl{font-size:1.16rem;color:#3d2a60;font-weight:800;letter-spacing:.04em;margin-top:2px}
+.fsv{font-size:.85rem;font-weight:900}
+.fsl{font-size:.68rem;color:#6b5a8a;font-weight:700;text-transform:uppercase}
 
 /* ── LEVEL UP TOAST ── */
 
@@ -126,9 +123,9 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 </div>
 
 <div class="sp" id="sp">
-  <div class="spt" onclick="document.getElementById('sp').classList.toggle('open')">
-    <div class="sptl"><span>⚔️ 裝備 &amp; 能力值</span><span id="spSum" style="font-size:1.32rem;color:#3d2a60"></span></div>
-    <span class="spar">▲</span>
+  <div class="spt">
+    <div class="sptl"><span>⚔️ 裝備 &amp; 能力值</span><span id="spSum" style="font-size:.75rem;color:#3d2a60"></span></div>
+    
   </div>
   <div class="spb">
     <div class="eqg" id="eqg"></div>
@@ -210,7 +207,7 @@ outer.addEventListener('mouseup',function(){dragging=false;});
 outer.addEventListener('wheel',function(e){e.preventDefault();var ns=Math.min(2.5,Math.max(0.35,sc*Math.exp(-e.deltaY*.001)));panX=e.clientX-(e.clientX-panX)*ns/sc;panY=e.clientY-(e.clientY-panY)*ns/sc;sc=ns;clamp();applyT();},{passive:false});
 
 function scrollToPos(x,y){
-  var vw=window.innerWidth,vh=window.innerHeight-60-HUDH;
+  var vw=window.innerWidth,vh=window.innerHeight-44-HUDH;
   panX=vw/2-x*sc; panY=HUDH+(vh/2)-y*sc; clamp(); applyT();
 }
 
