@@ -669,8 +669,9 @@ function d2(cont){
   window.setPhong=function(m){window._phMode=m;document.querySelectorAll('[id^="ph-"]').forEach(function(b){b.classList.remove('on');});document.getElementById('ph-'+m).classList.add('on');};
   // ── exactly from phong_sphere_fixed.html ──
   var canvas=document.getElementById('cv-d2');
-  canvas.width=420; canvas.height=420;
-  canvas.style.width='420px'; canvas.style.height='420px';
+  var cw=Math.min(300,window.innerWidth-80);
+  canvas.width=cw; canvas.height=cw;
+  canvas.style.width=cw+'px'; canvas.style.height=cw+'px';
   canvas.style.display='block'; canvas.style.margin='0 auto';
   var gl=canvas.getContext('webgl');
   if(!gl){console.error('WebGL not available');return;}
@@ -744,8 +745,9 @@ function d3(cont){
     <button class="ctrl-btn" onclick="setMat(4)">🪵 木頭</button>
   </div>`;
   var cv3=document.getElementById('cv-d3');
-  cv3.width=420; cv3.height=420;
-  cv3.style.width='420px'; cv3.style.height='420px';
+  var cw3=Math.min(300,window.innerWidth-80);
+  cv3.width=cw3; cv3.height=cw3;
+  cv3.style.width=cw3+'px'; cv3.style.height=cw3+'px';
   cv3.style.display='block'; cv3.style.margin='0 auto';
   var gl3=cv3.getContext('webgl');
   if(!gl3){console.error('WebGL n/a d3');return;}
@@ -900,7 +902,7 @@ function d5(cont){
     <span class="slider-val" id="cutoff-disp">20°</span>
   </div>`;
   var cv5=document.getElementById('cv-d5');
-  cv5.width=420;cv5.height=420;cv5.style.width='420px';cv5.style.height='420px';cv5.style.display='block';cv5.style.margin='0 auto';
+  var cw5=Math.min(300,window.innerWidth-80);cv5.width=cw5;cv5.height=cw5;cv5.style.width=cw5+'px';cv5.style.height=cw5+'px';cv5.style.display='block';cv5.style.margin='0 auto';
   var gl5=cv5.getContext('webgl');if(!gl5){console.error('WebGL n/a d5');return;}
   var VS5=`attribute vec3 aP,aN;uniform mat4 uMVP;varying vec3 vN,vP;void main(){vP=aP;vN=aN;gl_Position=uMVP*vec4(aP,1.0);}`;
   var FS5=`precision mediump float;varying vec3 vN,vP;uniform int uLT;uniform vec3 uLP,uLD,uEye;uniform float uCO;void main(){vec3 N=normalize(vN);vec3 V=normalize(uEye-vP);vec3 L;float att=1.0;if(uLT==0){L=normalize(-uLD);}else if(uLT==1){L=normalize(uLP-vP);float d=length(uLP-vP);att=1.0/(1.0+0.09*d+0.032*d*d);}else{L=normalize(uLP-vP);float th=dot(L,normalize(-uLD));att=th>uCO?smoothstep(uCO,uCO+0.05,th):0.0;}vec3 R=reflect(-L,N);float dif=max(dot(N,L),0.0);float spec=pow(max(dot(V,R),0.0),32.0);vec3 col=vec3(0.38,0.62,1.0);gl_FragColor=vec4(col*(0.1+dif*att)+vec3(spec*att*0.8),1.0);}`;
