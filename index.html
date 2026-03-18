@@ -30,8 +30,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
 <style>
-html{font-size:20px;}
-@media(max-width:480px){html{font-size:18px;}}
+html{font-size:23px;}
+@media(max-width:480px){html{font-size:21px;}}
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --bg:#0a0a0c;--surf:#111116;--surf2:#18181f;--bdr:#2a2a38;
@@ -1636,7 +1636,8 @@ function render(){
         <div class="card-links">${linksHTML}</div>
       </div>`;
     }
-    return `<div class="card${isNew?' is-new':''}${isTip?' is-tip':''}" style="animation-delay:${Math.min(i,5)*.025}s" onclick="openReader('${a.id}')">
+    const cardUrl = a.url || '#';
+    return `<div class="card${isNew?' is-new':''}${isTip?' is-tip':''}" style="animation-delay:${Math.min(i,5)*.025}s;cursor:pointer;" onclick="window.open('${cardUrl}','_blank')">
       <div class="card-hd">
         ${srcBadgeHTML(a.sc,a.src)}
         ${isNew?'<span class="new-badge">NEW</span>':''}
