@@ -86,8 +86,7 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 .fsl{font-size:1.16rem;color:#3d2a60;font-weight:800;letter-spacing:.04em;margin-top:2px}
 
 /* ── LEVEL UP TOAST ── */
-.lut{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120px);background:linear-gradient(135deg,#c084fc,#34d399);color:#04020e;border-radius:100px;padding:10px 22px;font-size:1.8rem;font-weight:900;z-index:300;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none}
-.lut.show{transform:translateX(-50%) translateY(0)}
+
 </style>
 </head>
 <body>
@@ -137,7 +136,6 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
   </div>
 </div>
 
-<div class="lut" id="lut">🎉 升級了！</div>
 
 <script>
 const C=[
@@ -393,12 +391,7 @@ function init(){
     if(lv>prevLv){
       player.level=lv;
       localStorage.setItem('player_data',JSON.stringify(player));
-      setTimeout(function(){
-        var t=document.getElementById('lut');
-        t.textContent='🎉 升到 Lv.'+lv+'！稱號：'+getTitle(lv);
-        t.classList.add('show');
-        setTimeout(function(){t.classList.remove('show');},3000);
-      },800);
+
     }
   },50);
 
