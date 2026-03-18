@@ -222,6 +222,18 @@ function safeGL(cv) {
   return gl;
 }
 
+// Release all WebGL contexts to avoid iOS 8-context limit
+function releaseAllGL(){
+  if(window._glPool){
+    Object.values(window._glPool).forEach(function(g){
+      try{var ext=g.getExtension('WEBGL_lose_context');if(ext)ext.loseContext();}catch(e){}
+    });
+    window._glPool={};
+  }
+  // Also stop all running animation frames
+  if(window._rafIds){window._rafIds.forEach(function(id){cancelAnimationFrame(id);});window._rafIds=[];}
+}
+
 
 const LESSONS=[
 {id:'l1',num:'4-1',icon:'🔲',title:'深度測試 — 誰在前面？',
@@ -509,6 +521,7 @@ function d1(cont){
   function _look(e,c){function nr(v){var l=Math.hypot(v[0],v[1],v[2]);return[v[0]/l,v[1]/l,v[2]/l];}function cr(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}var z=nr([e[0]-c[0],e[1]-c[1],e[2]-c[2]]);var x=nr(cr([0,1,0],z));var y=cr(z,x);var m=new Float32Array(16);m[0]=x[0];m[4]=x[1];m[8]=x[2];m[12]=-dt(x,e);m[1]=y[0];m[5]=y[1];m[9]=y[2];m[13]=-dt(y,e);m[2]=z[0];m[6]=z[1];m[10]=z[2];m[14]=-dt(z,e);m[15]=1;return m;}
   function _mul(a,b){var m=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){var s=0;for(var k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];m[i+j*4]=s;}return m;}
   function _gl(id){
+  releaseAllGL();
   var cv=document.getElementById(id);
   var w=Math.min(300,Math.max(200,window.innerWidth-80));
   cv.width=w;cv.height=w;
@@ -823,6 +836,7 @@ function d7(cont){
   function _look(e,c){function nr(v){var l=Math.hypot(v[0],v[1],v[2]);return[v[0]/l,v[1]/l,v[2]/l];}function cr(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}function dt(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}var z=nr([e[0]-c[0],e[1]-c[1],e[2]-c[2]]);var x=nr(cr([0,1,0],z));var y=cr(z,x);var m=new Float32Array(16);m[0]=x[0];m[4]=x[1];m[8]=x[2];m[12]=-dt(x,e);m[1]=y[0];m[5]=y[1];m[9]=y[2];m[13]=-dt(y,e);m[2]=z[0];m[6]=z[1];m[10]=z[2];m[14]=-dt(z,e);m[15]=1;return m;}
   function _mul(a,b){var m=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){var s=0;for(var k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];m[i+j*4]=s;}return m;}
   function _gl(id){
+  releaseAllGL();
   var cv=document.getElementById(id);
   var w=Math.min(300,Math.max(200,window.innerWidth-80));
   cv.width=w;cv.height=w;
@@ -942,6 +956,7 @@ function d10(cont){
   <div class="ctrl-row"><button class="ctrl-btn on" id="nm-on" onclick="setNM('on')">✅ 法線貼圖</button><button class="ctrl-btn" id="nm-off" onclick="setNM('off')">❌ 關閉（看差異）</button><button class="ctrl-btn" id="nm-show" onclick="setNM('show')">🗺️ 顯示法線圖</button></div>`;
   var cv=document.getElementById('cv4-10');
   var d10w=Math.min(600,window.innerWidth>0?window.innerWidth-20:600);cv.width=d10w;cv.height=Math.round(d10w*0.55);cv.style.cssText='display:block;width:100%;height:'+cv.height+'px;';
+  releaseAllGL();
   var gl=cv.getContext('webgl');if(!gl)return;
   // Precompute brick normal map as texture (avoid dFdx/dFdy which needs extension)
   var NW=256,NH=192,nmD=new Uint8Array(NW*NH*4),albD=new Uint8Array(NW*NH*4);
