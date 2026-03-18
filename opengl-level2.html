@@ -6,6 +6,8 @@
 <title>💡 光之城 — OpenGL 魔法王國</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+html{font-size:20px;}
+@media(max-width:480px){html{font-size:18px;}}
 :root{
   --bg:#09080f;--bg2:#0e0c1a;--card:#131024;--border:#1d1a30;
   --acc:#ffd93d;--acc2:#ff6b9d;--acc3:#00d4ff;--acc4:#7c6dfa;
@@ -171,7 +173,6 @@ input[type=range]{flex:1;accent-color:var(--acc);height:4px}
 @keyframes fwFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx,0px),var(--ty,-80px)) scale(0);opacity:0}}
 
 /* ── Font size boost ── */
-html{font-size:17px}
 .lesson-title{font-size:1.05rem!important}
 .lesson-sub{font-size:.85rem!important}
 .story-box{font-size:1rem!important;line-height:1.9!important}
