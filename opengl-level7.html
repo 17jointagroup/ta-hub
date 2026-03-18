@@ -284,14 +284,14 @@ function checkQ(lid,idx){const les=LESSONS.find(l=>l.id===lid);document.querySel
 function complete(id){if(earned.includes(id))return;earned.push(id);localStorage.setItem('tower7_done',JSON.stringify(earned));setTimeout(checkCompletion,400);const les=LESSONS.find(l=>l.id===id);const btn=document.getElementById('btn-'+id);showXPPop(les.xp,btn);toast(`⚔️ +${les.xp} XP！「${les.title}」完成！`);setTimeout(()=>{current=null;render();updateXP();},500);}
 
 const inited={};
-function initDemo(id){if(inited[id])return;inited[id]=true;const cont=document.getElementById('dc-'+id);if(!cont)return;const fn={l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6,l7:d7,l8:d8,l9:d9};fn[id]?.(cont);}
+function initDemo(id){const cont=document.getElementById('dc-'+id);if(!cont)return;if(inited[id])return;if(window._glPool){Object.values(window._glPool).forEach(function(g){try{var e=g.getExtension('WEBGL_lose_context');if(e)e.loseContext();}catch(e2){}});window._glPool={};}Object.keys(inited).forEach(function(k){if(k!==id)inited[k]=false;});inited[id]=true;const fn={l1:d1,l2:d2,l3:d3,l4:d4,l5:d5,l6:d6,l7:d7,l8:d8,l9:d9};fn[id]?.(cont);}
 function mkP(gl,vs,fs){const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;};const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,vs));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
 function qB(gl){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);return b;}
 function mkSD(cont,id,label,mnames,fs,extras){
   const btns=mnames.map((n,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="m7${id}${i}" onclick="setM7_${id}(${i})">${n}</button>`).join('');
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>${label}</div></div><canvas id="cv7${id}" width="600" height="280" style="height:280px"></canvas></div><div class="ctrl-row">${btns}</div>${extras||''}`;
   window[`_m7${id}`]=0;window[`setM7_${id}`]=m=>{window[`_m7${id}`]=m;mnames.forEach((_,i)=>document.getElementById(`m7${id}${i}`).classList.toggle('on',i===m));};
-  const cv=document.getElementById('cv7'+id);const gl=safeGL(cv);if(!gl)return;
+  const cv=document.getElementById('cv7'+id);const gl=cv.getContext('webgl');if(!gl)return;
   const prog=mkP(gl,'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}',fs);
   const buf=qB(gl);const pL=gl.getAttribLocation(prog,'p'),mL=gl.getUniformLocation(prog,'mode'),tL=gl.getUniformLocation(prog,'t');
   let time=0;(function fr(){time+=0.016;gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,2,gl.FLOAT,false,0,0);gl.uniform1i(mL,window[`_m7${id}`]);gl.uniform1f(tL,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(fr);})();
@@ -303,7 +303,7 @@ function d1(cont){
   document.getElementById('pe-cnt').oninput=function(){document.getElementById('pe-cntv').textContent=this.value;};
   window._pe='fire';window.setPE=m=>{window._pe=m;['fire','magic','rain'].forEach(x=>document.getElementById('pe-'+x).classList.toggle('on',x===m));};
   const cv=document.getElementById('cv7p1');
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const gl=safeGL(cv);if(!gl)return;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';const gl=cv.getContext('webgl');if(!gl)return;
   gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
   const vs=`attribute vec2 pos;attribute float life;uniform mat4 mvp;void main(){float s=life*4.+1.;gl_PointSize=s;gl_Position=vec4(pos,0,1);}`;
   const fs=`precision mediump float;uniform int mode;uniform float t;varying float vLife;void main(){vec2 c=gl_PointCoord-.5;float r=length(c);if(r>.5)discard;float a=(1.-r*2.)*vLife;vec3 col;if(mode==0)col=mix(vec3(1.,.3,.0),vec3(1.,.9,.2),vLife);else if(mode==1)col=vec3(abs(sin(t+vLife*3.)),vLife,1.);else col=vec3(.4,.7,1.);gl_FragColor=vec4(col,a*(.3+vLife*.7));}`;
@@ -311,7 +311,6 @@ function d1(cont){
   const vs2=`attribute vec2 pos;attribute float life;void main(){gl_PointSize=max(1.,life*8.);gl_Position=vec4(pos,0,1);}`;
   const fs2=`precision mediump float;uniform int mode;uniform float t;void main(){vec2 c=gl_PointCoord-.5;float r=length(c);if(r>.5)discard;gl_FragColor=vec4(1.,.5,.1,.5);}`;
   // Simple approach: use 2D canvas for particles, convert to WebGL
-  safeGL(cv);
   // Use 2D canvas overlay
   const ctx2=document.createElement('canvas');ctx2.width=600;ctx2.height=280;ctx2.style.cssText='position:absolute;top:0;left:0;width:100%;height:280px;pointer-events:none';
   cv.parentElement.style.position='relative';cv.parentElement.appendChild(ctx2);
