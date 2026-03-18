@@ -582,7 +582,6 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
 .int-next-arr{color:var(--acc);margin-top:8px;font-size:.78rem;font-weight:700}
 
 
-.back-float{display:none;position:fixed;bottom:20px;left:20px;z-index:9999;background:#111;border:1px solid #333;color:#aaa;padding:8px 16px;border-radius:20px;font-size:.75rem;cursor:pointer;text-decoration:none;}
 .back-float:hover{background:#222;color:#fff;}
 </style>
 </head>
@@ -2532,14 +2531,5 @@ function goOpenGL(){
 
 
 
-<!-- Back button shown when returning from article -->
-<a id="back-float" class="back-float" href="javascript:history.back()">← 上一頁</a>
-<script>
-// Show back button if there's history to go back to
-if(document.referrer && document.referrer !== window.location.href){
-  var bf=document.getElementById('back-float');
-  if(bf) bf.style.display='block';
-}
-</script>
 </body>
 </html>
