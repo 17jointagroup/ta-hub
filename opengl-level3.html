@@ -336,7 +336,7 @@ function complete(id){if(earned.includes(id))return;earned.push(id);localStorage
 
 // ── DEMOS ──
 const inited={};
-function initDemo(id){if(inited[id])return;inited[id]=true;const cont=document.getElementById('dc-'+id);if(!cont)return;({l1:d1,l2:d2,l3:d3})[id]?.(cont);}
+function initDemo(id){const cont=document.getElementById('dc-'+id);if(!cont)return;if(inited[id])return;if(window._glPool){Object.values(window._glPool).forEach(function(g){try{var e=g.getExtension('WEBGL_lose_context');if(e)e.loseContext();}catch(e2){}});window._glPool={};}Object.keys(inited).forEach(function(k){if(k!==id)inited[k]=false;});inited[id]=true;({l1:d1,l2:d2,l3:d3})[id]?.(cont);}
 
 function mkGL(id,w,h){const cv=document.createElement('canvas');cv.id='cv-'+id;cv.width=w;cv.height=h;cv.style.height=h+'px';return cv;}
 function mkProg(gl,vs,fs){const mkS=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;};const p=gl.createProgram();gl.attachShader(p,mkS(gl.VERTEX_SHADER,vs));gl.attachShader(p,mkS(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
