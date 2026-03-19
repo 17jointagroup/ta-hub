@@ -1381,32 +1381,72 @@ function buildDemo_MVP(cont){
   function trans(x,y,z){const m=ident();m[12]=x;m[13]=y;m[14]=z;return m;}
   function persp(fov,asp,n,f){const s=1/Math.tan(fov/2);return new Float32Array([s/asp,0,0,0, 0,s,0,0, 0,0,(f+n)/(n-f),-1, 0,0,2*f*n/(n-f),0]);}
 
+  // Build floor grid lines (world-space, fixed XZ plane at y=-1.5)
+  const gridLines=[];
+  for(let i=-4;i<=4;i++){
+    // lines along Z
+    gridLines.push(i*.6,-1.5,-2.4, .18,.18,.28, i*.6,-1.5,2.4, .18,.18,.28);
+    // lines along X
+    gridLines.push(-2.4,-1.5,i*.6, .18,.18,.28, 2.4,-1.5,i*.6, .18,.18,.28);
+  }
+  const gridV=new Float32Array(gridLines);
+  const gridBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,gridBuf);gl.bufferData(gl.ARRAY_BUFFER,gridV,gl.STATIC_DRAW);
+
+  // World axes (X=red, Y=green, Z=blue) - fixed in world space
+  const axisV=new Float32Array([
+    0,0,0, 1,.2,.2,  1.8,0,0, 1,.2,.2,   // X red
+    0,0,0, .2,1,.3,  0,1.8,0, .2,1,.3,   // Y green
+    0,0,0, .2,.4,1,  0,0,1.8, .2,.4,1    // Z blue
+  ]);
+  const axisBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,axisBuf);gl.bufferData(gl.ARRAY_BUFFER,axisV,gl.STATIC_DRAW);
+
   let autoT=0;
   function frame(){
     if(autoRot){autoT+=0.008;modelRy=autoT;modelRx=0.35;}
     const fov=parseInt(document.getElementById('sl-fov').value)*Math.PI/180||Math.PI/3;
     const asp=cv.width/cv.height;
 
-    // M: model rotation
-    const M=mul(rotX(modelRx),rotY(modelRy));
-    // V: camera position
-    const V=mul(rotX(camRx),mul(rotY(camRy),trans(0,0,-camDist)));
-    // P: perspective
+    // KEY DIFFERENCE:
+    // M mode: object rotates (M changes), camera fixed, world axes fixed
+    // V mode: object fixed (M=ident), camera orbits (V changes), world axes move with camera
+    const M = mvpMode==='model'
+      ? mul(rotX(modelRx), rotY(modelRy))
+      : mul(trans(0,0.3,0), ident()); // object stationary in V/P modes
+
+    const V = mvpMode==='model'
+      ? mul(rotX(0.25), trans(0,0,-camDist))       // fixed camera looking slightly down
+      : mul(rotX(camRx), mul(rotY(camRy), trans(0,0,-camDist))); // orbiting camera
+
     const P=persp(fov,asp,.1,100);
 
     gl.viewport(0,0,cv.width,cv.height);
     gl.clearColor(.04,.05,.12,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
-    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
     const stride=24;
+
+    // Draw world axes (always fixed identity M)
+    gl.bindBuffer(gl.ARRAY_BUFFER,axisBuf);
+    gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,stride,0);
+    gl.enableVertexAttribArray(cL);gl.vertexAttribPointer(cL,3,gl.FLOAT,false,stride,12);
+    gl.uniformMatrix4fv(uM,false,ident());
+    gl.uniformMatrix4fv(uV,false,V);
+    gl.uniformMatrix4fv(uP,false,P);
+    gl.drawArrays(gl.LINES,0,6);
+
+    // Draw floor grid (always fixed identity M)
+    gl.bindBuffer(gl.ARRAY_BUFFER,gridBuf);
+    gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,stride,0);
+    gl.enableVertexAttribArray(cL);gl.vertexAttribPointer(cL,3,gl.FLOAT,false,stride,12);
+    gl.uniformMatrix4fv(uM,false,ident());
+    gl.drawArrays(gl.LINES,0,gridLines.length/6);
+
+    // Draw cube (M applied only in model mode)
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
     gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,stride,0);
     gl.enableVertexAttribArray(cL);gl.vertexAttribPointer(cL,3,gl.FLOAT,false,stride,12);
     gl.uniformMatrix4fv(uM,false,M);
-    gl.uniformMatrix4fv(uV,false,V);
-    gl.uniformMatrix4fv(uP,false,P);
     gl.drawArrays(gl.TRIANGLES,0,36);
 
-    // Labels overlay using 2D canvas approach - draw axes hint
     requestAnimationFrame(frame);
   }
   frame();
