@@ -1254,36 +1254,7 @@ const POOL = [
   {title:"Unreal Engine 5 Nanite Virtualized Geometry Documentation",excerpt:"Epic's official deep-dive on Nanite virtualized geometry: custom depth writes, programmable rasterization, material evaluation hooks, performance budgeting, LOD integration, and Nanite Foliage setup for open worlds.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["graphics","scene"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/nanite-virtualized-geometry-in-unreal-engine"},
   {title:"Lumen Global Illumination & Reflections in UE5",excerpt:"Epic's documentation on Lumen GI and reflections: software ray tracing via mesh distance fields, surface cache, hardware RT mode, Lumen scene detail settings, and performance tuning for console and PC targets.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["graphics","scene"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine"},
   {title:"UE5 Procedural Content Generation (PCG) Framework Overview",excerpt:"Epic's guide to UE5's PCG framework: point cloud processing, hierarchical graphs, biome rule authoring, data-driven foliage placement, and hooking PCG output into Nanite Foliage for open-world environments.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["procedural","scene"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/procedural-content-generation-overview"},
-  {title:"Chaos Cloth Asset Editor User Guide — UE5",excerpt:"Epic's guide to Chaos Cloth in UE5: painting constraints in the cloth tool, configuring self-collision, tuning solver iterations, and achieving stable real-time cloth simulation on hero character capes and garments.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["character","animation"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/chaos-cloth-asset-editor-user-guide"}
-];
-
-// ─── ART TIPS DATA ────────────────────────────────────────────────────────────
-const ART_SEEDS = [
-  {id:"a01",title:"The 7 Values of Colour — Painting Light from Imagination",excerpt:"James Gurney breakdown of how artists use value structure to imply convincing light. Covers lost and found edges, form shadows vs cast shadows, and the 3-value sketch method used in concept production pipelines.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2024-03-15",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
-  {id:"a02",title:"Substance 3D Painter Smart Materials — Building a Reusable Library",excerpt:"How to build a studio-grade smart material library in Substance 3D Painter: folder structure, anchor point setup, height-blending for layered wear, and exporting multi-channel maps for Unreal and Unity in one click.",src:"Adobe Substance Blog",sc:"substanceblog",tags:["texturing"],date:"2024-06-01",type:"rss",url:"https://substance3d.adobe.com/community-blog",tip:false},
-  {id:"a03",title:"Hard Surface Modeling Tips — Bevel, Boolean, and Mesh Clean-up",excerpt:"Production tips for hard surface game assets: bevel workflow for smooth normal bakes, boolean operations without topology nightmares, and the 'floater geo' technique to add detail without extra polygons on the low-poly.",src:"80.lv",sc:"80lv",tags:["modeling"],date:"2024-09-20",type:"rss",url:"https://80.lv/articles/hard-surface-modeling-tips",tip:false},
-  {id:"a04",title:"Lighting a Game Scene — 3-Point Setup to HDRI Blend",excerpt:"Step-by-step guide to lighting an interior environment in UE5: starting with a 3-point directional/fill/rim setup, blending sky HDRI, adding emissive props for fill, and final LUT-based colour grading in post.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["lighting","scene"],date:"2024-11-05",type:"rss",url:"https://dev.epicgames.com/community/learning",tip:false},
-  {id:"a05",title:"AI-Assisted Concept Art Pipeline — Midjourney to Production",excerpt:"How studios use Midjourney and Stable Diffusion for early concept exploration: prompt structures for consistent character designs, img2img for iterating on rough sketches, and when to hand off to a human artist for final polish.",src:"ArtStation Blog",sc:"artstation",tags:["concept","ai-art"],date:"2025-01-10",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
-  {id:"a06",title:"Character Silhouette Design — 10 Rules from AAA Studios",excerpt:"10 silhouette rules used by character artists at AAA studios: the thumbnail test, silhouette weight distribution, why tighter silhouettes read better on small screens, and how negative space creates memorable characters.",src:"80.lv",sc:"80lv",tags:["concept","character"],date:"2024-08-14",type:"rss",url:"https://80.lv/articles/character-silhouette-design",tip:false},
-  {id:"a07",title:"Organic Sculpting in ZBrush — From Blockout to Hero Detail",excerpt:"Full workflow from ZSphere blockout to hero mesh detail in ZBrush: proportional blocking with DynaMesh, macro surface forms with ClayBuildup and TrimDynamic, and micro-detail with Alpha brushes and Surface Noise for skin pores.",src:"ArtStation Blog",sc:"artstation",tags:["modeling","character"],date:"2024-07-22",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
-  {id:"a08",title:"Trim Sheet Workflow — One Texture, Infinite Architecture",excerpt:"How to build a game-ready trim sheet texture: planning the 9 trim zones on a 2K atlas, baking normals and AO from a high-poly source, and applying trim sheets in Unreal to modular architecture assets for maximum texture reuse.",src:"80.lv",sc:"80lv",tags:["texturing","scene"],date:"2024-05-03",type:"rss",url:"https://80.lv/articles/trim-sheet-workflow",tip:false},
-  {id:"a09",title:"Midpoint Value Study — Mastering Greyscale Before Colour",excerpt:"Why greyscale studies accelerate colour learning: the midpoint value method (everything maps to mid grey, lights up, darks down), how to do a 30-minute master copy study, and translating greyscale value maps to full colour.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2024-02-28",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
-  {id:"a10",title:"Rigging Stylized Characters in Maya — Squash & Stretch Controls",excerpt:"Building expressive squash-and-stretch rigs for stylized game characters in Maya: SDK-driven volume controls, non-linear deformers for cartoon exaggeration, and baking to a clean deformation skeleton for engine export.",src:"80.lv",sc:"80lv",tags:["character","animation"],date:"2024-10-11",type:"rss",url:"https://80.lv/articles/rigging-stylized-characters",tip:false}
-];
-
-// Short Tips (card-only, no reader body) — the Art Tips channel
-const ART_TIPS = [
-  {id:"t01",title:"UV islands should never share edges across material boundaries",excerpt:"When tiling textures meet unique baked detail, UV island boundaries act as hard seams under normal map filtering. Keep separate materials on separate UV islands — even if it means splitting a mesh — to prevent seam artefacts at runtime.",src:"Polycount",sc:"polycount",tags:["texturing","modeling"],date:"2025-01-20",type:"ai",url:"https://polycount.com/discussion",tip:true},
-  {id:"t02",title:"Paint shadows before highlights when doing greyscale studies",excerpt:"Shadows establish form; highlights are surface response. Painting shadows first forces you to commit to a light direction and prevents the common mistake of floating highlights with no grounding shadow to anchor them.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2025-01-18",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
-  {id:"t03",title:"Keep your hero mesh under 1% of your poly budget",excerpt:"A hero character in a current-gen open world title has a budget of ~80K triangles. Using more than 1% (~800 tris) on a single fingernail means you are robbing budget from silhouette-forming geometry elsewhere.",src:"80.lv",sc:"80lv",tags:["modeling","character"],date:"2025-01-15",type:"rss",url:"https://80.lv",tip:true},
-  {id:"t04",title:"Use a 1-pixel black outline in your concept colour script",excerpt:"A 1px black stroke around all value shapes in a colour script forces you to check that every shape reads as a distinct value — if two adjacent shapes have the same value, the stroke disappears and the forms merge.",src:"ArtStation Blog",sc:"artstation",tags:["concept"],date:"2025-01-12",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
-  {id:"t05",title:"Cavity maps should be baked at twice your target texel density",excerpt:"Cavity detail baked at 2× texel density, then downsampled, gives you anti-aliased micro-surface detail that catches specular correctly. Baking at target resolution results in aliased edges that break under area lights.",src:"Polycount",sc:"polycount",tags:["texturing"],date:"2025-01-10",type:"ai",url:"https://polycount.com",tip:true},
-  {id:"t06",title:"Three-light setups: key, fill, and rim should never share the same hue",excerpt:"Key and fill lights from the same colour temperature create flat, toneless renders. Use a warm key with a cool fill (or vice-versa), and a rim with a complementary hue to the key — the contrast reads as dimensional on any display.",src:"ArtStation Blog",sc:"artstation",tags:["lighting"],date:"2025-01-08",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
-  {id:"t07",title:"Midjourney style consistency: use --cref for character references",excerpt:"The --cref (character reference) flag in Midjourney v6 locks style and identity across prompts more reliably than textual description. Combine with --sw 50–80 for variation while preserving core character features in concept series.",src:"ArtStation Blog",sc:"artstation",tags:["ai-art","concept"],date:"2025-01-05",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
-  {id:"t08",title:"Use floating geometry to add chamfer detail without topology cost",excerpt:"Floating (non-connected) geo slightly above a surface bakes into the normal map as a chamfer seam — zero polygon cost on the low-poly. Essential for hard-surface panel lines. Keep floaters within 0.001 world units of the base mesh for accurate bakes.",src:"Polycount",sc:"polycount",tags:["modeling","texturing"],date:"2025-01-02",type:"ai",url:"https://polycount.com",tip:true},
-  {id:"t09",title:"Always block in at 50% grey before colour in Painter",excerpt:"Starting in Substance 3D Painter at 50% grey (128,128,128) for your Base Colour channel lets you evaluate height and cavity-driven detail in greyscale before committing to colour — the same principle as a traditional greyscale study.",src:"Adobe Substance Blog",sc:"substanceblog",tags:["texturing"],date:"2024-12-28",type:"rss",url:"https://substance3d.adobe.com",tip:true},
-  {id:"t10",title:"Your thumbnail pass should be completable in 5 minutes",excerpt:"If your concept thumbnail takes more than 5 minutes, you are rendering, not designing. Thumbnails are composition and silhouette decisions. Use a 2B brush at 100% opacity, no blending. Kill the rendering urge.",src:"ArtStation Blog",sc:"artstation",tags:["concept"],date:"2024-12-22",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
-  // ── UE5 Rendering ──
+  {title:"Chaos Cloth Asset Editor User Guide — UE5",excerpt:"Epic's guide to Chaos Cloth in UE5: painting constraints in the cloth tool, configuring self-collision, tuning solver iterations, and achieving stable real-time cloth simulation on hero character capes and garments.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["character","animation"],type:"rss",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/chaos-cloth-asset-editor-user-guide"},
   {title:"Lumen Core Technology: Surface Cache & Real-Time GI",excerpt:"How Lumen's Surface Cache stores material info to accelerate indirect lighting. Covers Software vs Hardware ray tracing modes and debugging with r.Lumen.Visualize.",src:"Medium",sc:"80lv",tags:["ue5rendering","lumen","rendering","graphics"],type:"ai",url:"https://medium.com/@GroundZer0/lumen-core-technology-how-unreal-handles-real-time-global-illumination-09ed6a0f62be"},
   {title:"Nanite for Artists — GDC 2024 (Epic Official)",excerpt:"Epic's GDC 2024 session: best practices for building with Nanite, UE5.4 Tessellation, and virtualized geometry for TA workflows.",src:"Epic Dev Community",sc:"ue",tags:["ue5rendering","nanite","rendering","tools"],type:"ai",url:"https://forums.unrealengine.com/t/talks-and-demos-nanite-for-artists-gdc-2024/1845174"},
   {title:"MegaLights in UE5.5 — SIGGRAPH 2025 Paper",excerpt:"Stochastic direct lighting: how MegaLights enables 1000+ shadow-casting dynamic lights on console. Full technical paper from SIGGRAPH 2025.",src:"SIGGRAPH 2025",sc:"80lv",tags:["ue5rendering","lighting","rendering","graphics"],type:"ai",url:"https://advances.realtimerendering.com/s2025/content/MegaLights_Stochastic_Direct_Lighting_2025.pdf"},
@@ -1294,8 +1265,6 @@ const ART_TIPS = [
   {title:"Virtual Shadow Maps Deep Dive — UE5",excerpt:"How VSM page tables, caching, and invalidation work alongside Nanite. Common performance pitfalls and settings for scenes with many dynamic objects.",src:"Epic Documentation",sc:"ue",tags:["ue5rendering","rendering","graphics","optimization"],type:"ai",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/virtual-shadow-maps-in-unreal-engine"},
   {title:"UE5 Path Tracer — Production Ready (UE5.5)",excerpt:"Path Tracer reaches production-ready status in UE5.5. Used in feature films including Piece by Piece. Covers integration with Movie Render Queue and ACES color management.",src:"Unreal Fest 2024",sc:"ue",tags:["ue5rendering","rendering","lighting","scene"],type:"ai",url:"https://www.unrealengine.com/en-US/blog/catch-up-on-the-big-news-from-unreal-fest-seattle-2024"},
   {title:"UE5 Lumen Optimization — r.ProfileGPU for TAs",excerpt:"Reading Lumen's GPU profiler output: which passes cost what, Surface Cache update budget, and practical Lumen frame budget targets for shipping titles.",src:"YouTube / TA Community",sc:"80lv",tags:["ue5rendering","optimization","rendering","tools"],type:"ai",url:"https://www.youtube.com/results?search_query=UE5+Lumen+GPU+profiling+technical+artist+2024"},
-,
-  // ── UE5 Optimization ──
   {title:"Optimizing UE5: Nanite, Lumen & VSM — Unreal Fest 2024 (Matt Ostle)",excerpt:"Senior TA Matt Ostle shares Epic's golden project settings: disable static lighting, enable Nanite+VSM+Virtual Textures. Practical GPU time and memory targets for AAA titles.",src:"Unreal Fest 2024",sc:"ue",tags:["ue5opt","optimization","tools","ue5rendering"],type:"ai",url:"https://linktr.ee/epicmattoztalay"},
   {title:"Optimizing UE5 — Rethinking Performance Paradigms Pt.1 & 2 (Epic)",excerpt:"Why traditional optimization rules don't apply to Nanite+Lumen pipelines. How to actually measure bottlenecks and fix them. Two-part deep dive from an Epic TA.",src:"Epic Games",sc:"ue",tags:["ue5opt","optimization","tools"],type:"ai",url:"https://linktr.ee/epicmattoztalay"},
   {title:"Nanite Performance Gotchas — When Virtualized Geometry Hurts",excerpt:"Nanite Streamed mode is slower than Fallback Mesh for raytracing. Memory footprint traps with dense geometry. When Masked/Translucent materials break the pipeline.",src:"NVIDIA UE5 RT Guide",sc:"80lv",tags:["ue5opt","optimization","ue5rendering","nanite"],type:"ai",url:"https://dlss.download.nvidia.com/uebinarypackages/Documentation/UE5+Raytracing+Guideline+v5.4.pdf"},
@@ -1304,8 +1273,6 @@ const ART_TIPS = [
   {title:"Virtual Shadow Maps: Caching, Invalidation & Page Budget",excerpt:"How VSM page tables get invalidated by dynamic objects. Strategies for controlling invalidation rate and keeping shadow budget stable in large open-world scenes.",src:"Epic Documentation",sc:"ue",tags:["ue5opt","optimization","ue5rendering"],type:"ai",url:"https://dev.epicgames.com/documentation/en-us/unreal-engine/virtual-shadow-maps-in-unreal-engine"},
   {title:"Virtualize Everything: Polygons, Shadows & Textures — Unreal Fest 2024",excerpt:"Deep dive into the three UE5 virtualization pillars and how they interact. When enabling all three hurts vs helps. Real project data from an Epic TA.",src:"Unreal Fest 2024",sc:"ue",tags:["ue5opt","optimization","ue5rendering","tools"],type:"ai",url:"https://linktr.ee/epicmattoztalay"},
   {title:"UE5 Draw Call Reduction — Merging, Instancing & Nanite Strategy",excerpt:"Strategies for reducing draw calls in UE5: static mesh instancing, HLOD, ISM vs HISM, and how Nanite changes the equation. When draw calls still matter even with Nanite.",src:"80.lv",sc:"80lv",tags:["ue5opt","optimization","tools","ue5rendering"],type:"ai",url:"https://80.lv/articles/?s=unreal+engine+5+optimization+draw+call"},
-,
-  // ── UE5 Rendering — International Sources ──
   {title:"UE5 Lumen 完全解説：サーフェスキャッシュとリアルタイムGI",excerpt:"Lumenのサーフェスキャッシュ仕組み、SoftwareとHardware RTの使い分け、r.Lumen.Visualizeデバッグ方法を日本語で徹底解説。TA向けの実践チップス多数。",src:"Zenn.dev (JP)",sc:"80lv",tags:["ue5rendering","lumen","rendering","graphics"],type:"ai",url:"https://zenn.dev/search?q=UE5+Lumen+TA"},
   {title:"Nanite 실전 최적화 가이드 — 한국 UE5 커뮤니티",excerpt:"Nanite 클러스터 구조, VSM 연동, Tessellation 활용법. 한국 언리얼 개발자 포럼의 실전 경험 공유. Masked 머티리얼의 Dither 대체 전략 포함.",src:"UE Korea Forum",sc:"ue",tags:["ue5rendering","nanite","optimization","ue5opt"],type:"ai",url:"https://cafe.naver.com/ue5korea"},
   {title:"UE5渲染优化完整指南 — Lumen+Nanite+VSM三件套",excerpt:"中文详解UE5三大虚拟化技术：Nanite虚拟几何、Virtual Shadow Maps、Virtual Textures。附项目设置截图和GPU Profiler读法。",src:"知乎专栏",sc:"80lv",tags:["ue5rendering","ue5opt","optimization","nanite","lumen"],type:"ai",url:"https://www.zhihu.com/search?type=content&q=UE5+Lumen+Nanite+渲染优化"},
@@ -1318,8 +1285,6 @@ const ART_TIPS = [
   {title:"Discord TA Guild: UE5 Rendering Q&A Digest",excerpt:"Weekly digest of UE5 rendering questions and answers from the Technical Artist Discord server. Covers Lumen GI issues, Nanite compatibility, VSM shadow artifacts, and Substrate migration tips.",src:"TA Discord",sc:"80lv",tags:["ue5rendering","lumen","nanite","community"],type:"ai",url:"https://discord.gg/technicalart"},
   {title:"UE5 Path Tracer vs Lumen — 映像制作者の比較",excerpt:"映像制作・建築ビジュアライゼーションにおけるPath TracerとLumenの使い分け。Movie Render Queueの設定、ACESカラーマネジメント、レンダリング速度比較。",src:"CG World (JP)",sc:"artstation",tags:["ue5rendering","lumen","rendering","cinematic"],type:"ai",url:"https://cgworld.jp/search/?s=UE5+Lumen+Path+Tracer"},
   {title:"UE5 虚拟阴影贴图（VSM）深度解析 — TA实战经验",excerpt:"UE5 Virtual Shadow Maps页面缓存机制、动态物体导致的缓存失效、大型开放世界场景的VSM预算控制。附带性能测试数据。",src:"CSDN技术博客",sc:"80lv",tags:["ue5opt","ue5rendering","optimization","rendering"],type:"ai",url:"https://blog.csdn.net/search?q=UE5+Virtual+Shadow+Maps+优化"},
-
-  // ── UE5 Optimization — International Sources ──
   {title:"UE5 최적화 실전 — Unreal Insights + RenderDoc 활용법",excerpt:"한국 게임 스튜디오 TA의 UE5 최적화 워크플로우: Unreal Insights로 병목 찾기, RenderDoc으로 드로우콜 분석, Nanite+Lumen 예산 설정.",src:"Korean Game Dev Blog",sc:"80lv",tags:["ue5opt","optimization","tools"],type:"ai",url:"https://www.youtube.com/results?search_query=UE5+언리얼+최적화+기술아티스트"},
   {title:"UE5性能优化踩坑记录 — 独立开发者分享",excerpt:"中国独立开发者分享UE5优化实战：Lumen场景细节等级调整、小道具关闭投影、VSM失效排查、r.ProfileGPU读法详解。",src:"游戏开发者社区",sc:"80lv",tags:["ue5opt","optimization","lumen","tools"],type:"ai",url:"https://indienova.com/search?q=UE5+优化"},
   {title:"UE5 GPU Optimization — Practical Profiling for Small Studios",excerpt:"Step-by-step GPU profiling workflow for small teams: reading GPU Visualizer, identifying Lumen vs shadow vs material bottlenecks, and setting realistic frame budgets.",src:"Reddit r/gamedev",sc:"80lv",tags:["ue5opt","optimization","tools"],type:"rss",url:"https://www.reddit.com/r/unrealengine/search/?q=UE5+optimization+profiling+lumen"},
@@ -1328,24 +1293,18 @@ const ART_TIPS = [
   {title:"Optimizing Draw Calls in UE5 — Even With Nanite",excerpt:"When draw calls still matter in UE5: translucent objects, UI, non-Nanite assets, and Niagara particles. ISM vs HISM vs Merged Actor strategies from an experienced TA.",src:"YouTube EN",sc:"80lv",tags:["ue5opt","optimization","tools"],type:"ai",url:"https://www.youtube.com/results?search_query=UE5+draw+call+optimization+Nanite+2024"},
   {title:"UE5 Mobile Rendering — Fallback Strategies for Lumen & Nanite",excerpt:"What to do when your game targets mobile: Lumen fallback to lightmaps, Nanite mesh reduction pipeline, VSM vs traditional shadow maps. Real project from a cross-platform studio.",src:"80.lv",sc:"80lv",tags:["ue5opt","optimization","ue5rendering","rendering"],type:"ai",url:"https://80.lv/articles/?s=UE5+mobile+rendering+optimization"},
   {title:"UE5 렌더링 최적화 — 모바일과 콘솔 플랫폼별 설정",excerpt:"플랫폼별 UE5 최적화 전략: PS5/Xbox에서의 Lumen 설정, 모바일 Nanite 폴백, 닌텐도 스위치 포팅 시 렌더링 파이프라인 단순화 방법.",src:"Naver 개발자 블로그",sc:"80lv",tags:["ue5opt","optimization","ue5rendering"],type:"ai",url:"https://blog.naver.com/search/search.nhn?query=UE5+최적화+렌더링"},
-
-  // ── General TA — International Sources ──
   {title:"TA向けシェーダー開発 HLSL実践入門 — 日本語解説",excerpt:"UE5のカスタムシェーダーノード、HLSLコードの書き方、Material Parameter Collectionの活用法。日本のTA向けシェーダー入門記事。",src:"Zenn.dev (JP)",sc:"80lv",tags:["shader","tools"],type:"ai",url:"https://zenn.dev/search?q=UE5+HLSL+シェーダー+TA"},
   {title:"Houdini → UE5 プロシージャルアセットパイプライン",excerpt:"HoudiniのProceduralアセットをUE5に連携するパイプライン構築。Houdini Engine for Unreal、PDG、アセット自動更新ワークフローの実践解説。",src:"CGWorld (JP)",sc:"80lv",tags:["procedural","tools","scene"],type:"ai",url:"https://cgworld.jp/search/?s=Houdini+UE5+プロシージャル"},
   {title:"VFX for Games — Niagara 실전 이펙트 제작 YouTube 강의",excerpt:"UE5 Niagara를 활용한 게임 VFX 제작: 파티클 시스템 기초부터 GPU 파티클 최적화까지. 한국 TA의 실전 이펙트 제작 과정 공개.",src:"YouTube KR",sc:"80lv",tags:["vfx","tools"],type:"ai",url:"https://www.youtube.com/results?search_query=UE5+Niagara+VFX+기술아티스트"},
   {title:"UE5 PCG框架实战 — 程序化内容生成完全指南",excerpt:"Unreal Engine 5的PCG框架中文实战：程序化地形生成、植被散布、关卡几何体自动化。含节点图和蓝图脚本示例。",src:"Bilibili / 知乎",sc:"80lv",tags:["procedural","tools","scene"],type:"ai",url:"https://www.bilibili.com/search?keyword=UE5+PCG+程序化生成"},
   {title:"Technical Art Portfolio — What Recruiters Actually Look For (2024)",excerpt:"Industry survey of TA recruiters at AAA and indie studios: which skills are most valued, how to show Shader/VFX/Tools work in a portfolio, and what differentiates strong candidates.",src:"80.lv",sc:"artstation",tags:["tools","generalist"],type:"ai",url:"https://80.lv/articles/technical-artist-portfolio-tips-2024"},
   {title:"Polycount Forum — Shader of the Month: Community Showcase",excerpt:"Monthly thread where artists worldwide share their latest shader experiments: procedural materials, screen-space effects, and custom HLSL tricks. Raw community creativity from all skill levels.",src:"Polycount",sc:"80lv",tags:["shader","procedural"],type:"rss",url:"https://polycount.com/search?search=shader+UE5+2024"},
-,
-  // ── Rendering Research & Academic ──
   {title:"Real-Time Rendering Blog — Latest Techniques Digest",excerpt:"Tomas Akenine-Möller's curated blog tracking the latest in real-time rendering research. Screen-space effects, sampling theory, GPU architecture updates, and links to papers worth reading.",src:"realtimerendering.com",sc:"80lv",tags:["rendering","graphics","shader","research"],type:"rss",url:"https://www.realtimerendering.com/blog/"},
   {title:"Journal of Computer Graphics Techniques (JCGT) — Open Access",excerpt:"Peer-reviewed open-access journal for practical rendering and graphics techniques. Covers GPU algorithms, material models, and real-time rendering approaches directly applicable to game TA work.",src:"JCGT",sc:"80lv",tags:["rendering","graphics","shader","research"],type:"ai",url:"http://jcgt.org/"},
   {title:"Inigo Quilez — Articles on Procedural Graphics",excerpt:"Inigo Quilez's legendary collection of articles on SDFs, procedural textures, raymarching, and shader math. Essential reading for any TA working with procedural content.",src:"iquilezles.org",sc:"80lv",tags:["shader","procedural","rendering","graphics"],type:"rss",url:"https://iquilezles.org/articles/"},
   {title:"Advances in Real-Time Rendering — SIGGRAPH Course",excerpt:"Annual SIGGRAPH course with production rendering techniques from AAA game studios. Covers Lumen, Nanite, and next-gen rendering features from studios like Epic, EA, Naughty Dog, and more.",src:"advances.realtimerendering.com",sc:"80lv",tags:["rendering","graphics","shader","research"],type:"ai",url:"https://advances.realtimerendering.com/"},
   {title:"GPU Gems — NVIDIA Developer Technical Articles",excerpt:"NVIDIA's GPU Gems series and developer blog covering shader programming, GPU architecture optimizations, DLSS, ray tracing, and real-time rendering techniques for game developers.",src:"NVIDIA Dev Blog",sc:"80lv",tags:["rendering","shader","graphics","ue5rendering"],type:"rss",url:"https://developer.nvidia.com/blog/tag/graphics/"},
   {title:"The Book of Shaders — Interactive Shader Learning",excerpt:"Patricio Gonzalez Vivo's interactive guide to fragment shaders. From noise and randomness to patterns and fractals. Widely used as a foundation for shader TA learning.",src:"thebookofshaders.com",sc:"80lv",tags:["shader","procedural","graphics"],type:"ai",url:"https://thebookofshaders.com/"},
-
-  // ── YouTube Educators ──
   {title:"Acerola — GPU & Graphics Programming Deep Dives",excerpt:"Acerola's YouTube channel covers rendering algorithms, post-processing effects, and GPU pipeline internals with hands-on implementations. Great for understanding the theory behind game graphics.",src:"YouTube — Acerola",sc:"80lv",tags:["rendering","shader","graphics"],type:"ai",url:"https://www.youtube.com/@Acerola_t/videos"},
   {title:"Freya Holmér — Math for Game Developers",excerpt:"Freya Holmér's acclaimed series on math for games: vectors, bezier curves, splines, and shader math. Essential background for any TA working with procedural content or custom shaders.",src:"YouTube — Freya Holmér",sc:"80lv",tags:["shader","procedural","graphics","tools"],type:"ai",url:"https://www.youtube.com/@Acegikmo/videos"},
   {title:"SimonDev — Rendering & Graphics Tutorials",excerpt:"SimonDev covers WebGL, Three.js, and graphics programming fundamentals. Atmospheric scattering, terrain rendering, and advanced shading techniques explained clearly.",src:"YouTube — SimonDev",sc:"80lv",tags:["rendering","shader","graphics"],type:"ai",url:"https://www.youtube.com/@simondev758/videos"},
@@ -1354,8 +1313,6 @@ const ART_TIPS = [
   {title:"Ben Cloward — Shader Tutorials UE5 & Unity",excerpt:"Ben Cloward's weekly shader tutorials covering UE5 and Unity material creation. From dissolve effects to procedural textures, highly practical for game TAs.",src:"YouTube — Ben Cloward",sc:"80lv",tags:["shader","tools","ue5rendering"],type:"ai",url:"https://www.youtube.com/@BenCloward/videos"},
   {title:"William Faucher — UE5 Cinematic & Lighting",excerpt:"William Faucher's UE5 tutorials on cinematic lighting, Lumen setup, and environment creation. Real production-level Unreal workflows for environment artists and TAs.",src:"YouTube — William Faucher",sc:"80lv",tags:["ue5rendering","lumen","scene","lighting"],type:"ai",url:"https://www.youtube.com/@WilliamFaucher/videos"},
   {title:"GDC Talks YouTube Channel — Free Game Dev Lectures",excerpt:"Official GDC YouTube channel with hundreds of free talks: Technical Artist Summit, Rendering Techniques, VFX sessions, and pipeline talks from AAA developers worldwide.",src:"YouTube — GDC",sc:"ue",tags:["rendering","vfx","tools","shader","graphics"],type:"rss",url:"https://www.youtube.com/@GDC/videos"},
-
-  // ── Community Forums & Blogs ──
   {title:"Shadertoy Community — Real-Time Shader Experiments",excerpt:"Shadertoy is the world's largest collection of GLSL shader experiments. Explore procedural techniques, raymarching, noise algorithms, and creative coding from developers worldwide.",src:"Shadertoy",sc:"80lv",tags:["shader","procedural","rendering","graphics"],type:"rss",url:"https://www.shadertoy.com/"},
   {title:"Simon Schreibt — Game Effects Tech Blog",excerpt:"Simon Schreibt's famous blog series 'Game Art Tricks' — deep dives into how AAA games fake effects. Fake shadows, projection decals, scrolling textures, and many more techniques explained.",src:"simonschreibt.de",sc:"80lv",tags:["vfx","shader","rendering"],type:"rss",url:"https://simonschreibt.de/"},
   {title:"Catlike Coding — Unity Shader & Rendering Tutorials",excerpt:"Jasper Flick's comprehensive shader tutorials for Unity covering rendering pipelines, procedural textures, PBR shading, and advanced effects. The gold standard for Unity shader learning.",src:"Catlike Coding",sc:"80lv",tags:["shader","rendering","graphics"],type:"rss",url:"https://catlikecoding.com/unity/tutorials/"},
@@ -1367,25 +1324,17 @@ const ART_TIPS = [
   {title:"Reddit r/GraphicsProgramming — Shader & Rendering Discussion",excerpt:"Active community of graphics programmers discussing GPU algorithms, shader optimization, rendering research papers, and real-time technique implementations.",src:"Reddit r/GraphicsProgramming",sc:"80lv",tags:["rendering","shader","graphics"],type:"rss",url:"https://www.reddit.com/r/GraphicsProgramming/"},
   {title:"Reddit r/VFX — Visual Effects Community",excerpt:"VFX professionals sharing breakdowns, tutorials, and pipeline discussions. Covers Houdini, Niagara, Unity VFX Graph, Nuke, and production VFX tools.",src:"Reddit r/VFX",sc:"80lv",tags:["vfx","tools","procedural"],type:"rss",url:"https://www.reddit.com/r/vfx/"},
   {title:"Twitter / X — TA Community #techart #gamedev",excerpt:"The real-time stream of technical art discoveries. Follow #techart, #gamedev, #HLSL, #Houdini for daily shader experiments, UE5 tips, and job posts from the global TA community.",src:"Twitter/X #techart",sc:"80lv",tags:["shader","vfx","tools","rendering"],type:"ai",url:"https://twitter.com/search?q=%23techart+%23ue5&f=live"},
-
-  // ── Procedural & Houdini ──
   {title:"Houdini SideFX — Tutorials & Forum",excerpt:"Official Houdini tutorials and SideFX forum. Covers PDG pipeline, Houdini Engine integration with UE5/Unity, procedural geometry, and VFX simulation. Essential for TAs using procedural workflows.",src:"SideFX Houdini",sc:"80lv",tags:["procedural","tools","vfx","scene"],type:"rss",url:"https://www.sidefx.com/tutorials/"},
   {title:"Entagma — Houdini & Procedural Art Tutorials",excerpt:"Entagma's advanced Houdini tutorials covering procedural art, growth algorithms, and technical implementations. Used by professional TAs at AAA studios worldwide.",src:"Entagma",sc:"80lv",tags:["procedural","tools","vfx"],type:"rss",url:"https://entagma.com/"},
   {title:"CGWiki — Houdini & Procedural Reference",excerpt:"Comprehensive wiki for Houdini techniques. Covers VEX scripting, procedural modeling, PDG, and Houdini Engine. Community-maintained with examples from working TAs.",src:"cgwiki.org",sc:"80lv",tags:["procedural","tools","vfx"],type:"rss",url:"https://www.cgwiki.org/"},
-
-  // ── Unity Ecosystem ──
   {title:"Unity Blog — Rendering & Graphics Updates",excerpt:"Official Unity blog covering URP, HDRP, Shader Graph updates, VFX Graph, and rendering pipeline improvements. Essential for TAs working in Unity alongside UE5.",src:"Unity Blog",sc:"80lv",tags:["shader","rendering","vfx","tools"],type:"rss",url:"https://blog.unity.com/technology"},
   {title:"Cyanilux — Unity Shader Graph & HLSL Blog",excerpt:"Alan Zucconi's and Cyanilux's Unity shader tutorials. Shader Graph node deep dives, custom render passes, and HLSL tricks for Unity URP/HDRP.",src:"Cyanilux",sc:"80lv",tags:["shader","rendering","tools"],type:"rss",url:"https://www.cyanilux.com/"},
   {title:"Unity VFX Graph Forum & Community Showcases",excerpt:"Unity's official VFX Graph forum with community showcases, technique breakdowns, and troubleshooting. Artists worldwide sharing Flipbook setups, GPU trails, and custom blocks.",src:"Unity Forum VFX",sc:"80lv",tags:["vfx","shader","tools"],type:"rss",url:"https://forum.unity.com/forums/visual-effect-graph.428/"},
-
-  // ── Japan / Asia Expanded ──
   {title:"Qiita — ゲーム開発 技術記事まとめ",excerpt:"Qiitaの技術記事：UE5、Unity、HLSL、Houdiniに関する日本語テクニカルアート記事。実装コード付きの解説が多く、実践的。",src:"Qiita (JP)",sc:"80lv",tags:["shader","tools","rendering","procedural"],type:"rss",url:"https://qiita.com/search?q=UE5+テクニカルアート"},
   {title:"ゲームクリエイターズギルド — TA勉強会資料",excerpt:"日本のゲームクリエイターズギルドが主催するTA勉強会の発表資料まとめ。国内AAA/インディースタジオのTAによる実践的な知見共有。",src:"GCG Japan",sc:"80lv",tags:["shader","vfx","tools","rendering"],type:"ai",url:"https://game-creators.camp/"},
   {title:"Velog — 한국 게임개발자 기술 블로그",excerpt:"한국 게임개발자들의 기술 블로그 플랫폼. UE5 렌더링, 셰이더, VFX, 최적화에 관한 한국어 실전 경험 공유. 국내 스튜디오 TA들의 인사이트.",src:"Velog (KR)",sc:"80lv",tags:["rendering","shader","tools","ue5opt"],type:"rss",url:"https://velog.io/search?q=UE5+렌더링+기술"},
   {title:"CSDN — 游戏渲染与图形学技术文章",excerpt:"中国最大的技术博客平台CSDN上关于游戏渲染、UE5、Unity、HLSL的中文技术文章。包含大量有代码示例的实战教程。",src:"CSDN (CN)",sc:"80lv",tags:["rendering","shader","tools","graphics"],type:"rss",url:"https://blog.csdn.net/nav/game"},
   {title:"IndieNova — 独立游戏开发者社区技术版",excerpt:"IndieNova独立游戏开发社区的技术分享：渲染技巧、Shader实现、工具开发。来自国内独立游戏TA的第一手经验。",src:"IndieNova (CN)",sc:"80lv",tags:["shader","tools","rendering","vfx"],type:"rss",url:"https://indienova.com/ue/"},
-
-  // ── TA Optimization & Tools ──
   {title:"Rendering Optimization Subreddit — r/gamedev Deep Dives",excerpt:"Community deep dives into game rendering optimization: draw call batching strategies, LOD systems, occlusion culling, and shader permutation management from developers worldwide.",src:"Reddit r/gamedev",sc:"80lv",tags:["ue5opt","optimization","tools","rendering"],type:"rss",url:"https://www.reddit.com/r/gamedev/search/?q=rendering+optimization+UE5+shader"},
   {title:"Unreal Slackers Discord — Daily #rendering & #technical-art",excerpt:"The largest unofficial Unreal Engine community Discord. Daily discussions in #rendering, #technical-art, and #shader-art channels with Epic developers and senior TAs.",src:"Unreal Slackers Discord",sc:"ue",tags:["ue5rendering","ue5opt","tools","shader"],type:"ai",url:"https://unrealslackers.org/"},
   {title:"LearnOpenGL — Modern OpenGL Rendering Fundamentals",excerpt:"Joey de Vries' comprehensive OpenGL tutorial site. Essential for understanding the rendering pipeline fundamentals that UE5 and Unity are built on top of.",src:"learnopengl.com",sc:"80lv",tags:["rendering","graphics","shader"],type:"rss",url:"https://learnopengl.com/"},
@@ -1393,62 +1342,26 @@ const ART_TIPS = [
   {title:"GDC Vault — Free Technical Art Talks Archive",excerpt:"GDC Vault's collection of free talks from the Technical Artist Summit and rendering sessions. Includes sessions from EA, Bungie, Riot, Epic, and dozens of other studios.",src:"GDC Vault",sc:"ue",tags:["rendering","vfx","tools","shader","ue5rendering"],type:"ai",url:"https://www.gdcvault.com/search.php#&conference_id=&category=free&firstfocus=&keyword=technical+art"},
   {title:"ArtStation Learning — Technical Art Courses",excerpt:"ArtStation Learning's technical art courses: UE5 materials, Houdini pipelines, shader creation, and VFX tutorials from working industry professionals.",src:"ArtStation Learning",sc:"artstation",tags:["shader","vfx","tools","procedural","ue5rendering"],type:"ai",url:"https://www.artstation.com/learning/tags/technical-art"},
   {title:"80.lv — Weekly Game Dev Tech Breakdown",excerpt:"80 Level's daily coverage of game development tech: shader breakdowns, UE5 environment art, Houdini procedural workflows, and studio pipeline interviews. Sourced from global developers.",src:"80.lv",sc:"80lv",tags:["shader","rendering","vfx","procedural","scene"],type:"rss",url:"https://80.lv/articles/"},
-,
-  // ── 真實搜尋到的高品質來源 ──
-
-  // alain.xyz — Frame analysis & renderer architecture deep dives
   {title:"Frame Analysis: Control — Ray Tracing & Rendering Architecture",excerpt:"Alain Galvan's detailed breakdown of Remedy's Control renderer: ray traced reflections, GI, fluid smoke pass, DLSS 4K upscaling. Shows exactly how a AAA game uses DXR in production.",src:"alain.xyz",sc:"80lv",tags:["rendering","graphics","shader","ue5rendering"],type:"rss",url:"https://alain.xyz/blog/frame-analysis-control"},
   {title:"Real-Time Renderer Architectures — Forward, Deferred, Tile-Based",excerpt:"Comprehensive review of modern renderer architectures: Forward+, Deferred, Tile Deferred, Texture Space shading, Mesh Shaders. Vulkan implementation with detailed code.",src:"alain.xyz",sc:"80lv",tags:["rendering","graphics","shader"],type:"rss",url:"https://alain.xyz/blog/realtime-renderer-architectures"},
-
-  // interplayoflight.wordpress.com — Kostas Anagnostou (Graphics Programmer)
   {title:"How Unreal Renders a Frame — Complete 3-Part Series",excerpt:"Kostas Anagnostou's legendary series tracing every GPU pass in an Unreal Engine frame: shadowmaps, Hi-Z, G-Prepass, SSR, temporal AA, post processing. Updated to UE5 techniques.",src:"Interplay of Light",sc:"80lv",tags:["rendering","graphics","ue5rendering","ue5opt"],type:"rss",url:"https://interplayoflight.wordpress.com/2017/10/25/how-unreal-renders-a-frame/"},
   {title:"Shader Tips & Tricks — GPU Performance Optimization",excerpt:"Kostas Anagnostou's collection of shader optimization tips: fp16 usage, VGPR reduction, texture Load() vs Sample(), compute shader cache coherence, tile classification for deferred shading.",src:"Interplay of Light",sc:"80lv",tags:["shader","ue5opt","optimization","graphics"],type:"rss",url:"https://interplayoflight.wordpress.com/2022/01/22/shader-tips-and-tricks/"},
   {title:"Adventures in Neural Rendering — MLP for Irradiance Encoding",excerpt:"Experimenting with small neural networks for rendering: encoding irradiance in MLPs vs Spherical Harmonics, cooperative vectors, neural texture compression in real-time contexts.",src:"Interplay of Light",sc:"80lv",tags:["rendering","graphics","shader","research"],type:"rss",url:"https://interplayoflight.wordpress.com/2026/02/10/adventures-in-neural-rendering/"},
   {title:"Workgraphs for GPU-Driven Rendering — DX12 Deep Dive",excerpt:"Hands-on workgraph implementation of a hybrid shadow system. Performance comparison vs compute shaders, GPU occupancy analysis with Nsight. Practical data from 2024/2025 testing.",src:"Interplay of Light",sc:"80lv",tags:["rendering","graphics","ue5opt","optimization"],type:"rss",url:"https://interplayoflight.wordpress.com/2024/06/29/a-quick-introduction-to-workgraphs/"},
-
-  // realtimevfx.com — Real-time VFX community
   {title:"realtimevfx.com — Community Shader & VFX Breakdowns",excerpt:"The world's largest real-time VFX community. Daily breakdowns of Niagara, Unity VFX Graph, and shader-based effects. Portfolio showcases, technique critiques, and job postings from studios worldwide.",src:"realtimevfx.com",sc:"80lv",tags:["vfx","shader","tools"],type:"rss",url:"https://realtimevfx.com/"},
-
-  // Laura Higgins VFX — Professional VFX Artist blog (Rocksteady)
   {title:"Laura Higgins VFX — Real-Time Effect Breakdowns (Rocksteady Studios)",excerpt:"GDC speaker and Rocksteady VFX artist sharing detailed breakdowns of real-time effects. Technical explorations of Niagara, shader tricks, and game VFX pipeline at AAA level.",src:"laurahigginsvfx.wordpress.com",sc:"80lv",tags:["vfx","shader","tools"],type:"rss",url:"https://laurahigginsvfx.wordpress.com/"},
-
-  // SIGGRAPH Advances (real 2025 content found)
   {title:"SIGGRAPH 2025 — Advances in Real-Time Rendering: 20th Anniversary",excerpt:"Call of Duty's Order-Independent Transparency, new GI techniques, and 20 years of real-time rendering advances. Natalya Tatarchuk (Activision CTO) curates top industry techniques.",src:"SIGGRAPH 2025",sc:"80lv",tags:["rendering","graphics","research","ue5rendering"],type:"ai",url:"https://advances.realtimerendering.com/s2025/"},
-
-  // simonschreibt.de — Simon Schreibt (Game Art Tricks)
   {title:"Game Art Tricks — How AAA Games Fake Visual Effects",excerpt:"Simon Schreibt's famous series breaking down how shipped games achieve their effects: fake GI, projection decals, scrolling textures, and clever shader tricks used in Destiny, The Last of Us, and more.",src:"simonschreibt.de",sc:"80lv",tags:["vfx","shader","rendering","scene"],type:"rss",url:"https://simonschreibt.de/"},
-
-  // technically.art — TA Newsletter
   {title:"Technically Art — Weekly Technical Artist Newsletter",excerpt:"Weekly curated newsletter for TAs: new shader techniques, UE5 feature updates, Houdini releases, Unity VFX Graph tips, and job market insights. Aggregates from the global TA community.",src:"technically.art",sc:"80lv",tags:["shader","tools","vfx","rendering"],type:"rss",url:"https://technically.art/"},
-
-  // Gamedeveloper.com technical blogs
   {title:"Game Developer — Technical Programming & Rendering Blog",excerpt:"Game Developer magazine's community technical blogs: rendering postmortems, shader system design, GPU optimization, and TA pipeline articles from developers at studios of all sizes.",src:"Game Developer",sc:"80lv",tags:["rendering","tools","shader","ue5opt"],type:"rss",url:"https://www.gamedeveloper.com/programming"},
-
-  // GDC Vault free
   {title:"GDC Vault — Free Technical Art Summit Talks Archive",excerpt:"Hundreds of free GDC talks including the Technical Artist Summit: rigging, VFX, pipeline tools, shader authoring, and rendering from EA, Bungie, Riot, Naughty Dog, and Epic.",src:"GDC Vault",sc:"ue",tags:["vfx","tools","shader","rendering","ue5rendering"],type:"ai",url:"https://gdcvault.com/search.php#&category=free&keyword=technical+art"},
-
-  // Shadertoy
   {title:"Shadertoy — Real-Time Shader Experiments from Developers Worldwide",excerpt:"Global collection of GLSL shader experiments: raymarching, procedural noise, SDF shapes, atmospheric effects. Essential for understanding fragment shader techniques used in games.",src:"Shadertoy",sc:"80lv",tags:["shader","procedural","rendering","graphics"],type:"rss",url:"https://www.shadertoy.com/"},
-
-  // Victoria VR Medium — Houdini VAT pipeline article found in search
   {title:"Houdini VAT + Niagara Pipeline — VFX Without Performance Cost",excerpt:"How Vertex Animated Textures bring Houdini simulations into UE5 without crushing performance. Root Trap spell breakdown: procedural Houdini core, Copernicus for decals, Blender-to-UE5 workflow.",src:"Medium — Victoria VR",sc:"80lv",tags:["vfx","procedural","tools","shader"],type:"ai",url:"https://victoria-vr.medium.com/what-comes-after-revolutionizing-the-vfx-pipeline-c770093c806a"},
-
-  // Catlike Coding (real confirmed source)
   {title:"Catlike Coding — Custom SRP, Shaders & Rendering Pipelines",excerpt:"Jasper Flick's definitive Unity rendering tutorials: building a custom SRP from scratch, PBR shading, procedural textures, deferred rendering. Standard reference for understanding rendering pipelines.",src:"Catlike Coding",sc:"80lv",tags:["shader","rendering","graphics"],type:"rss",url:"https://catlikecoding.com/unity/tutorials/"},
-
-  // LearnOpenGL
   {title:"LearnOpenGL — Complete Modern OpenGL & Rendering Fundamentals",excerpt:"Joey de Vries' comprehensive OpenGL learning site: deferred shading, PBR, IBL, HDR, shadow mapping, SSAO, bloom. The foundation every TA needs to understand what's happening inside UE5.",src:"learnopengl.com",sc:"80lv",tags:["rendering","shader","graphics"],type:"rss",url:"https://learnopengl.com/"},
-
-  // NVIDIA Developer Blog (confirmed from search)
   {title:"NVIDIA Developer Blog — GPU Graphics & Rendering Techniques",excerpt:"NVIDIA's developer blog: DLSS, ray tracing, mesh shaders, GPU architecture updates, and real-time rendering research. Direct from the GPU engineers who build the hardware TAs rely on.",src:"NVIDIA Dev Blog",sc:"80lv",tags:["rendering","shader","graphics","ue5rendering","research"],type:"rss",url:"https://developer.nvidia.com/blog/tag/graphics/"},
-
-  // Awesome-Gamedev GitHub curated list
   {title:"Awesome Gamedev — Curated Game Dev Learning Resources",excerpt:"Community-maintained GitHub list of game development resources: TA workflows, Houdini tutorials, shader learning paths, UE5 technical art guides, and animation tools. Updated regularly.",src:"GitHub Awesome-Gamedev",sc:"80lv",tags:["tools","shader","vfx","procedural"],type:"rss",url:"https://github.com/FronkonGames/Awesome-Gamedev"},
-
-  // Entagma Houdini
   {title:"Entagma — Advanced Houdini & Procedural Art Tutorials",excerpt:"Professional Houdini tutorials covering growth algorithms, procedural structures, VEX scripting, and PDG pipelines. Used by TA teams at major studios for complex procedural content.",src:"Entagma",sc:"80lv",tags:["procedural","vfx","tools"],type:"rss",url:"https://entagma.com/"},
-,
-  // ── Extra articles to ensure all sources are represented ──
   {title:"Shadertoy — Procedural Noise & SDF Shader Collection 2025",excerpt:"Latest trending shaders on Shadertoy: volumetric clouds, SDF-based terrain, procedural city generators. Community-driven experiments showcasing real-time ray marching and noise techniques.",src:"Shadertoy",sc:"80lv",tags:["shader","procedural","rendering"],type:"rss",url:"https://www.shadertoy.com/results?query=&sort=newest"},
   {title:"iquilezles.org — Distance Functions & SDF Techniques",excerpt:"Inigo Quilez's reference on signed distance functions: union, subtraction, intersection operations, smooth blending. The mathematical foundation for procedural geometry in shaders.",src:"iquilezles.org",sc:"80lv",tags:["shader","procedural","graphics"],type:"rss",url:"https://iquilezles.org/articles/distfunctions/"},
   {title:"The Book of Shaders — Noise Chapter",excerpt:"Interactive chapter on algorithmic noise: value noise, gradient noise, simplex noise. Browser-runnable GLSL examples. Essential reading before writing any procedural texture shader.",src:"thebookofshaders.com",sc:"80lv",tags:["shader","procedural","graphics"],type:"rss",url:"https://thebookofshaders.com/11/"},
@@ -1481,7 +1394,224 @@ const ART_TIPS = [
   {title:"Qiita — UE5 Custom Pass + HLSL で作るポストエフェクト",excerpt:"UE5でHLSLカスタムパスを使ったポストプロセスエフェクトの実装方法。MaterialからCustom Nodeへの移行、r.ProfileGPUでのパフォーマンス測定まで日本語で解説。",src:"Qiita (JP)",sc:"80lv",tags:["shader","rendering","tools"],type:"rss",url:"https://qiita.com/search?q=UE5+HLSL+カスタムパス"},
   {title:"Velog — UE5 렌더링 아키텍처 분석 (Korean)",excerpt:"한국 개발자의 UE5 렌더링 아키텍처 분석: G-Buffer 구조, Lumen GI 동작 원리, Nanite 클러스터 시스템. 소스 코드 레벨의 심층 분석 포함.",src:"Velog (KR)",sc:"80lv",tags:["rendering","ue5rendering","graphics"],type:"rss",url:"https://velog.io/search?q=UE5+렌더링"},
   {title:"CSDN (CN) — UE5 材质系统完全手册",excerpt:"中文UE5材质系统完整指南：材质表达式详解、Material Function封装技巧、材质实例参数化、Substrate分层材质从零开始。适合进阶TA学习。",src:"CSDN (CN)",sc:"80lv",tags:["shader","tools","ue5rendering"],type:"rss",url:"https://blog.csdn.net/search?q=UE5+材质系统"},
-  {title:"IndieNova (CN) — 独立游戏TA技术分享合集",excerpt:"IndieNova独立游戏开发社区TA技术分享：从零实现卡通渲染、程序化地形生成、Niagara流体效果。来自独立游戏开发者的第一手实战经验。",src:"IndieNova (CN)",sc:"80lv",tags:["shader","vfx","procedural"],type:"rss",url:"https://indienova.com/ue/"},
+  {title:"IndieNova (CN) — 独立游戏TA技术分享合集",excerpt:"IndieNova独立游戏开发社区TA技术分享：从零实现卡通渲染、程序化地形生成、Niagara流体效果。来自独立游戏开发者的第一手实战经验。",src:"IndieNova (CN)",sc:"80lv",tags:["shader","vfx","procedural"],type:"rss",url:"https://indienova.com/ue/"}
+
+];
+
+// ─── ART TIPS DATA ────────────────────────────────────────────────────────────
+const ART_SEEDS = [
+  {id:"a01",title:"The 7 Values of Colour — Painting Light from Imagination",excerpt:"James Gurney breakdown of how artists use value structure to imply convincing light. Covers lost and found edges, form shadows vs cast shadows, and the 3-value sketch method used in concept production pipelines.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2024-03-15",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
+  {id:"a02",title:"Substance 3D Painter Smart Materials — Building a Reusable Library",excerpt:"How to build a studio-grade smart material library in Substance 3D Painter: folder structure, anchor point setup, height-blending for layered wear, and exporting multi-channel maps for Unreal and Unity in one click.",src:"Adobe Substance Blog",sc:"substanceblog",tags:["texturing"],date:"2024-06-01",type:"rss",url:"https://substance3d.adobe.com/community-blog",tip:false},
+  {id:"a03",title:"Hard Surface Modeling Tips — Bevel, Boolean, and Mesh Clean-up",excerpt:"Production tips for hard surface game assets: bevel workflow for smooth normal bakes, boolean operations without topology nightmares, and the 'floater geo' technique to add detail without extra polygons on the low-poly.",src:"80.lv",sc:"80lv",tags:["modeling"],date:"2024-09-20",type:"rss",url:"https://80.lv/articles/hard-surface-modeling-tips",tip:false},
+  {id:"a04",title:"Lighting a Game Scene — 3-Point Setup to HDRI Blend",excerpt:"Step-by-step guide to lighting an interior environment in UE5: starting with a 3-point directional/fill/rim setup, blending sky HDRI, adding emissive props for fill, and final LUT-based colour grading in post.",src:"Unreal Dev Blog",sc:"unrealblog",tags:["lighting","scene"],date:"2024-11-05",type:"rss",url:"https://dev.epicgames.com/community/learning",tip:false},
+  {id:"a05",title:"AI-Assisted Concept Art Pipeline — Midjourney to Production",excerpt:"How studios use Midjourney and Stable Diffusion for early concept exploration: prompt structures for consistent character designs, img2img for iterating on rough sketches, and when to hand off to a human artist for final polish.",src:"ArtStation Blog",sc:"artstation",tags:["concept","ai-art"],date:"2025-01-10",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
+  {id:"a06",title:"Character Silhouette Design — 10 Rules from AAA Studios",excerpt:"10 silhouette rules used by character artists at AAA studios: the thumbnail test, silhouette weight distribution, why tighter silhouettes read better on small screens, and how negative space creates memorable characters.",src:"80.lv",sc:"80lv",tags:["concept","character"],date:"2024-08-14",type:"rss",url:"https://80.lv/articles/character-silhouette-design",tip:false},
+  {id:"a07",title:"Organic Sculpting in ZBrush — From Blockout to Hero Detail",excerpt:"Full workflow from ZSphere blockout to hero mesh detail in ZBrush: proportional blocking with DynaMesh, macro surface forms with ClayBuildup and TrimDynamic, and micro-detail with Alpha brushes and Surface Noise for skin pores.",src:"ArtStation Blog",sc:"artstation",tags:["modeling","character"],date:"2024-07-22",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
+  {id:"a08",title:"Trim Sheet Workflow — One Texture, Infinite Architecture",excerpt:"How to build a game-ready trim sheet texture: planning the 9 trim zones on a 2K atlas, baking normals and AO from a high-poly source, and applying trim sheets in Unreal to modular architecture assets for maximum texture reuse.",src:"80.lv",sc:"80lv",tags:["texturing","scene"],date:"2024-05-03",type:"rss",url:"https://80.lv/articles/trim-sheet-workflow",tip:false},
+  {id:"a09",title:"Midpoint Value Study — Mastering Greyscale Before Colour",excerpt:"Why greyscale studies accelerate colour learning: the midpoint value method (everything maps to mid grey, lights up, darks down), how to do a 30-minute master copy study, and translating greyscale value maps to full colour.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2024-02-28",type:"ai",url:"https://www.artstation.com/blogs",tip:false},
+  {id:"a10",title:"Rigging Stylized Characters in Maya — Squash & Stretch Controls",excerpt:"Building expressive squash-and-stretch rigs for stylized game characters in Maya: SDK-driven volume controls, non-linear deformers for cartoon exaggeration, and baking to a clean deformation skeleton for engine export.",src:"80.lv",sc:"80lv",tags:["character","animation"],date:"2024-10-11",type:"rss",url:"https://80.lv/articles/rigging-stylized-characters",tip:false}
+];
+
+// Short Tips (card-only, no reader body) — the Art Tips channel
+const ART_TIPS = [
+  {id:"t01",title:"UV islands should never share edges across material boundaries",excerpt:"When tiling textures meet unique baked detail, UV island boundaries act as hard seams under normal map filtering. Keep separate materials on separate UV islands — even if it means splitting a mesh — to prevent seam artefacts at runtime.",src:"Polycount",sc:"polycount",tags:["texturing","modeling"],date:"2025-01-20",type:"ai",url:"https://polycount.com/discussion",tip:true},
+  {id:"t02",title:"Paint shadows before highlights when doing greyscale studies",excerpt:"Shadows establish form; highlights are surface response. Painting shadows first forces you to commit to a light direction and prevents the common mistake of floating highlights with no grounding shadow to anchor them.",src:"ArtStation Blog",sc:"artstation",tags:["concept","lighting"],date:"2025-01-18",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
+  {id:"t03",title:"Keep your hero mesh under 1% of your poly budget",excerpt:"A hero character in a current-gen open world title has a budget of ~80K triangles. Using more than 1% (~800 tris) on a single fingernail means you are robbing budget from silhouette-forming geometry elsewhere.",src:"80.lv",sc:"80lv",tags:["modeling","character"],date:"2025-01-15",type:"rss",url:"https://80.lv",tip:true},
+  {id:"t04",title:"Use a 1-pixel black outline in your concept colour script",excerpt:"A 1px black stroke around all value shapes in a colour script forces you to check that every shape reads as a distinct value — if two adjacent shapes have the same value, the stroke disappears and the forms merge.",src:"ArtStation Blog",sc:"artstation",tags:["concept"],date:"2025-01-12",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
+  {id:"t05",title:"Cavity maps should be baked at twice your target texel density",excerpt:"Cavity detail baked at 2× texel density, then downsampled, gives you anti-aliased micro-surface detail that catches specular correctly. Baking at target resolution results in aliased edges that break under area lights.",src:"Polycount",sc:"polycount",tags:["texturing"],date:"2025-01-10",type:"ai",url:"https://polycount.com",tip:true},
+  {id:"t06",title:"Three-light setups: key, fill, and rim should never share the same hue",excerpt:"Key and fill lights from the same colour temperature create flat, toneless renders. Use a warm key with a cool fill (or vice-versa), and a rim with a complementary hue to the key — the contrast reads as dimensional on any display.",src:"ArtStation Blog",sc:"artstation",tags:["lighting"],date:"2025-01-08",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
+  {id:"t07",title:"Midjourney style consistency: use --cref for character references",excerpt:"The --cref (character reference) flag in Midjourney v6 locks style and identity across prompts more reliably than textual description. Combine with --sw 50–80 for variation while preserving core character features in concept series.",src:"ArtStation Blog",sc:"artstation",tags:["ai-art","concept"],date:"2025-01-05",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
+  {id:"t08",title:"Use floating geometry to add chamfer detail without topology cost",excerpt:"Floating (non-connected) geo slightly above a surface bakes into the normal map as a chamfer seam — zero polygon cost on the low-poly. Essential for hard-surface panel lines. Keep floaters within 0.001 world units of the base mesh for accurate bakes.",src:"Polycount",sc:"polycount",tags:["modeling","texturing"],date:"2025-01-02",type:"ai",url:"https://polycount.com",tip:true},
+  {id:"t09",title:"Always block in at 50% grey before colour in Painter",excerpt:"Starting in Substance 3D Painter at 50% grey (128,128,128) for your Base Colour channel lets you evaluate height and cavity-driven detail in greyscale before committing to colour — the same principle as a traditional greyscale study.",src:"Adobe Substance Blog",sc:"substanceblog",tags:["texturing"],date:"2024-12-28",type:"rss",url:"https://substance3d.adobe.com",tip:true},
+  {id:"t10",title:"Your thumbnail pass should be completable in 5 minutes",excerpt:"If your concept thumbnail takes more than 5 minutes, you are rendering, not designing. Thumbnails are composition and silhouette decisions. Use a 2B brush at 100% opacity, no blending. Kill the rendering urge.",src:"ArtStation Blog",sc:"artstation",tags:["concept"],date:"2024-12-22",type:"ai",url:"https://www.artstation.com/blogs",tip:true},
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+,
+  
+  
+  
+  
+  
+  
+  
+  
+,
+  // ── UE5 Rendering — International Sources ──
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  // ── UE5 Optimization — International Sources ──
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  
+,
+  
+  
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  
+
+  
+  
+  
+
+  
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+,
+  // ── 真實搜尋到的高品質來源 ──
+
+  // alain.xyz — Frame analysis & renderer architecture deep dives
+  
+  
+
+  // interplayoflight.wordpress.com — Kostas Anagnostou (Graphics Programmer)
+  
+  
+  
+  
+
+  // realtimevfx.com — Real-time VFX community
+  
+
+  // Laura Higgins VFX — Professional VFX Artist blog (Rocksteady)
+  
+
+  // SIGGRAPH Advances (real 2025 content found)
+  
+
+  // simonschreibt.de — Simon Schreibt (Game Art Tricks)
+  
+
+  // technically.art — TA Newsletter
+  
+
+  // Gamedeveloper.com technical blogs
+  
+
+  // GDC Vault free
+  
+
+  // Shadertoy
+  
+
+  // Victoria VR Medium — Houdini VAT pipeline article found in search
+  
+
+  // Catlike Coding (real confirmed source)
+  
+
+  // LearnOpenGL
+  
+
+  // NVIDIA Developer Blog (confirmed from search)
+  
+
+  // Awesome-Gamedev GitHub curated list
+  
+
+  // Entagma Houdini
+  
+,
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
 ];
 
