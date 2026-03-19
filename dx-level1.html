@@ -347,6 +347,21 @@ function mkProg(gl,vs,fs){
   gl.linkProgram(p);return p;
 }
 
+// ── Sphere geometry helper (shared by 1-7, 1-8, 1-9) ──
+function makeSphere(r){
+  const v=[];const ST=28,SL=36;
+  function pv(lat,lon){const x=Math.cos(lat)*Math.cos(lon),y=Math.sin(lat),z=Math.cos(lat)*Math.sin(lon);v.push(x*r,y*r,z*r,x,y,z);}
+  for(let si=0;si<ST;si++){
+    const la0=(si/ST-.5)*Math.PI,la1=((si+1)/ST-.5)*Math.PI;
+    for(let li=0;li<SL;li++){
+      const lo0=li/SL*Math.PI*2,lo1=(li+1)/SL*Math.PI*2;
+      pv(la0,lo0);pv(la1,lo0);pv(la1,lo1);
+      pv(la0,lo0);pv(la1,lo1);pv(la0,lo1);
+    }
+  }
+  return new Float32Array(v);
+}
+
 function demoCompare(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-label">⚔️ DirectX 11 vs OpenGL 對比</div><div style="padding:20px;font-size:.82rem;line-height:2"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="background:rgba(232,69,69,.08);border:1px solid rgba(232,69,69,.2);border-radius:12px;padding:16px"><div style="color:var(--acc);font-weight:900;margin-bottom:10px">⚔️ DirectX 11</div><div>📦 內含於 Windows SDK</div><div>🏭 Microsoft 獨家</div><div>🎮 Xbox 完整支援</div><div>📐 左手座標系</div><div>🔧 HLSL 著色語言</div><div>💾 COM 介面</div><div>🔄 順時針繞序</div></div><div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:16px"><div style="color:var(--acc2);font-weight:900;margin-bottom:10px">🌐 OpenGL</div><div>📦 需要 GLEW/GLAD</div><div>🌍 跨平台支援</div><div>🐧 Linux/macOS/Web</div><div>📐 右手座標系</div><div>🔧 GLSL 著色語言</div><div>💾 C 函式介面</div><div>🔄 逆時針繞序</div></div></div></div></div>';
 }
@@ -457,7 +472,7 @@ function demoLight(cont,isMobile){
     const x=Math.cos(lat)*Math.cos(lon);
     const y=Math.sin(lat);
     const z=Math.cos(lat)*Math.sin(lon);
-    verts3d.push(x*.68,y*.68,z*.68, x,y,z); // pos(xyz) + normal(xyz)
+    verts3d.push(x*.88,y*.88,z*.88, x,y,z); // pos(xyz) + normal(xyz)
   }
   for(let si=0;si<STACKS;si++){
     const lat0=(si/STACKS-.5)*Math.PI;
@@ -472,7 +487,7 @@ function demoLight(cont,isMobile){
 
   const p=mkProg(gl,
     // aspect ratio uniform 修正球的形狀
-    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;uniform float asp;void main(){vn=nor;gl_Position=vec4(pos.x/asp,pos.y,pos.z*.01,1.);}",
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;uniform float asp;void main(){vn=nor;gl_Position=vec4(pos.x*0.92/asp,pos.y*0.92,pos.z*.01,1.);}",
     "precision mediump float;varying vec3 vn;uniform vec3 ld;uniform float amb;void main(){vec3 n=normalize(vn);float d=max(dot(n,ld),0.);vec3 c=vec3(.88,.27,.27);gl_FragColor=vec4(c*(amb+d*(1.-amb)),1.);}");
   gl.useProgram(p);
   const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
@@ -504,134 +519,71 @@ function demoLight(cont,isMobile){
 }
 
 function demoModel(cont,isMobile){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">📦 3D 模型渲染 — 45° 透視視角</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setMM(0)">⬛ 填充</button><button class="ctrl-btn" onclick="setMM(1)">🔲 線框</button><button class="ctrl-btn" onclick="setMM(2)">🎨 法線</button></div>';
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">📦 3D 模型渲染（旋轉球體）</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setMM(0)">⬛ 填充</button><button class="ctrl-btn" onclick="setMM(1)">💡 光照</button><button class="ctrl-btn" onclick="setMM(2)">🎨 法線</button></div>';
   const cv=cont.querySelector("canvas");
   const gl=cv.getContext("webgl");if(!gl)return;
-
-  function syncSize(){
-    const w=cv.clientWidth||600;
-    if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height='260px';}
-    return w/260;
-  }
+  function syncSize(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height='260px';}return w/260;}
   syncSize();
-
   let mode=0,t=0;
-
-  // Cube: pos(xyz) + normal(xyz), 36 verts
-  const cube=new Float32Array([
-    -1,-1,-1,0,0,-1, 1,-1,-1,0,0,-1, 1,1,-1,0,0,-1,
-    -1,-1,-1,0,0,-1, 1,1,-1,0,0,-1, -1,1,-1,0,0,-1,
-    -1,-1,1,0,0,1,   1,-1,1,0,0,1,  1,1,1,0,0,1,
-    -1,-1,1,0,0,1,   1,1,1,0,0,1,  -1,1,1,0,0,1,
-    -1,1,-1,0,1,0,   1,1,-1,0,1,0,  1,1,1,0,1,0,
-    -1,1,-1,0,1,0,   1,1,1,0,1,0,  -1,1,1,0,1,0,
-    -1,-1,-1,0,-1,0, 1,-1,-1,0,-1,0, 1,-1,1,0,-1,0,
-    -1,-1,-1,0,-1,0, 1,-1,1,0,-1,0, -1,-1,1,0,-1,0,
-    -1,-1,-1,-1,0,0, -1,1,-1,-1,0,0, -1,1,1,-1,0,0,
-    -1,-1,-1,-1,0,0, -1,1,1,-1,0,0, -1,-1,1,-1,0,0,
-     1,-1,-1,1,0,0,   1,1,-1,1,0,0,  1,1,1,1,0,0,
-     1,-1,-1,1,0,0,   1,1,1,1,0,0,   1,-1,1,1,0,0,
-  ]);
-
-  // Full MVP vertex shader with perspective + 45° pitch
-  const vs=`
-    attribute vec3 pos;
-    attribute vec3 nor;
-    varying vec3 vn;
-    varying vec3 vp;
-    uniform float rotY;  // auto-rotate Y
-    uniform float asp;   // aspect ratio
-    void main(){
-      // Rotate Y
-      float cy=cos(rotY), sy=sin(rotY);
-      vec3 r=vec3(pos.x*cy+pos.z*sy, pos.y, -pos.x*sy+pos.z*cy);
-      vec3 rn=vec3(nor.x*cy+nor.z*sy, nor.y, -nor.x*sy+nor.z*cy);
-
-      // 45° pitch down (look from above)
-      float pitch = 0.6;  // ~34 degrees
-      float cp=cos(pitch), sp2=sin(pitch);
-      vec3 v=vec3(r.x, r.y*cp-r.z*sp2, r.y*sp2+r.z*cp);
-      vec3 vn2=vec3(rn.x, rn.y*cp-rn.z*sp2, rn.y*sp2+rn.z*cp);
-
-      vp = v;
-      vn = vn2;
-
-      // Simple perspective
-      float fov = 1.2;
-      float near = 0.1;
-      float camZ = 4.5;
-      vec3 cam = vec3(v.x, v.y, v.z + camZ);
-      float pz = cam.z + near;
-      float px = cam.x / pz * fov;
-      float py = cam.y / pz * fov;
-
-      gl_Position = vec4(px / asp, py, (cam.z - near) / camZ * 0.5, 1.0);
-    }`;
-
-  const fs=`
-    precision mediump float;
-    varying vec3 vn;
-    varying vec3 vp;
-    uniform int mode;
-    void main(){
-      if(mode==0){
-        vec3 light = normalize(vec3(1.2, 1.8, 2.0));
-        float d = max(dot(normalize(vn), light), 0.0);
-        float amb = 0.18;
-        vec3 col = vec3(0.88, 0.27, 0.27);
-        gl_FragColor = vec4(col * (amb + d * (1.0-amb)), 1.0);
-      } else if(mode==1){
-        gl_FragColor = vec4(0.3, 0.85, 0.3, 1.0);
-      } else {
-        gl_FragColor = vec4(normalize(vn)*0.5+0.5, 1.0);
-      }
-    }`;
-
-  const p=mkProg(gl,vs,fs);
+  const sphVerts=makeSphere(.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;uniform float asp;uniform float rot;void main(){float c=cos(rot),s=sin(rot);vec3 r=vec3(pos.x*c+pos.z*s,pos.y,-pos.x*s+pos.z*c);vn=vec3(nor.x*c+nor.z*s,nor.y,-nor.x*s+nor.z*c);gl_Position=vec4(r.x*0.92/asp,r.y*0.92,r.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;uniform int mode;void main(){if(mode==0){gl_FragColor=vec4(vec3(.88,.27,.27),1.);}else if(mode==1){vec3 l=normalize(vec3(1.2,1.5,2.));float d=max(dot(normalize(vn),l),0.);gl_FragColor=vec4(vec3(.88,.27,.27)*(.18+d*.82),1.);}else{gl_FragColor=vec4(normalize(vn)*.5+.5,1.);}}");
   gl.useProgram(p);
-  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,cube,gl.STATIC_DRAW);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,sphVerts,gl.STATIC_DRAW);
   const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
-  const ur=gl.getUniformLocation(p,"rotY"),um=gl.getUniformLocation(p,"mode"),uasp=gl.getUniformLocation(p,"asp");
+  const ur=gl.getUniformLocation(p,"rot"),um=gl.getUniformLocation(p,"mode"),uasp=gl.getUniformLocation(p,"asp");
   gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
   gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
   gl.enable(gl.DEPTH_TEST);
-
   window.setMM=m=>{mode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
-  if(isMobile) window.addEventListener('resize',syncSize);
-
+  if(isMobile)window.addEventListener('resize',syncSize);
+  function frame(){t+=.015;const asp=syncSize();gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform1f(ur,t);gl.uniform1i(um,mode);gl.uniform1f(uasp,asp);gl.drawArrays(gl.TRIANGLES,0,sphVerts.length/6);requestAnimationFrame(frame);}
+  frame();
+}
+function demoBlend(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">⚗️ Alpha Blending — 兩個球體</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="slider-row"><label>透明度</label><input type="range" min="0" max="100" value="70" id="ba" oninput="updB()"><span class="slider-val" id="bva">0.70</span></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setBM(1)">✅ Blend ON</button><button class="ctrl-btn" onclick="setBM(0)">❌ Blend OFF</button></div>';
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  function syncSize(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height='260px';}return w/260;}
+  syncSize();
+  let alpha=.7,blendOn=true,t=0;
+  const sphVerts=makeSphere(.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;uniform float asp;uniform vec2 off;void main(){vn=nor;vec3 r=vec3(pos.x+off.x,pos.y,pos.z);gl_Position=vec4(r.x*0.92/asp,r.y*0.92,r.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;uniform vec3 col;uniform float alpha;void main(){vec3 l=normalize(vec3(1.2,1.5,2.));float d=max(dot(normalize(vn),l),0.);gl_FragColor=vec4(col*(.18+d*.82),alpha);}");
+  gl.useProgram(p);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,sphVerts,gl.STATIC_DRAW);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  const uasp=gl.getUniformLocation(p,"asp"),uoff=gl.getUniformLocation(p,"off"),ucol=gl.getUniformLocation(p,"col"),ualpha=gl.getUniformLocation(p,"alpha");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  window.updB=()=>{alpha=document.getElementById("ba").value/100;document.getElementById("bva").textContent=alpha.toFixed(2);};
+  window.setBM=on=>{blendOn=on===1;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  if(isMobile)window.addEventListener('resize',syncSize);
   function frame(){
-    t+=.012;
     const asp=syncSize();
     gl.viewport(0,0,cv.width,cv.height);
     gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.uniform1f(ur,t);
-    gl.uniform1i(um,mode);
+    if(blendOn){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);}
+    else gl.disable(gl.BLEND);
     gl.uniform1f(uasp,asp);
-    if(mode===1){for(let i=0;i<36;i+=3)gl.drawArrays(gl.LINE_LOOP,i,3);}
-    else gl.drawArrays(gl.TRIANGLES,0,36);
+    // Back sphere (red, opaque) — draw first (farther)
+    gl.uniform2f(uoff,-.45,0);
+    gl.uniform3f(ucol,.88,.27,.27);
+    gl.uniform1f(ualpha,1.0);
+    gl.drawArrays(gl.TRIANGLES,0,sphVerts.length/6);
+    // Front sphere (blue, transparent) — draw second (closer)
+    gl.uniform2f(uoff,.45,0);
+    gl.uniform3f(ucol,.2,.5,1.0);
+    gl.uniform1f(ualpha,blendOn?alpha:1.0);
+    gl.drawArrays(gl.TRIANGLES,0,sphVerts.length/6);
     requestAnimationFrame(frame);
   }
   frame();
 }
 
-function demoBlend(cont){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">⚗️ Alpha Blending 透明效果</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="slider-row"><label>透明度</label><input type="range" min="0" max="100" value="70" id="ba" oninput="updB()"><span class="slider-val" id="bva">0.70</span></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setBM(1)">✅ Blend ON</button><button class="ctrl-btn" onclick="setBM(0)">❌ Blend OFF</button></div>';
-  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=260;
-  const gl=cv.getContext("webgl");if(!gl)return;
-  let alpha=.7,blendOn=true,t=0;
-  const p=mkProg(gl,"attribute vec2 pos;attribute vec4 col;varying vec4 vc;void main(){gl_Position=vec4(pos,0,1);vc=col;}","precision mediump float;varying vec4 vc;uniform float a;void main(){gl_FragColor=vec4(vc.rgb,vc.a*a);}");
-  gl.useProgram(p);
-  const data=new Float32Array([-1,-1,1,.2,.2,1,1,-1,1,.2,.2,1,-1,1,1,.2,.2,1,1,1,1,.2,.2,1,-.6,-.6,.1,.3,1,1,.9,-.6,.1,.3,1,1,-.6,.9,.1,.3,1,1,.9,.9,.1,.3,1,1]);
-  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
-  const ap=gl.getAttribLocation(p,"pos"),ac=gl.getAttribLocation(p,"col"),ua=gl.getUniformLocation(p,"a");
-  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,24,0);
-  gl.enableVertexAttribArray(ac);gl.vertexAttribPointer(ac,4,gl.FLOAT,false,24,8);
-  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-  window.updB=()=>{alpha=document.getElementById("ba").value/100;document.getElementById("bva").textContent=alpha.toFixed(2);};
-  window.setBM=on=>{blendOn=on===1;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
-  function frame(){const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT);if(blendOn){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);}else gl.disable(gl.BLEND);gl.uniform1f(ua,1.0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);gl.uniform1f(ua,blendOn?alpha:1.0);gl.drawArrays(gl.TRIANGLE_STRIP,4,4);requestAnimationFrame(frame);}
-  frame();
-}
 
 function checkCompletion(){
   if(earned.length>=CASTLE_TOTAL&&!localStorage.getItem(CASTLE_KEY+"_comp_shown")){
