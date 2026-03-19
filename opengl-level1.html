@@ -228,7 +228,7 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 </div>
 
 <!-- Toast -->
-<div class="toast" id="toast">✨ 關卡完成！</div>
+<div class="toast" id="toast"></div>
 
 <script>
 
@@ -1881,16 +1881,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
 window.addEventListener('storage', checkCompletion);
 
 // Hide overlay on back-forward cache restore
-window.addEventListener('pageshow', () => {
-  // Clear all overlay/toast states on page restore
+window.addEventListener('pageshow', (e) => {
+  // Clear overlay/toast
   const overlay = document.getElementById('compOverlay');
   if (overlay) overlay.classList.remove('show');
   const toast = document.getElementById('toast');
   if (toast) toast.classList.remove('show');
-  // Close any open lesson body (bfcache restores open state)
-  document.querySelectorAll('.lesson.active').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.lesson-body').forEach(el => { el.style.display = 'none'; el.innerHTML = ''; });
-  if (typeof currentLesson !== 'undefined') currentLesson = null;
+  // On bfcache restore: reset and re-render lessons cleanly
+  if (e.persisted) {
+    if (typeof currentLesson !== 'undefined') currentLesson = null;
+    if (typeof renderLessons === 'function') renderLessons();
+  }
 });
 </script>
 
