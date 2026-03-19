@@ -960,57 +960,106 @@ function buildDemo_Window(cont){
 function buildDemo_Loop(cont){
   cont.innerHTML=`
   <div class="demo-wrap">
-    <div class="demo-label">🔄 渲染迴圈視覺化</div>
-    <canvas id="cv-l3" width="600" height="220" style="height:220px"></canvas>
+    <div class="demo-label">🔄 渲染迴圈 — 親手控制每一幀</div>
+    <canvas id="cv-l3" width="600" height="240" style="height:240px"></canvas>
   </div>
-  <div style="display:flex;gap:16px;margin-top:12px;font-size:.85rem;color:var(--txt2)">
-    <span>📊 FPS: <strong id="fps-display" style="color:var(--acc4);font-family:var(--mono)">--</strong></span>
+  <div class="ctrl-row" style="margin-top:10px">
+    <button class="ctrl-btn on" id="loop-run" onclick="setLoopRun(true)">▶ 執行</button>
+    <button class="ctrl-btn" id="loop-pause" onclick="setLoopRun(false)">⏸ 暫停</button>
+    <button class="ctrl-btn" id="loop-step" onclick="loopStep()">👆 手動下一幀</button>
+  </div>
+  <div class="slider-row" style="margin-top:6px">
+    <span class="slider-label">⚡ 目標 FPS</span>
+    <input type="range" min="1" max="60" value="60" id="loop-fps-sl">
+    <span class="slider-val" id="loop-fps-v">60</span>
+  </div>
+  <div style="display:flex;gap:20px;margin-top:8px;font-size:.82rem;color:var(--txt2)">
     <span>🔄 幀數: <strong id="frame-display" style="color:var(--acc2);font-family:var(--mono)">0</strong></span>
     <span>⏱️ 時間: <strong id="time-display" style="color:var(--acc);font-family:var(--mono)">0.0s</strong></span>
+    <span>📊 實際 FPS: <strong id="fps-display" style="color:var(--acc4);font-family:var(--mono)">--</strong></span>
   </div>`;
-  const cv=document.getElementById('cv-l3');
-  
-  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}const ctx=cv.getContext('2d');
-  let frames=0,lastFps=0,fpsCount=0,fpsTimer=0,startTime=Date.now();
-  const history=new Array(60).fill(60);
-  function draw(now){
-    frames++;fpsCount++;
-    if(now-fpsTimer>500){lastFps=Math.round(fpsCount/((now-fpsTimer)/1000));fpsCount=0;fpsTimer=now;}
-    history.shift();history.push(lastFps||60);
-    const elapsed=(Date.now()-startTime)/1000;
-    document.getElementById('fps-display').textContent=lastFps||60;
-    document.getElementById('frame-display').textContent=frames;
-    document.getElementById('time-display').textContent=elapsed.toFixed(1)+'s';
-    ctx.fillStyle='#0a0b14';ctx.fillRect(0,0,600,220);
-    // heartbeat graph
-    const gx=40,gy=160,gw=520,gh=100;
-    ctx.strokeStyle='#1e2340';ctx.lineWidth=1;
-    for(let i=0;i<=4;i++){
-      const y=gy-gh*i/4;
-      ctx.beginPath();ctx.moveTo(gx,y);ctx.lineTo(gx+gw,y);ctx.stroke();
-      ctx.fillStyle='#4a5068';ctx.font='10px Space Mono';ctx.textAlign='right';
-      ctx.fillText(i*30,gx-6,y+4);
+
+  const cv = document.getElementById('cv-l3');
+  if(cv){const pw=cv.parentElement?.clientWidth||600;cv.width=pw;}
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  let running = true, frames = 0, lastFps = 60, fpsCount = 0, fpsTimer = 0;
+  let startTime = Date.now(), lastFrameTime = 0, rafId = null;
+  const history = new Array(60).fill(60);
+
+  window.setLoopRun = function(v){
+    running = v;
+    document.getElementById('loop-run').classList.toggle('on', v);
+    document.getElementById('loop-pause').classList.toggle('on', !v);
+    if(v && !rafId) rafId = requestAnimationFrame(tick);
+  };
+  window.loopStep = function(){
+    if(running) return;
+    drawFrame(performance.now());
+  };
+
+  document.getElementById('loop-fps-sl').oninput = function(){
+    document.getElementById('loop-fps-v').textContent = this.value;
+  };
+
+  function drawFrame(now){
+    frames++; fpsCount++;
+    if(now - fpsTimer > 500){
+      lastFps = Math.round(fpsCount / ((now - fpsTimer) / 1000));
+      fpsCount = 0; fpsTimer = now;
     }
-    ctx.strokeStyle='#00f5c4';ctx.lineWidth=2;
-    ctx.shadowColor='#00f5c4';ctx.shadowBlur=6;
-    ctx.beginPath();
-    history.forEach((v,i)=>{
-      const x=gx+i*(gw/60);
-      const y=gy-Math.min(v/120*gh,gh);
-      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-    });
-    ctx.stroke();ctx.shadowBlur=0;
-    // current dot
-    const cx2=gx+gw,cy=gy-Math.min((lastFps||60)/120*gh,gh);
-    ctx.fillStyle='#00f5c4';ctx.shadowColor='#00f5c4';ctx.shadowBlur=10;
-    ctx.beginPath();ctx.arc(cx2,cy,5,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
-    ctx.fillStyle='#7b82b0';ctx.font='11px Nunito';ctx.textAlign='left';
-    ctx.fillText('FPS',gx,gy-gh-12);
-    ctx.fillStyle='#e8eaf6';ctx.font='bold 12px Nunito';
-    ctx.fillText('渲染迴圈 — 每秒執行 '+lastFps+' 次',gx,30);
-    requestAnimationFrame(draw);
+    history.shift(); history.push(lastFps || 60);
+    const elapsed = (Date.now() - startTime) / 1000;
+    document.getElementById('fps-display').textContent = lastFps || '...';
+    document.getElementById('frame-display').textContent = frames;
+    document.getElementById('time-display').textContent = elapsed.toFixed(1) + 's';
+
+    // Draw background
+    ctx.fillStyle = '#0a0b14'; ctx.fillRect(0, 0, W, H);
+
+    // Moving ball - position based on frame count
+    const t = frames / 60;
+    const bx = 60 + (W - 120) * ((Math.sin(t * 1.3) + 1) / 2);
+    const by = H/2 + Math.sin(t * 2.1) * (H/2 - 50);
+    const trail = 18;
+    for(let i = trail; i >= 0; i--){
+      const tt = (frames - i) / 60;
+      const tx = 60 + (W-120)*((Math.sin(tt*1.3)+1)/2);
+      const ty = H/2 + Math.sin(tt*2.1)*(H/2-50);
+      const alpha = (1 - i/trail) * 0.5;
+      const r = 14 * (1 - i/trail * 0.5);
+      ctx.beginPath(); ctx.arc(tx, ty, r, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(0,245,196,'+alpha+')'; ctx.fill();
+    }
+    // main ball
+    ctx.beginPath(); ctx.arc(bx, by, 16, 0, Math.PI*2);
+    ctx.fillStyle = '#00f5c4';
+    ctx.shadowColor = '#00f5c4'; ctx.shadowBlur = 20;
+    ctx.fill(); ctx.shadowBlur = 0;
+
+    // Frame counter overlay
+    ctx.fillStyle = 'rgba(10,11,20,.7)';
+    ctx.fillRect(8, 8, 180, 28);
+    ctx.fillStyle = running ? '#00f5c4' : '#ff6b6b';
+    ctx.font = 'bold 13px Space Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText((running ? '▶ FRAME ' : '⏸ FRAME ') + frames + '  ' + (lastFps||60) + ' FPS', 16, 27);
   }
-  requestAnimationFrame(draw);
+
+  function tick(now){
+    rafId = null;
+    if(!running) return;
+    const targetFps = parseInt(document.getElementById('loop-fps-sl').value);
+    const interval = 1000 / targetFps;
+    if(now - lastFrameTime >= interval){
+      lastFrameTime = now;
+      drawFrame(now);
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  rafId = requestAnimationFrame(tick);
 }
 
 // Demo L4 — Interactive Triangle
