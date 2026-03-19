@@ -1881,19 +1881,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
 window.addEventListener('storage', checkCompletion);
 
 // Hide overlay on back-forward cache restore
-window.addEventListener('pageshow', (e) => {
+window.addEventListener('pageshow', () => {
+  // Clear all overlay/toast states on page restore
   const overlay = document.getElementById('compOverlay');
   if (overlay) overlay.classList.remove('show');
   const toast = document.getElementById('toast');
   if (toast) toast.classList.remove('show');
-});
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    const overlay = document.getElementById('compOverlay');
-    if (overlay) overlay.classList.remove('show');
-    const toast = document.getElementById('toast');
-    if (toast) toast.classList.remove('show');
-  }
+  // Close any open lesson body (bfcache restores open state)
+  document.querySelectorAll('.lesson.active').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.lesson-body').forEach(el => { el.style.display = 'none'; el.innerHTML = ''; });
+  if (typeof currentLesson !== 'undefined') currentLesson = null;
 });
 </script>
 
