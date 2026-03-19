@@ -491,8 +491,7 @@ function showXPPopup(xp,el){
 
 function showToast(msg){
   const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+  t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500);
 }
 
 // ════════════════════════════════════════
@@ -1885,6 +1884,16 @@ window.addEventListener('storage', checkCompletion);
 window.addEventListener('pageshow', (e) => {
   const overlay = document.getElementById('compOverlay');
   if (overlay) overlay.classList.remove('show');
+  const toast = document.getElementById('toast');
+  if (toast) toast.classList.remove('show');
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    const overlay = document.getElementById('compOverlay');
+    if (overlay) overlay.classList.remove('show');
+    const toast = document.getElementById('toast');
+    if (toast) toast.classList.remove('show');
+  }
 });
 </script>
 
