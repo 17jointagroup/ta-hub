@@ -58,10 +58,10 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 .map-path{position:absolute;top:0;left:0;pointer-events:none;z-index:5}
 
 /* ── PLAYER PIN ── */
-.pp{position:absolute;transform:translate(10%,-60%);z-index:50;pointer-events:none;text-align:center;transition:left .9s cubic-bezier(.34,1.56,.64,1),top .9s cubic-bezier(.34,1.56,.64,1)}
-.pp-av{font-size:2.8rem;filter:drop-shadow(0 4px 12px rgba(192,132,252,.8));animation:pp-bob .9s ease infinite alternate}
+.pp{position:absolute;transform:translate(55%,-70%);z-index:50;pointer-events:none;text-align:center;transition:left .9s cubic-bezier(.34,1.56,.64,1),top .9s cubic-bezier(.34,1.56,.64,1)}
+.pp-av{font-size:3.5rem;filter:drop-shadow(0 4px 12px rgba(192,132,252,.8));animation:pp-bob .9s ease infinite alternate}
 @keyframes pp-bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
-.pp-name{font-size:1.2rem;font-weight:900;color:#c084fc;background:rgba(5,2,14,.8);border-radius:100px;padding:1px 8px;margin-top:2px;white-space:nowrap}
+.pp-name{display:none}
 .pp-dot{width:8px;height:8px;background:#c084fc;border-radius:50%;margin:3px auto 0;box-shadow:0 0 10px #c084fc;animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
 
