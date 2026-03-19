@@ -841,69 +841,119 @@ function buildDemo_Pipeline(cont){
   const cv = document.getElementById('cv-l1');
   const ctx = cv.getContext('2d');
 
+  // Mobile: taller canvas so boxes are bigger, desktop: compact 600x220
+  const DW = 600;
+  const DH = isMobile ? 340 : 220;
+
   function syncSize(){
-    const w = cv.clientWidth > 0 ? cv.clientWidth : 600;
-    const h = Math.round(w * 220/600);
-    if(cv.width !== w || cv.height !== h){ cv.width = w; cv.height = h; }
+    const w = cv.clientWidth > 0 ? cv.clientWidth : DW;
+    const h = Math.round(w * DH/DW);
+    if(cv.width!==w || cv.height!==h){
+      cv.width=w; cv.height=h;
+      cv.style.height=h+'px';
+    }
   }
   syncSize();
   if(isMobile) window.addEventListener('resize', syncSize);
 
   let t = 0;
-  const stages=['頂點資料\n(Vertices)','頂點著色器\n(Vertex Shader)','圖元組裝\n(Primitive Assembly)','片段著色器\n(Fragment Shader)','螢幕輸出\n(Screen)'];
-  const cols=['#7c6dfa','#00f5c4','#ffd93d','#ff6b6b','#e8eaf6'];
+  const stages = ['頂點資料\n(Vertices)','頂點著色器\n(Vertex Shader)','圖元組裝\n(Primitive Assembly)','片段著色器\n(Fragment Shader)','螢幕輸出\n(Screen)'];
+  const cols = ['#7c6dfa','#00f5c4','#ffd93d','#ff6b6b','#e8eaf6'];
 
+  // Layout differs: mobile = 1-col vertical stack, desktop = horizontal row
   function draw(){
     syncSize();
     const W = cv.width, H = cv.height;
-    // Scale all drawing to 600x220 design space
-    const scx = W/600, scy = H/220;
-    ctx.setTransform(scx, 0, 0, scy, 0, 0);
+    ctx.setTransform(W/DW, 0, 0, H/DH, 0, 0);
+    ctx.clearRect(0,0,DW,DH);
+    ctx.fillStyle='#0a0b14'; ctx.fillRect(0,0,DW,DH);
 
-    ctx.clearRect(0,0,600,220);
-    ctx.fillStyle='#0a0b14';
-    ctx.fillRect(0,0,600,220);
+    const active = Math.floor(t/40) % stages.length;
 
-    const bw=90,bh=50,gap=12;
-    const total = stages.length*(bw+gap)-gap;
-    let stageX=(600-total)/2;
-    const active = Math.floor(t/30)%stages.length;
+    if(isMobile){
+      // ── Mobile: vertical stack, big cards ──
+      const bw=460, bh=50, gap=10;
+      const totalH = stages.length*(bh+gap)-gap;
+      const startY = (DH - totalH)/2;
+      const cx2 = DW/2;
 
-    stages.forEach((s,i)=>{
-      const x=stageX+i*(bw+gap), y=110-bh/2;
-      const glow = i===active;
-      ctx.shadowColor=glow?cols[i]:'transparent'; ctx.shadowBlur=glow?18:0;
-      ctx.fillStyle = glow?cols[i]:'#13162a';
-      ctx.strokeStyle = glow?cols[i]:'#1e2340';
-      ctx.lineWidth=1.5;
-      roundRect(ctx,x,y,bw,bh,8,true,true);
-      ctx.fillStyle= glow?'#07080f':'#7b82b0';
-      ctx.font='bold 9px Nunito';
-      ctx.textAlign='center';
-      ctx.shadowBlur=0;
-      s.split('\n').forEach((line,j)=>ctx.fillText(line,x+bw/2,y+bh/2-4+j*13));
-      if(i<stages.length-1){
-        const px=x+bw+2, py=110;
-        ctx.strokeStyle = i<active?cols[i]:'#1e2340';
-        ctx.lineWidth=2;
-        ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+gap-4,py);ctx.stroke();
-        ctx.fillStyle = i<active?cols[i]:'#1e2340';
-        ctx.beginPath();ctx.moveTo(px+gap-4,py-4);ctx.lineTo(px+gap,py);ctx.lineTo(px+gap-4,py+4);ctx.fill();
+      stages.forEach((s,i)=>{
+        const x = cx2 - bw/2;
+        const y = startY + i*(bh+gap);
+        const glow = i===active;
+        ctx.shadowColor = glow ? cols[i] : 'transparent'; ctx.shadowBlur = glow ? 20 : 0;
+        ctx.fillStyle = glow ? cols[i] : '#13162a';
+        ctx.strokeStyle = glow ? cols[i] : '#1e2340'; ctx.lineWidth=2;
+        roundRect(ctx,x,y,bw,bh,10,true,true);
+        ctx.fillStyle = glow ? '#07080f' : '#9ba3c0';
+        ctx.font = 'bold 18px Nunito';
+        ctx.textAlign = 'center'; ctx.shadowBlur=0;
+        // Single line: combine both lines
+        const label = s.replace('\n',' ');
+        ctx.fillText(label, cx2, y+bh/2+6);
+        // Arrow down (except last)
+        if(i < stages.length-1){
+          const ay = y+bh+2, abot = y+bh+gap-2;
+          ctx.strokeStyle = i<active ? cols[i] : '#2a2f4a'; ctx.lineWidth=2;
+          ctx.beginPath(); ctx.moveTo(cx2,ay); ctx.lineTo(cx2,abot-5); ctx.stroke();
+          ctx.fillStyle = i<active ? cols[i] : '#2a2f4a';
+          ctx.beginPath(); ctx.moveTo(cx2-5,abot-5); ctx.lineTo(cx2,abot); ctx.lineTo(cx2+5,abot-5); ctx.fill();
+        }
+      });
+
+      // Particle moving down the stack
+      const progress=(t%40)/40;
+      if(active>0){
+        const from=active-1;
+        const y1=startY+from*(bh+gap)+bh;
+        const y2=startY+active*(bh+gap);
+        const py=y1+(y2-y1)*progress;
+        ctx.shadowColor='#fff'; ctx.shadowBlur=12;
+        ctx.fillStyle='#fff';
+        ctx.beginPath(); ctx.arc(cx2,py,5,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0;
       }
-    });
 
-    const progress=(t%30)/30;
-    const from=active===0?0:active-1;
-    if(active>0){
-      const x1=stageX+from*(bw+gap)+bw, x2=stageX+active*(bw+gap);
-      const px=x1+(x2-x1)*progress;
-      ctx.shadowColor='#fff'; ctx.shadowBlur=12;
-      ctx.fillStyle='#fff';
-      ctx.beginPath();ctx.arc(px,110,4,0,Math.PI*2);ctx.fill();
-      ctx.shadowBlur=0;
+    } else {
+      // ── Desktop: horizontal row ──
+      const bw=90, bh=50, gap=12;
+      const total = stages.length*(bw+gap)-gap;
+      let stageX = (DW-total)/2;
+      const cy2 = DH/2;
+
+      stages.forEach((s,i)=>{
+        const x=stageX+i*(bw+gap), y=cy2-bh/2;
+        const glow=i===active;
+        ctx.shadowColor=glow?cols[i]:'transparent'; ctx.shadowBlur=glow?18:0;
+        ctx.fillStyle=glow?cols[i]:'#13162a';
+        ctx.strokeStyle=glow?cols[i]:'#1e2340'; ctx.lineWidth=1.5;
+        roundRect(ctx,x,y,bw,bh,8,true,true);
+        ctx.fillStyle=glow?'#07080f':'#7b82b0';
+        ctx.font='bold 9px Nunito';
+        ctx.textAlign='center'; ctx.shadowBlur=0;
+        s.split('\n').forEach((line,j)=>ctx.fillText(line,x+bw/2,y+bh/2-4+j*13));
+        if(i<stages.length-1){
+          const px=x+bw+2, py=cy2;
+          ctx.strokeStyle=i<active?cols[i]:'#1e2340'; ctx.lineWidth=2;
+          ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px+gap-4,py); ctx.stroke();
+          ctx.fillStyle=i<active?cols[i]:'#1e2340';
+          ctx.beginPath(); ctx.moveTo(px+gap-4,py-4); ctx.lineTo(px+gap,py); ctx.lineTo(px+gap-4,py+4); ctx.fill();
+        }
+      });
+
+      const progress=(t%40)/40;
+      if(active>0){
+        const from=active-1;
+        const x1=stageX+from*(bw+gap)+bw, x2=stageX+active*(bw+gap);
+        const px=x1+(x2-x1)*progress;
+        ctx.shadowColor='#fff'; ctx.shadowBlur=12;
+        ctx.fillStyle='#fff';
+        ctx.beginPath(); ctx.arc(px,cy2,4,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0;
+      }
     }
 
-    ctx.setTransform(1,0,0,1,0,0); // reset transform
+    ctx.setTransform(1,0,0,1,0,0);
     t++;
     requestAnimationFrame(draw);
   }
@@ -1514,19 +1564,21 @@ function buildDemo_Camera(cont){
 
   const cv = document.getElementById('cv-l9');
   cv.style.width='100%'; cv.style.display='block';
+  // Create gl FIRST, then syncCamSize can use it
+  const gl = cv.getContext('webgl'); if(!gl) return;
+  gl.enable(gl.DEPTH_TEST);
+
   function syncCamSize(){
     const w = cv.clientWidth > 0 ? cv.clientWidth : 600;
     const h = Math.round(w * 300/600);
     if(cv.width!==w||cv.height!==h){
       cv.width=w; cv.height=h;
-      cv.style.height=h+'px'; // keep CSS height = pixel height to avoid distortion
+      cv.style.height=h+'px';
       gl.viewport(0,0,w,h);
     }
   }
   syncCamSize();
-  if(isMobile) window.addEventListener('resize', syncCamSize);
-  const gl = cv.getContext('webgl'); if(!gl) return;
-  gl.enable(gl.DEPTH_TEST);
+  window.addEventListener('resize', syncCamSize);
 
   // ── Shaders ──
   const prog = makeProgram(gl,
