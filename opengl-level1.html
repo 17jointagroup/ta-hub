@@ -1456,71 +1456,172 @@ function buildDemo_MVP(cont){
 function buildDemo_Camera(cont){
   cont.innerHTML=`
   <div class="demo-wrap" style="position:relative">
-    <div class="demo-label">🎥 Boss：自由攝影機！(拖曳旋轉)</div>
-    <canvas id="cv-l9" width="600" height="300" style="height:300px;cursor:grab"></canvas>
-    <div style="position:absolute;bottom:12px;right:12px;font-size:.7rem;color:rgba(255,255,255,.4);font-family:Space Mono">拖曳旋轉 · 滾輪縮放</div>
+    <div class="demo-label">🎥 Boss：自由攝影機！— WASD 移動 + 拖曳視角</div>
+    <canvas id="cv-l9" width="600" height="320" style="height:320px;cursor:crosshair;touch-action:none"></canvas>
   </div>
-  <div style="font-size:.8rem;color:var(--txt2);margin-top:8px;text-align:center">攝影機 Position: <span id="cam-pos" style="font-family:var(--mono);color:var(--acc4)">0, 0, 3</span></div>`;
+  <div class="ctrl-row" style="margin-top:8px">
+    <span style="font-size:.78rem;color:var(--txt2)">⌨️ <b>WASD</b> 前後左右 · <b>QE</b> 上下 · 🖱️ 拖曳視角 · 滾輪速度</span>
+  </div>
+  <div style="display:flex;gap:16px;margin-top:6px;font-size:.78rem;color:var(--txt2)">
+    <span>📍 Pos: <span id="cam-pos" style="font-family:var(--mono);color:var(--acc4)">0,0,5</span></span>
+    <span>🧭 Yaw: <span id="cam-yaw" style="font-family:var(--mono);color:var(--acc2)">0°</span></span>
+    <span>📐 Pitch: <span id="cam-pitch" style="font-family:var(--mono);color:var(--acc)">0°</span></span>
+  </div>`;
+
   const cv=document.getElementById('cv-l9');
-  
-  cv.width=600;cv.height=parseInt(cv.style.height)||260;cv.style.width='100%';const gl=cv.getContext('webgl');if(!gl)return;
+  cv.width=600;cv.height=320;cv.style.width='100%';cv.style.height='320px';
+  const gl=cv.getContext('webgl');if(!gl)return;
   gl.enable(gl.DEPTH_TEST);
-  const vs=`attribute vec3 p;attribute vec3 c;varying vec3 vc;uniform mat4 mvp;void main(){gl_Position=mvp*vec4(p,1);vc=c;}`;
-  const fs=`precision mediump float;varying vec3 vc;void main(){gl_FragColor=vec4(vc,1);}`;
+
+  const vs='attribute vec3 p;attribute vec3 col;varying vec3 vc;uniform mat4 uMVP;void main(){gl_Position=uMVP*vec4(p,1.);vc=col;}';
+  const fs='precision mediump float;varying vec3 vc;void main(){gl_FragColor=vec4(vc,1.);}';
   const prog=makeProgram(gl,vs,fs);
-  // Multiple cubes
-  const buf=gl.createBuffer();
+  const pL=gl.getAttribLocation(prog,'p'),cL=gl.getAttribLocation(prog,'col');
+  const mvpL=gl.getUniformLocation(prog,'uMVP');
+
+  // Math
+  function ident(){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);}
+  function mul4(a,b){const r=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let k=0;k<4;k++)r[i*4+j]+=a[i*4+k]*b[k*4+j];return r;}
+  function persp(fov,a,n,f){const s=1/Math.tan(fov/2);return new Float32Array([s/a,0,0,0,0,s,0,0,0,0,(f+n)/(n-f),-1,0,0,2*f*n/(n-f),0]);}
+  function translate(x,y,z){const m=ident();m[12]=x;m[13]=y;m[14]=z;return m;}
+  function rotY(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]);}
+  function rotX(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1]);}
+  function norm(v){const l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])||1;return[v[0]/l,v[1]/l,v[2]/l];}
+
+  // Cube geometry
   const cubeV=buildCubeVerts();
-  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-  gl.bufferData(gl.ARRAY_BUFFER,cubeV,gl.STATIC_DRAW);
-  const pLoc=gl.getAttribLocation(prog,'p');
-  const cLoc=gl.getAttribLocation(prog,'c');
-  const mvpLoc=gl.getUniformLocation(prog,'mvp');
+  const cubeBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,cubeBuf);gl.bufferData(gl.ARRAY_BUFFER,cubeV,gl.STATIC_DRAW);
+
+  // Floor grid
+  const grid=[];
+  for(let i=-8;i<=8;i++){
+    const b=i%4===0?[.3,.3,.45]:[.12,.12,.22];
+    grid.push(i,0,-8,...b, i,0,8,...b, -8,0,i,...b, 8,0,i,...b);
+  }
+  const gridV=new Float32Array(grid);
+  const gridBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,gridBuf);gl.bufferData(gl.ARRAY_BUFFER,gridV,gl.STATIC_DRAW);
+
+  // Scene: city-like block arrangement
+  const buildings=[
+    {pos:[0,0,0],   scale:[1,2,1],   col:[.8,.4,.9]},
+    {pos:[3,0,-2],  scale:[.8,3,.8], col:[.3,.8,1]},
+    {pos:[-3,0,-1], scale:[1,1.5,1], col:[1,.7,.3]},
+    {pos:[0,0,-5],  scale:[1.5,4,1.5],col:[.4,1,.6]},
+    {pos:[4,0,-5],  scale:[.7,2,.7], col:[1,.4,.4]},
+    {pos:[-4,0,-4], scale:[1,2.5,1], col:[.6,.4,1]},
+    {pos:[2,0,-8],  scale:[1,1,1],   col:[.9,.9,.3]},
+    {pos:[-2,0,-8], scale:[.8,3.5,.8],col:[.3,.9,.9]},
+  ];
+
   // Camera state
-  let camYaw=-90*Math.PI/180, camPitch=0, camDist=5;
-  let isDragging=false,lastX=0,lastY=0;
-  cv.addEventListener('mousedown',e=>{isDragging=true;lastX=e.clientX;lastY=e.clientY;cv.style.cursor='grabbing';});
-  cv.addEventListener('mouseup',()=>{isDragging=false;cv.style.cursor='grab';});
-  cv.addEventListener('mousemove',e=>{
-    if(!isDragging) return;
-    camYaw+=(e.clientX-lastX)*.005;
-    camPitch-=(e.clientY-lastY)*.005;
-    camPitch=Math.max(-1.5,Math.min(1.5,camPitch));
-    lastX=e.clientX;lastY=e.clientY;
+  let camX=0,camY=2,camZ=8;
+  let yaw=Math.PI,pitch=0;
+  let moveSpeed=0.08;
+  const keys={};
+  document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;});
+  document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+
+  // Mouse drag for look
+  let dragging=false,lmx=0,lmy=0;
+  cv.addEventListener('mousedown',e=>{dragging=true;lmx=e.clientX;lmy=e.clientY;cv.style.cursor='grabbing';e.preventDefault();});
+  window.addEventListener('mouseup',()=>{dragging=false;cv.style.cursor='crosshair';});
+  window.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    yaw-=(e.clientX-lmx)*.004;
+    pitch-=(e.clientY-lmy)*.004;
+    pitch=Math.max(-.8,Math.min(.8,pitch));
+    lmx=e.clientX;lmy=e.clientY;
   });
-  cv.addEventListener('wheel',e=>{camDist=Math.max(2,Math.min(12,camDist+e.deltaY*.01));e.preventDefault();},{passive:false});
-  // Touch support
-  let lastTouch={x:0,y:0};
-  cv.addEventListener('touchstart',e=>{lastTouch={x:e.touches[0].clientX,y:e.touches[0].clientY};});
+  cv.addEventListener('wheel',e=>{moveSpeed=Math.max(.02,Math.min(.4,moveSpeed+e.deltaY*.0002));e.preventDefault();},{passive:false});
+
+  // Touch look
+  let lt2=null;
+  cv.addEventListener('touchstart',e=>{lt2={x:e.touches[0].clientX,y:e.touches[0].clientY};e.preventDefault();},{passive:false});
   cv.addEventListener('touchmove',e=>{
+    if(!lt2)return;
+    yaw-=(e.touches[0].clientX-lt2.x)*.004;
+    pitch-=(e.touches[0].clientY-lt2.y)*.004;
+    pitch=Math.max(-.8,Math.min(.8,pitch));
+    lt2={x:e.touches[0].clientX,y:e.touches[0].clientY};
     e.preventDefault();
-    camYaw+=(e.touches[0].clientX-lastTouch.x)*.005;
-    camPitch-=(e.touches[0].clientY-lastTouch.y)*.005;
-    camPitch=Math.max(-1.5,Math.min(1.5,camPitch));
-    lastTouch={x:e.touches[0].clientX,y:e.touches[0].clientY};
   },{passive:false});
-  const positions=[[0,0,0],[2,0,-2],[-2,0,-2],[0,0,-4],[1.5,0,2],[-1.5,1,-1]];
-  function frame(){
-    gl.clearColor(.04,.05,.1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    const cx=Math.cos(camPitch)*Math.cos(camYaw)*camDist;
-    const cy=Math.sin(camPitch)*camDist;
-    const cz=Math.cos(camPitch)*Math.sin(camYaw)*camDist;
-    document.getElementById('cam-pos').textContent=`${cx.toFixed(1)}, ${cy.toFixed(1)}, ${cz.toFixed(1)}`;
-    gl.useProgram(prog);
+
+  function buildView(){
+    // Forward direction based on yaw+pitch
+    const fx=Math.sin(yaw)*Math.cos(pitch);
+    const fy=Math.sin(pitch);
+    const fz=Math.cos(yaw)*Math.cos(pitch);
+    // Move camera
+    const spd=moveSpeed;
+    if(keys['w']){camX+=fx*spd;camY+=fy*spd;camZ+=fz*spd;}
+    if(keys['s']){camX-=fx*spd;camY-=fy*spd;camZ-=fz*spd;}
+    // Right = cross(forward, up)
+    const rx=Math.cos(yaw),rz=-Math.sin(yaw);
+    if(keys['a']){camX-=rx*spd;camZ-=rz*spd;}
+    if(keys['d']){camX+=rx*spd;camZ+=rz*spd;}
+    if(keys['q'])camY-=spd;
+    if(keys['e'])camY+=spd;
+
+    // View = rotX(pitch) * rotY(yaw) * translate(-eye)
+    return mul4(mul4(rotX(-pitch),rotY(-yaw)),translate(-camX,-camY,-camZ));
+  }
+
+  function drawMesh(buf,count,mode,M,V,P){
+    const mvp=mul4(P,mul4(V,M));
     gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-    const s=6*4;
-    gl.enableVertexAttribArray(pLoc);gl.vertexAttribPointer(pLoc,3,gl.FLOAT,false,s,0);
-    gl.enableVertexAttribArray(cLoc);gl.vertexAttribPointer(cLoc,3,gl.FLOAT,false,s,12);
-    const proj=perspective(45*Math.PI/180,600/300,.1,100);
-    const view=lookAt([cx,cy,cz],[0,0,0],[0,1,0]);
-    positions.forEach((pos,i)=>{
-      const model=makeTranslate(pos[0],pos[1],pos[2]);
-      const t2=Date.now()*.001+i;
-      const rotM=makeRotY(t2*.3+i);
-      const combined=mat4Mul(mat4Mul(proj,view),mat4Mul(model,rotM));
-      gl.uniformMatrix4fv(mvpLoc,false,combined);
-      gl.drawArrays(gl.TRIANGLES,0,36);
+    gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,24,0);
+    gl.enableVertexAttribArray(cL);gl.vertexAttribPointer(cL,3,gl.FLOAT,false,24,12);
+    gl.uniformMatrix4fv(mvpL,false,mvp);
+    gl.drawArrays(mode,0,count);
+  }
+
+  function makeBuildingVerts(sx,sy,sz,r,g,b){
+    const v=[];
+    const f=[[0,0,-1],[0,0,1],[0,1,0],[0,-1,0],[1,0,0],[-1,0,0]];
+    const cols=[[r*.8,g*.8,b*.8],[r,g,b],[r*.6,g*.6,b*.6],[r*.5,g*.5,b*.5],[r*.9,g*.9,b*.9],[r*.7,g*.7,b*.7]];
+    // Each face 2 tris
+    const vx=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,-1,-1],[1,1,-1],[-1,1,-1],
+              [-1,-1,1],[1,-1,1],[1,1,1],[-1,-1,1],[1,1,1],[-1,1,1],
+              [-1,1,-1],[-1,1,1],[1,1,1],[-1,1,-1],[1,1,1],[1,1,-1],
+              [-1,-1,-1],[-1,-1,1],[1,-1,1],[-1,-1,-1],[1,-1,1],[1,-1,-1],
+              [1,-1,-1],[1,-1,1],[1,1,1],[1,-1,-1],[1,1,1],[1,1,-1],
+              [-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,-1,-1],[-1,1,1],[-1,1,-1]];
+    for(let fi=0;fi<6;fi++){const c=cols[fi];for(let vi=0;vi<6;vi++){const p=vx[fi*6+vi];v.push(p[0]*sx,p[1]*sy,p[2]*sz,...c);}}
+    return new Float32Array(v);
+  }
+
+  // Pre-build building buffers
+  const bBufs=buildings.map(b=>{
+    const vd=makeBuildingVerts(b.scale[0],b.scale[1],b.scale[2],...b.col);
+    const buf2=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf2);gl.bufferData(gl.ARRAY_BUFFER,vd,gl.STATIC_DRAW);
+    return buf2;
+  });
+
+  const P=persp(70*Math.PI/180,600/320,.05,200);
+
+  function frame(){
+    const V=buildView();
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.04,.14,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.useProgram(prog);
+
+    // Floor grid
+    drawMesh(gridBuf,grid.length/6,gl.LINES,ident(),V,P);
+
+    // Buildings
+    buildings.forEach((b,i)=>{
+      const M=translate(b.pos[0],b.scale[1]-1,b.pos[2]);
+      drawMesh(bBufs[i],36,gl.TRIANGLES,M,V,P);
     });
+
+    // Update HUD
+    document.getElementById('cam-pos').textContent=
+      camX.toFixed(1)+', '+camY.toFixed(1)+', '+camZ.toFixed(1);
+    document.getElementById('cam-yaw').textContent=
+      (yaw*180/Math.PI%360|0)+'°';
+    document.getElementById('cam-pitch').textContent=
+      (pitch*180/Math.PI|0)+'°';
+
     requestAnimationFrame(frame);
   }
   frame();
