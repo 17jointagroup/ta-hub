@@ -156,153 +156,71 @@ let currentLesson=null;
 const demoInited={};
 
 const LESSONS=[
-  {id:'d1',num:'1-1',icon:'🛠️',title:'設定 DirectX 11 開發環境',desc:'Visual Studio 2022 + Windows SDK，準備出發！',xp:80,type:'normal',
-   q:'DirectX 11 需要額外安裝哪個 SDK？',opts:['DirectX SDK（舊版）','Windows SDK（已內含）','OpenGL SDK','不需要 SDK'],ans:1,
-   story:'<span class="emoji-big">🛠️</span>DirectX 11 是 <span class="hl">Windows 原生</span>的圖形 API，不需要額外 SDK！<br><br>你只需要：<br>🔹 <span class="hl">Visual Studio 2022 Community</span>（免費）<br>🔹 安裝 <span class="hl">Game development with C++</span> 工作負載<br>🔹 Windows SDK 會自動包含 DirectX 11 的所有標頭和函式庫！<br><br>和 OpenGL 不同：DirectX 是 <span class="hl">Microsoft 獨家</span>，只跑 Windows，但與 Xbox 完全整合！',
-   src:'rastertek.com/dx11win10tut01.html',
-   code:'<span class="cm">// directx11 標頭（隨 Windows SDK 自動安裝）</span>
+  {id:"d1",num:"1-1",icon:"🛠️",title:"設定 DirectX 11 開發環境",desc:"Visual Studio 2022 + Windows SDK，準備出發！",xp:80,type:"normal",q:"DirectX 11 需要額外安裝哪個 SDK？",opts:["DirectX SDK（舊版）","Windows SDK（已內含）","OpenGL SDK","不需要 SDK"],ans:1,src:"rastertek.com/dx11win10tut01.html",story:`<span class="emoji-big">🛠️</span>DirectX 11 是 <span class="hl">Windows 原生</span>的圖形 API，不需要額外 SDK！<br><br>你只需要：<br>🔹 <span class="hl">Visual Studio 2022 Community</span>（免費）<br>🔹 安裝 <span class="hl">Game development with C++</span> 工作負載<br>🔹 Windows SDK 自動包含所有標頭和函式庫<br><br>和 OpenGL 不同：DirectX 是 <span class="hl">Microsoft 獨家</span>，只跑 Windows，但與 Xbox 完整整合！`,code:`<span class="cm">// DirectX11 標頭</span>
 <span class="kw">#include</span> <span class="str">&lt;d3d11.h&gt;</span>
 <span class="kw">#include</span> <span class="str">&lt;d3dcompiler.h&gt;</span>
 <span class="kw">#include</span> <span class="str">&lt;DirectXMath.h&gt;</span>
-
-<span class="cm">// 連結 DirectX 函式庫</span>
 <span class="kw">#pragma</span> comment(lib, <span class="str">"d3d11.lib"</span>)
-<span class="kw">#pragma</span> comment(lib, <span class="str">"dxgi.lib"</span>)
-<span class="kw">#pragma</span> comment(lib, <span class="str">"d3dcompiler.lib"</span>)'},
-
-  {id:'d2',num:'1-2',icon:'🪟',title:'建立框架與視窗',desc:'WinMain、SystemClass、ApplicationClass 架構',xp:100,type:'normal',
-   q:'ApplicationClass 主要負責什麼？',opts:['處理鍵盤輸入','圖形渲染管理','管理視窗建立','處理網路'],ans:1,
-   story:'<span class="emoji-big">🪟</span>DirectX 程式的骨架：<br><br><span class="hl">WinMain</span> → 入口點，建立 SystemClass<br><span class="hl">SystemClass</span> → 封裝整個應用程式<br>&nbsp;&nbsp;├── <span class="hl">InputClass</span> → 處理鍵盤輸入<br>&nbsp;&nbsp;└── <span class="hl">ApplicationClass</span> → 圖形渲染<br><br>Win32 視窗建立後，用 <span class="hl">HWND</span>（視窗 handle）傳給 DirectX 使用。',
-   src:'rastertek.com/dx11win10tut02.html',
-   code:'<span class="cm">// main.cpp — 入口點</span>
-<span class="kw">int</span> WINAPI <span class="fn">WinMain</span>(HINSTANCE hInstance, HINSTANCE, PSTR, <span class="kw">int</span>) {
-  <span class="tp">SystemClass</span>* System = <span class="kw">new</span> <span class="tp">SystemClass</span>;
-  <span class="kw">if</span>(System-><span class="fn">Initialize</span>()) System-><span class="fn">Run</span>();
-  System-><span class="fn">Shutdown</span>();
-  <span class="kw">delete</span> System;
+<span class="kw">#pragma</span> comment(lib, <span class="str">"dxgi.lib"</span>)`},
+  {id:"d2",num:"1-2",icon:"🪟",title:"建立框架與視窗",desc:"WinMain、SystemClass、ApplicationClass 架構",xp:100,type:"normal",q:"ApplicationClass 主要負責什麼？",opts:["處理鍵盤輸入","圖形渲染管理","管理視窗建立","處理網路"],ans:1,src:"rastertek.com/dx11win10tut02.html",story:`<span class="emoji-big">🪟</span>DirectX 程式骨架：<br><br><span class="hl">WinMain</span> → 入口點<br><span class="hl">SystemClass</span> → 封裝整個應用程式<br>&nbsp;&nbsp;├── <span class="hl">InputClass</span> → 鍵盤輸入<br>&nbsp;&nbsp;└── <span class="hl">ApplicationClass</span> → 圖形渲染<br><br>Win32 視窗建立後，用 <span class="hl">HWND</span> 傳給 DirectX 使用。`,code:`<span class="cm">// main.cpp — 入口點</span>
+<span class="kw">int</span> WINAPI <span class="fn">WinMain</span>(HINSTANCE h, HINSTANCE, PSTR, <span class="kw">int</span>) {
+  <span class="tp">SystemClass</span>* S = <span class="kw">new</span> <span class="tp">SystemClass</span>;
+  <span class="kw">if</span>(S-><span class="fn">Initialize</span>()) S-><span class="fn">Run</span>();
+  S-><span class="fn">Shutdown</span>(); <span class="kw">delete</span> S;
   <span class="kw">return</span> <span class="num">0</span>;
-}
-
-<span class="cm">// SystemClass 包含兩個子系統</span>
-<span class="kw">class</span> <span class="tp">SystemClass</span> {
-  <span class="tp">InputClass</span>*       m_Input;       <span class="cm">// 輸入</span>
-  <span class="tp">ApplicationClass</span>* m_Application; <span class="cm">// 圖形</span>
-};'},
-
-  {id:'d3',num:'1-3',icon:'⚙️',title:'初始化 Direct3D',desc:'Device、DeviceContext、SwapChain 三劍客',xp:120,type:'normal',
-   q:'SwapChain 的主要功能是？',opts:['建立 Buffer 資源','前後緩衝互換消除撕裂','處理輸入','載入紋理'],ans:1,
-   story:'<span class="emoji-big">⚙️</span>三個核心 DirectX 物件：<br><br>🔹 <span class="hl">ID3D11Device</span> — 硬體介面，建立 Buffer/Texture 資源<br>🔹 <span class="hl">ID3D11DeviceContext</span> — 命令列表，發出渲染指令<br>🔹 <span class="hl">IDXGISwapChain</span> — 雙緩衝，前後緩衝互換顯示<br><br>一次建立全部：<span class="hl">D3D11CreateDeviceAndSwapChain()</span><br><br>還需要：<br>🎯 <span class="hl">Render Target View</span> — 告訴 GPU 畫到哪裡<br>🎯 <span class="hl">Depth/Stencil Buffer</span> — 3D 深度測試',
-   src:'rastertek.com/dx11win10tut03.html',
-   code:'<span class="cm">// 一次建立 Device + Context + SwapChain</span>
-<span class="tp">DXGI_SWAP_CHAIN_DESC</span> swapDesc = {};
-swapDesc.BufferCount = <span class="num">1</span>;
-swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-swapDesc.OutputWindow = hwnd;
-swapDesc.SampleDesc.Count = <span class="num">1</span>;
-swapDesc.Windowed = <span class="num">TRUE</span>;
-
+}`},
+  {id:"d3",num:"1-3",icon:"⚙️",title:"初始化 Direct3D",desc:"Device、DeviceContext、SwapChain 三劍客",xp:120,type:"normal",q:"SwapChain 的主要功能是？",opts:["建立 Buffer 資源","前後緩衝互換消除撕裂","處理輸入","載入紋理"],ans:1,src:"rastertek.com/dx11win10tut03.html",story:`<span class="emoji-big">⚙️</span>三個核心 DirectX 物件：<br><br>🔹 <span class="hl">ID3D11Device</span> — 硬體介面，建立資源<br>🔹 <span class="hl">ID3D11DeviceContext</span> — 命令列表，發出渲染指令<br>🔹 <span class="hl">IDXGISwapChain</span> — 雙緩衝，前後互換顯示<br><br>用 <span class="hl">D3D11CreateDeviceAndSwapChain()</span> 一次建立全部！`,code:`<span class="tp">DXGI_SWAP_CHAIN_DESC</span> sd = {};
+sd.BufferCount = <span class="num">1</span>;
+sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+sd.OutputWindow = hwnd;
+sd.Windowed = <span class="num">TRUE</span>;
 <span class="fn">D3D11CreateDeviceAndSwapChain</span>(
-  <span class="kw">nullptr</span>, D3D_DRIVER_TYPE_HARDWARE, <span class="kw">nullptr</span>, <span class="num">0</span>,
-  <span class="kw">nullptr</span>, <span class="num">0</span>, D3D11_SDK_VERSION,
-  &swapDesc, &m_swapChain,
-  &m_device, <span class="kw">nullptr</span>, &m_deviceContext);'},
-
-  {id:'d4',num:'1-4',icon:'🔺',title:'Vertex Buffer 與第一個三角形',desc:'VB、IB、頂點結構體，左手座標系',xp:120,type:'normal',
-   q:'DirectX 11 用什麼座標系？',opts:['右手座標系（Z 朝你）','左手座標系（Z 朝畫面裡）','兩者都支援','無座標系'],ans:1,
-   story:'<span class="emoji-big">🔺</span>3D 世界由三角形組成，三角形由頂點組成。<br><br><span class="hl">Vertex Buffer</span> — 儲存頂點資料的 GPU 記憶體<br><span class="hl">Index Buffer</span> — 用索引重用頂點，省記憶體<br><br>DirectX 頂點結構體範例：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.8rem">struct Vertex {<br>&nbsp;&nbsp;XMFLOAT3 position;<br>&nbsp;&nbsp;XMFLOAT4 color;<br>};</code><br><br>⚠️ <span class="hl">左手座標系</span>：Z 朝畫面裡（OpenGL 是右手，Z 朝你）<br>三角形頂點順序也相反：DX 用<span class="hl">順時針</span>，OpenGL 用逆時針',
-   src:'rastertek.com/dx11win10tut04.html',
-   code:'<span class="cm">// 頂點結構體（左手座標系）</span>
-<span class="kw">struct</span> <span class="tp">VertexType</span> {
-  <span class="tp">XMFLOAT3</span> position;
-  <span class="tp">XMFLOAT4</span> color;
+  <span class="kw">nullptr</span>, D3D_DRIVER_TYPE_HARDWARE,
+  <span class="kw">nullptr</span>, <span class="num">0</span>, <span class="kw">nullptr</span>, <span class="num">0</span>,
+  D3D11_SDK_VERSION, &sd,
+  &m_swapChain, &m_device, <span class="kw">nullptr</span>, &m_deviceContext);`},
+  {id:"d4",num:"1-4",icon:"🔺",title:"Vertex Buffer 與第一個三角形",desc:"VB、IB、頂點結構體，左手座標系",xp:120,type:"normal",q:"DirectX 11 用什麼座標系？",opts:["右手座標系（Z 朝你）","左手座標系（Z 朝畫面裡）","兩者都支援","無座標系"],ans:1,src:"rastertek.com/dx11win10tut04.html",story:`<span class="emoji-big">🔺</span>3D 世界由三角形組成，三角形由頂點組成。<br><br><span class="hl">Vertex Buffer</span> — 儲存頂點資料<br><span class="hl">Index Buffer</span> — 索引重用頂點<br><br>⚠️ <span class="hl">左手座標系</span>：Z 朝畫面裡（OpenGL 是右手，Z 朝你）<br>三角形用<span class="hl">順時針</span>繞序（OpenGL 用逆時針）`,code:`<span class="kw">struct</span> <span class="tp">VertexType</span> { <span class="tp">XMFLOAT3</span> pos; <span class="tp">XMFLOAT4</span> col; };
+<span class="tp">VertexType</span> verts[<span class="num">3</span>] = {
+  { <span class="tp">XMFLOAT3</span>(-<span class="num">1</span>,-<span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">1,0,0,1</span>) },
+  { <span class="tp">XMFLOAT3</span>( <span class="num">0</span>, <span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">0,1,0,1</span>) },
+  { <span class="tp">XMFLOAT3</span>( <span class="num">1</span>,-<span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">0,0,1,1</span>) },
 };
-
-<span class="tp">VertexType</span> vertices[<span class="num">3</span>] = {
-  { <span class="tp">XMFLOAT3</span>(-<span class="num">1</span>,-<span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">1</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>) },
-  { <span class="tp">XMFLOAT3</span>( <span class="num">0</span>, <span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">0</span>,<span class="num">1</span>,<span class="num">0</span>,<span class="num">1</span>) },
-  { <span class="tp">XMFLOAT3</span>( <span class="num">1</span>,-<span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>,<span class="num">1</span>) },
-};
-
-<span class="cm">// 建立 Vertex Buffer</span>
-<span class="tp">D3D11_BUFFER_DESC</span> vbd = {};
-vbd.ByteWidth = <span class="kw">sizeof</span>(<span class="tp">VertexType</span>) * <span class="num">3</span>;
-vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-m_device-><span class="fn">CreateBuffer</span>(&vbd, &init, &m_vb);'},
-
-  {id:'d5',num:'1-5',icon:'✨',title:'HLSL — GPU 的程式語言',desc:'Vertex Shader、Pixel Shader、Constant Buffer',xp:120,type:'normal',
-   q:'cbuffer 的主要用途是？',opts:['儲存紋理','從 CPU 傳矩陣等資料給 Shader','定義頂點結構','控制混合'],ans:1,
-   story:'<span class="emoji-big">✨</span><span class="hl">HLSL</span>（High-Level Shader Language）是 DirectX 的著色器語言！<br><br>兩種必備 Shader：<br>🔹 <span class="hl">Vertex Shader (.vs)</span> — 處理每個頂點位置<br>🔹 <span class="hl">Pixel Shader (.ps)</span> — 決定每個像素顏色<br><br>HLSL 語義（Semantics）：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.8rem">POSITION, SV_POSITION, TEXCOORD0, COLOR, NORMAL</code><br><br><span class="hl">cbuffer</span>（Constant Buffer）= 從 CPU 傳資料給 Shader<br>例如傳 MVP 矩陣：worldMatrix、viewMatrix、projectionMatrix',
-   src:'rastertek.com/dx11win10tut04.html',
-   code:'<span class="cm">// color.vs — 頂點著色器（HLSL）</span>
-<span class="tp">cbuffer</span> MatrixBuffer : register(b0) {
+m_device-><span class="fn">CreateBuffer</span>(&vbd, &init, &m_vb);`},
+  {id:"d5",num:"1-5",icon:"✨",title:"HLSL — GPU 的程式語言",desc:"Vertex Shader、Pixel Shader、Constant Buffer",xp:120,type:"normal",q:"cbuffer 的主要用途是？",opts:["儲存紋理","從 CPU 傳矩陣等資料給 Shader","定義頂點結構","控制混合"],ans:1,src:"rastertek.com/dx11win10tut04.html",story:`<span class="emoji-big">✨</span><span class="hl">HLSL</span> 是 DirectX 的著色器語言！<br><br>🔹 <span class="hl">Vertex Shader (.vs)</span> — 處理頂點位置<br>🔹 <span class="hl">Pixel Shader (.ps)</span> — 決定像素顏色<br><br>HLSL 語義：<code style="color:var(--acc2)">POSITION, SV_POSITION, TEXCOORD0, COLOR</code><br><br><span class="hl">cbuffer</span> = 從 CPU 傳資料（MVP 矩陣）給 Shader`,code:`<span class="tp">cbuffer</span> MatrixBuffer : register(b0) {
   <span class="tp">matrix</span> worldMatrix;
   <span class="tp">matrix</span> viewMatrix;
   <span class="tp">matrix</span> projectionMatrix;
 };
-
-<span class="tp">PixelInput</span> <span class="fn">ColorVertexShader</span>(<span class="tp">VertexInput</span> input) {
-  <span class="tp">PixelInput</span> output;
+<span class="tp">PixelInput</span> <span class="fn">VS</span>(<span class="tp">VertexInput</span> input) {
+  <span class="tp">PixelInput</span> o;
   input.position.w = <span class="num">1.0f</span>;
-  output.position = <span class="fn">mul</span>(input.position, worldMatrix);
-  output.position = <span class="fn">mul</span>(output.position, viewMatrix);
-  output.position = <span class="fn">mul</span>(output.position, projectionMatrix);
-  output.color = input.color;
-  <span class="kw">return</span> output;
-}
-
-<span class="cm">// color.ps — 像素著色器</span>
-<span class="tp">float4</span> <span class="fn">ColorPixelShader</span>(<span class="tp">PixelInput</span> input) : SV_TARGET {
-  <span class="kw">return</span> input.color;
-}'},
-
-  {id:'d6',num:'1-6',icon:'🖼️',title:'貼圖與取樣器',desc:'Texture2D、SamplerState、UV 座標系統',xp:100,type:'normal',
-   q:'DirectX 的 UV 座標 V=0 在哪裡？',opts:['畫面下方','畫面上方（與 OpenGL 相反）','畫面左方','畫面中心'],ans:1,
-   story:'<span class="emoji-big">🖼️</span>DirectX 的紋理系統：<br><br><span class="hl">Texture2D</span> — 紋理資源物件<br><span class="hl">SamplerState</span> — 控制取樣方式（線性/點取樣、Wrap/Clamp）<br><br>HLSL 取樣紋理：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.75rem">float4 color = shaderTexture.Sample(sampleType, input.tex);</code><br><br>⚠️ <span class="hl">重要差異</span>：DirectX 的 UV 座標 V=0 在<span class="hl">上方</span>（OpenGL V=0 在下方！）<br>載入 OpenGL 的貼圖要垂直翻轉！',
-   src:'rastertek.com/dx11win10tut05.html',
-   code:'<span class="cm">// texture.ps — 紋理像素著色器</span>
-<span class="tp">Texture2D</span>    shaderTexture : register(t0);
+  o.position = <span class="fn">mul</span>(input.position, worldMatrix);
+  o.position = <span class="fn">mul</span>(o.position, viewMatrix);
+  o.position = <span class="fn">mul</span>(o.position, projectionMatrix);
+  <span class="kw">return</span> o;
+}`},
+  {id:"d6",num:"1-6",icon:"🖼️",title:"貼圖與取樣器",desc:"Texture2D、SamplerState、UV 座標系統",xp:100,type:"normal",q:"DirectX 的 UV V=0 在哪裡？",opts:["畫面下方","畫面上方（與 OpenGL 相反）","畫面左方","畫面中心"],ans:1,src:"rastertek.com/dx11win10tut05.html",story:`<span class="emoji-big">🖼️</span><span class="hl">Texture2D</span> — 紋理物件<br><span class="hl">SamplerState</span> — 控制取樣方式<br><br>HLSL 取樣：<br><code style="color:var(--acc2)">shaderTexture.Sample(sampleType, input.tex)</code><br><br>⚠️ <span class="hl">重要差異</span>：DirectX UV 的 V=0 在<span class="hl">上方</span>（OpenGL 在下方！）`,code:`<span class="tp">Texture2D</span>    shaderTexture : register(t0);
 <span class="tp">SamplerState</span> sampleType   : register(s0);
 
-<span class="tp">float4</span> <span class="fn">TexturePixelShader</span>(<span class="tp">PixelInput</span> input) : SV_TARGET {
-  <span class="kw">return</span> shaderTexture.<span class="fn">Sample</span>(sampleType, input.tex);
+<span class="tp">float4</span> <span class="fn">PS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="kw">return</span> shaderTexture.<span class="fn">Sample</span>(sampleType, i.tex);
 }
-
-<span class="cm">// C++ 端：建立 SamplerState</span>
+<span class="cm">// C++ 建立 SamplerState</span>
 <span class="tp">D3D11_SAMPLER_DESC</span> sd = {};
-sd.Filter   = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+sd.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 sd.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-sd.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-m_device-><span class="fn">CreateSamplerState</span>(&sd, &m_sampleState);'},
-
-  {id:'d7',num:'1-7',icon:'💡',title:'Diffuse 漫反射光照',desc:'法線向量、光方向、Lambert 光照模型',xp:100,type:'normal',
-   q:'Diffuse 光照使用什麼數學運算？',opts:['叉積 cross product','點積 dot product','矩陣乘法','三角函數'],ans:1,
-   story:'<span class="emoji-big">💡</span>光照讓 3D 物體看起來立體！DirectX 在 Pixel Shader 裡計算光照。<br><br><span class="hl">Diffuse（漫反射）</span>光照公式：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.75rem">float intensity = saturate(dot(normal, -lightDir));<br>float4 color = ambient + diffuse * intensity;</code><br><br>關鍵 HLSL 函式：<br>🔹 <span class="hl">dot()</span> — 點積，計算法線與光方向夾角<br>🔹 <span class="hl">saturate()</span> — 夾在 [0, 1] 之間<br>🔹 <span class="hl">normalize()</span> — 正規化向量',
-   src:'rastertek.com/dx11win10tut06.html',
-   code:'<span class="cm">// light.ps — 漫反射光照</span>
-<span class="tp">cbuffer</span> LightBuffer : register(b0) {
-  <span class="tp">float4</span> ambientColor;
-  <span class="tp">float4</span> diffuseColor;
-  <span class="tp">float3</span> lightDirection;
-  <span class="tp">float</span>  padding;
+m_device-><span class="fn">CreateSamplerState</span>(&sd, &m_ss);`},
+  {id:"d7",num:"1-7",icon:"💡",title:"Diffuse 漫反射光照",desc:"法線向量、光方向、Lambert 光照模型",xp:100,type:"normal",q:"Diffuse 光照使用什麼數學運算？",opts:["叉積 cross product","點積 dot product","矩陣乘法","三角函數"],ans:1,src:"rastertek.com/dx11win10tut06.html",story:`<span class="emoji-big">💡</span>光照讓 3D 物體看起來立體！DirectX 在 Pixel Shader 裡計算。<br><br><span class="hl">Lambert 漫反射</span>公式：<br><code style="color:var(--acc2)">float i = saturate(dot(normal, -lightDir));</code><br><br>🔹 <span class="hl">dot()</span> — 點積，計算法線與光的夾角<br>🔹 <span class="hl">saturate()</span> — 夾在 [0, 1]<br>🔹 <span class="hl">normalize()</span> — 正規化向量`,code:`<span class="tp">cbuffer</span> LightBuffer : register(b0) {
+  <span class="tp">float4</span> ambientColor, diffuseColor;
+  <span class="tp">float3</span> lightDirection; <span class="tp">float</span> padding;
 };
-
-<span class="tp">float4</span> <span class="fn">LightPixelShader</span>(<span class="tp">PixelInput</span> input) : SV_TARGET {
+<span class="tp">float4</span> <span class="fn">PS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
   <span class="tp">float4</span> color = ambientColor;
-  <span class="tp">float3</span> lightDir = -lightDirection;
-  <span class="tp">float</span>  intensity = <span class="fn">saturate</span>(<span class="fn">dot</span>(input.normal, lightDir));
-  <span class="kw">if</span>(intensity > <span class="num">0.0f</span>)
-    color += diffuseColor * intensity;
-  color = <span class="fn">saturate</span>(color);
-  <span class="kw">return</span> color * shaderTexture.<span class="fn">Sample</span>(sampleType, input.tex);
-}'},
-
-  {id:'d8',num:'1-8',icon:'📦',title:'3D 模型系統',desc:'ModelClass、輸入裝配階段、DrawIndexed',xp:100,type:'normal',
-   q:'IASetPrimitiveTopology 設定什麼？',opts:['紋理格式','頂點組合方式（三角形/線/點）','深度測試','混合模式'],ans:1,
-   story:'<span class="emoji-big">📦</span>DirectX 的模型渲染流程：<br><br>1️⃣ <span class="hl">ModelClass::Initialize()</span> — 建立 VB/IB<br>2️⃣ <span class="hl">ModelClass::Render()</span> — 設定 IA Stage，繪製<br><br>設定輸入裝配（Input Assembler）階段：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.73rem">ctx->IASetVertexBuffers(0, 1, &vb, &stride, &offset);<br>ctx->IASetIndexBuffer(ib, DXGI_FORMAT_R32_UINT, 0);<br>ctx->IASetPrimitiveTopology(TRIANGLELIST);</code><br><br>最後用 <span class="hl">DrawIndexed()</span> 送出繪製指令到 GPU',
-   src:'rastertek.com/dx11win10tut07.html',
-   code:'<span class="cm">// 設定 Input Assembler（IA）階段</span>
-<span class="kw">void</span> <span class="tp">ModelClass</span>::<span class="fn">Render</span>(<span class="tp">ID3D11DeviceContext</span>* ctx) {
+  <span class="tp">float</span>  intensity = <span class="fn">saturate</span>(<span class="fn">dot</span>(i.normal, -lightDirection));
+  <span class="kw">if</span>(intensity > <span class="num">0.0f</span>) color += diffuseColor * intensity;
+  <span class="kw">return</span> <span class="fn">saturate</span>(color) * shaderTexture.<span class="fn">Sample</span>(sampleType, i.tex);
+}`},
+  {id:"d8",num:"1-8",icon:"📦",title:"3D 模型系統",desc:"ModelClass、輸入裝配階段、DrawIndexed",xp:100,type:"normal",q:"IASetPrimitiveTopology 設定什麼？",opts:["紋理格式","頂點組合方式（三角形/線/點）","深度測試","混合模式"],ans:1,src:"rastertek.com/dx11win10tut07.html",story:`<span class="emoji-big">📦</span>DirectX 的模型渲染流程：<br><br>1️⃣ <span class="hl">Initialize()</span> — 建立 VB/IB<br>2️⃣ <span class="hl">Render()</span> — 設定 IA Stage，繪製<br><br>設定輸入裝配（Input Assembler）後，用 <span class="hl">DrawIndexed()</span> 送出繪製指令`,code:`<span class="kw">void</span> <span class="tp">ModelClass</span>::<span class="fn">Render</span>(<span class="tp">ID3D11DeviceContext</span>* ctx) {
   <span class="kw">unsigned int</span> stride = <span class="kw">sizeof</span>(<span class="tp">VertexType</span>);
   <span class="kw">unsigned int</span> offset = <span class="num">0</span>;
   ctx-><span class="fn">IASetVertexBuffers</span>(<span class="num">0</span>, <span class="num">1</span>, &m_vb, &stride, &offset);
@@ -310,27 +228,18 @@ m_device-><span class="fn">CreateSamplerState</span>(&sd, &m_sampleState);'},
   ctx-><span class="fn">IASetPrimitiveTopology</span>(
     D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
-
-<span class="cm">// 發出繪製指令</span>
-deviceContext-><span class="fn">DrawIndexed</span>(m_indexCount, <span class="num">0</span>, <span class="num">0</span>);'},
-
-  {id:'d9',num:'1-9',icon:'👑',title:'Boss：Alpha Blending 透明混合',desc:'Blend State、透明效果、渲染排序',xp:180,type:'boss',
-   q:'Alpha Blending 的正確渲染順序是？',opts:['從近到遠（前景先畫）','從遠到近（背景先畫）','隨機順序','依 Alpha 值排序'],ans:1,
-   story:'<span class="emoji-big">👑</span>Alpha Blending 讓你渲染半透明的玻璃、火焰、UI！<br><br>用 <span class="hl">Blend State</span> 控制混合：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.73rem">SrcBlend = D3D11_BLEND_SRC_ALPHA<br>DestBlend = D3D11_BLEND_INV_SRC_ALPHA<br>BlendOp = D3D11_BLEND_OP_ADD</code><br><br>混合公式：<span class="hl">Output = Src * SrcAlpha + Dst * (1-SrcAlpha)</span><br><br>⚠️ <span class="hl">渲染排序</span>：必須從遠到近（Painter's Algorithm）<br>否則半透明物體會遮住後面的東西！',
-   src:'rastertek.com/dx11win10tut10.html',
-   code:'<span class="cm">// 建立 Alpha Blend State</span>
-<span class="tp">D3D11_BLEND_DESC</span> bd = {};
+ctx-><span class="fn">DrawIndexed</span>(m_indexCount, <span class="num">0</span>, <span class="num">0</span>);`},
+  {id:"d9",num:"1-9",icon:"👑",title:"Boss：Alpha Blending 透明混合",desc:"Blend State、透明效果、渲染排序",xp:180,type:"boss",q:"Alpha Blending 的正確渲染順序是？",opts:["從近到遠（前景先畫）","從遠到近（背景先畫）","隨機順序","依 Alpha 值排序"],ans:1,src:"rastertek.com/dx11win10tut10.html",story:`<span class="emoji-big">👑</span>Alpha Blending 讓你渲染半透明的玻璃、火焰、UI！<br><br>用 <span class="hl">Blend State</span> 控制混合：<br><code style="color:var(--acc2)">SrcBlend=SRC_ALPHA, DestBlend=INV_SRC_ALPHA, BlendOp=ADD</code><br><br>⚠️ <span class="hl">渲染排序</span>：必須從遠到近（Painter Algorithm）<br>否則半透明物體會遮住後面的東西！`,code:`<span class="tp">D3D11_BLEND_DESC</span> bd = {};
 bd.RenderTarget[<span class="num">0</span>].BlendEnable = <span class="num">TRUE</span>;
 bd.RenderTarget[<span class="num">0</span>].SrcBlend  = D3D11_BLEND_SRC_ALPHA;
 bd.RenderTarget[<span class="num">0</span>].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
 bd.RenderTarget[<span class="num">0</span>].BlendOp   = D3D11_BLEND_OP_ADD;
 bd.RenderTarget[<span class="num">0</span>].RenderTargetWriteMask = <span class="num">0x0f</span>;
 m_device-><span class="fn">CreateBlendState</span>(&bd, &m_blendState);
-
-<span class="cm">// 啟用（渲染前呼叫）</span>
 <span class="tp">float</span> bf[<span class="num">4</span>] = {<span class="num">0,0,0,0</span>};
-ctx-><span class="fn">OMSetBlendState</span>(m_blendState, bf, <span class="num">0xffffffff</span>);'},
+ctx-><span class="fn">OMSetBlendState</span>(m_blendState, bf, <span class="num">0xffffffff</span>);`},
 ];
+
 
 function updateXP(){
   const tot=earned.reduce((s,id)=>{const l=LESSONS.find(x=>x.id===id);return s+(l?l.xp:0);},0);
