@@ -1454,120 +1454,182 @@ function buildDemo_MVP(cont){
 
 // Demo L9 — Camera with mouse control (Boss!)
 function buildDemo_Camera(cont){
+  // Detect mobile once
+  const isMobile = ('ontouchstart' in window) || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   cont.innerHTML=`
   <div class="demo-wrap" style="position:relative">
-    <div class="demo-label">🎥 Boss：自由攝影機！— WASD 移動 + 拖曳視角</div>
-    <canvas id="cv-l9" width="600" height="320" style="height:320px;cursor:crosshair;touch-action:none"></canvas>
+    <div class="demo-label">🎥 Boss：自由攝影機！</div>
+    <canvas id="cv-l9" width="600" height="300" style="height:300px;touch-action:none;cursor:${isMobile?'default':'crosshair'}"></canvas>
   </div>
-  <div class="ctrl-row" style="margin-top:8px">
-    <span style="font-size:.78rem;color:var(--txt2)">⌨️ <b>WASD</b> 前後左右 · <b>QE</b> 上下 · 🖱️ 拖曳視角 · 滾輪速度</span>
+  <div class="ctrl-row" style="margin-top:8px;min-height:24px">
+    ${isMobile ? `
+    <span style="font-size:.78rem;color:var(--txt2)">📱 <b>單指拖曳</b> 轉視角 · <b>雙指捏合</b> 縮放</span>
+    ` : `
+    <span style="font-size:.78rem;color:var(--txt2)">💻 <b>WASD</b> 移動 · <b>右鍵拖曳</b> 視角 · <b>滾輪</b> 縮放</span>
+    `}
   </div>
+  ${isMobile ? `
+  <div id="cam-joy-wrap" style="margin-top:8px;display:flex;align-items:center;gap:16px;padding:8px 16px;background:rgba(192,132,252,.05);border-radius:12px;border:1px solid rgba(192,132,252,.15)">
+    <div id="joy-base" style="width:90px;height:90px;border-radius:50%;background:rgba(192,132,252,.08);border:2px solid rgba(192,132,252,.25);position:relative;flex-shrink:0;touch-action:none">
+      <div id="joy-knob" style="width:38px;height:38px;border-radius:50%;background:rgba(192,132,252,.55);border:2px solid #c084fc;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <button id="btn-up" style="width:44px;height:44px;border-radius:50%;background:rgba(192,132,252,.12);border:1.5px solid rgba(192,132,252,.3);color:#c084fc;font-size:1.1rem;-webkit-tap-highlight-color:transparent">↑</button>
+      <button id="btn-dn" style="width:44px;height:44px;border-radius:50%;background:rgba(192,132,252,.12);border:1.5px solid rgba(192,132,252,.3);color:#c084fc;font-size:1.1rem;-webkit-tap-highlight-color:transparent">↓</button>
+    </div>
+    <div style="font-size:.72rem;color:var(--txt2);line-height:1.9">搖桿：前後左右<br>按鈕：上升/下降</div>
+  </div>
+  ` : ''}
   <div style="display:flex;gap:16px;margin-top:6px;font-size:.78rem;color:var(--txt2)">
-    <span>📍 Pos: <span id="cam-pos" style="font-family:var(--mono);color:var(--acc4)">0,0,5</span></span>
-    <span>🧭 Yaw: <span id="cam-yaw" style="font-family:var(--mono);color:var(--acc2)">0°</span></span>
-    <span>📐 Pitch: <span id="cam-pitch" style="font-family:var(--mono);color:var(--acc)">0°</span></span>
+    <span>📍 <span id="cam-pos" style="font-family:var(--mono);color:var(--acc4)">...</span></span>
+    <span>🧭 <span id="cam-yaw" style="font-family:var(--mono);color:var(--acc2)">0°</span></span>
+    <span>📐 <span id="cam-pitch" style="font-family:var(--mono);color:var(--acc)">0°</span></span>
   </div>`;
 
-  const cv=document.getElementById('cv-l9');
-  cv.width=600;cv.height=320;cv.style.width='100%';cv.style.height='320px';
-  const gl=cv.getContext('webgl');if(!gl)return;
+  const cv = document.getElementById('cv-l9');
+  cv.width=600; cv.height=300; cv.style.width='100%'; cv.style.height='300px';
+  const gl = cv.getContext('webgl'); if(!gl) return;
   gl.enable(gl.DEPTH_TEST);
 
-  const vs='attribute vec3 p;attribute vec3 col;varying vec3 vc;uniform mat4 uMVP;void main(){gl_Position=uMVP*vec4(p,1.);vc=col;}';
-  const fs='precision mediump float;varying vec3 vc;void main(){gl_FragColor=vec4(vc,1.);}';
-  const prog=makeProgram(gl,vs,fs);
-  const pL=gl.getAttribLocation(prog,'p'),cL=gl.getAttribLocation(prog,'col');
+  // ── Shaders ──
+  const prog = makeProgram(gl,
+    'attribute vec3 p;attribute vec3 col;varying vec3 vc;uniform mat4 uMVP;void main(){gl_Position=uMVP*vec4(p,1.);vc=col;}',
+    'precision mediump float;varying vec3 vc;void main(){gl_FragColor=vec4(vc,1.);}');
+  const pL=gl.getAttribLocation(prog,'p'), cL=gl.getAttribLocation(prog,'col');
   const mvpL=gl.getUniformLocation(prog,'uMVP');
 
-  // Math
+  // ── Math (column-major) ──
   function ident(){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);}
-  function mul4(a,b){const r=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let k=0;k<4;k++)r[i*4+j]+=a[i*4+k]*b[k*4+j];return r;}
+  function mul4(a,b){const r=new Float32Array(16);for(let c=0;c<4;c++)for(let row=0;row<4;row++)for(let k=0;k<4;k++)r[c*4+row]+=a[k*4+row]*b[c*4+k];return r;}
   function persp(fov,a,n,f){const s=1/Math.tan(fov/2);return new Float32Array([s/a,0,0,0,0,s,0,0,0,0,(f+n)/(n-f),-1,0,0,2*f*n/(n-f),0]);}
-  function translate(x,y,z){const m=ident();m[12]=x;m[13]=y;m[14]=z;return m;}
+  function transl(x,y,z){const m=ident();m[12]=x;m[13]=y;m[14]=z;return m;}
   function rotY(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]);}
   function rotX(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1]);}
-  function norm(v){const l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])||1;return[v[0]/l,v[1]/l,v[2]/l];}
 
-  // Cube geometry
-  const cubeV=buildCubeVerts();
-  const cubeBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,cubeBuf);gl.bufferData(gl.ARRAY_BUFFER,cubeV,gl.STATIC_DRAW);
+  // ── Geometry ──
+  const cubeV = buildCubeVerts();
+  const cubeBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,cubeBuf); gl.bufferData(gl.ARRAY_BUFFER,cubeV,gl.STATIC_DRAW);
 
-  // Floor grid
   const grid=[];
-  for(let i=-8;i<=8;i++){
-    const b=i%4===0?[.3,.3,.45]:[.12,.12,.22];
-    grid.push(i,0,-8,...b, i,0,8,...b, -8,0,i,...b, 8,0,i,...b);
-  }
-  const gridV=new Float32Array(grid);
-  const gridBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,gridBuf);gl.bufferData(gl.ARRAY_BUFFER,gridV,gl.STATIC_DRAW);
+  for(let i=-5;i<=5;i++){const b=i%5===0?[.3,.3,.45]:[.12,.12,.22];grid.push(i,0,-5,...b,i,0,5,...b,-5,0,i,...b,5,0,i,...b);}
+  const gridBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,gridBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(grid),gl.STATIC_DRAW);
 
-  // Scene: city-like block arrangement
   const buildings=[
-    {pos:[0,0,0],   scale:[1,2,1],   col:[.8,.4,.9]},
-    {pos:[3,0,-2],  scale:[.8,3,.8], col:[.3,.8,1]},
-    {pos:[-3,0,-1], scale:[1,1.5,1], col:[1,.7,.3]},
-    {pos:[0,0,-5],  scale:[1.5,4,1.5],col:[.4,1,.6]},
-    {pos:[4,0,-5],  scale:[.7,2,.7], col:[1,.4,.4]},
-    {pos:[-4,0,-4], scale:[1,2.5,1], col:[.6,.4,1]},
-    {pos:[2,0,-8],  scale:[1,1,1],   col:[.9,.9,.3]},
-    {pos:[-2,0,-8], scale:[.8,3.5,.8],col:[.3,.9,.9]},
+    {pos:[0,0,-2],scale:[.6,1.2,.6],col:[.8,.4,.9]},{pos:[2,0,-3],scale:[.5,1.8,.5],col:[.3,.8,1]},
+    {pos:[-2,0,-2.5],scale:[.6,1.0,.6],col:[1,.7,.3]},{pos:[0,0,-5],scale:[.8,2.2,.8],col:[.4,1,.6]},
+    {pos:[2.5,0,-5],scale:[.45,1.2,.45],col:[1,.4,.4]},{pos:[-2.5,0,-4.5],scale:[.6,1.6,.6],col:[.6,.4,1]},
+    {pos:[1,0,-7],scale:[.5,.8,.5],col:[.9,.9,.3]},{pos:[-1,0,-6.5],scale:[.45,2.0,.45],col:[.3,.9,.9]},
   ];
+  function makeBuildVerts(sx,sy,sz,r,g,b){
+    const v=[],cols=[[r*.8,g*.8,b*.8],[r,g,b],[r*.6,g*.6,b*.6],[r*.5,g*.5,b*.5],[r*.9,g*.9,b*.9],[r*.7,g*.7,b*.7]];
+    const vx=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,-1,1],[1,1,1],[-1,1,1],[-1,1,-1],[-1,1,1],[1,1,1],[-1,1,-1],[1,1,1],[1,1,-1],[-1,-1,-1],[-1,-1,1],[1,-1,1],[-1,-1,-1],[1,-1,1],[1,-1,-1],[1,-1,-1],[1,-1,1],[1,1,1],[1,-1,-1],[1,1,1],[1,1,-1],[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,-1,-1],[-1,1,1],[-1,1,-1]];
+    for(let fi=0;fi<6;fi++){const c=cols[fi];for(let vi=0;vi<6;vi++){const p=vx[fi*6+vi];v.push(p[0]*sx,p[1]*sy,p[2]*sz,...c);}}
+    return new Float32Array(v);
+  }
+  const bBufs=buildings.map(b=>{const vd=makeBuildVerts(b.scale[0],b.scale[1],b.scale[2],...b.col);const bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,vd,gl.STATIC_DRAW);return bf;});
 
-  // Camera state
-  let camX=0,camY=2,camZ=8;
-  let yaw=Math.PI,pitch=0;
-  let moveSpeed=0.08;
+  // ── Camera state ──
+  let camX=-0.1, camY=2.1, camZ=1.1, yaw=0, pitch=0, moveSpd=0.06;
   const keys={};
-  document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;});
-  document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 
-  // Mouse drag for look
-  let dragging=false,lmx=0,lmy=0;
-  cv.addEventListener('mousedown',e=>{dragging=true;lmx=e.clientX;lmy=e.clientY;cv.style.cursor='grabbing';e.preventDefault();});
-  window.addEventListener('mouseup',()=>{dragging=false;cv.style.cursor='crosshair';});
-  window.addEventListener('mousemove',e=>{
-    if(!dragging)return;
-    yaw-=(e.clientX-lmx)*.004;
-    pitch-=(e.clientY-lmy)*.004;
-    pitch=Math.max(-.8,Math.min(.8,pitch));
-    lmx=e.clientX;lmy=e.clientY;
-  });
-  cv.addEventListener('wheel',e=>{moveSpeed=Math.max(.02,Math.min(.4,moveSpeed+e.deltaY*.0002));e.preventDefault();},{passive:false});
+  // ── DESKTOP controls ──
+  if(!isMobile){
+    document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;});
+    document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 
-  // Touch look
-  let lt2=null;
-  cv.addEventListener('touchstart',e=>{lt2={x:e.touches[0].clientX,y:e.touches[0].clientY};e.preventDefault();},{passive:false});
-  cv.addEventListener('touchmove',e=>{
-    if(!lt2)return;
-    yaw-=(e.touches[0].clientX-lt2.x)*.004;
-    pitch-=(e.touches[0].clientY-lt2.y)*.004;
-    pitch=Math.max(-.8,Math.min(.8,pitch));
-    lt2={x:e.touches[0].clientX,y:e.touches[0].clientY};
-    e.preventDefault();
-  },{passive:false});
+    let dragging=false, lmx=0, lmy=0;
+    cv.addEventListener('mousedown',e=>{if(e.button!==2)return;dragging=true;lmx=e.clientX;lmy=e.clientY;cv.style.cursor='grabbing';e.preventDefault();});
+    window.addEventListener('mouseup',()=>{if(dragging){dragging=false;cv.style.cursor='crosshair';}});
+    window.addEventListener('mousemove',e=>{if(!dragging)return;yaw-=(e.clientX-lmx)*.004;pitch-=(e.clientY-lmy)*.004;pitch=Math.max(-.8,Math.min(.8,pitch));lmx=e.clientX;lmy=e.clientY;});
+    cv.addEventListener('contextmenu',e=>e.preventDefault());
+    cv.addEventListener('wheel',e=>{
+      e.preventDefault();
+      const fx=Math.sin(yaw)*Math.cos(pitch),fy=Math.sin(pitch),fz=Math.cos(yaw)*Math.cos(pitch);
+      const step=e.deltaY*0.008;
+      camX+=fx*step;camY+=fy*step;camZ+=fz*step;
+    },{passive:false});
+  }
 
+  // ── MOBILE controls ──
+  let joyDx=0, joyDy=0;
+  if(isMobile){
+    // Single finger = look, two finger = pinch zoom
+    let lt=null, pinchD=0;
+    cv.addEventListener('touchstart',e=>{
+      e.preventDefault();
+      if(e.touches.length===1){lt={x:e.touches[0].clientX,y:e.touches[0].clientY};}
+      else if(e.touches.length===2){pinchD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);lt=null;}
+    },{passive:false});
+    cv.addEventListener('touchmove',e=>{
+      e.preventDefault();
+      if(e.touches.length===2){
+        const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+        const delta=(pinchD-d)*0.04;
+        const fx=Math.sin(yaw)*Math.cos(pitch),fy=Math.sin(pitch),fz=Math.cos(yaw)*Math.cos(pitch);
+        camX+=fx*delta;camY+=fy*delta;camZ+=fz*delta;
+        pinchD=d; lt=null;
+      } else if(e.touches.length===1&&lt){
+        yaw-=(e.touches[0].clientX-lt.x)*.004;
+        pitch-=(e.touches[0].clientY-lt.y)*.004;
+        pitch=Math.max(-.8,Math.min(.8,pitch));
+        lt={x:e.touches[0].clientX,y:e.touches[0].clientY};
+      }
+    },{passive:false});
+    cv.addEventListener('touchend',e=>{if(e.touches.length===0)lt=null;});
+
+    // Virtual joystick
+    const joyBase=document.getElementById('joy-base');
+    const joyKnob=document.getElementById('joy-knob');
+    if(joyBase){
+      let joyTid=null;
+      joyBase.addEventListener('touchstart',e=>{e.preventDefault();joyTid=e.changedTouches[0].identifier;},{passive:false});
+      joyBase.addEventListener('touchmove',e=>{
+        e.preventDefault();
+        for(const t of e.changedTouches){
+          if(t.identifier!==joyTid)continue;
+          const r=joyBase.getBoundingClientRect();
+          let dx=t.clientX-(r.left+r.width/2), dy=t.clientY-(r.top+r.height/2);
+          const mag=Math.sqrt(dx*dx+dy*dy), maxR=34;
+          if(mag>maxR){dx=dx/mag*maxR;dy=dy/mag*maxR;}
+          joyDx=dx/maxR; joyDy=dy/maxR;
+          joyKnob.style.transform='translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px))';
+        }
+      },{passive:false});
+      const joyEnd=()=>{joyTid=null;joyDx=0;joyDy=0;joyKnob.style.transform='translate(-50%,-50%)';};
+      joyBase.addEventListener('touchend',joyEnd);joyBase.addEventListener('touchcancel',joyEnd);
+    }
+
+    // Up/down buttons
+    const btnUp=document.getElementById('btn-up'), btnDn=document.getElementById('btn-dn');
+    if(btnUp){btnUp.addEventListener('touchstart',e=>{e.preventDefault();keys['e']=true;},{passive:false});btnUp.addEventListener('touchend',()=>{keys['e']=false;});}
+    if(btnDn){btnDn.addEventListener('touchstart',e=>{e.preventDefault();keys['q']=true;},{passive:false});btnDn.addEventListener('touchend',()=>{keys['q']=false;});}
+  }
+
+  // ── Build view & apply movement ──
   function buildView(){
-    // Forward direction based on yaw+pitch
-    const fx=Math.sin(yaw)*Math.cos(pitch);
-    const fy=Math.sin(pitch);
-    const fz=Math.cos(yaw)*Math.cos(pitch);
-    // Move camera
-    const spd=moveSpeed;
-    if(keys['w']){camX+=fx*spd;camY+=fy*spd;camZ+=fz*spd;}
-    if(keys['s']){camX-=fx*spd;camY-=fy*spd;camZ-=fz*spd;}
-    // Right = cross(forward, up)
+    const fx=Math.sin(yaw)*Math.cos(pitch), fy=Math.sin(pitch), fz=Math.cos(yaw)*Math.cos(pitch);
+    const spd=moveSpd;
+    // Desktop WASD
+    if(keys['w']){camX-=fx*spd;camY-=fy*spd;camZ-=fz*spd;}
+    if(keys['s']){camX+=fx*spd;camY+=fy*spd;camZ+=fz*spd;}
     const rx=Math.cos(yaw),rz=-Math.sin(yaw);
     if(keys['a']){camX-=rx*spd;camZ-=rz*spd;}
     if(keys['d']){camX+=rx*spd;camZ+=rz*spd;}
     if(keys['q'])camY-=spd;
     if(keys['e'])camY+=spd;
-
-    // View = rotX(pitch) * rotY(yaw) * translate(-eye)
-    return mul4(mul4(rotX(-pitch),rotY(-yaw)),translate(-camX,-camY,-camZ));
+    // Mobile joystick
+    if(joyDx||joyDy){
+      const s=moveSpd*1.5;
+      const fx2=Math.sin(yaw),fz2=Math.cos(yaw);
+      camX+=(-fz2*joyDy+Math.cos(yaw)*joyDx)*s;
+      camZ+=(fx2*joyDy+Math.sin(yaw)*joyDx)*s;
+    }
+    return mul4(mul4(rotX(-pitch),rotY(-yaw)),transl(-camX,-camY,-camZ));
   }
 
-  function drawMesh(buf,count,mode,M,V,P){
-    const mvp=mul4(P,mul4(V,M));
+  function drawMesh(buf,count,mode,M,V,Proj){
+    const mvp=mul4(Proj,mul4(V,M));
     gl.bindBuffer(gl.ARRAY_BUFFER,buf);
     gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,24,0);
     gl.enableVertexAttribArray(cL);gl.vertexAttribPointer(cL,3,gl.FLOAT,false,24,12);
@@ -1575,53 +1637,18 @@ function buildDemo_Camera(cont){
     gl.drawArrays(mode,0,count);
   }
 
-  function makeBuildingVerts(sx,sy,sz,r,g,b){
-    const v=[];
-    const f=[[0,0,-1],[0,0,1],[0,1,0],[0,-1,0],[1,0,0],[-1,0,0]];
-    const cols=[[r*.8,g*.8,b*.8],[r,g,b],[r*.6,g*.6,b*.6],[r*.5,g*.5,b*.5],[r*.9,g*.9,b*.9],[r*.7,g*.7,b*.7]];
-    // Each face 2 tris
-    const vx=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,-1,-1],[1,1,-1],[-1,1,-1],
-              [-1,-1,1],[1,-1,1],[1,1,1],[-1,-1,1],[1,1,1],[-1,1,1],
-              [-1,1,-1],[-1,1,1],[1,1,1],[-1,1,-1],[1,1,1],[1,1,-1],
-              [-1,-1,-1],[-1,-1,1],[1,-1,1],[-1,-1,-1],[1,-1,1],[1,-1,-1],
-              [1,-1,-1],[1,-1,1],[1,1,1],[1,-1,-1],[1,1,1],[1,1,-1],
-              [-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,-1,-1],[-1,1,1],[-1,1,-1]];
-    for(let fi=0;fi<6;fi++){const c=cols[fi];for(let vi=0;vi<6;vi++){const p=vx[fi*6+vi];v.push(p[0]*sx,p[1]*sy,p[2]*sz,...c);}}
-    return new Float32Array(v);
-  }
-
-  // Pre-build building buffers
-  const bBufs=buildings.map(b=>{
-    const vd=makeBuildingVerts(b.scale[0],b.scale[1],b.scale[2],...b.col);
-    const buf2=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf2);gl.bufferData(gl.ARRAY_BUFFER,vd,gl.STATIC_DRAW);
-    return buf2;
-  });
-
-  const P=persp(70*Math.PI/180,600/320,.05,200);
+  const Proj=persp(65*Math.PI/180,600/300,.1,100);
 
   function frame(){
     const V=buildView();
     gl.viewport(0,0,cv.width,cv.height);
     gl.clearColor(.04,.04,.14,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
-
-    // Floor grid
-    drawMesh(gridBuf,grid.length/6,gl.LINES,ident(),V,P);
-
-    // Buildings
-    buildings.forEach((b,i)=>{
-      const M=translate(b.pos[0],b.scale[1]-1,b.pos[2]);
-      drawMesh(bBufs[i],36,gl.TRIANGLES,M,V,P);
-    });
-
-    // Update HUD
-    document.getElementById('cam-pos').textContent=
-      camX.toFixed(1)+', '+camY.toFixed(1)+', '+camZ.toFixed(1);
-    document.getElementById('cam-yaw').textContent=
-      (yaw*180/Math.PI%360|0)+'°';
-    document.getElementById('cam-pitch').textContent=
-      (pitch*180/Math.PI|0)+'°';
-
+    drawMesh(gridBuf,grid.length/6,gl.LINES,ident(),V,Proj);
+    buildings.forEach((b,i)=>drawMesh(bBufs[i],36,gl.TRIANGLES,transl(b.pos[0],b.scale[1],b.pos[2]),V,Proj));
+    document.getElementById('cam-pos').textContent=camX.toFixed(1)+', '+camY.toFixed(1)+', '+camZ.toFixed(1);
+    document.getElementById('cam-yaw').textContent=(yaw*180/Math.PI%360|0)+'°';
+    document.getElementById('cam-pitch').textContent=(pitch*180/Math.PI|0)+'°';
     requestAnimationFrame(frame);
   }
   frame();
