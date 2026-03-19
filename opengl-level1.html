@@ -1513,7 +1513,14 @@ function buildDemo_Camera(cont){
   </div>`;
 
   const cv = document.getElementById('cv-l9');
-  cv.width=600; cv.height=300; cv.style.width='100%'; cv.style.height='300px';
+  cv.style.width='100%'; cv.style.display='block';
+  function syncCamSize(){
+    const w = cv.clientWidth > 0 ? cv.clientWidth : 600;
+    const h = Math.round(w * 300/600);
+    if(cv.width!==w||cv.height!==h){ cv.width=w; cv.height=h; gl.viewport(0,0,w,h); }
+  }
+  syncCamSize();
+  if(isMobile) window.addEventListener('resize', syncCamSize);
   const gl = cv.getContext('webgl'); if(!gl) return;
   gl.enable(gl.DEPTH_TEST);
 
@@ -1662,9 +1669,11 @@ function buildDemo_Camera(cont){
     gl.drawArrays(mode,0,count);
   }
 
-  const Proj=persp(65*Math.PI/180,600/300,.1,100);
+  // Proj is rebuilt each frame with correct aspect ratio
 
   function frame(){
+    syncCamSize();
+    const Proj=persp(65*Math.PI/180, cv.width/cv.height, .1, 100);
     const V=buildView();
     gl.viewport(0,0,cv.width,cv.height);
     gl.clearColor(.04,.04,.14,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
