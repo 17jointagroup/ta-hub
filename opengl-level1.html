@@ -25,7 +25,7 @@ html{font-size:20px;}
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden;min-height:100vh}
+body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden;min-height:100vh;padding-bottom:120px}
 
 /* ── STARS BG ── */
 .stars{position:fixed;inset:0;pointer-events:none;z-index:0}
@@ -577,9 +577,9 @@ function buildBody(lesson, isDone){
         <div class="challenge-options">${opts}</div>
         <div id="explain-${lesson.id}" style="display:none;margin-top:12px;padding:12px;background:rgba(0,245,196,.05);border:1px solid rgba(0,245,196,.2);border-radius:10px;font-size:.85rem;line-height:1.6;color:var(--txt2)"></div>
       </div>
-      <button class="complete-btn" id="btn-${lesson.id}" onclick="completeLesson('${lesson.id}')" ${isDone?'disabled':''}>
-        ${isDone?'✅ 已完成！':'⚡ 完成此關 → 解鎖下一關'}
-      </button>
+      ${!isDone ? `<button class="complete-btn" id="btn-\${lesson.id}" onclick="completeLesson('\${lesson.id}')">
+        ⚡ 完成此關 → 解鎖下一關
+      </button>` : ''}
     </div>
     <div id="demo-${lesson.id}" class="tab-panel">
       <div id="demo-content-${lesson.id}">
