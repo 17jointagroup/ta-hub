@@ -30,7 +30,7 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 .hbtn{background:rgba(192,132,252,.12);border:1px solid rgba(192,132,252,.22);color:#c084fc;border-radius:9px;padding:6px 10px;font-size:1.4rem;font-weight:800;cursor:pointer;flex-shrink:0;font-family:inherit}
 
 /* ── SCROLL AREA ── */
-.outer{position:fixed;top:0;left:0;right:0;bottom:34px;overflow:hidden;cursor:grab}
+.outer{position:fixed;top:0;left:0;right:0;bottom:28px;overflow:hidden;cursor:grab}
 .outer:active{cursor:grabbing}
 .stage{position:absolute;transform-origin:0 0;will-change:transform}
 
@@ -66,18 +66,18 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
 @keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
 
 /* ── BOTTOM PANEL ── */
-.sp{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(3,1,16,.97);border-top:1px solid rgba(192,132,252,.15);padding:6px 14px max(6px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.sp{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(3,1,16,.97);border-top:1px solid rgba(192,132,252,.15);padding:4px 10px max(4px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
 
 .spt{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;cursor:pointer}
 .sptl{display:flex;align-items:center;gap:10px;display:none}
 .spar{display:none}
 
-.spb{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex:1;overflow:hidden}
-.eqg{display:flex;gap:8px;align-items:center}
+.spb{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;flex:1;overflow:hidden;min-width:0}
+.eqg{display:flex;gap:6px;align-items:center;overflow:hidden;min-width:0}
 .eq{background:rgba(192,132,252,.05);border:1px dashed rgba(192,132,252,.18);border-radius:7px;padding:8px 4px;text-align:center;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 .eq.fl{border-style:solid;border-color:rgba(192,132,252,.35);background:rgba(192,132,252,.08)}
 .eq-ic{font-size:1.2rem}.eq-nm{font-size:.72rem;font-weight:800;color:#c084fc;white-space:nowrap}.eq-st{font-size:.68rem;color:#34d399;white-space:nowrap}.eq-em{font-size:.9rem;color:#2d1a50;font-weight:800}
-.fsg{display:flex;gap:10px;align-items:center}
+.fsg{display:flex;gap:8px;align-items:center;border-left:1px solid rgba(192,132,252,.2);padding-left:8px;flex-shrink:0}
 .fs{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:9px;padding:7px 3px;text-align:center}
 .fsv{font-size:.85rem;font-weight:900}
 .fsl{font-size:.68rem;color:#6b5a8a;font-weight:700;text-transform:uppercase}
@@ -221,7 +221,7 @@ outer.addEventListener('wheel',function(e){
 },{passive:false});
 
 function scrollToPos(x,y){
-  var vw=window.innerWidth,vh=window.innerHeight-34-HUDH;
+  var vw=window.innerWidth,vh=window.innerHeight-28-HUDH;
   panX=vw/2-x*sc; panY=HUDH+(vh/2)-y*sc; clamp(); applyT();
 }
 
