@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no">
+<title>🗺️ DirectX 征服之地</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background:#0a0205;touch-action:none;user-select:none}
+
+/* ── HUD ── */
+.hud{position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:max(10px,env(safe-area-inset-top)) 12px 8px;
+  background:rgba(10,2,5,.95);border-bottom:1px solid rgba(232,69,69,.2);
+  display:flex;align-items:center;gap:10px;backdrop-filter:blur(12px)}
+.av{width:36px;height:36px;border-radius:50%;border:2px solid #e84545;background:#1a0a0a;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2.4rem}
+.pi{flex:1;min-width:0}
+.pnr{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.pn{font-size:1.8rem;font-weight:900;color:#ffe8e8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv{background:linear-gradient(135deg,#e84545,#ffd700);color:#050210;font-size:1.2rem;font-weight:900;padding:2px 7px;border-radius:100px;flex-shrink:0}
+.ttl{font-size:1.2rem;font-weight:800;color:#e84545;flex-shrink:0}
+.brs{display:flex;flex-direction:column;gap:3px}
+.br{display:flex;align-items:center;gap:5px}
+.brl{font-size:1.16rem;font-weight:800;color:#4a1010;min-width:18px}
+.brb{flex:1;height:5px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+.brf{height:100%;border-radius:100px;transition:width .4s}
+.hb{background:linear-gradient(90deg,#ef4444,#f87171)}
+.xb{background:linear-gradient(90deg,#f59e0b,#fcd34d)}
+.hbtn{background:rgba(232,69,69,.12);border:1px solid rgba(232,69,69,.22);color:#e84545;border-radius:9px;padding:6px 10px;font-size:1.4rem;font-weight:800;cursor:pointer;flex-shrink:0;font-family:inherit}
+
+/* ── SCROLL AREA ── */
+.outer{position:fixed;top:0;left:0;right:0;bottom:28px;overflow:hidden;cursor:grab}
+.outer:active{cursor:grabbing}
+.stage{position:absolute;transform-origin:0 0;will-change:transform}
+
+/* ── MAP WORLD (SVG + HTML overlay) ── */
+.map-bg{display:block;position:absolute;top:0;left:0}
+
+/* ── CASTLE NODES ── */
+.castle{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer;z-index:20}
+.castle.locked{cursor:not-allowed;opacity:.35}
+.c-tower{display:flex;flex-direction:column;align-items:center;position:relative;transition:transform .2s}
+.castle:not(.locked):active .c-tower{transform:scale(.92)}
+.c-icon{font-size:5.6rem;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6));position:relative;z-index:2}
+.castle.locked .c-icon{filter:grayscale(1) brightness(.4)}
+.castle.done .c-icon{filter:drop-shadow(0 0 14px gold)}
+.castle.current .c-icon{animation:pulse-castle 2s ease infinite}
+@keyframes pulse-castle{0%,100%{filter:drop-shadow(0 4px 12px rgba(0,0,0,.6)) drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 4px 12px rgba(0,0,0,.6)) drop-shadow(0 0 18px var(--cc,#e84545))}}
+.c-base{width:56px;height:14px;border-radius:50%;margin-top:-4px;position:relative;z-index:1}
+.c-lbl{text-align:center;margin-top:6px}
+.c-name{font-size:1.44rem;font-weight:900;color:#ffe8e8;text-shadow:0 2px 8px rgba(0,0,0,.9);line-height:1.3}
+.c-stars{font-size:1.3rem;letter-spacing:1px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.c-pct{font-size:1.2rem;font-weight:900;color:#a0f8ff;margin-top:2px;background:rgba(0,0,0,.5);border-radius:100px;padding:1px 7px}
+.c-num{position:absolute;top:-10px;right:-12px;min-width:36px;height:22px;border-radius:100px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;color:white;border:1.5px solid rgba(255,255,255,.4);z-index:5;padding:0 6px;white-space:nowrap}
+
+/* ── PATH ── */
+.map-path{position:absolute;top:0;left:0;pointer-events:none;z-index:5}
+
+/* ── PLAYER PIN ── */
+.pp{position:absolute;transform:translate(55%,-70%);z-index:50;pointer-events:none;text-align:center;transition:left .9s cubic-bezier(.34,1.56,.64,1),top .9s cubic-bezier(.34,1.56,.64,1)}
+.pp-av{font-size:3.5rem;filter:drop-shadow(0 4px 12px rgba(192,132,252,.8));animation:pp-bob .9s ease infinite alternate}
+@keyframes pp-bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
+.pp-name{display:none}
+.pp-dot{width:8px;height:8px;background:#e84545;border-radius:50%;margin:3px auto 0;box-shadow:0 0 10px #e84545;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* ── BOTTOM PANEL ── */
+.sp{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(3,1,16,.97);border-top:1px solid rgba(232,69,69,.15);padding:4px 10px max(4px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+
+.spt{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;cursor:pointer}
+.sptl{display:flex;align-items:center;gap:10px;display:none}
+.spar{display:none}
+
+.spb{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;flex:1;overflow:hidden;min-width:0}
+.eqg{display:flex;gap:6px;align-items:center;overflow:hidden;min-width:0}
+.eq{background:rgba(192,132,252,.05);border:1px dashed rgba(192,132,252,.18);border-radius:7px;padding:8px 4px;text-align:center;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.eq.fl{border-style:solid;border-color:rgba(192,132,252,.35);background:rgba(232,69,69,.08)}
+.eq-ic{font-size:1.2rem}.eq-nm{font-size:.72rem;font-weight:800;color:#e84545;white-space:nowrap}.eq-st{font-size:.68rem;color:#34d399;white-space:nowrap}.eq-em{font-size:.9rem;color:#2d1a50;font-weight:800}
+.fsg{display:flex;gap:8px;align-items:center;border-left:1px solid rgba(232,69,69,.2);padding-left:8px;flex-shrink:0}
+.fs{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:9px;padding:7px 3px;text-align:center}
+.fsv{font-size:.85rem;font-weight:900}
+.fsl{font-size:.68rem;color:#6b5a8a;font-weight:700;text-transform:uppercase}
+
+/* ── LEVEL UP TOAST ── */
+
+
+@media(max-width:768px){
+  .eq-ic{font-size:.84rem!important}
+  .eq-nm{font-size:.50rem!important}
+  .eq-st{font-size:.48rem!important}
+  .fsv{font-size:.60rem!important}
+  .fsl{font-size:.48rem!important}
+  .eq{padding:2px 5px!important}
+}
+</style>
+</head>
+<body>
+
+<div class="hud">
+  <div class="av" id="hudAv">🧙</div>
+  <div class="pi">
+    <div class="pnr"><span class="pn" id="hudN">征服者</span><span class="lv" id="hudLv">Lv.1</span><span class="ttl" id="hudTtl">初學者</span></div>
+    <div class="brs">
+      <div class="br"><span class="brl">HP</span><div class="brb"><div class="brf hb" id="hpB" style="width:100%"></div></div><span style="font-size:1.16rem;color:#f87171;font-weight:800;min-width:38px;text-align:right" id="hpT">100/100</span></div>
+      <div class="br"><span class="brl">XP</span><div class="brb"><div class="brf xb" id="xpB" style="width:0%"></div></div><span style="font-size:1.16rem;color:#fcd34d;font-weight:800;min-width:38px;text-align:right" id="xpT">0/500</span></div>
+    </div>
+  </div>
+  <button class="hbtn" onclick="location.href='index.html'">🏠</button>
+</div>
+
+<div class="outer" id="outer">
+<div class="stage" id="stage">
+
+<!-- SVG background - world map -->
+<svg class="map-bg" id="mapSVG" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<!-- Path between castles -->
+<svg class="map-path" id="pathSVG" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<!-- Castle nodes injected by JS -->
+<div id="castleLayer"></div>
+
+<!-- Player -->
+<div class="pp" id="pp">
+  <div class="pp-av" id="ppAv">⚔️</div>
+  <div class="pp-name" id="ppName">征服者</div>
+  <div class="pp-dot"></div>
+</div>
+
+</div>
+</div>
+
+<div class="sp" id="sp">
+  <div class="spt">
+    <div class="sptl"><span>⚔️ 裝備 &amp; 能力值</span><span id="spSum" style="font-size:.75rem;color:#4a1010"></span></div>
+    
+  </div>
+  <div class="spb">
+    <div class="eqg" id="eqg"></div>
+    <div class="fsg" id="fsg"></div>
+  </div>
+</div>
+
+
+<script>
+const C=[
+  {id:1,em:'⚔️',name:'起源之城',col:'#e84545',key:'dx1_done',tot:9, rw:{slot:'weapon',name:'HLSL 法劍',icon:'🗡️',stat:'ATK+3',bonus:{atk:3}}},
+  {id:2,em:'🛡️',name:'光影要塞',col:'#d97706',key:'dx2_done',tot:8, rw:{slot:'armor',name:'光照護甲',icon:'🛡️',stat:'DEF+3,INT+2',bonus:{def:3,int:2}}},
+  {id:3,em:'🔮',name:'著色器城',col:'#7c3aed',key:'dx3_done',tot:9, rw:{slot:'hat',name:'著色師之冠',icon:'🎩',stat:'INT+4',bonus:{int:4}}},
+  {id:4,em:'🌊',name:'特效要塞',col:'#0891b2',key:'dx4_done',tot:10,rw:{slot:'accessory',name:'特效之環',icon:'💠',stat:'ATK+2,SPD+3',bonus:{atk:2,spd:3}}},
+  {id:5,em:'🏔️',name:'地形之城',col:'#059669',key:'dx5_done',tot:9, rw:{slot:'accessory',name:'地形羅盤',icon:'🧭',stat:'DEF+4,INT+2',bonus:{def:4,int:2}}},
+  {id:6,em:'👁️',name:'後處理城',col:'#be185d',key:'dx6_done',tot:8, rw:{slot:'hat',name:'視覺濾鏡冠',icon:'🪖',stat:'INT+5,SPD+2',bonus:{int:5,spd:2}}},
+  {id:7,em:'💥',name:'粒子要塞',col:'#ea580c',key:'dx7_done',tot:9, rw:{slot:'weapon',name:'粒子法杖',icon:'✨',stat:'ATK+5,INT+2',bonus:{atk:5,int:2}}},
+  {id:8,em:'🌌',name:'延遲渲染城',col:'#4f46e5',key:'dx8_done',tot:8, rw:{slot:'armor',name:'延遲渲染甲',icon:'🦾',stat:'DEF+6,INT+4',bonus:{def:6,int:4}}},
+  {id:9,em:'👑',name:'DirectX 王城',col:'#ca8a04',key:'dx9_done',tot:9, rw:{slot:'accessory',name:'DirectX 王冠',icon:'👑',stat:'全屬性+5',bonus:{atk:5,def:5,int:5,spd:5}}},
+];
+const LX=[0,300,700,1200,1800,2500,3400,4400,5600,7000];
+const TITLES=['初學者','DX學徒','HLSL術士','渲染騎士','圖形學大師','DirectX征服者'];
+function getTitle(lv){return TITLES[Math.min(Math.floor((lv-1)/2),TITLES.length-1)];}
+function getLevel(xp){for(let i=LX.length-1;i>=0;i--)if(xp>=LX[i])return i+1;return 1;}
+function getDone(c){try{return JSON.parse(localStorage.getItem(c.key)||'[]').filter(Boolean).length;}catch{return 0;}}
+function getTotalXP(){return C.reduce((s,c)=>{const d=getDone(c);return s+Math.round(d/c.tot*(c.id*100+20));},0);}
+function getEq(){const eq={weapon:null,armor:null,hat:null,accessory:null};C.forEach(c=>{if(getDone(c)>=c.tot&&c.rw)eq[c.rw.slot]=c.rw;});return eq;}
+
+// Map dimensions
+const MW=600, MH=2400;
+
+// Castle positions [x,y] on the map
+const CPOS=[
+  [340,2060], // 1
+  [160,1860], // 2
+  [420,1660], // 3
+  [150,1450], // 4
+  [410,1240], // 5
+  [150,1030], // 6
+  [410,820],  // 7
+  [150,610],  // 8
+  [300,380],  // 9
+];
+
+let player=null, panX=0,panY=0,sc=1,lx=0,ly=0,dragging=false,lastDist=0;
+const outer=document.getElementById('outer');
+const stage=document.getElementById('stage');
+const HUDH=72;
+// Fix: offset outer below HUD so map content isn't hidden behind the HUD bar
+outer.style.top=HUDH+'px';
+
+function applyT(){stage.style.transform='translate('+panX+'px,'+panY+'px) scale('+sc+')';}
+function clamp(){
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const spH=document.getElementById('sp')?.offsetHeight||60;
+  const mw=MW*sc,mh=MH*sc;
+  panX=Math.min(0,Math.max(panX,vw-mw));
+  panY=Math.min(0,Math.max(panY,HUDH+spH-mh));
+}
+
+outer.addEventListener('touchstart',function(e){
+  if(e.touches.length===1){dragging=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}
+  else if(e.touches.length===2){lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
+},{passive:true});
+outer.addEventListener('touchmove',function(e){
+  e.preventDefault();
+  if(e.touches.length===1&&dragging){panX+=e.touches[0].clientX-lx;panY+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clamp();applyT();}
+  if(e.touches.length===2){
+    var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    var ns=Math.min(2.5,Math.max(0.35,sc*d/lastDist));
+    var cx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    var cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    panX=cx-(cx-panX)*ns/sc;panY=cy-(cy-panY)*ns/sc;sc=ns;lastDist=d;clamp();applyT();
+  }
+},{passive:false});
+outer.addEventListener('touchend',function(){dragging=false;});
+outer.addEventListener('mousedown',function(e){dragging=true;lx=e.clientX;ly=e.clientY;});
+outer.addEventListener('mousemove',function(e){if(!dragging)return;panX+=e.clientX-lx;panY+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clamp();applyT();});
+outer.addEventListener('mouseup',function(){dragging=false;});
+outer.addEventListener('wheel',function(e){
+  e.preventDefault();
+  panY-=e.deltaY;
+  panX-=e.deltaX;
+  clamp();applyT();
+},{passive:false});
+
+function scrollToPos(x,y){
+  var vw=window.innerWidth,spH=document.getElementById('sp')?.offsetHeight||60,vh=window.innerHeight-spH-HUDH;
+  panX=vw/2-x*sc; panY=HUDH+(vh/2)-y*sc; clamp(); applyT();
+}
+
+// ── Draw SVG Map Background ──
+function drawMapSVG(){
+  var svg=document.getElementById('mapSVG');
+  svg.setAttribute('width',MW);svg.setAttribute('height',MH);
+  svg.setAttribute('viewBox','0 0 '+MW+' '+MH);
+
+  var defs='<defs>'+
+    '<radialGradient id="sg0" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="#0a0428"/><stop offset="100%" stop-color="#0a0205"/></radialGradient>'+
+    '<radialGradient id="zg1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2a0a0a" stop-opacity=".8"/><stop offset="100%" stop-color="#2a0a0a" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#3a1010" stop-opacity=".8"/><stop offset="100%" stop-color="#3a1010" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg3" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#200808" stop-opacity=".8"/><stop offset="100%" stop-color="#200808" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg4" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#280808" stop-opacity=".8"/><stop offset="100%" stop-color="#280808" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg5" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2a0808" stop-opacity=".8"/><stop offset="100%" stop-color="#2a0808" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg6" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#180808" stop-opacity=".8"/><stop offset="100%" stop-color="#180808" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg7" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2a0808" stop-opacity=".8"/><stop offset="100%" stop-color="#2a0808" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg8" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#1a0505" stop-opacity=".8"/><stop offset="100%" stop-color="#1a0505" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="zg9" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2a0808" stop-opacity=".8"/><stop offset="100%" stop-color="#2a0808" stop-opacity="0"/></radialGradient>'+
+    '</defs>';
+
+  var bg='<rect width="'+MW+'" height="'+MH+'" fill="url(#sg0)"/>';
+
+  // Stars
+  var stars='';
+  function rng(s){var x=Math.sin(s+1)*43758.5;return x-Math.floor(x);}
+  for(var i=0;i<200;i++){
+    var sx=rng(i*2)*MW, sy=rng(i*2+1)*(MH*.7);
+    var sr=rng(i*3)<.15?1.5:rng(i*3)<.4?1:.5;
+    var sa=(.3+rng(i*5)*.6).toFixed(2);
+    stars+='<circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="'+sr+'" fill="rgba(220,190,255,'+sa+')" />';
+  }
+
+  // Island base shape
+  var island='<path d="M120,400 Q80,600 100,900 Q70,1100 80,1400 Q60,1600 120,1900 Q180,2100 300,2150 Q420,2180 500,2100 Q560,2020 540,1800 Q560,1600 540,1300 Q570,1100 550,850 Q580,650 540,420 Q500,250 380,200 Q260,150 180,280 Z" fill="#0e1428" stroke="rgba(100,80,200,.2)" stroke-width="2"/>';
+
+  // Zone glows around each castle
+  var zones='';
+  CPOS.forEach(function(pos,i){
+    var r=140;
+    zones+='<ellipse cx="'+pos[0]+'" cy="'+pos[1]+'" rx="'+r+'" ry="'+(r*.7)+'" fill="url(#zg'+(i+1)+')" />';
+  });
+
+  // Rivers/paths as SVG lines (drawn before castles)
+  var rivers='<path d="M300,2060 Q260,1900 280,1700 Q250,1500 280,1300 Q240,1100 260,900 Q240,700 280,500 Q300,400 310,380" fill="none" stroke="rgba(0,120,200,.25)" stroke-width="18" stroke-linecap="round"/>';
+
+  // Trees (emoji via text)
+  var trees='';
+  var treePositions=[[80,1950],[520,1980],[80,1750],[490,1720],[100,1500],[500,1480],[90,1200],[510,1200],[100,950],[500,920],[90,700],[510,680],[100,450],[490,440],[200,250],[400,260]];
+  treePositions.forEach(function(t){
+    trees+='<text x="'+t[0]+'" y="'+t[1]+'" font-size="28" text-anchor="middle" dominant-baseline="middle">🌲</text>';
+  });
+
+  svg.innerHTML=defs+bg+stars+island+zones+rivers+trees;
+}
+
+// ── Draw path SVG between castles ──
+function drawPath(unlockedCount){
+  var svg=document.getElementById('pathSVG');
+  svg.setAttribute('width',MW);svg.setAttribute('height',MH);
+  svg.setAttribute('viewBox','0 0 '+MW+' '+MH);
+
+  var lines='<defs><filter id="pf"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+
+  for(var i=0;i<CPOS.length-1;i++){
+    var p0=CPOS[i], p1=CPOS[i+1];
+    var done=i<unlockedCount;
+    var cx=(p0[0]+p1[0])/2, cy=(p0[1]+p1[1])/2;
+    // Road shadow
+    lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="rgba(80,50,20,.6)" stroke-width="20" stroke-linecap="round"/>';
+    // Road surface
+    lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="'+(done?'rgba(180,140,60,.7)':'rgba(80,70,50,.4)')+'" stroke-width="13" stroke-linecap="round"/>';
+    // Road dashes
+    if(done){lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="rgba(240,200,100,.4)" stroke-width="4" stroke-dasharray="16,20" stroke-linecap="round"/>';}
+    // Glow if unlocked
+    if(done){lines+='<path d="M'+p0[0]+','+p0[1]+' Q'+p0[0]+','+cy+' '+p1[0]+','+p1[1]+'" fill="none" stroke="rgba(232,69,69,.15)" stroke-width="28" stroke-linecap="round" filter="url(#pf)"/>';}
+  }
+  svg.innerHTML=lines;
+}
+
+// ── Render Castle HTML nodes ──
+function renderCastles(hi){
+  var layer=document.getElementById('castleLayer');
+  layer.innerHTML='';
+  C.forEach(function(c,idx){
+    var done=getDone(c)>=c.tot;
+    var unlocked=idx===0||(getDone(C[idx-1])>=C[idx-1].tot);
+    var isCurrent=idx===hi;
+    var pos=CPOS[idx];
+    var pct=Math.round(getDone(c)/c.tot*100);
+    var stars=done?'⭐⭐⭐':getDone(c)>0?(getDone(c)>=Math.floor(c.tot*.66)?'⭐⭐☆':'⭐☆☆'):'☆☆☆';
+
+    var div=document.createElement('div');
+    div.className='castle'+(done?' done':unlocked?' current':' locked');
+    if(isCurrent)div.className+=' current';
+    div.style.cssText='left:'+pos[0]+'px;top:'+pos[1]+'px;--cc:'+c.col;
+    
+    div.innerHTML='<div class="c-tower">'+
+      '<span class="c-icon" style="font-size:'+(idx===8?'3.6rem':'2.8rem')+'">'+c.em+'</span>'+
+      '<div class="c-num" style="background:'+c.col+';border-color:rgba(255,255,255,.4)">Lv.'+(idx+1)+'</div>'+
+      '<div class="c-base" style="background:radial-gradient(ellipse,'+c.col+'66 0%,transparent 70%)"></div>'+
+    '</div>'+
+    '<div class="c-lbl">'+
+      '<div class="c-name">'+c.name+'</div>'+
+      (unlocked&&!done?'<div class="c-pct">'+pct+'%</div>':'')+''+
+      '<div class="c-stars">'+stars+'</div>'+
+    '</div>';
+
+    if(unlocked){div.addEventListener('click',function(id){return function(){location.href='dx-dx-level'+id+'.html';};}(c.id));}
+    layer.appendChild(div);
+  });
+}
+
+// ── Update HUD ──
+function updateHUD(xp,lv,eq){
+  var base=player.stats||{atk:8,def:6,int:10,spd:8};
+  var tot=JSON.parse(JSON.stringify(base));
+  Object.values(eq).forEach(function(it){if(it&&it.bonus)Object.keys(it.bonus).forEach(function(k){if(tot[k]!==undefined)tot[k]+=it.bonus[k];});});
+  var xpNext=LX[Math.min(lv,LX.length-1)]||9999, xpPrev=LX[Math.max(lv-1,0)]||0;
+  var xpPct=Math.min(100,Math.round((xp-xpPrev)/Math.max(1,xpNext-xpPrev)*100));
+  document.getElementById('hudN').textContent=player.name;
+  document.getElementById('hudLv').textContent='Lv.'+lv;
+  document.getElementById('hudTtl').textContent=getTitle(lv);
+  document.getElementById('hpB').style.width=Math.round(player.hp/player.hpMax*100)+'%';
+  document.getElementById('hpT').textContent=player.hp+'/'+player.hpMax;
+  document.getElementById('xpB').style.width=xpPct+'%';
+  document.getElementById('xpT').textContent=xp+'/'+xpNext;
+  document.getElementById('spSum').textContent='ATK '+tot.atk+'  INT '+tot.int+'  DEF '+tot.def+'  SPD '+tot.spd;
+  // Equip
+  var slots=[['weapon','武器'],['armor','防具'],['hat','頭盔'],['accessory','飾品']];
+  document.getElementById('eqg').innerHTML=slots.map(function(sl){var it=eq[sl[0]];return it?'<div class="eq fl"><div class="eq-ic">'+it.icon+'</div><div class="eq-nm">'+it.name+'</div><div class="eq-st">'+it.stat+'</div></div>':'<div class="eq"><div class="eq-em">'+sl[1]+'</div></div>';}).join('');
+  document.getElementById('fsg').innerHTML=[['ATK',tot.atk,'#f87171'],['DEF',tot.def,'#60a5fa'],['INT',tot.int,'#e84545'],['SPD',tot.spd,'#34d399']].map(function(x){return '<div class="fs"><div class="fsv" style="color:'+x[2]+'">'+x[1]+'</div><div class="fsl">'+x[0]+'</div></div>';}).join('');
+  // Avatar emoji
+  var clsEmoji={mage:'🧙',warrior:'⚔️',archer:'🏹'};
+  var av=clsEmoji[player.class]||'🧙';
+  document.getElementById('hudAv').textContent=av;
+  document.getElementById('ppAv').textContent=av;
+  document.getElementById('ppName').textContent=player.name;
+}
+
+// ── INIT ──
+function init(){
+  var raw=localStorage.getItem('player_data');
+  if(!raw){location.href='character.html';return;}
+  player=JSON.parse(raw);
+  var xp=getTotalXP(),lv=getLevel(xp),eq=getEq();
+  
+  // Find current position
+  var hi=0;
+  C.forEach(function(c,i){
+    if(getDone(c)>0)hi=i;
+    if(getDone(c)>=c.tot&&i+1<C.length)hi=i+1;
+  });
+  hi=Math.min(hi,C.length-1);
+
+  // Draw world
+  drawMapSVG();
+  drawPath(hi);
+  renderCastles(hi);
+  updateHUD(xp,lv,eq);
+
+  // Position player
+  var pos=CPOS[hi];
+  var pp=document.getElementById('pp');
+  pp.style.left=pos[0]+'px';
+  pp.style.top=(pos[1]-20)+'px';
+
+  // Set initial view
+  setTimeout(function(){
+    var vw=window.innerWidth, vh=window.innerHeight-60;
+    sc=Math.min(vw/MW*1.1,1.2);
+    sc=Math.max(sc,0.5);
+    scrollToPos(pos[0],pos[1]-60);
+    
+    // Level up check
+    var prevLv=player.level||1;
+    if(lv>prevLv){
+      player.level=lv;
+      localStorage.setItem('player_data',JSON.stringify(player));
+
+    }
+  },50);
+
+  // Hash navigation from castle completion
+  if(location.hash&&location.hash.indexOf('#done-')===0){
+    var cid=parseInt(location.hash.replace('#done-',''));
+    var ni=Math.min(cid,C.length-1);
+    setTimeout(function(){
+      var npos=CPOS[ni];
+      pp.style.left=npos[0]+'px';
+      pp.style.top=(npos[1]-20)+'px';
+      setTimeout(function(){scrollToPos(npos[0],npos[1]-60);},300);
+    },400);
+    history.replaceState(null,'',location.pathname);
+  }
+}
+
+window.addEventListener('resize',function(){clamp();applyT();});
+// Wait for DOM
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',init);
+}else{
+  init();
+}
+</script>
+</body>
+</html>

@@ -431,24 +431,76 @@ function demoTex(cont){
   frame();
 }
 
-function demoLight(cont){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">💡 Lambert 漫反射光照（HLSL 模擬）</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="slider-row"><label>💡 光照角度</label><input type="range" min="-180" max="180" value="45" id="la" oninput="updL()"><span class="slider-val" id="lva">45°</span></div><div class="slider-row"><label>🌙 環境光</label><input type="range" min="0" max="60" value="15" id="lb" oninput="updL()"><span class="slider-val" id="lvb">0.15</span></div>';
-  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=260;
-  const gl=cv.getContext("webgl");if(!gl)return;
+function demoLight(cont,isMobile){
+  const sliders = isMobile
+    ? `<div class="slider-row" style="flex-direction:column;align-items:flex-start;gap:4px"><label style="min-width:auto">💡 光照角度</label><div style="display:flex;width:100%;gap:8px;align-items:center"><input type="range" min="-180" max="180" value="45" id="la" oninput="updL()" style="flex:1"><span class="slider-val" id="lva">45°</span></div></div><div class="slider-row" style="flex-direction:column;align-items:flex-start;gap:4px"><label style="min-width:auto">🌙 環境光</label><div style="display:flex;width:100%;gap:8px;align-items:center"><input type="range" min="0" max="60" value="15" id="lb" oninput="updL()" style="flex:1"><span class="slider-val" id="lvb">0.15</span></div></div>`
+    : `<div class="slider-row"><label>💡 光照角度</label><input type="range" min="-180" max="180" value="45" id="la" oninput="updL()"><span class="slider-val" id="lva">45°</span></div><div class="slider-row"><label>🌙 環境光</label><input type="range" min="0" max="60" value="15" id="lb" oninput="updL()"><span class="slider-val" id="lvb">0.15</span></div>`;
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">💡 Lambert 漫反射光照（HLSL 模擬）</div><canvas style="width:100%;display:block;height:260px"></canvas></div>'+sliders;
+  const cv=cont.querySelector("canvas");
   let ang=45,amb=.15;
-  // Sphere made of triangles
-  const verts=[];const N=48;
-  for(let i=0;i<N;i++){const a0=i/N*Math.PI*2,a1=(i+1)/N*Math.PI*2;const r=.72;verts.push(0,0,0,0, Math.cos(a0)*r,Math.sin(a0)*r,Math.cos(a0),Math.sin(a0), Math.cos(a1)*r,Math.sin(a1)*r,Math.cos(a1),Math.sin(a1));}
-  const p=mkProg(gl,"attribute vec2 pos;attribute vec2 nor;varying vec2 vn;void main(){vn=nor;gl_Position=vec4(pos*.9,0,1);}","precision mediump float;varying vec2 vn;uniform vec3 ld;uniform float amb;void main(){vec3 n=normalize(vec3(vn,1));float d=max(dot(n,ld),0.);vec3 c=vec3(.88,.27,.27);gl_FragColor=vec4(c*(amb+d*(1.-amb)),1.);}");
+
+  // syncSize: 保持 canvas pixel 尺寸，修正 aspect ratio
+  function syncSize(){
+    const w=cv.clientWidth||600;
+    const h=260;
+    if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;cv.style.height=h+'px';}
+    return w/h; // aspect ratio
+  }
+
+  const gl=cv.getContext("webgl");if(!gl)return;
+  syncSize();
+
+  // 真正的 3D 球體（lat/lon 球面三角網格）
+  const verts3d=[];
+  const STACKS=24,SLICES=32;
+  function pushVert(lat,lon){
+    const x=Math.cos(lat)*Math.cos(lon);
+    const y=Math.sin(lat);
+    const z=Math.cos(lat)*Math.sin(lon);
+    verts3d.push(x*.68,y*.68,z*.68, x,y,z); // pos(xyz) + normal(xyz)
+  }
+  for(let si=0;si<STACKS;si++){
+    const lat0=(si/STACKS-.5)*Math.PI;
+    const lat1=((si+1)/STACKS-.5)*Math.PI;
+    for(let li=0;li<SLICES;li++){
+      const lon0=li/SLICES*Math.PI*2;
+      const lon1=(li+1)/SLICES*Math.PI*2;
+      pushVert(lat0,lon0);pushVert(lat1,lon0);pushVert(lat1,lon1);
+      pushVert(lat0,lon0);pushVert(lat1,lon1);pushVert(lat0,lon1);
+    }
+  }
+
+  const p=mkProg(gl,
+    // aspect ratio uniform 修正球的形狀
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;uniform float asp;void main(){vn=nor;gl_Position=vec4(pos.x/asp,pos.y,pos.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;uniform vec3 ld;uniform float amb;void main(){vec3 n=normalize(vn);float d=max(dot(n,ld),0.);vec3 c=vec3(.88,.27,.27);gl_FragColor=vec4(c*(amb+d*(1.-amb)),1.);}");
   gl.useProgram(p);
-  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts3d),gl.STATIC_DRAW);
   const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
-  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,16,0);
-  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,2,gl.FLOAT,false,16,8);
-  const ul=gl.getUniformLocation(p,"ld"),ua=gl.getUniformLocation(p,"amb");
-  window.updL=()=>{ang=parseFloat(document.getElementById("la").value);amb=document.getElementById("lb").value/100;document.getElementById("lva").textContent=ang+"°";document.getElementById("lvb").textContent=amb.toFixed(2);};
-  function frame(){const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT);const r=ang*Math.PI/180;gl.uniform3f(ul,Math.cos(r),Math.sin(r),.5);gl.uniform1f(ua,amb);gl.drawArrays(gl.TRIANGLES,0,verts.length/4);requestAnimationFrame(frame);}
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const ul=gl.getUniformLocation(p,"ld"),ua=gl.getUniformLocation(p,"amb"),uasp=gl.getUniformLocation(p,"asp");
+  gl.enable(gl.DEPTH_TEST);
+  window.updL=()=>{
+    ang=parseFloat(document.getElementById("la").value);
+    amb=document.getElementById("lb").value/100;
+    document.getElementById("lva").textContent=ang+"°";
+    document.getElementById("lvb").textContent=amb.toFixed(2);
+  };
+  function frame(){
+    const asp=syncSize();
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    const r=ang*Math.PI/180;
+    gl.uniform3f(ul,Math.cos(r),Math.sin(r),.5);
+    gl.uniform1f(ua,amb);
+    gl.uniform1f(uasp,asp);
+    gl.drawArrays(gl.TRIANGLES,0,verts3d.length/6);
+    requestAnimationFrame(frame);
+  }
   frame();
+  if(isMobile) window.addEventListener('resize',syncSize);
 }
 
 function demoModel(cont){
