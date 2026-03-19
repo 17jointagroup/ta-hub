@@ -2337,15 +2337,15 @@ async function runCollect(){
   // Take ALL articles from ALL sources
   const fresh = arr.map((a, i) => ({...a, id: 'd_'+todayStr+'_'+i, date: todayStr, isNew: true}));
 
-  // Log a sample of sources (not all 100+, just show unique sources)
-  const shownSrcs = [...new Set(fresh.map(a=>a.src))];
-  for(const src of shownSrcs.slice(0,12)){
-    await delay(120);
+  // Show all sources in log
+  const shownSrcs = [...new Set(fresh.map(a=>a.src))].sort();
+  addLog(`📦 共 ${shownSrcs.length} 個來源，${fresh.length} 篇文章`);
+  for(const src of shownSrcs){
+    await delay(40);
     const count = fresh.filter(a=>a.src===src).length;
     addLog(`✓ ${src}：${count} 篇`);
   }
-  if(shownSrcs.length > 12) addLog(`... 共 ${shownSrcs.length} 個來源`);
-  await delay(300);
+  await delay(200);
   addLog(`✅ 完成！從 ${shownSrcs.length} 個來源收集 ${fresh.length} 篇文章`);
 
   // Remove old "today" articles, prepend new ones
