@@ -1303,50 +1303,110 @@ void main(){
 function buildDemo_MVP(cont){
   cont.innerHTML=`
   <div class="demo-wrap">
-    <div class="demo-label">📷 3D 透視 Demo</div>
-    <canvas id="cv-l8" width="600" height="260" style="height:260px"></canvas>
+    <div class="demo-label">📷 MVP 三個世界 — 拖曳旋轉 / 滾輪縮放</div>
+    <canvas id="cv-l8" width="600" height="280" style="height:280px;cursor:grab;touch-action:none"></canvas>
   </div>
-  <div class="slider-row"><label>🔭 FOV 視野角</label><input type="range" min="10" max="150" value="45" id="sl-fov" oninput="document.getElementById('sv-fov').textContent=this.value+'°'"><span class="slider-val" id="sv-fov">45°</span></div>
-  <div class="slider-row"><label>📏 攝影機距離</label><input type="range" min="1" max="10" value="3" step=".1" id="sl-dist" oninput="document.getElementById('sv-dist').textContent=this.value"><span class="slider-val" id="sv-dist">3</span></div>`;
+  <div class="ctrl-row">
+    <button class="ctrl-btn on" id="mvp-m" onclick="setMvpMode('model')">🎲 M 模型空間</button>
+    <button class="ctrl-btn" id="mvp-v" onclick="setMvpMode('view')">📷 V 視圖空間</button>
+    <button class="ctrl-btn" id="mvp-p" onclick="setMvpMode('proj')">🔭 P 投影空間</button>
+  </div>
+  <div style="margin-top:8px;padding:8px 12px;background:rgba(124,109,250,.08);border-radius:10px;font-size:.82rem;color:var(--txt2);line-height:1.6" id="mvp-desc">
+    🎲 <b style="color:#c084fc">模型空間</b>：物體自己的座標系。旋轉的是物體本身，世界靜止不動。
+  </div>
+  <div class="slider-row" style="margin-top:8px">
+    <span class="slider-label">🔭 FOV 視角</span>
+    <input type="range" min="20" max="120" value="60" id="sl-fov" oninput="document.getElementById('sv-fov').textContent=this.value+'°'">
+    <span class="slider-val" id="sv-fov">60°</span>
+  </div>`;
   const cv=document.getElementById('cv-l8');
-  
-  cv.width=600;cv.height=parseInt(cv.style.height)||260;cv.style.width='100%';const gl=cv.getContext('webgl');if(!gl)return;
-  const vs=`attribute vec3 p;attribute vec3 c;varying vec3 vc;
-uniform mat4 mvp;
-void main(){gl_Position=mvp*vec4(p,1);vc=c;}`;
-  const fs=`precision mediump float;varying vec3 vc;void main(){gl_FragColor=vec4(vc,1);}`;
+  cv.width=600;cv.height=280;cv.style.width='100%';cv.style.height='280px';
+  const gl=cv.getContext('webgl');if(!gl)return;
+  const vs='attribute vec3 p;attribute vec3 col;varying vec3 vc;uniform mat4 uM;uniform mat4 uV;uniform mat4 uP;void main(){gl_Position=uP*uV*uM*vec4(p,1.);vc=col;}';
+  const fs='precision mediump float;varying vec3 vc;void main(){gl_FragColor=vec4(vc,1.);}';
   const prog=makeProgram(gl,vs,fs);
-  // Cube verts (6 faces, 2 tris each)
   const cubeV=new Float32Array([
-    -1,-1,-1, 1,.3,.3,  1,-1,-1, 1,.3,.3,  1,1,-1, 1,.3,.3,  -1,-1,-1, 1,.3,.3,  1,1,-1, 1,.3,.3,  -1,1,-1, 1,.3,.3,
-    -1,-1,1, .3,1,.5,   1,-1,1, .3,1,.5,   1,1,1, .3,1,.5,   -1,-1,1, .3,1,.5,   1,1,1, .3,1,.5,   -1,1,1, .3,1,.5,
-    -1,1,-1, .8,.6,1,  -1,1,1, .8,.6,1,   1,1,1, .8,.6,1,   -1,1,-1, .8,.6,1,   1,1,1, .8,.6,1,   1,1,-1, .8,.6,1,
-    -1,-1,-1, .6,.9,.3, -1,-1,1, .6,.9,.3, 1,-1,1, .6,.9,.3, -1,-1,-1, .6,.9,.3, 1,-1,1, .6,.9,.3, 1,-1,-1, .6,.9,.3,
-    1,-1,-1, 1,.7,.2,   1,-1,1, 1,.7,.2,   1,1,1, 1,.7,.2,   1,-1,-1, 1,.7,.2,   1,1,1, 1,.7,.2,   1,1,-1, 1,.7,.2,
-    -1,-1,-1, .4,.4,.9, -1,-1,1, .4,.4,.9, -1,1,1, .4,.4,.9, -1,-1,-1, .4,.4,.9, -1,1,1, .4,.4,.9, -1,1,-1, .4,.4,.9
+    -1,-1,-1,1,.3,.3, 1,-1,-1,1,.3,.3, 1,1,-1,1,.3,.3, -1,-1,-1,1,.3,.3, 1,1,-1,1,.3,.3, -1,1,-1,1,.3,.3,
+    -1,-1,1,.3,1,.5, 1,-1,1,.3,1,.5, 1,1,1,.3,1,.5, -1,-1,1,.3,1,.5, 1,1,1,.3,1,.5, -1,1,1,.3,1,.5,
+    -1,1,-1,.8,.6,1, -1,1,1,.8,.6,1, 1,1,1,.8,.6,1, -1,1,-1,.8,.6,1, 1,1,1,.8,.6,1, 1,1,-1,.8,.6,1,
+    -1,-1,-1,.6,.9,.3, -1,-1,1,.6,.9,.3, 1,-1,1,.6,.9,.3, -1,-1,-1,.6,.9,.3, 1,-1,1,.6,.9,.3, 1,-1,-1,.6,.9,.3,
+    1,-1,-1,1,.7,.2, 1,-1,1,1,.7,.2, 1,1,1,1,.7,.2, 1,-1,-1,1,.7,.2, 1,1,1,1,.7,.2, 1,1,-1,1,.7,.2,
+    -1,-1,-1,.4,.4,.9, -1,-1,1,.4,.4,.9, -1,1,1,.4,.4,.9, -1,-1,-1,.4,.4,.9, -1,1,1,.4,.4,.9, -1,1,-1,.4,.4,.9
   ]);
-  const buf=gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-  gl.bufferData(gl.ARRAY_BUFFER,cubeV,gl.STATIC_DRAW);
-  const pLoc=gl.getAttribLocation(prog,'p');
-  const cLoc=gl.getAttribLocation(prog,'c');
-  const mvpLoc=gl.getUniformLocation(prog,'mvp');
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,cubeV,gl.STATIC_DRAW);
+  const pL=gl.getAttribLocation(prog,'p'),cL=gl.getAttribLocation(prog,'col');
+  const uM=gl.getUniformLocation(prog,'uM'),uV=gl.getUniformLocation(prog,'uV'),uP=gl.getUniformLocation(prog,'uP');
   gl.enable(gl.DEPTH_TEST);
-  let t=0;
+
+  // State
+  let mvpMode='model', autoRot=true;
+  let modelRx=0.4,modelRy=0,camDist=5,camRx=0.3,camRy=0;
+  let dragX=0,dragY=0,dragging=false,lastX=0,lastY=0;
+
+  const descs={
+    model:'🎲 <b style="color:#c084fc">模型空間</b>：拖曳旋轉物體本身。M 矩陣控制物體的位置、旋轉、縮放。世界和攝影機都靜止。',
+    view:'📷 <b style="color:#60a5fa">視圖空間</b>：拖曳旋轉攝影機視角。V 矩陣決定「從哪裡看」。物體沒動，但你的角度變了！',
+    proj:'🔭 <b style="color:#34d399">投影空間</b>：P 矩陣決定遠近感。調 FOV 滑桿感受廣角vs窄角的透視變形。'
+  };
+
+  window.setMvpMode=function(m){
+    mvpMode=m;
+    ['model','view','proj'].forEach(k=>{
+      document.getElementById('mvp-'+k[0]).classList.toggle('on',k===m);
+    });
+    document.getElementById('mvp-desc').innerHTML=descs[m];
+    document.getElementById('sl-fov').parentElement.style.display=m==='proj'?'flex':'none';
+  };
+  // Hide FOV slider initially
+  setTimeout(()=>{document.getElementById('sl-fov').parentElement.style.display='none';},0);
+
+  // Drag to rotate
+  cv.addEventListener('mousedown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;autoRot=false;cv.style.cursor='grabbing';});
+  cv.addEventListener('mousemove',e=>{if(!dragging)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;if(mvpMode==='model'){modelRy+=dx*.01;modelRx+=dy*.01;}else if(mvpMode==='view'){camRy+=dx*.01;camRx+=dy*.01;}else{camRy+=dx*.01;}});
+  cv.addEventListener('mouseup',()=>{dragging=false;cv.style.cursor='grab';});
+  cv.addEventListener('mouseleave',()=>{dragging=false;cv.style.cursor='grab';});
+  // Touch
+  let lt=null;
+  cv.addEventListener('touchstart',e=>{e.preventDefault();lt=e.touches[0];autoRot=false;},{passive:false});
+  cv.addEventListener('touchmove',e=>{e.preventDefault();if(!lt)return;const dx=e.touches[0].clientX-lt.clientX,dy=e.touches[0].clientY-lt.clientY;lt=e.touches[0];if(mvpMode==='model'){modelRy+=dx*.01;modelRx+=dy*.01;}else{camRy+=dx*.01;camRx+=dy*.01;}},{passive:false});
+  cv.addEventListener('touchend',()=>{lt=null;});
+  // Wheel = zoom
+  cv.addEventListener('wheel',e=>{e.preventDefault();camDist=Math.max(2,Math.min(12,camDist+e.deltaY*.01));},{passive:false});
+
+  // Math helpers
+  function ident(){return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);}
+  function mul(a,b){const r=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let k=0;k<4;k++)r[i*4+j]+=a[i*4+k]*b[k*4+j];return r;}
+  function rotX(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]);}
+  function rotY(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]);}
+  function trans(x,y,z){const m=ident();m[12]=x;m[13]=y;m[14]=z;return m;}
+  function persp(fov,asp,n,f){const s=1/Math.tan(fov/2);return new Float32Array([s/asp,0,0,0, 0,s,0,0, 0,0,(f+n)/(n-f),-1, 0,0,2*f*n/(n-f),0]);}
+
+  let autoT=0;
   function frame(){
-    t+=0.01;
-    const fov=parseInt(document.getElementById('sl-fov').value)*Math.PI/180;
-    const dist=parseFloat(document.getElementById('sl-dist').value);
-    // simple MVP
-    const mvp=makeMVP(t,t*.7,dist,fov,cv.width/cv.height);
-    gl.clearColor(.04,.05,.1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    if(autoRot){autoT+=0.008;modelRy=autoT;modelRx=0.35;}
+    const fov=parseInt(document.getElementById('sl-fov').value)*Math.PI/180||Math.PI/3;
+    const asp=cv.width/cv.height;
+
+    // M: model rotation
+    const M=mul(rotX(modelRx),rotY(modelRy));
+    // V: camera position
+    const V=mul(rotX(camRx),mul(rotY(camRy),trans(0,0,-camDist)));
+    // P: perspective
+    const P=persp(fov,asp,.1,100);
+
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.05,.12,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(prog);
     gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-    const s=6*4;
-    gl.enableVertexAttribArray(pLoc);gl.vertexAttribPointer(pLoc,3,gl.FLOAT,false,s,0);
-    gl.enableVertexAttribArray(cLoc);gl.vertexAttribPointer(cLoc,3,gl.FLOAT,false,s,12);
-    gl.uniformMatrix4fv(mvpLoc,false,mvp);
+    const stride=24;
+    gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,stride,0);
+    gl.enableVertexAttribArray(cL);gl.vertexAttribPointer(cL,3,gl.FLOAT,false,stride,12);
+    gl.uniformMatrix4fv(uM,false,M);
+    gl.uniformMatrix4fv(uV,false,V);
+    gl.uniformMatrix4fv(uP,false,P);
     gl.drawArrays(gl.TRIANGLES,0,36);
+
+    // Labels overlay using 2D canvas approach - draw axes hint
     requestAnimationFrame(frame);
   }
   frame();
