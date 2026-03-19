@@ -1485,7 +1485,7 @@ function buildDemo_Camera(cont){
   cont.innerHTML=`
   <div class="demo-wrap" style="position:relative">
     <div class="demo-label">🎥 Boss：自由攝影機！</div>
-    <canvas id="cv-l9" width="600" height="300" style="height:300px;touch-action:none;cursor:${isMobile?'default':'crosshair'}"></canvas>
+    <canvas id="cv-l9" style="width:100%;display:block;touch-action:none;cursor:${isMobile?'default':'crosshair'}"></canvas>
   </div>
   <div class="ctrl-row" style="margin-top:8px;min-height:24px">
     ${isMobile ? `
@@ -1517,7 +1517,11 @@ function buildDemo_Camera(cont){
   function syncCamSize(){
     const w = cv.clientWidth > 0 ? cv.clientWidth : 600;
     const h = Math.round(w * 300/600);
-    if(cv.width!==w||cv.height!==h){ cv.width=w; cv.height=h; gl.viewport(0,0,w,h); }
+    if(cv.width!==w||cv.height!==h){
+      cv.width=w; cv.height=h;
+      cv.style.height=h+'px'; // keep CSS height = pixel height to avoid distortion
+      gl.viewport(0,0,w,h);
+    }
   }
   syncCamSize();
   if(isMobile) window.addEventListener('resize', syncCamSize);
