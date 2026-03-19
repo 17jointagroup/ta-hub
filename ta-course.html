@@ -390,6 +390,12 @@ const CHS=[
   {id:'c17',num:17, col:'#f97316',icon:'🌊',tag:'第 17 關',title:'PBR 物理材質',        desc:'Metallic + Roughness + Albedo，讓材質遵守物理規則',   time:'40分',xp:280, group:'🔬 進階應用'},
   {id:'c18',num:18, col:'#84cc16',icon:'🔦',tag:'第 18 關',title:'後製特效 Post FX',    desc:'Bloom、Tone Mapping、色調分級讓畫面有電影感',          time:'40分',xp:280, group:'🔬 進階應用'},
   {id:'c19',num:19, col:'#fbbf24',icon:'🏆',tag:'第 19 關',title:'畢業作品：整合材質',  desc:'把 20 關學到的全部用上，做一顆完整的 PBR 材質球',     time:'60分',xp:500, group:'🏆 畢業'},
+  // ══════ UE5 渲染 ══════
+  {id:'c20',num:20,col:'#00b4d8',icon:'💡',tag:'UE5-1',title:'Lumen — 動態全域光照',           desc:'取代傳統烘焙！Lumen 即時 GI 原理、Surface Cache、Soft/Hard Ray Tracing 怎麼選',  time:'25分',xp:160,group:'🔵 UE5 渲染'},
+  {id:'c21',num:21,col:'#7209b7',icon:'⬡',tag:'UE5-2',title:'Nanite — 虛擬幾何體',           desc:'億級多邊形即時渲染的秘密：Cluster LOD、VSM 與 Nanite Tessellation',                time:'25分',xp:160,group:'🔵 UE5 渲染'},
+  {id:'c22',num:22,col:'#f77f00',icon:'✨',tag:'UE5-3',title:'MegaLights — 千燈場景',         desc:'UE5.5 新功能：隨機直接光照，千盞動態投影燈不爆效能的秘密',                         time:'20分',xp:140,group:'🔵 UE5 渲染'},
+  {id:'c23',num:23,col:'#2dc653',icon:'🧱',tag:'UE5-4',title:'Substrate — 新材質系統',        desc:'UE5.7 正式上線！分層 BSDF 取代固定 Shading Model，多層材質的正確打開方式',         time:'25分',xp:160,group:'🔵 UE5 渲染'},
+  {id:'c24',num:24,col:'#e63946',icon:'🏆',tag:'UE5-5',title:'UE5 渲染優化 — TA 實戰精華',   desc:'精選 GDC、Unreal Fest、YouTube 頂尖演講：效能分析、GPU 時間、記憶體管理',          time:'30分',xp:200,group:'🔵 UE5 渲染'},
 ];
 
 let curCh=null,curIdx=0;
@@ -464,9 +470,148 @@ const STEPS={
   c17:['h_c17','e_c17','t_c17','ch_c17','d_c17'],
   c18:['h_c18','e_c18','t_c18','ch_c18','d_c18'],
   c19:['h_c19','e_c19','t_c19','ch_c19','d_c19'],
+  c20:['h_c20','e_c20','q_c20','d_c20'],
+  c21:['h_c21','e_c21','q_c21','d_c21'],
+  c22:['h_c22','e_c22','q_c22','d_c22'],
+  c23:['h_c23','e_c23','q_c23','d_c23'],
+  c24:['h_c24','e_c24','q_c24','d_c24'],
 };
 
-// ─── NOISE HELPERS ───
+
+  // ══════ C20 — Lumen ══════
+  h_c20:{type:'hook',emoji:'💡',q:'Lumen 和傳統光照烘焙最大的差別？',sub:'猜猜看！',choices:[
+    {ico:'🎨',text:'顏色更漂亮、更鮮豔',ok:false},
+    {ico:'⚡',text:'全動態，不需預計算，場景改變光影即時更新',ok:true},
+    {ico:'💻',text:'比烘焙更省記憶體',ok:false}]},
+  e_c20:{type:'explain',html:`<div class="etitle">💡 Lumen — 動態全域光照革命</div>
+    <div class="ebody">傳統做法：把光照<strong>烘焙</strong>成靜態貼圖，燈不能移動。<br>Lumen：每幀即時追蹤光線彈射，燈移動→光影立刻跟著變。<br><br>
+    <strong>三個核心技術：</strong><br>
+    🔸 <strong>Surface Cache</strong>：預存物體表面材質資訊，加速採樣<br>
+    🔸 <strong>Software RT</strong>（SDF + Voxel）：預設模式，所有顯卡都跑得動<br>
+    🔸 <strong>Hardware RT</strong>（RTX）：更高品質，需要支援 DXR 的顯卡<br><br>
+    TA 重點：<strong>Emissive 材質</strong> 是 Lumen 間接光的主要光源，設錯就沒光！</div>
+    <div class="abox"><div class="albl">📺 必看資源</div><div class="atext">
+      <a href="https://medium.com/@GroundZer0/lumen-core-technology-how-unreal-handles-real-time-global-illumination-09ed6a0f62be" target="_blank" style="color:#00b4d8">▶ Lumen 內部原理深度解析（Medium 2026）</a><br>
+      <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine" target="_blank" style="color:#00b4d8">📖 Epic 官方 Lumen 文件</a>
+    </div></div>`},
+  q_c20:{type:'hook',emoji:'🧠',q:'Lumen 的 Surface Cache 主要用途？',sub:'用剛才學的回答！',choices:[
+    {ico:'💾',text:'儲存場景所有幾何體的頂點資料',ok:false},
+    {ico:'🎨',text:'預存物體表面的材質/顏色資訊，讓 GI 採樣更快',ok:true},
+    {ico:'🔦',text:'記錄每盞燈的位置和強度',ok:false}]},
+  d_c20:{type:'done',xp:160,badge:'💡',bname:'Lumen 解鎖！',bdesc:'理解動態全域光照',pts:['Lumen 取代靜態烘焙，全動態即時 GI','Surface Cache 加速間接光採樣','Emissive 材質 = Lumen 的光源核心']},
+
+  // ══════ C21 — Nanite ══════
+  h_c21:{type:'hook',emoji:'⬡',q:'Nanite 用什麼技術讓你不用手動做 LOD？',sub:'想想看！',choices:[
+    {ico:'🤖',text:'AI 自動簡化模型',ok:false},
+    {ico:'⬡',text:'Cluster 虛擬幾何體，只串流螢幕實際看得到的部分',ok:true},
+    {ico:'📷',text:'用 Impostor 替代遠距離物件',ok:false}]},
+  e_c21:{type:'explain',html:`<div class="etitle">⬡ Nanite — 虛擬幾何體系統</div>
+    <div class="ebody">以前：美術手動做 LOD0/1/2/3，耗大量時間。<br>Nanite：直接匯入高精度模型，自動串流、自動 LOD。<br><br>
+    <strong>運作原理：</strong><br>
+    🔸 網格被切成 <strong>Cluster（128 個三角面）</strong>的層級樹<br>
+    🔸 每幀只渲染螢幕上實際可見的 Cluster<br>
+    🔸 <strong>Virtual Shadow Maps（VSM）</strong>搭配使用，陰影也虛擬化<br><br>
+    <strong>UE5.4+ 新功能：</strong><br>
+    • Nanite Tessellation — 細分曲面，不增大 Disk 體積<br>
+    • Nanite Skeletal Mesh（UE5.5 實驗性）— 骨架動畫也能用<br><br>
+    ⚠️ 限制：半透明材質、Masked 材質目前支援有限</div>
+    <div class="abox"><div class="albl">🎤 GDC 精選</div><div class="atext">
+      <a href="https://forums.unrealengine.com/t/talks-and-demos-nanite-for-artists-gdc-2024/1845174" target="_blank" style="color:#7209b7">▶ Nanite for Artists — GDC 2024（Epic 官方論壇）</a><br>
+      <a href="https://www.youtube.com/results?search_query=UE5+Nanite+technical+artist+2024" target="_blank" style="color:#7209b7">📺 YouTube 搜尋：UE5 Nanite technical artist</a>
+    </div></div>`},
+  q_c21:{type:'hook',emoji:'🧠',q:'Nanite Cluster 裡大約有幾個三角面？',sub:'記住這個數字！',choices:[
+    {ico:'🔢',text:'約 16 個',ok:false},
+    {ico:'🔢',text:'約 128 個',ok:true},
+    {ico:'🔢',text:'約 1024 個',ok:false}]},
+  d_c21:{type:'done',xp:160,badge:'⬡',bname:'Nanite 解鎖！',bdesc:'理解虛擬幾何體系統',pts:['Cluster 層級樹，只串流可見部分','VSM 搭配讓陰影也虛擬化','Nanite Tessellation 細分不增大檔案']},
+
+  // ══════ C22 — MegaLights ══════
+  h_c22:{type:'hook',emoji:'✨',q:'MegaLights（UE5.5）最大突破是什麼？',sub:'猜猜看！',choices:[
+    {ico:'🌈',text:'燈光顏色更豐富、更準確',ok:false},
+    {ico:'💡',text:'可在場景放上千盞動態投影燈而不爆效能',ok:true},
+    {ico:'🔋',text:'讓靜態燈更省電',ok:false}]},
+  e_c22:{type:'explain',html:`<div class="etitle">✨ MegaLights — 千燈不爆效能</div>
+    <div class="ebody">傳統：每盞投影燈都有獨立 Shadow Pass，10 盞就卡了。<br>MegaLights：用<strong>隨機直接光照（Stochastic Sampling）</strong>，1000 盞燈同時投影！<br><br>
+    <strong>技術核心：</strong><br>
+    🔸 每個像素隨機採樣少數燈光 → 時間積累去噪<br>
+    🔸 Area Light 軟陰影，比點光更真實<br>
+    🔸 支援 Rect Light + Media Texture（賽博龐克招牌！）<br><br>
+    <strong>版本進度：</strong><br>
+    • UE5.5：實驗性上線，Unreal Fest Seattle 2024 展示<br>
+    • UE5.7：Beta，加入 Directional Light、Niagara 粒子燈支援<br><br>
+    🎬 <strong>SIGGRAPH 2025</strong> 技術論文已公開，深入原理可以看！</div>
+    <div class="abox"><div class="albl">📺 必看影片 &amp; 論文</div><div class="atext">
+      <a href="https://dev.epicgames.com/community/learning/tutorials/V2kD/unreal-engine-megalights-in-ue-5-5" target="_blank" style="color:#f77f00">▶ MegaLights 官方教學（Epic Dev Community）</a><br>
+      <a href="https://advances.realtimerendering.com/s2025/content/MegaLights_Stochastic_Direct_Lighting_2025.pdf" target="_blank" style="color:#f77f00">📄 SIGGRAPH 2025 MegaLights 技術論文（PDF）</a><br>
+      <a href="https://www.unrealengine.com/en-US/blog/catch-up-on-the-big-news-from-unreal-fest-seattle-2024" target="_blank" style="color:#f77f00">📰 Unreal Fest Seattle 2024 發布公告</a>
+    </div></div>`},
+  q_c22:{type:'hook',emoji:'🧠',q:'MegaLights 用什麼方式讓千燈投影不爆效能？',sub:'剛才學到的！',choices:[
+    {ico:'🤖',text:'用 AI 預測哪些燈不重要並關掉',ok:false},
+    {ico:'🎲',text:'隨機採樣少數燈光 + 時間積累去噪',ok:true},
+    {ico:'📦',text:'把所有燈光打包成一張貼圖',ok:false}]},
+  d_c22:{type:'done',xp:140,badge:'✨',bname:'MegaLights 解鎖！',bdesc:'千燈場景不是夢',pts:['隨機直接光照讓千盞燈成為可能','Area Light 提供真實軟陰影','UE5.7 Beta，SIGGRAPH 2025 有技術論文']},
+
+  // ══════ C23 — Substrate ══════
+  h_c23:{type:'hook',emoji:'🧱',q:'Substrate 和 UE4 時代的材質系統最大差別？',sub:'想想看！',choices:[
+    {ico:'🎨',text:'顏色更好看',ok:false},
+    {ico:'🧩',text:'可以疊加多個 BSDF 層（金屬+透明漆+布料），用節點組合',ok:true},
+    {ico:'⚡',text:'著色速度更快',ok:false}]},
+  e_c23:{type:'explain',html:`<div class="etitle">🧱 Substrate — 下一代材質系統（UE5.7 正式版）</div>
+    <div class="ebody">舊系統：Material 只能選一種 Shading Model（Metallic/Subsurface/...），切換就要重做。<br>Substrate：用<strong>分層 BSDF 節點</strong>自由組合，像積木一樣！<br><br>
+    <strong>可以疊加的層：</strong><br>
+    🔸 Slab BSDF（金屬、布料、皮膚的基底）<br>
+    🔸 Clear Coat（車漆透明漆層）<br>
+    🔸 Glint（雪花、金屬片的閃光感）<br>
+    🔸 Hair BSDF（頭髮專用雙層高光）<br><br>
+    <strong>UE5.7（2025.11）正式 Production-Ready</strong><br>
+    支援行動端、完全整合 Lumen 管線 ✅<br><br>
+    📌 GDC 2023 "The Future of Materials" — Matt Ostle (Epic) 的開創性演講</div>
+    <div class="abox"><div class="albl">📺 必看資源</div><div class="atext">
+      <a href="https://www.youtube.com/results?search_query=UE5+Substrate+material+tutorial+2024" target="_blank" style="color:#2dc653">📺 YouTube：UE5 Substrate material tutorial</a><br>
+      <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/substrate-materials-in-unreal-engine" target="_blank" style="color:#2dc653">📖 Epic 官方 Substrate 文件</a><br>
+      <a href="https://linktr.ee/epicmattoztalay" target="_blank" style="color:#2dc653">🎤 Matt Ostle GDC 2023 "The Future of Materials"（演講連結）</a>
+    </div></div>`},
+  q_c23:{type:'hook',emoji:'🧠',q:'Substrate 的 Slab BSDF 最適合用在哪種材質？',sub:'用剛才學的！',choices:[
+    {ico:'🌊',text:'水面和海洋模擬',ok:false},
+    {ico:'🧱',text:'金屬、布料、皮膚等固體表面的基底著色層',ok:true},
+    {ico:'💥',text:'粒子爆炸特效',ok:false}]},
+  d_c23:{type:'done',xp:160,badge:'🧱',bname:'Substrate 解鎖！',bdesc:'掌握下一代材質系統',pts:['疊加多層 BSDF 取代固定 Shading Model','Glint 節點做雪花和金屬片閃光','UE5.7 正式上線，整合 Lumen 管線']},
+
+  // ══════ C24 — UE5 優化實戰 ══════
+  h_c24:{type:'hook',emoji:'🏆',q:'TA 在 UE5 渲染優化中最常用的分析工具？',sub:'猜猜看！',choices:[
+    {ico:'📊',text:'Excel 表格記錄 FPS',ok:false},
+    {ico:'🔬',text:'Unreal Insights + GPU Profiler（r.ProfileGPU）',ok:true},
+    {ico:'🤖',text:'AI 自動優化建議',ok:false}]},
+  e_c24:{type:'explain',html:`<div class="etitle">🏆 UE5 渲染優化 — TA 必懂的業界精華</div>
+    <div class="ebody"><strong>精選自 GDC、Unreal Fest 的真實業界經驗：</strong><br><br>
+    🔍 <strong>分析工具：</strong><br>
+    • <code>r.ProfileGPU</code> — 看每個 Pass 的 GPU 時間<br>
+    • Unreal Insights — 完整幀時序分析<br>
+    • Nanite Visualizer / Lumen Visualize — 內建視覺化<br><br>
+    ⚙️ <strong>Matt Ostle（Epic TA）的黃金設定：</strong><br>
+    • 關閉 Allow Static Lighting → 啟用 Material AO + Lumen<br>
+    • 開啟 Virtual Textures + Nanite + VSM 三件套<br>
+    • Startup Map 設空場景加快啟動<br><br>
+    📦 <strong>Nanite 優化要點：</strong><br>
+    • 超高密度 Mesh 用 Fallback Mesh 而非 Streamed<br>
+    • 半透明 / Masked → 改用 Dither<br><br>
+    💡 <strong>Lumen 優化要點：</strong><br>
+    • 小物件關掉 Cast Shadow<br>
+    • 控制 Lumen Scene Detail 不要太高</div>
+    <div class="abox"><div class="albl">🎤 頂尖演講 &amp; 論壇</div><div class="atext">
+      <a href="https://linktr.ee/epicmattoztalay" target="_blank" style="color:#e63946">▶ Matt Ostle（Epic）全部演講連結（GDC/Unreal Fest 2023-2025）</a><br>
+      <a href="https://forums.unrealengine.com/c/development-discussion/rendering/26" target="_blank" style="color:#e63946">💬 UE 官方論壇 Rendering 板塊</a><br>
+      <a href="https://www.youtube.com/results?search_query=UE5+rendering+optimization+technical+artist+2024+2025" target="_blank" style="color:#e63946">📺 YouTube：UE5 rendering optimization TA 2024-2025</a><br>
+      <a href="https://cgchannel.com/tag/unreal-engine/" target="_blank" style="color:#e63946">📰 CG Channel — UE5 最新功能整理</a>
+    </div></div>`},
+  q_c24:{type:'hook',emoji:'🧠',q:'Lumen 優化時，哪個設定最有效降低 GPU 負擔？',sub:'實戰問題！',choices:[
+    {ico:'🔦',text:'把所有燈光強度調低',ok:false},
+    {ico:'📦',text:'小物件關掉 Cast Shadow，控制 Lumen Scene Detail',ok:true},
+    {ico:'🎨',text:'把材質全換成 Unlit',ok:false}]},
+  d_c24:{type:'done',xp:200,badge:'🏆',bname:'UE5 TA 優化大師！',bdesc:'掌握業界頂尖實戰技巧',pts:['r.ProfileGPU + Unreal Insights 是分析標配','Matt Ostle 三件套：VSM+Nanite+虛擬貼圖','Lumen：小物件關陰影，控制 Scene Detail']},
+
+
+  // ─── NOISE HELPERS ───
 function nhash(x,y){let v=Math.sin(x*127.1+y*311.7)*43758.5453;return v-Math.floor(v);}
 function nval(x,y){const ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy,ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);return nhash(ix,iy)*(1-ux)*(1-uy)+nhash(ix+1,iy)*ux*(1-uy)+nhash(ix,iy+1)*(1-ux)*uy+nhash(ix+1,iy+1)*ux*uy;}
 function fbm(x,y,oct){let v=0,a=1,t=0;for(let i=0;i<oct;i++){v+=nval(x,y)*a;t+=a;a*=.5;x*=2;y*=2;}return v/t;}
