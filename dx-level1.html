@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚔️ DirectX 要塞1 — HLSL 魔法王國</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html{font-size:20px;}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080f;--bg2:#0d0f1e;--card:#111326;--border:#1a1d35;
+  --acc:#e84545;--acc2:#00d4ff;--acc3:#ffd700;--acc4:#ff9f43;
+  --txt:#e8eaf6;--txt2:#8892b0;--mono:"Space Mono",monospace;--font:"Nunito",sans-serif;
+  --glow:0 0 22px rgba(232,69,69,.35);
+}
+body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden;min-height:100vh;padding-bottom:120px}
+header{position:sticky;top:0;z-index:100;background:rgba(7,8,15,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px}
+.back-btn{background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:6px 14px;border-radius:100px;font-family:var(--font);font-size:.8rem;font-weight:800;cursor:pointer;text-decoration:none;transition:.2s}
+.back-btn:hover{color:var(--acc2);border-color:var(--acc2)}
+.header-title{font-size:1.1rem;font-weight:900;color:var(--acc)}
+.xp-bar{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:800}
+.xp-total{color:var(--acc3);font-family:var(--mono)}
+.xp-track{width:120px;height:8px;background:var(--border);border-radius:100px;overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:100px;transition:width .6s cubic-bezier(.34,1.56,.64,1)}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:twinkle var(--d,3s) var(--dl,0s) ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+.hero{position:relative;z-index:1;text-align:center;padding:60px 24px 40px;overflow:hidden}
+.tower-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(232,69,69,.12);border:1px solid rgba(232,69,69,.3);border-radius:100px;padding:6px 18px;font-size:.8rem;font-weight:800;color:var(--acc);margin-bottom:20px;letter-spacing:.05em}
+.hero h1{font-size:clamp(2rem,6vw,3.5rem);font-weight:900;line-height:1.1;margin-bottom:12px}
+.hero h1 span{background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--txt2);font-size:1rem;max-width:500px;margin:0 auto 32px;line-height:1.7}
+.stats-row{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+.stat-chip{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 20px;text-align:center}
+.stat-chip .num{font-size:1.5rem;font-weight:900;font-family:var(--mono);color:var(--acc3)}
+.stat-chip .lbl{font-size:.7rem;color:var(--txt2);font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.chapter-map{position:relative;z-index:1;padding:24px;max-width:900px;margin:0 auto}
+.lesson{background:var(--card);border:1px solid var(--border);border-radius:20px;margin-bottom:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s;cursor:pointer}
+.lesson:hover{border-color:var(--acc);box-shadow:var(--glow)}
+.lesson.active{border-color:var(--acc);box-shadow:var(--glow)}
+.lesson.done{}
+.lesson.locked{opacity:.5;cursor:not-allowed}
+.lesson.boss{border-color:rgba(255,215,0,.3)}
+.lesson.boss:hover,.lesson.boss.active{border-color:var(--acc3);box-shadow:0 0 22px rgba(255,215,0,.3)}
+.lesson-header{display:flex;align-items:center;gap:14px;padding:16px 18px}
+.lesson-num{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-family:var(--mono);font-size:.9rem;flex-shrink:0}
+.done-num{background:var(--card);color:var(--acc2);border:1px solid var(--border)}
+.active-num{background:rgba(232,69,69,.15);color:var(--acc);border:1px solid var(--acc)}
+.locked-num{background:var(--border);color:var(--txt2);border:1px solid transparent}
+.lesson-info{flex:1;min-width:0}
+.lesson-title{font-size:1rem;font-weight:900;margin-bottom:3px}
+.lesson-desc{font-size:.8rem;color:var(--txt2);font-weight:700}
+.lesson-meta{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+.xp-badge{background:rgba(255,163,67,.1);color:var(--acc4);border:1px solid rgba(255,163,67,.3);border-radius:100px;padding:3px 10px;font-size:.75rem;font-weight:800;font-family:var(--mono)}
+.boss-badge{background:rgba(255,215,0,.1);color:var(--acc3);border:1px solid rgba(255,215,0,.3);border-radius:100px;padding:3px 10px;font-size:.72rem;font-weight:800}
+.check{width:28px;height:28px;border-radius:50%;background:transparent;color:var(--txt2);display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.lesson-body{display:none;border-top:1px solid var(--border);padding:24px}
+.lesson.active .lesson-body{display:block}
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg2);border-radius:12px;padding:4px}
+.tab{flex:1;text-align:center;padding:8px;border-radius:8px;font-size:.8rem;font-weight:800;cursor:pointer;transition:.15s;color:var(--txt2)}
+.tab.on{background:var(--card);color:var(--txt);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.tab-panel{display:none}.tab-panel.on{display:block}
+.story-box{background:linear-gradient(135deg,rgba(232,69,69,.06),rgba(0,212,255,.04));border:1px solid rgba(232,69,69,.2);border-radius:16px;padding:20px;margin-bottom:16px;font-size:.9rem;line-height:1.8}
+.hl{background:rgba(0,212,255,.15);color:var(--acc2);border-radius:4px;padding:1px 6px;font-weight:900}
+.emoji-big{font-size:2.5rem;display:block;margin-bottom:10px}
+.src-link{display:inline-flex;align-items:center;gap:6px;background:rgba(232,69,69,.08);border:1px solid rgba(232,69,69,.25);border-radius:8px;padding:4px 12px;font-size:.75rem;font-weight:800;color:var(--acc);margin-top:12px;text-decoration:none}
+.code-block{background:#050710;border:1px solid var(--border);border-radius:12px;padding:16px;font-family:var(--mono);font-size:.75rem;line-height:1.7;overflow-x:auto;position:relative;margin-bottom:16px;white-space:pre}
+.kw{color:#e84545}.fn{color:#00d4ff}.str{color:#00f5c4}.num{color:#ffd93d}.cm{color:#4a5568}.tp{color:#c084fc}
+.copy-btn{position:absolute;top:10px;right:10px;background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:.7rem;cursor:pointer;transition:.2s}
+.copy-btn:hover{color:var(--acc2);border-color:var(--acc2)}
+.demo-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px}
+.demo-label{font-size:.75rem;font-weight:800;color:var(--txt2);padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.demo-label::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 6px var(--acc);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+canvas{display:block;width:100%;max-width:100%}
+.ctrl-row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.ctrl-btn{background:var(--card);border:1px solid var(--border);color:var(--txt);padding:8px 18px;border-radius:100px;font-family:var(--font);font-size:.8rem;font-weight:800;cursor:pointer;transition:.15s}
+.ctrl-btn:hover,.ctrl-btn.on,.ctrl-btn.active{background:rgba(232,69,69,.12);border-color:var(--acc);color:var(--acc)}
+.slider-row{display:flex;align-items:center;gap:12px;margin:8px 0}
+.slider-row label{font-size:.8rem;font-weight:800;color:var(--txt2);min-width:80px}
+input[type=range]{flex:1;accent-color:var(--acc)}
+.slider-val{font-family:var(--mono);font-size:.8rem;color:var(--acc3);min-width:40px}
+.quiz-box{background:rgba(232,69,69,.05);border:1px solid rgba(232,69,69,.2);border-radius:16px;padding:20px;margin-bottom:16px}
+.quiz-title{font-size:.85rem;font-weight:900;color:var(--acc);margin-bottom:10px}
+.quiz-q{font-size:.88rem;line-height:1.7;color:var(--txt2);margin-bottom:14px}
+.opts{display:grid;gap:8px}
+.opt{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 16px;cursor:pointer;font-size:.88rem;font-weight:700;display:flex;align-items:center;gap:10px;transition:.15s}
+.opt:hover{border-color:var(--acc);background:rgba(232,69,69,.05)}
+.opt.correct{border-color:var(--acc2);background:rgba(0,212,255,.06);color:var(--acc2)}
+.opt.wrong{border-color:var(--acc);background:rgba(232,69,69,.06);color:var(--acc)}
+.opt-key{width:24px;height:24px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;flex-shrink:0}
+.complete-btn{width:100%;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#07080f;border:none;border-radius:100px;padding:14px;font-family:var(--font);font-size:.95rem;font-weight:900;cursor:pointer;margin-top:16px;transition:.2s}
+.complete-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,69,69,.35)}
+.complete-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.connector{width:2px;height:12px;background:linear-gradient(var(--acc),transparent);margin:0 auto -2px;position:relative;z-index:1}
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--acc2);border-radius:100px;padding:12px 28px;font-weight:800;font-size:.9rem;color:var(--acc2);z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,212,255,.2)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.xp-pop{position:fixed;font-family:var(--mono);font-weight:900;font-size:1.2rem;color:var(--acc3);pointer-events:none;z-index:9999;animation:xpFloat 1.2s ease forwards}
+@keyframes xpFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+.comp-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(4,2,14,.9);backdrop-filter:blur(18px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.comp-overlay.show{display:flex;animation:fadeIn .5s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.comp-trophy{font-size:5rem;margin-bottom:16px;animation:bounce 1s ease infinite alternate}
+@keyframes bounce{from{transform:scale(1)}to{transform:scale(1.1)}}
+.comp-stars{font-size:2rem;margin-bottom:16px}
+.comp-title{font-size:2rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,var(--acc),var(--acc3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.comp-sub{color:var(--txt2);margin-bottom:32px}
+.comp-next-btn{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#050210;border:none;border-radius:100px;padding:14px 32px;font-family:var(--font);font-size:1rem;font-weight:900;cursor:pointer;margin-bottom:12px;box-shadow:0 6px 28px rgba(232,69,69,.4)}
+.comp-map-btn{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:var(--txt2);border-radius:100px;padding:10px 24px;font-family:var(--font);font-size:.85rem;font-weight:800;cursor:pointer}
+.fw-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.fw{position:absolute;border-radius:50%;animation:fw var(--d,.8s) var(--dl,0s) ease-out forwards}
+@keyframes fw{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--tx,0),var(--ty,-100px))}}
+@media(max-width:600px){.stats-row{gap:12px}.stat-chip .num{font-size:1.2rem}.hero h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<header>
+  <a href="dx-map.html" class="back-btn">🗺️ DX 地圖</a>
+  <a href="index.html" class="back-btn">🏠 首頁</a>
+  <span class="header-title">⚔️ DirectX 要塞1</span>
+  <div class="xp-bar">
+    <span style="color:var(--txt2)">⚡</span>
+    <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    <span class="xp-total" id="xp-total">0 / 920</span>
+  </div>
+</header>
+<section class="hero">
+  <div class="tower-badge">⚔️ 要塞1 · 起源之城 · DirectX 11 Fundamentals</div>
+  <h1>征服 <span>DirectX 11</span></h1>
+  <p>DirectX 是 Windows 的圖形 API — 從 Xbox 到 AAA 遊戲都靠它！學會 HLSL，直接跟 GPU 說話！</p>
+  <div class="stats-row">
+    <div class="stat-chip"><div class="num" id="done-count">0</div><div class="lbl">已完成</div></div>
+    <div class="stat-chip"><div class="num">9</div><div class="lbl">關卡總數</div></div>
+    <div class="stat-chip"><div class="num">920</div><div class="lbl">XP 總值</div></div>
+    <div class="stat-chip"><div class="num">👑</div><div class="lbl">Boss 1 關</div></div>
+  </div>
+</section>
+<div class="chapter-map"><div id="lesson-list"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const s=document.getElementById('stars');
+  for(let i=0;i<70;i++){
+    const d=document.createElement('div');d.className='star';
+    d.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;--d:'+(2+Math.random()*4)+'s;--dl:'+Math.random()*4+'s';
+    s.appendChild(d);
+  }
+})();
+
+const CASTLE_KEY='dx1_done', CASTLE_TOTAL=9, CASTLE_NUM=1, NEXT_CASTLE=2;
+let earned=JSON.parse(localStorage.getItem(CASTLE_KEY)||'[]');
+let currentLesson=null;
+const demoInited={};
+
+const LESSONS=[
+  {id:'d1',num:'1-1',icon:'🛠️',title:'設定 DirectX 11 開發環境',desc:'Visual Studio 2022 + Windows SDK，準備出發！',xp:80,type:'normal',
+   q:'DirectX 11 需要額外安裝哪個 SDK？',opts:['DirectX SDK（舊版）','Windows SDK（已內含）','OpenGL SDK','不需要 SDK'],ans:1,
+   story:'<span class="emoji-big">🛠️</span>DirectX 11 是 <span class="hl">Windows 原生</span>的圖形 API，不需要額外 SDK！<br><br>你只需要：<br>🔹 <span class="hl">Visual Studio 2022 Community</span>（免費）<br>🔹 安裝 <span class="hl">Game development with C++</span> 工作負載<br>🔹 Windows SDK 會自動包含 DirectX 11 的所有標頭和函式庫！<br><br>和 OpenGL 不同：DirectX 是 <span class="hl">Microsoft 獨家</span>，只跑 Windows，但與 Xbox 完全整合！',
+   src:'rastertek.com/dx11win10tut01.html',
+   code:'<span class="cm">// directx11 標頭（隨 Windows SDK 自動安裝）</span>
+<span class="kw">#include</span> <span class="str">&lt;d3d11.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;d3dcompiler.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;DirectXMath.h&gt;</span>
+
+<span class="cm">// 連結 DirectX 函式庫</span>
+<span class="kw">#pragma</span> comment(lib, <span class="str">"d3d11.lib"</span>)
+<span class="kw">#pragma</span> comment(lib, <span class="str">"dxgi.lib"</span>)
+<span class="kw">#pragma</span> comment(lib, <span class="str">"d3dcompiler.lib"</span>)'},
+
+  {id:'d2',num:'1-2',icon:'🪟',title:'建立框架與視窗',desc:'WinMain、SystemClass、ApplicationClass 架構',xp:100,type:'normal',
+   q:'ApplicationClass 主要負責什麼？',opts:['處理鍵盤輸入','圖形渲染管理','管理視窗建立','處理網路'],ans:1,
+   story:'<span class="emoji-big">🪟</span>DirectX 程式的骨架：<br><br><span class="hl">WinMain</span> → 入口點，建立 SystemClass<br><span class="hl">SystemClass</span> → 封裝整個應用程式<br>&nbsp;&nbsp;├── <span class="hl">InputClass</span> → 處理鍵盤輸入<br>&nbsp;&nbsp;└── <span class="hl">ApplicationClass</span> → 圖形渲染<br><br>Win32 視窗建立後，用 <span class="hl">HWND</span>（視窗 handle）傳給 DirectX 使用。',
+   src:'rastertek.com/dx11win10tut02.html',
+   code:'<span class="cm">// main.cpp — 入口點</span>
+<span class="kw">int</span> WINAPI <span class="fn">WinMain</span>(HINSTANCE hInstance, HINSTANCE, PSTR, <span class="kw">int</span>) {
+  <span class="tp">SystemClass</span>* System = <span class="kw">new</span> <span class="tp">SystemClass</span>;
+  <span class="kw">if</span>(System-><span class="fn">Initialize</span>()) System-><span class="fn">Run</span>();
+  System-><span class="fn">Shutdown</span>();
+  <span class="kw">delete</span> System;
+  <span class="kw">return</span> <span class="num">0</span>;
+}
+
+<span class="cm">// SystemClass 包含兩個子系統</span>
+<span class="kw">class</span> <span class="tp">SystemClass</span> {
+  <span class="tp">InputClass</span>*       m_Input;       <span class="cm">// 輸入</span>
+  <span class="tp">ApplicationClass</span>* m_Application; <span class="cm">// 圖形</span>
+};'},
+
+  {id:'d3',num:'1-3',icon:'⚙️',title:'初始化 Direct3D',desc:'Device、DeviceContext、SwapChain 三劍客',xp:120,type:'normal',
+   q:'SwapChain 的主要功能是？',opts:['建立 Buffer 資源','前後緩衝互換消除撕裂','處理輸入','載入紋理'],ans:1,
+   story:'<span class="emoji-big">⚙️</span>三個核心 DirectX 物件：<br><br>🔹 <span class="hl">ID3D11Device</span> — 硬體介面，建立 Buffer/Texture 資源<br>🔹 <span class="hl">ID3D11DeviceContext</span> — 命令列表，發出渲染指令<br>🔹 <span class="hl">IDXGISwapChain</span> — 雙緩衝，前後緩衝互換顯示<br><br>一次建立全部：<span class="hl">D3D11CreateDeviceAndSwapChain()</span><br><br>還需要：<br>🎯 <span class="hl">Render Target View</span> — 告訴 GPU 畫到哪裡<br>🎯 <span class="hl">Depth/Stencil Buffer</span> — 3D 深度測試',
+   src:'rastertek.com/dx11win10tut03.html',
+   code:'<span class="cm">// 一次建立 Device + Context + SwapChain</span>
+<span class="tp">DXGI_SWAP_CHAIN_DESC</span> swapDesc = {};
+swapDesc.BufferCount = <span class="num">1</span>;
+swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+swapDesc.OutputWindow = hwnd;
+swapDesc.SampleDesc.Count = <span class="num">1</span>;
+swapDesc.Windowed = <span class="num">TRUE</span>;
+
+<span class="fn">D3D11CreateDeviceAndSwapChain</span>(
+  <span class="kw">nullptr</span>, D3D_DRIVER_TYPE_HARDWARE, <span class="kw">nullptr</span>, <span class="num">0</span>,
+  <span class="kw">nullptr</span>, <span class="num">0</span>, D3D11_SDK_VERSION,
+  &swapDesc, &m_swapChain,
+  &m_device, <span class="kw">nullptr</span>, &m_deviceContext);'},
+
+  {id:'d4',num:'1-4',icon:'🔺',title:'Vertex Buffer 與第一個三角形',desc:'VB、IB、頂點結構體，左手座標系',xp:120,type:'normal',
+   q:'DirectX 11 用什麼座標系？',opts:['右手座標系（Z 朝你）','左手座標系（Z 朝畫面裡）','兩者都支援','無座標系'],ans:1,
+   story:'<span class="emoji-big">🔺</span>3D 世界由三角形組成，三角形由頂點組成。<br><br><span class="hl">Vertex Buffer</span> — 儲存頂點資料的 GPU 記憶體<br><span class="hl">Index Buffer</span> — 用索引重用頂點，省記憶體<br><br>DirectX 頂點結構體範例：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.8rem">struct Vertex {<br>&nbsp;&nbsp;XMFLOAT3 position;<br>&nbsp;&nbsp;XMFLOAT4 color;<br>};</code><br><br>⚠️ <span class="hl">左手座標系</span>：Z 朝畫面裡（OpenGL 是右手，Z 朝你）<br>三角形頂點順序也相反：DX 用<span class="hl">順時針</span>，OpenGL 用逆時針',
+   src:'rastertek.com/dx11win10tut04.html',
+   code:'<span class="cm">// 頂點結構體（左手座標系）</span>
+<span class="kw">struct</span> <span class="tp">VertexType</span> {
+  <span class="tp">XMFLOAT3</span> position;
+  <span class="tp">XMFLOAT4</span> color;
+};
+
+<span class="tp">VertexType</span> vertices[<span class="num">3</span>] = {
+  { <span class="tp">XMFLOAT3</span>(-<span class="num">1</span>,-<span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">1</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>) },
+  { <span class="tp">XMFLOAT3</span>( <span class="num">0</span>, <span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">0</span>,<span class="num">1</span>,<span class="num">0</span>,<span class="num">1</span>) },
+  { <span class="tp">XMFLOAT3</span>( <span class="num">1</span>,-<span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>,<span class="num">1</span>) },
+};
+
+<span class="cm">// 建立 Vertex Buffer</span>
+<span class="tp">D3D11_BUFFER_DESC</span> vbd = {};
+vbd.ByteWidth = <span class="kw">sizeof</span>(<span class="tp">VertexType</span>) * <span class="num">3</span>;
+vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+m_device-><span class="fn">CreateBuffer</span>(&vbd, &init, &m_vb);'},
+
+  {id:'d5',num:'1-5',icon:'✨',title:'HLSL — GPU 的程式語言',desc:'Vertex Shader、Pixel Shader、Constant Buffer',xp:120,type:'normal',
+   q:'cbuffer 的主要用途是？',opts:['儲存紋理','從 CPU 傳矩陣等資料給 Shader','定義頂點結構','控制混合'],ans:1,
+   story:'<span class="emoji-big">✨</span><span class="hl">HLSL</span>（High-Level Shader Language）是 DirectX 的著色器語言！<br><br>兩種必備 Shader：<br>🔹 <span class="hl">Vertex Shader (.vs)</span> — 處理每個頂點位置<br>🔹 <span class="hl">Pixel Shader (.ps)</span> — 決定每個像素顏色<br><br>HLSL 語義（Semantics）：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.8rem">POSITION, SV_POSITION, TEXCOORD0, COLOR, NORMAL</code><br><br><span class="hl">cbuffer</span>（Constant Buffer）= 從 CPU 傳資料給 Shader<br>例如傳 MVP 矩陣：worldMatrix、viewMatrix、projectionMatrix',
+   src:'rastertek.com/dx11win10tut04.html',
+   code:'<span class="cm">// color.vs — 頂點著色器（HLSL）</span>
+<span class="tp">cbuffer</span> MatrixBuffer : register(b0) {
+  <span class="tp">matrix</span> worldMatrix;
+  <span class="tp">matrix</span> viewMatrix;
+  <span class="tp">matrix</span> projectionMatrix;
+};
+
+<span class="tp">PixelInput</span> <span class="fn">ColorVertexShader</span>(<span class="tp">VertexInput</span> input) {
+  <span class="tp">PixelInput</span> output;
+  input.position.w = <span class="num">1.0f</span>;
+  output.position = <span class="fn">mul</span>(input.position, worldMatrix);
+  output.position = <span class="fn">mul</span>(output.position, viewMatrix);
+  output.position = <span class="fn">mul</span>(output.position, projectionMatrix);
+  output.color = input.color;
+  <span class="kw">return</span> output;
+}
+
+<span class="cm">// color.ps — 像素著色器</span>
+<span class="tp">float4</span> <span class="fn">ColorPixelShader</span>(<span class="tp">PixelInput</span> input) : SV_TARGET {
+  <span class="kw">return</span> input.color;
+}'},
+
+  {id:'d6',num:'1-6',icon:'🖼️',title:'貼圖與取樣器',desc:'Texture2D、SamplerState、UV 座標系統',xp:100,type:'normal',
+   q:'DirectX 的 UV 座標 V=0 在哪裡？',opts:['畫面下方','畫面上方（與 OpenGL 相反）','畫面左方','畫面中心'],ans:1,
+   story:'<span class="emoji-big">🖼️</span>DirectX 的紋理系統：<br><br><span class="hl">Texture2D</span> — 紋理資源物件<br><span class="hl">SamplerState</span> — 控制取樣方式（線性/點取樣、Wrap/Clamp）<br><br>HLSL 取樣紋理：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.75rem">float4 color = shaderTexture.Sample(sampleType, input.tex);</code><br><br>⚠️ <span class="hl">重要差異</span>：DirectX 的 UV 座標 V=0 在<span class="hl">上方</span>（OpenGL V=0 在下方！）<br>載入 OpenGL 的貼圖要垂直翻轉！',
+   src:'rastertek.com/dx11win10tut05.html',
+   code:'<span class="cm">// texture.ps — 紋理像素著色器</span>
+<span class="tp">Texture2D</span>    shaderTexture : register(t0);
+<span class="tp">SamplerState</span> sampleType   : register(s0);
+
+<span class="tp">float4</span> <span class="fn">TexturePixelShader</span>(<span class="tp">PixelInput</span> input) : SV_TARGET {
+  <span class="kw">return</span> shaderTexture.<span class="fn">Sample</span>(sampleType, input.tex);
+}
+
+<span class="cm">// C++ 端：建立 SamplerState</span>
+<span class="tp">D3D11_SAMPLER_DESC</span> sd = {};
+sd.Filter   = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+sd.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+sd.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+m_device-><span class="fn">CreateSamplerState</span>(&sd, &m_sampleState);'},
+
+  {id:'d7',num:'1-7',icon:'💡',title:'Diffuse 漫反射光照',desc:'法線向量、光方向、Lambert 光照模型',xp:100,type:'normal',
+   q:'Diffuse 光照使用什麼數學運算？',opts:['叉積 cross product','點積 dot product','矩陣乘法','三角函數'],ans:1,
+   story:'<span class="emoji-big">💡</span>光照讓 3D 物體看起來立體！DirectX 在 Pixel Shader 裡計算光照。<br><br><span class="hl">Diffuse（漫反射）</span>光照公式：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.75rem">float intensity = saturate(dot(normal, -lightDir));<br>float4 color = ambient + diffuse * intensity;</code><br><br>關鍵 HLSL 函式：<br>🔹 <span class="hl">dot()</span> — 點積，計算法線與光方向夾角<br>🔹 <span class="hl">saturate()</span> — 夾在 [0, 1] 之間<br>🔹 <span class="hl">normalize()</span> — 正規化向量',
+   src:'rastertek.com/dx11win10tut06.html',
+   code:'<span class="cm">// light.ps — 漫反射光照</span>
+<span class="tp">cbuffer</span> LightBuffer : register(b0) {
+  <span class="tp">float4</span> ambientColor;
+  <span class="tp">float4</span> diffuseColor;
+  <span class="tp">float3</span> lightDirection;
+  <span class="tp">float</span>  padding;
+};
+
+<span class="tp">float4</span> <span class="fn">LightPixelShader</span>(<span class="tp">PixelInput</span> input) : SV_TARGET {
+  <span class="tp">float4</span> color = ambientColor;
+  <span class="tp">float3</span> lightDir = -lightDirection;
+  <span class="tp">float</span>  intensity = <span class="fn">saturate</span>(<span class="fn">dot</span>(input.normal, lightDir));
+  <span class="kw">if</span>(intensity > <span class="num">0.0f</span>)
+    color += diffuseColor * intensity;
+  color = <span class="fn">saturate</span>(color);
+  <span class="kw">return</span> color * shaderTexture.<span class="fn">Sample</span>(sampleType, input.tex);
+}'},
+
+  {id:'d8',num:'1-8',icon:'📦',title:'3D 模型系統',desc:'ModelClass、輸入裝配階段、DrawIndexed',xp:100,type:'normal',
+   q:'IASetPrimitiveTopology 設定什麼？',opts:['紋理格式','頂點組合方式（三角形/線/點）','深度測試','混合模式'],ans:1,
+   story:'<span class="emoji-big">📦</span>DirectX 的模型渲染流程：<br><br>1️⃣ <span class="hl">ModelClass::Initialize()</span> — 建立 VB/IB<br>2️⃣ <span class="hl">ModelClass::Render()</span> — 設定 IA Stage，繪製<br><br>設定輸入裝配（Input Assembler）階段：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.73rem">ctx->IASetVertexBuffers(0, 1, &vb, &stride, &offset);<br>ctx->IASetIndexBuffer(ib, DXGI_FORMAT_R32_UINT, 0);<br>ctx->IASetPrimitiveTopology(TRIANGLELIST);</code><br><br>最後用 <span class="hl">DrawIndexed()</span> 送出繪製指令到 GPU',
+   src:'rastertek.com/dx11win10tut07.html',
+   code:'<span class="cm">// 設定 Input Assembler（IA）階段</span>
+<span class="kw">void</span> <span class="tp">ModelClass</span>::<span class="fn">Render</span>(<span class="tp">ID3D11DeviceContext</span>* ctx) {
+  <span class="kw">unsigned int</span> stride = <span class="kw">sizeof</span>(<span class="tp">VertexType</span>);
+  <span class="kw">unsigned int</span> offset = <span class="num">0</span>;
+  ctx-><span class="fn">IASetVertexBuffers</span>(<span class="num">0</span>, <span class="num">1</span>, &m_vb, &stride, &offset);
+  ctx-><span class="fn">IASetIndexBuffer</span>(m_ib, DXGI_FORMAT_R32_UINT, <span class="num">0</span>);
+  ctx-><span class="fn">IASetPrimitiveTopology</span>(
+    D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+<span class="cm">// 發出繪製指令</span>
+deviceContext-><span class="fn">DrawIndexed</span>(m_indexCount, <span class="num">0</span>, <span class="num">0</span>);'},
+
+  {id:'d9',num:'1-9',icon:'👑',title:'Boss：Alpha Blending 透明混合',desc:'Blend State、透明效果、渲染排序',xp:180,type:'boss',
+   q:'Alpha Blending 的正確渲染順序是？',opts:['從近到遠（前景先畫）','從遠到近（背景先畫）','隨機順序','依 Alpha 值排序'],ans:1,
+   story:'<span class="emoji-big">👑</span>Alpha Blending 讓你渲染半透明的玻璃、火焰、UI！<br><br>用 <span class="hl">Blend State</span> 控制混合：<br><code style="color:var(--acc2);font-family:var(--mono);font-size:.73rem">SrcBlend = D3D11_BLEND_SRC_ALPHA<br>DestBlend = D3D11_BLEND_INV_SRC_ALPHA<br>BlendOp = D3D11_BLEND_OP_ADD</code><br><br>混合公式：<span class="hl">Output = Src * SrcAlpha + Dst * (1-SrcAlpha)</span><br><br>⚠️ <span class="hl">渲染排序</span>：必須從遠到近（Painter's Algorithm）<br>否則半透明物體會遮住後面的東西！',
+   src:'rastertek.com/dx11win10tut10.html',
+   code:'<span class="cm">// 建立 Alpha Blend State</span>
+<span class="tp">D3D11_BLEND_DESC</span> bd = {};
+bd.RenderTarget[<span class="num">0</span>].BlendEnable = <span class="num">TRUE</span>;
+bd.RenderTarget[<span class="num">0</span>].SrcBlend  = D3D11_BLEND_SRC_ALPHA;
+bd.RenderTarget[<span class="num">0</span>].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+bd.RenderTarget[<span class="num">0</span>].BlendOp   = D3D11_BLEND_OP_ADD;
+bd.RenderTarget[<span class="num">0</span>].RenderTargetWriteMask = <span class="num">0x0f</span>;
+m_device-><span class="fn">CreateBlendState</span>(&bd, &m_blendState);
+
+<span class="cm">// 啟用（渲染前呼叫）</span>
+<span class="tp">float</span> bf[<span class="num">4</span>] = {<span class="num">0,0,0,0</span>};
+ctx-><span class="fn">OMSetBlendState</span>(m_blendState, bf, <span class="num">0xffffffff</span>);'},
+];
+
+function updateXP(){
+  const tot=earned.reduce((s,id)=>{const l=LESSONS.find(x=>x.id===id);return s+(l?l.xp:0);},0);
+  const mx=LESSONS.reduce((s,l)=>s+l.xp,0);
+  document.getElementById("xp-fill").style.width=(tot/mx*100)+"%";
+  document.getElementById("xp-total").textContent=tot+" / "+mx;
+  document.getElementById("done-count").textContent=earned.length;
+}
+
+function renderLessons(){
+  const list=document.getElementById("lesson-list");
+  list.innerHTML="";
+  LESSONS.forEach((lesson,idx)=>{
+    const isDone=earned.includes(lesson.id);
+    const isActive=currentLesson===lesson.id;
+    const isLocked=idx>0&&!earned.includes(LESSONS[idx-1].id)&&!isDone&&!isActive;
+    const div=document.createElement("div");
+    div.className="lesson"+(isDone?" done":"")+(isActive?" active":"")+(isLocked?" locked":"")+(lesson.type==="boss"?" boss":"");
+    div.id="lesson-"+lesson.id;
+    const numCls=isDone?"done-num":isActive?"active-num":"locked-num";
+    const metaHTML=lesson.type==="boss"
+      ?'<span class="boss-badge">👑 BOSS</span><span class="xp-badge">+'+lesson.xp+' XP</span>'
+      :'<span class="xp-badge">+'+lesson.xp+' XP</span>';
+    const checkHTML=isDone?'<div class="check">✓</div>':(isLocked?'<div class="check" style="color:var(--txt2)">🔒</div>':"");
+    div.innerHTML='<div class="lesson-header"><div class="lesson-num '+numCls+'">'+(isDone?"✓":lesson.icon)+'</div><div class="lesson-info"><div class="lesson-title">'+lesson.num+" "+lesson.title+'</div><div class="lesson-desc">'+lesson.desc+'</div></div><div class="lesson-meta">'+metaHTML+checkHTML+'</div></div>'+(isActive?'<div class="lesson-body">'+buildBody(lesson,isDone)+'</div>':'<div class="lesson-body"></div>');
+    if(!isLocked)div.querySelector(".lesson-header").addEventListener("click",()=>toggleLesson(lesson.id));
+    if(idx<LESSONS.length-1){const conn=document.createElement("div");conn.className="connector";list.appendChild(div);list.appendChild(conn);}
+    else list.appendChild(div);
+  });
+}
+
+function toggleLesson(id){
+  currentLesson=(currentLesson===id)?null:id;
+  renderLessons();
+  if(currentLesson){
+    setTimeout(()=>{
+      const el=document.getElementById("lesson-"+id);
+      if(el)el.scrollIntoView({behavior:"smooth",block:"start"});
+      initDemo(id);
+    },50);
+  }
+}
+
+function buildBody(lesson,isDone){
+  const opts=lesson.opts.map((o,i)=>'<div class="opt" id="opt-'+lesson.id+"-"+i+'" onclick="checkAns(\''+lesson.id+"\',"+i+')"><div class="opt-key">'+["A","B","C","D"][i]+"</div>"+o+"</div>").join("");
+  return '<div class="tabs"><div class="tab on" onclick="switchTab(this,\'story-'+lesson.id+"\',\'"+lesson.id+'\')">📖 概念</div><div class="tab" onclick="switchTab(this,\'demo-'+lesson.id+"\',\'"+lesson.id+'\')">🎮 互動</div><div class="tab" onclick="switchTab(this,\'code-'+lesson.id+"\',\'"+lesson.id+'\')">💻 HLSL</div></div><div id="story-'+lesson.id+'" class="tab-panel on"><div class="story-box">'+lesson.story+'</div><a class="src-link" href="https://www.'+lesson.src+'" target="_blank">📖 Rastertek 原始教學 →</a><div class="quiz-box" style="margin-top:16px"><div class="quiz-title">🎯 理解測驗</div><div class="quiz-q">'+lesson.q+'</div><div class="opts">'+opts+'</div><div id="ex-'+lesson.id+'" style="display:none;margin-top:12px;padding:12px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.2);border-radius:10px;font-size:.85rem;color:var(--txt2)"></div></div>'+(isDone?'<button class="complete-btn" disabled style="background:var(--border);color:var(--txt2)">✅ 已完成！</button>':'<button class="complete-btn" id="btn-'+lesson.id+'" onclick="completeL(\''+lesson.id+'\')">完成測驗後解鎖 →</button>')+'</div><div id="demo-'+lesson.id+'" class="tab-panel"><div id="dc-'+lesson.id+'"><div style="text-align:center;padding:40px;color:var(--txt2)">點互動載入 Demo…</div></div></div><div id="code-'+lesson.id+'" class="tab-panel"><div class="code-block"><button class="copy-btn" onclick="copyC(this)">複製</button>'+lesson.code+'</div></div>';
+}
+
+function switchTab(tabEl,panelId,lessonId){
+  const body=document.getElementById("lesson-"+lessonId).querySelector(".lesson-body");
+  body.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
+  body.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("on"));
+  tabEl.classList.add("on");document.getElementById(panelId).classList.add("on");
+  if(panelId.startsWith("demo-"))initDemo(lessonId);
+}
+
+function checkAns(lessonId,idx){
+  const lesson=LESSONS.find(l=>l.id===lessonId);
+  document.querySelectorAll('[id^="opt-'+lessonId+'-"]').forEach((o,i)=>{
+    o.classList.remove("correct","wrong");
+    if(i===lesson.ans)o.classList.add("correct");
+    else if(i===idx)o.classList.add("wrong");
+  });
+  const ex=document.getElementById("ex-"+lessonId);
+  if(ex){ex.style.display="block";ex.textContent=idx===lesson.ans?"✅ 正確！":"❌ 再想想！正確答案已標示。";}
+  const btn=document.getElementById("btn-"+lessonId);
+  if(btn&&idx===lesson.ans){btn.disabled=false;btn.textContent="✅ 完成此關 → 解鎖下一關";}
+}
+
+function completeL(id){
+  if(earned.includes(id))return;
+  const lesson=LESSONS.find(l=>l.id===id);
+  earned.push(id);
+  localStorage.setItem(CASTLE_KEY,JSON.stringify(earned));
+  const btn=document.getElementById("btn-"+id);
+  if(btn){const r=btn.getBoundingClientRect();const d=document.createElement("div");d.className="xp-pop";d.textContent="+"+lesson.xp+" XP!";d.style.cssText="left:"+r.left+"px;top:"+(r.top+window.scrollY)+"px";document.body.appendChild(d);setTimeout(()=>d.remove(),1200);}
+  const t=document.getElementById("toast");t.textContent="🎉 +"+lesson.xp+" XP！「"+lesson.title+"」完成！";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);
+  setTimeout(()=>{currentLesson=null;renderLessons();updateXP();},600);
+  checkCompletion();
+}
+
+function copyC(btn){
+  const text=btn.parentElement.innerText.replace("複製","").trim();
+  navigator.clipboard.writeText(text).then(()=>{btn.textContent="✓ 已複製";setTimeout(()=>btn.textContent="複製",2000);});
+}
+
+// ── Interactive Demos ──
+function initDemo(id){
+  if(demoInited[id])return;demoInited[id]=true;
+  const cont=document.getElementById("dc-"+id);
+  const isMobile=("ontouchstart" in window)||/iPhone|iPad|Android/i.test(navigator.userAgent);
+  ({d1:demoCompare,d2:demoWindow,d3:demoDevice,d4:demoTri,d5:demoHLSL,d6:demoTex,d7:demoLight,d8:demoModel,d9:demoBlend})[id]?.(cont,isMobile);
+}
+
+function mkGL(cont,label,h){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">'+label+'</div><canvas style="width:100%;display:block;height:'+h+'px"></canvas></div>';
+  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=h;
+  return{cv,gl:cv.getContext("webgl")};
+}
+
+function mkProg(gl,vs,fs){
+  function sh(t,src){const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+  const p=gl.createProgram();
+  gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(p);return p;
+}
+
+function demoCompare(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">⚔️ DirectX 11 vs OpenGL 對比</div><div style="padding:20px;font-size:.82rem;line-height:2"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="background:rgba(232,69,69,.08);border:1px solid rgba(232,69,69,.2);border-radius:12px;padding:16px"><div style="color:var(--acc);font-weight:900;margin-bottom:10px">⚔️ DirectX 11</div><div>📦 內含於 Windows SDK</div><div>🏭 Microsoft 獨家</div><div>🎮 Xbox 完整支援</div><div>📐 左手座標系</div><div>🔧 HLSL 著色語言</div><div>💾 COM 介面</div><div>🔄 順時針繞序</div></div><div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:16px"><div style="color:var(--acc2);font-weight:900;margin-bottom:10px">🌐 OpenGL</div><div>📦 需要 GLEW/GLAD</div><div>🌍 跨平台支援</div><div>🐧 Linux/macOS/Web</div><div>📐 右手座標系</div><div>🔧 GLSL 著色語言</div><div>💾 C 函式介面</div><div>🔄 逆時針繞序</div></div></div></div></div>';
+}
+
+function demoWindow(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🪟 Win32 訊息迴圈模擬</div><canvas style="width:100%;display:block;height:220px"></canvas></div>';
+  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=220;
+  const ctx=cv.getContext("2d");let msgs=[],t=0;
+  const types=["WM_PAINT","WM_KEYDOWN","WM_MOUSEMOVE","WM_SIZE","WM_TIMER"],cols=["#e84545","#00d4ff","#ffd700","#ff9f43","#c084fc"];
+  function frame(){
+    t++;ctx.fillStyle="#07080f";ctx.fillRect(0,0,cv.width,cv.height);
+    if(t%25===0&&msgs.length<8)msgs.push({txt:types[Math.floor(Math.random()*types.length)],col:cols[Math.floor(Math.random()*cols.length)],age:0});
+    msgs=msgs.filter(m=>m.age<100);
+    ctx.font="bold 12px Space Mono";
+    msgs.forEach((m,i)=>{m.age++;ctx.globalAlpha=Math.max(0,1-m.age/100);ctx.fillStyle=m.col;ctx.fillText("[WndProc] "+m.txt+" → MessageHandler()",20,40+i*22);});
+    ctx.globalAlpha=1;ctx.fillStyle="rgba(232,69,69,.7)";ctx.fillText("SystemClass::Run() — 主迴圈運行中...",20,205);
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function demoDevice(cont){
+  const{cv,gl}=mkGL(cont,"⚙️ Direct3D 初始化狀態（WebGL 模擬）",200);
+  if(!gl){cont.innerHTML="<p style=padding:20px>WebGL 不支援</p>";return;}
+  const p=mkProg(gl,"attribute vec2 pos;void main(){gl_Position=vec4(pos,0,1);}","precision mediump float;uniform float t;void main(){gl_FragColor=vec4(.5+.5*sin(t),.1,.8+.2*cos(t),.8);}");
+  gl.useProgram(p);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const a=gl.getAttribLocation(p,"pos"),u=gl.getUniformLocation(p,"t");
+  gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+  let t2=0;function frame(){t2+=.02;const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1f(u,t2);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
+  frame();
+  const ov=document.createElement("div");ov.style.cssText="padding:10px 16px;font-family:Space Mono;font-size:.72rem;display:grid;grid-template-columns:1fr 1fr;gap:6px";
+  ov.innerHTML=[["ID3D11Device","✅ 已建立"],["ID3D11DeviceContext","✅ 就緒"],["IDXGISwapChain","✅ 雙緩衝"],["RenderTargetView","✅ 連結"],["DepthStencilView","✅ 深度"],["Viewport","✅ 已設定"]].map(([k,v])=>"<div><span style=color:#4a5568>"+k+"</span><br><span style=color:#00d4ff>"+v+"</span></div>").join("");
+  cont.querySelector(".demo-wrap").appendChild(ov);
+}
+
+function demoTri(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🔺 DirectX 三角形（左手座標系，順時針繞序）</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setTM(\'c\')">🎨 純色</button><button class="ctrl-btn" onclick="setTM(\'s\')">🌀 旋轉</button><button class="ctrl-btn" onclick="setTM(\'w\')">🌊 波動</button></div>';
+  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=260;
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let mode="c",t=0;
+  const p=mkProg(gl,"attribute vec2 pos;attribute vec3 col;varying vec3 vc;uniform float angle;void main(){float c=cos(angle),s=sin(angle);vec2 r=vec2(pos.x*c-pos.y*s,pos.x*s+pos.y*c);gl_Position=vec4(r*.85,0,1);vc=col;}","precision mediump float;varying vec3 vc;uniform float wave;void main(){gl_FragColor=vec4(vc*(.7+.3*wave),1.);}");
+  gl.useProgram(p);
+  const verts=new Float32Array([0,.85,0, 1,0,0, -.75,-.5,0, 0,1,0, .75,-.5,0, 0,0,1]);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
+  const ap=gl.getAttribLocation(p,"pos"),ac=gl.getAttribLocation(p,"col"),ua=gl.getUniformLocation(p,"angle"),uw=gl.getUniformLocation(p,"wave");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,20,0);
+  gl.enableVertexAttribArray(ac);gl.vertexAttribPointer(ac,3,gl.FLOAT,false,20,8);
+  window.setTM=m=>{mode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){t+=.02;const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1f(ua,mode==="s"?t:mode==="w"?Math.sin(t)*.6:0);gl.uniform1f(uw,mode==="w"?Math.sin(t*2)*.5+.5:1);gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(frame);}
+  frame();
+}
+
+function demoHLSL(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">✨ HLSL Shader 即時預覽</div><canvas style="width:100%;display:block;height:220px"></canvas></div><div class="slider-row"><label>🔴 R</label><input type="range" min="0" max="100" value="88" id="hr" oninput="updH()"><span class="slider-val" id="hvr">0.88</span></div><div class="slider-row"><label>🟢 G</label><input type="range" min="0" max="100" value="27" id="hg" oninput="updH()"><span class="slider-val" id="hvg">0.27</span></div><div class="slider-row"><label>🔵 B</label><input type="range" min="0" max="100" value="27" id="hb" oninput="updH()"><span class="slider-val" id="hvb">0.27</span></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setHFx(0)">⬛ 純色</button><button class="ctrl-btn" onclick="setHFx(1)">💓 脈衝</button><button class="ctrl-btn" onclick="setHFx(2)">🌈 漸層</button></div>';
+  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=220;
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let col={r:.88,g:.27,b:.27},fx=0,t=0;
+  const p=mkProg(gl,"attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}","precision mediump float;varying vec2 uv;uniform vec3 col;uniform float t;uniform int fx;void main(){if(fx==0)gl_FragColor=vec4(col,1.);else if(fx==1){float v=sin(t*3.)*.5+.5;gl_FragColor=vec4(col*v,1.);}else gl_FragColor=vec4(col.r*uv.x,col.g*uv.y,col.b*(1.-uv.x),1.);}");
+  gl.useProgram(p);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const a=gl.getAttribLocation(p,"p");gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+  const uc=gl.getUniformLocation(p,"col"),ut=gl.getUniformLocation(p,"t"),uf=gl.getUniformLocation(p,"fx");
+  window.updH=()=>{col.r=document.getElementById("hr").value/100;col.g=document.getElementById("hg").value/100;col.b=document.getElementById("hb").value/100;document.getElementById("hvr").textContent=col.r.toFixed(2);document.getElementById("hvg").textContent=col.g.toFixed(2);document.getElementById("hvb").textContent=col.b.toFixed(2);};
+  window.setHFx=f=>{fx=f;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){t+=.016;const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform3f(uc,col.r,col.g,col.b);gl.uniform1f(ut,t);gl.uniform1i(uf,fx);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
+  frame();
+}
+
+function demoTex(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🖼️ UV 座標系統（V=0 在上方）</div><canvas style="width:100%;display:block;height:220px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setTF(0)">🗺️ UV 視覺化</button><button class="ctrl-btn" onclick="setTF(1)">📐 棋盤格</button><button class="ctrl-btn" onclick="setTF(2)">🌊 動態波</button></div>';
+  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=220;
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let mode=0,t=0;
+  const p=mkProg(gl,"attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}","precision mediump float;varying vec2 uv;uniform int mode;uniform float t;void main(){if(mode==0){gl_FragColor=vec4(uv.x,1.-uv.y,.3,1.);}else if(mode==1){float c=mod(floor(uv.x*8.)+floor(uv.y*8.),2.);gl_FragColor=vec4(vec3(c*.8+.1),1.);}else{float d=length(uv-.5)*8.;float w=sin(d-t*4.)*.5+.5;gl_FragColor=vec4(w*.9,.1,w*.3,1.);}}");
+  gl.useProgram(p);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const a=gl.getAttribLocation(p,"p");gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+  const um=gl.getUniformLocation(p,"mode"),ut2=gl.getUniformLocation(p,"t");
+  window.setTF=m=>{mode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){t+=.016;const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1i(um,mode);gl.uniform1f(ut2,t);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
+  frame();
+}
+
+function demoLight(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">💡 Lambert 漫反射光照（HLSL 模擬）</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="slider-row"><label>💡 光照角度</label><input type="range" min="-180" max="180" value="45" id="la" oninput="updL()"><span class="slider-val" id="lva">45°</span></div><div class="slider-row"><label>🌙 環境光</label><input type="range" min="0" max="60" value="15" id="lb" oninput="updL()"><span class="slider-val" id="lvb">0.15</span></div>';
+  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=260;
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let ang=45,amb=.15;
+  // Sphere made of triangles
+  const verts=[];const N=48;
+  for(let i=0;i<N;i++){const a0=i/N*Math.PI*2,a1=(i+1)/N*Math.PI*2;const r=.72;verts.push(0,0,0,0, Math.cos(a0)*r,Math.sin(a0)*r,Math.cos(a0),Math.sin(a0), Math.cos(a1)*r,Math.sin(a1)*r,Math.cos(a1),Math.sin(a1));}
+  const p=mkProg(gl,"attribute vec2 pos;attribute vec2 nor;varying vec2 vn;void main(){vn=nor;gl_Position=vec4(pos*.9,0,1);}","precision mediump float;varying vec2 vn;uniform vec3 ld;uniform float amb;void main(){vec3 n=normalize(vec3(vn,1));float d=max(dot(n,ld),0.);vec3 c=vec3(.88,.27,.27);gl_FragColor=vec4(c*(amb+d*(1.-amb)),1.);}");
+  gl.useProgram(p);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,16,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,2,gl.FLOAT,false,16,8);
+  const ul=gl.getUniformLocation(p,"ld"),ua=gl.getUniformLocation(p,"amb");
+  window.updL=()=>{ang=parseFloat(document.getElementById("la").value);amb=document.getElementById("lb").value/100;document.getElementById("lva").textContent=ang+"°";document.getElementById("lvb").textContent=amb.toFixed(2);};
+  function frame(){const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT);const r=ang*Math.PI/180;gl.uniform3f(ul,Math.cos(r),Math.sin(r),.5);gl.uniform1f(ua,amb);gl.drawArrays(gl.TRIANGLES,0,verts.length/4);requestAnimationFrame(frame);}
+  frame();
+}
+
+function demoModel(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">📦 3D 模型渲染（旋轉立方體）</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setMM(0)">⬛ 填充</button><button class="ctrl-btn" onclick="setMM(1)">🔲 線框</button><button class="ctrl-btn" onclick="setMM(2)">🎨 法線</button></div>';
+  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=260;
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let mode=0,t=0;
+  const cube=new Float32Array([-1,-1,-1,0,0,-1,1,-1,-1,0,0,-1,1,1,-1,0,0,-1,-1,-1,-1,0,0,-1,1,1,-1,0,0,-1,-1,1,-1,0,0,-1,-1,-1,1,0,0,1,1,-1,1,0,0,1,1,1,1,0,0,1,-1,-1,1,0,0,1,1,1,1,0,0,1,-1,1,1,0,0,1,-1,1,-1,0,1,0,1,1,-1,0,1,0,1,1,1,0,1,0,-1,1,-1,0,1,0,1,1,1,0,1,0,-1,1,1,0,1,0,-1,-1,-1,0,-1,0,1,-1,-1,0,-1,0,1,-1,1,0,-1,0,-1,-1,-1,0,-1,0,1,-1,1,0,-1,0,-1,-1,1,0,-1,0,-1,-1,-1,-1,0,0,-1,1,-1,-1,0,0,-1,1,1,-1,0,0,-1,-1,-1,-1,0,0,-1,1,1,-1,0,0,-1,-1,1,-1,0,0,1,-1,-1,1,0,0,1,1,-1,1,0,0,1,1,1,1,0,0,1,-1,-1,1,0,0,1,1,1,1,0,0,1,-1,1,1,0,0]);
+  const p=mkProg(gl,"attribute vec3 pos;attribute vec3 nor;varying vec3 vn;uniform float rot;void main(){float c=cos(rot),s=sin(rot);vec3 rp=vec3(pos.x*c-pos.z*s,pos.y,pos.x*s+pos.z*c);vn=vec3(nor.x*c-nor.z*s,nor.y,nor.x*s+nor.z*c);gl_Position=vec4(rp.xy*.55,0,1);}","precision mediump float;varying vec3 vn;uniform int mode;void main(){if(mode==0){float d=max(dot(normalize(vn),normalize(vec3(1,1,1))),.15);gl_FragColor=vec4(vec3(.88,.27,.27)*d,1.);}else if(mode==1){gl_FragColor=vec4(.3,.85,.3,1.);}else{gl_FragColor=vec4(normalize(vn)*.5+.5,1.);}}");
+  gl.useProgram(p);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,cube,gl.STATIC_DRAW);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor"),ur=gl.getUniformLocation(p,"rot"),um=gl.getUniformLocation(p,"mode");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  gl.enable(gl.DEPTH_TEST);
+  window.setMM=m=>{mode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){t+=.015;const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform1f(ur,t);gl.uniform1i(um,mode);if(mode===1){for(let i=0;i<36;i+=3)gl.drawArrays(gl.LINE_LOOP,i,3);}else gl.drawArrays(gl.TRIANGLES,0,36);requestAnimationFrame(frame);}
+  frame();
+}
+
+function demoBlend(cont){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">⚗️ Alpha Blending 透明效果</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="slider-row"><label>透明度</label><input type="range" min="0" max="100" value="70" id="ba" oninput="updB()"><span class="slider-val" id="bva">0.70</span></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setBM(1)">✅ Blend ON</button><button class="ctrl-btn" onclick="setBM(0)">❌ Blend OFF</button></div>';
+  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=260;
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let alpha=.7,blendOn=true,t=0;
+  const p=mkProg(gl,"attribute vec2 pos;attribute vec4 col;varying vec4 vc;void main(){gl_Position=vec4(pos,0,1);vc=col;}","precision mediump float;varying vec4 vc;uniform float a;void main(){gl_FragColor=vec4(vc.rgb,vc.a*a);}");
+  gl.useProgram(p);
+  const data=new Float32Array([-1,-1,1,.2,.2,1,1,-1,1,.2,.2,1,-1,1,1,.2,.2,1,1,1,1,.2,.2,1,-.6,-.6,.1,.3,1,1,.9,-.6,.1,.3,1,1,-.6,.9,.1,.3,1,1,.9,.9,.1,.3,1,1]);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+  const ap=gl.getAttribLocation(p,"pos"),ac=gl.getAttribLocation(p,"col"),ua=gl.getUniformLocation(p,"a");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(ac);gl.vertexAttribPointer(ac,4,gl.FLOAT,false,24,8);
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  window.updB=()=>{alpha=document.getElementById("ba").value/100;document.getElementById("bva").textContent=alpha.toFixed(2);};
+  window.setBM=on=>{blendOn=on===1;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT);if(blendOn){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);}else gl.disable(gl.BLEND);gl.uniform1f(ua,1.0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);gl.uniform1f(ua,blendOn?alpha:1.0);gl.drawArrays(gl.TRIANGLE_STRIP,4,4);requestAnimationFrame(frame);}
+  frame();
+}
+
+function checkCompletion(){
+  if(earned.length>=CASTLE_TOTAL&&!localStorage.getItem(CASTLE_KEY+"_comp_shown")){
+    localStorage.setItem(CASTLE_KEY+"_comp_shown","1");
+    setTimeout(showCompletion,800);
+  }
+}
+function showCompletion(){
+  const ov=document.getElementById("compOverlay");if(!ov)return;
+  const fw=ov.querySelector(".fw-wrap");
+  const colors=["#e84545","#00d4ff","#ffd700","#ff9f43","#c084fc","#50fa7b"];
+  for(let i=0;i<28;i++){const d=document.createElement("div");d.className="fw";const tx=(Math.random()-.5)*300,ty=-100-Math.random()*200;d.style.cssText="width:6px;height:6px;background:"+colors[i%colors.length]+";left:"+(40+Math.random()*20)+"%;top:60%;--d:"+(0.6+Math.random()*.8)+"s;--dl:"+Math.random()*.5+"s;--tx:"+tx+"px;--ty:"+ty+"px";fw.appendChild(d);}
+  ov.classList.add("show");
+}
+function goNextCastle(){window.location.href="dx-map.html#done-1";}
+function goMap(){window.location.href="dx-map.html";}
+
+updateXP();renderLessons();
+window.addEventListener("pageshow",(e)=>{
+  const ov=document.getElementById("compOverlay");if(ov)ov.classList.remove("show");
+  const toast=document.getElementById("toast");if(toast)toast.classList.remove("show");
+  if(e.persisted){if(typeof currentLesson!=="undefined")currentLesson=null;if(typeof renderLessons==="function")renderLessons();}
+});
+document.addEventListener("DOMContentLoaded",()=>{setTimeout(checkCompletion,500);});
+window.addEventListener("storage",checkCompletion);
+</script>
+
+<!-- Completion Overlay -->
+<div id="compOverlay" class="comp-overlay">
+  <div class="fw-wrap"></div>
+  <div class="comp-trophy">⚔️</div>
+  <div class="comp-stars">🏆🏆🏆</div>
+  <div class="comp-title">要塞1 全通關！<br>起源之城</div>
+  <div class="comp-sub">你已掌握 DirectX 11 基礎！<br>獲得全部 XP！</div>
+  <button class="comp-next-btn" onclick="goNextCastle()">⚔️ 前往要塞2 →</button>
+  <button class="comp-map-btn" onclick="goMap()">🗺️ 返回地圖</button>
+</div>
+</body>
+</html>
