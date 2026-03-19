@@ -62,10 +62,10 @@ header{position:sticky;top:0;z-index:100;background:rgba(10,11,20,.9);backdrop-f
 .lesson:hover{border-color:var(--acc);box-shadow:var(--glow)}
 .lesson.locked{opacity:.5;cursor:not-allowed}
 .lesson.active{border-color:var(--acc);box-shadow:var(--glow)}
-.lesson.done{border-color:var(--border);opacity:.75}
+.lesson.done{}
 .lesson-header{display:flex;align-items:center;gap:16px;padding:18px 20px}
 .lesson-num{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-family:var(--mono);font-size:.9rem;flex-shrink:0;position:relative}
-.lesson-num.done-num{background:rgba(0,245,196,.1);color:var(--acc2);border:1px solid var(--acc2)}
+.done-num{background:var(--card);color:var(--acc2);border:1px solid var(--border)}
 .lesson-num.active-num{background:rgba(124,109,250,.15);color:var(--acc);border:1px solid var(--acc)}
 .lesson-num.locked-num{background:var(--border);color:var(--txt2);border:1px solid transparent}
 .lesson-info{flex:1;min-width:0}
@@ -74,7 +74,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(10,11,20,.9);backdrop-f
 .lesson-meta{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
 .xp-badge{background:rgba(255,217,61,.1);color:var(--acc4);border:1px solid rgba(255,217,61,.3);border-radius:100px;padding:3px 10px;font-size:.75rem;font-weight:800;font-family:var(--mono)}
 .boss-badge{background:rgba(255,107,107,.1);color:var(--acc3);border:1px solid rgba(255,107,107,.3);border-radius:100px;padding:3px 10px;font-size:.72rem;font-weight:900}
-.check{width:28px;height:28px;border-radius:50%;background:rgba(0,245,196,.15);color:var(--acc2);display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.check{width:28px;height:28px;border-radius:50%;background:transparent;color:var(--txt2);display:flex;align-items:center;justify-content:center;font-size:.9rem}
 
 /* ── LESSON CONTENT ── */
 .lesson-body{display:none;border-top:1px solid var(--border);padding:24px}
