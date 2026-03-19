@@ -503,21 +503,114 @@ function demoLight(cont,isMobile){
   if(isMobile) window.addEventListener('resize',syncSize);
 }
 
-function demoModel(cont){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">📦 3D 模型渲染（旋轉立方體）</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setMM(0)">⬛ 填充</button><button class="ctrl-btn" onclick="setMM(1)">🔲 線框</button><button class="ctrl-btn" onclick="setMM(2)">🎨 法線</button></div>';
-  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=260;
+function demoModel(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">📦 3D 模型渲染 — 45° 透視視角</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setMM(0)">⬛ 填充</button><button class="ctrl-btn" onclick="setMM(1)">🔲 線框</button><button class="ctrl-btn" onclick="setMM(2)">🎨 法線</button></div>';
+  const cv=cont.querySelector("canvas");
   const gl=cv.getContext("webgl");if(!gl)return;
+
+  function syncSize(){
+    const w=cv.clientWidth||600;
+    if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height='260px';}
+    return w/260;
+  }
+  syncSize();
+
   let mode=0,t=0;
-  const cube=new Float32Array([-1,-1,-1,0,0,-1,1,-1,-1,0,0,-1,1,1,-1,0,0,-1,-1,-1,-1,0,0,-1,1,1,-1,0,0,-1,-1,1,-1,0,0,-1,-1,-1,1,0,0,1,1,-1,1,0,0,1,1,1,1,0,0,1,-1,-1,1,0,0,1,1,1,1,0,0,1,-1,1,1,0,0,1,-1,1,-1,0,1,0,1,1,-1,0,1,0,1,1,1,0,1,0,-1,1,-1,0,1,0,1,1,1,0,1,0,-1,1,1,0,1,0,-1,-1,-1,0,-1,0,1,-1,-1,0,-1,0,1,-1,1,0,-1,0,-1,-1,-1,0,-1,0,1,-1,1,0,-1,0,-1,-1,1,0,-1,0,-1,-1,-1,-1,0,0,-1,1,-1,-1,0,0,-1,1,1,-1,0,0,-1,-1,-1,-1,0,0,-1,1,1,-1,0,0,-1,-1,1,-1,0,0,1,-1,-1,1,0,0,1,1,-1,1,0,0,1,1,1,1,0,0,1,-1,-1,1,0,0,1,1,1,1,0,0,1,-1,1,1,0,0]);
-  const p=mkProg(gl,"attribute vec3 pos;attribute vec3 nor;varying vec3 vn;uniform float rot;void main(){float c=cos(rot),s=sin(rot);vec3 rp=vec3(pos.x*c-pos.z*s,pos.y,pos.x*s+pos.z*c);vn=vec3(nor.x*c-nor.z*s,nor.y,nor.x*s+nor.z*c);gl_Position=vec4(rp.xy*.55,0,1);}","precision mediump float;varying vec3 vn;uniform int mode;void main(){if(mode==0){float d=max(dot(normalize(vn),normalize(vec3(1,1,1))),.15);gl_FragColor=vec4(vec3(.88,.27,.27)*d,1.);}else if(mode==1){gl_FragColor=vec4(.3,.85,.3,1.);}else{gl_FragColor=vec4(normalize(vn)*.5+.5,1.);}}");
+
+  // Cube: pos(xyz) + normal(xyz), 36 verts
+  const cube=new Float32Array([
+    -1,-1,-1,0,0,-1, 1,-1,-1,0,0,-1, 1,1,-1,0,0,-1,
+    -1,-1,-1,0,0,-1, 1,1,-1,0,0,-1, -1,1,-1,0,0,-1,
+    -1,-1,1,0,0,1,   1,-1,1,0,0,1,  1,1,1,0,0,1,
+    -1,-1,1,0,0,1,   1,1,1,0,0,1,  -1,1,1,0,0,1,
+    -1,1,-1,0,1,0,   1,1,-1,0,1,0,  1,1,1,0,1,0,
+    -1,1,-1,0,1,0,   1,1,1,0,1,0,  -1,1,1,0,1,0,
+    -1,-1,-1,0,-1,0, 1,-1,-1,0,-1,0, 1,-1,1,0,-1,0,
+    -1,-1,-1,0,-1,0, 1,-1,1,0,-1,0, -1,-1,1,0,-1,0,
+    -1,-1,-1,-1,0,0, -1,1,-1,-1,0,0, -1,1,1,-1,0,0,
+    -1,-1,-1,-1,0,0, -1,1,1,-1,0,0, -1,-1,1,-1,0,0,
+     1,-1,-1,1,0,0,   1,1,-1,1,0,0,  1,1,1,1,0,0,
+     1,-1,-1,1,0,0,   1,1,1,1,0,0,   1,-1,1,1,0,0,
+  ]);
+
+  // Full MVP vertex shader with perspective + 45° pitch
+  const vs=`
+    attribute vec3 pos;
+    attribute vec3 nor;
+    varying vec3 vn;
+    varying vec3 vp;
+    uniform float rotY;  // auto-rotate Y
+    uniform float asp;   // aspect ratio
+    void main(){
+      // Rotate Y
+      float cy=cos(rotY), sy=sin(rotY);
+      vec3 r=vec3(pos.x*cy+pos.z*sy, pos.y, -pos.x*sy+pos.z*cy);
+      vec3 rn=vec3(nor.x*cy+nor.z*sy, nor.y, -nor.x*sy+nor.z*cy);
+
+      // 45° pitch down (look from above)
+      float pitch = 0.6;  // ~34 degrees
+      float cp=cos(pitch), sp2=sin(pitch);
+      vec3 v=vec3(r.x, r.y*cp-r.z*sp2, r.y*sp2+r.z*cp);
+      vec3 vn2=vec3(rn.x, rn.y*cp-rn.z*sp2, rn.y*sp2+rn.z*cp);
+
+      vp = v;
+      vn = vn2;
+
+      // Simple perspective
+      float fov = 1.2;
+      float near = 0.1;
+      float camZ = 4.5;
+      vec3 cam = vec3(v.x, v.y, v.z + camZ);
+      float pz = cam.z + near;
+      float px = cam.x / pz * fov;
+      float py = cam.y / pz * fov;
+
+      gl_Position = vec4(px / asp, py, (cam.z - near) / camZ * 0.5, 1.0);
+    }`;
+
+  const fs=`
+    precision mediump float;
+    varying vec3 vn;
+    varying vec3 vp;
+    uniform int mode;
+    void main(){
+      if(mode==0){
+        vec3 light = normalize(vec3(1.2, 1.8, 2.0));
+        float d = max(dot(normalize(vn), light), 0.0);
+        float amb = 0.18;
+        vec3 col = vec3(0.88, 0.27, 0.27);
+        gl_FragColor = vec4(col * (amb + d * (1.0-amb)), 1.0);
+      } else if(mode==1){
+        gl_FragColor = vec4(0.3, 0.85, 0.3, 1.0);
+      } else {
+        gl_FragColor = vec4(normalize(vn)*0.5+0.5, 1.0);
+      }
+    }`;
+
+  const p=mkProg(gl,vs,fs);
   gl.useProgram(p);
   const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,cube,gl.STATIC_DRAW);
-  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor"),ur=gl.getUniformLocation(p,"rot"),um=gl.getUniformLocation(p,"mode");
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  const ur=gl.getUniformLocation(p,"rotY"),um=gl.getUniformLocation(p,"mode"),uasp=gl.getUniformLocation(p,"asp");
   gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
   gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
   gl.enable(gl.DEPTH_TEST);
+
   window.setMM=m=>{mode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
-  function frame(){t+=.015;const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform1f(ur,t);gl.uniform1i(um,mode);if(mode===1){for(let i=0;i<36;i+=3)gl.drawArrays(gl.LINE_LOOP,i,3);}else gl.drawArrays(gl.TRIANGLES,0,36);requestAnimationFrame(frame);}
+  if(isMobile) window.addEventListener('resize',syncSize);
+
+  function frame(){
+    t+=.012;
+    const asp=syncSize();
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform1f(ur,t);
+    gl.uniform1i(um,mode);
+    gl.uniform1f(uasp,asp);
+    if(mode===1){for(let i=0;i<36;i+=3)gl.drawArrays(gl.LINE_LOOP,i,3);}
+    else gl.drawArrays(gl.TRIANGLES,0,36);
+    requestAnimationFrame(frame);
+  }
   frame();
 }
 
