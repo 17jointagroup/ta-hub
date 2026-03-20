@@ -832,13 +832,24 @@ function d6(cont){
 
 // Demo L7 - Geometry shader explosion simulation
 function d7(cont){
+  const isMobile=('ontouchstart' in window)||/iPhone|iPad|Android/i.test(navigator.userAgent);
   window._geMode='sphere';
   window.setGE=function(m){window._geMode=m;['sphere','explode','norm'].forEach(function(x){document.getElementById('ge-'+x).classList.toggle('on',x===m);});document.getElementById('explode-row').style.display=m==='explode'?'flex':'none';};
-  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>幾何著色器模擬 — 爆炸特效</div></div><canvas id="cv4-7" width="600" height="320" style="width:100%;height:320px;display:block;background:#0a0614;"></canvas></div>
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>幾何著色器模擬 — 爆炸特效</div></div><canvas id="cv4-7" style="width:100%;height:320px;display:block;background:#0a0614;"></canvas></div>
   <div class="ctrl-row"><button class="ctrl-btn on" id="ge-sphere" onclick="setGE('sphere')">⚽ 球體</button><button class="ctrl-btn" id="ge-explode" onclick="setGE('explode')">💥 爆炸！</button><button class="ctrl-btn" id="ge-norm" onclick="setGE('norm')">🧲 法向量線</button></div>
   <div class="slider-row" id="explode-row" style="display:none"><span class="slider-label">💥 爆炸強度</span><input type="range" min="0" max="100" value="30" id="explode-str" oninput="document.getElementById('explode-sv').textContent=(this.value/100).toFixed(2)"><span class="slider-val" id="explode-sv">0.30</span></div>`;
   var cv=document.getElementById('cv4-7'),ctx=cv.getContext('2d');
-  var W=600,H=320,cx=W/2,cy=H/2,R=90;
+  // syncSize: keep canvas pixel size matching CSS, fix aspect ratio
+  function syncSize(){
+    var w=cv.clientWidth||600;
+    if(cv.width!==w||cv.height!==320){cv.width=w;cv.height=320;}
+    return w;
+  }
+  syncSize();
+  if(isMobile) window.addEventListener('resize',syncSize);
+  var H=320;
+  // R scales with actual canvas width so sphere fills the canvas properly
+  function getR(){return cv.width*0.38;}
   // Generate sphere points
   var pts=[];
   for(var i=0;i<800;i++){
@@ -849,6 +860,8 @@ function d7(cont){
   var t=0;
   (function frame(){
     t+=.02;
+    syncSize();
+    var W=cv.width,cx=W/2,cy=H/2,R=getR();
     var mode=window._geMode,ex=mode==='explode'?(document.getElementById('explode-str').value/100):0;
     // Rotate
     var cosT=Math.cos(t*.4),sinT=Math.sin(t*.4);
