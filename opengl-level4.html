@@ -553,7 +553,7 @@ function d1(cont){
   var pL=gl.getAttribLocation(prog,'aP'),cL=gl.getAttribLocation(prog,'aC');
   var uM=gl.getUniformLocation(prog,'uM'),uVD=gl.getUniformLocation(prog,'uVD');
   gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(pL);gl.vertexAttribPointer(pL,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(cL);gl.vertexAttribPointer(cL,3,gl.FLOAT,false,24,12);
-  var t=0;
+  var t=1.0;
   // Two separate index buffers for controlled draw order
   var ibRed=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibRed);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array([0,1,2,0,2,3]),gl.STATIC_DRAW);
   var ibBlue=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibBlue);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array([4,5,6,4,6,7]),gl.STATIC_DRAW);
@@ -611,7 +611,7 @@ function d2(cont){
   function scale(sc){return new Float32Array([sc,0,0,0,0,sc,0,0,0,0,sc,0,0,0,0,1]);}
   function hsl(h,s,l){var a=s*Math.min(l,1-l);function f(n){var k=(n+h/30)%12;return l-a*Math.max(-1,Math.min(k-3,9-k,1));}return[f(0),f(8),f(4)];}
   gl.enable(gl.DEPTH_TEST);
-  var t=0;
+  var t=1.0;
   (function fr(){
     t+=.013;
     var ow=1+parseInt(document.getElementById('outline-w').value)/14;
@@ -834,70 +834,155 @@ function d6(cont){
 function d7(cont){
   const isMobile=('ontouchstart' in window)||/iPhone|iPad|Android/i.test(navigator.userAgent);
   window._geMode='sphere';
-  window.setGE=function(m){window._geMode=m;['sphere','explode','norm'].forEach(function(x){document.getElementById('ge-'+x).classList.toggle('on',x===m);});document.getElementById('explode-row').style.display=m==='explode'?'flex':'none';};
-  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>幾何著色器模擬 — 爆炸特效</div></div><canvas id="cv4-7" style="width:100%;height:320px;display:block;background:#0a0614;"></canvas></div>
-  <div class="ctrl-row"><button class="ctrl-btn on" id="ge-sphere" onclick="setGE('sphere')">⚽ 球體</button><button class="ctrl-btn" id="ge-explode" onclick="setGE('explode')">💥 爆炸！</button><button class="ctrl-btn" id="ge-norm" onclick="setGE('norm')">🧲 法向量線</button></div>
-  <div class="slider-row" id="explode-row" style="display:none"><span class="slider-label">💥 爆炸強度</span><input type="range" min="0" max="100" value="30" id="explode-str" oninput="document.getElementById('explode-sv').textContent=(this.value/100).toFixed(2)"><span class="slider-val" id="explode-sv">0.30</span></div>`;
-  var cv=document.getElementById('cv4-7'),ctx=cv.getContext('2d');
-  // syncSize: keep canvas pixel size matching CSS, fix aspect ratio
+  window.setGE=function(m){
+    window._geMode=m;
+    ['sphere','explode','norm'].forEach(function(x){
+      document.getElementById('ge-'+x).classList.toggle('on',x===m);
+    });
+    document.getElementById('explode-row').style.display=m==='explode'?'flex':'none';
+  };
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>幾何著色器模擬 — 爆炸特效</div></div><canvas id="cv4-7" style="width:100%;height:320px;display:block;"></canvas></div>
+<div class="ctrl-row"><button class="ctrl-btn on" id="ge-sphere" onclick="setGE('sphere')">⚽ 球體</button><button class="ctrl-btn" id="ge-explode" onclick="setGE('explode')">💥 爆炸！</button><button class="ctrl-btn" id="ge-norm" onclick="setGE('norm')">🧲 法向量</button></div>
+<div class="slider-row" id="explode-row" style="display:none"><span class="slider-label">💥 爆炸強度</span><input type="range" min="0" max="100" value="0" id="explode-str" oninput="document.getElementById('explode-sv').textContent=(this.value/100).toFixed(2)"><span class="slider-val" id="explode-sv">0.00</span></div>`;
+
+  const cv=document.getElementById('cv4-7');
   function syncSize(){
     var w=cv.clientWidth||600;
-    if(cv.width!==w||cv.height!==320){cv.width=w;cv.height=320;}
-    return w;
+    if(cv.width!==w||cv.height!==320){cv.width=w;cv.height=320;cv.style.height='320px';}
+    return w/320;
   }
   syncSize();
   if(isMobile) window.addEventListener('resize',syncSize);
-  var H=320;
-  // R scales with actual canvas width so sphere fills the canvas properly
-  function getR(){return cv.width*0.38;}
-  // Generate sphere points
-  var pts=[];
-  for(var i=0;i<800;i++){
-    var phi=Math.acos(1-2*(i+.5)/800),th=Math.PI*(1+Math.sqrt(5))*i;
-    pts.push({x:Math.sin(phi)*Math.cos(th),y:Math.cos(phi),z:Math.sin(phi)*Math.sin(th),
-      nx:Math.sin(phi)*Math.cos(th),ny:Math.cos(phi),nz:Math.sin(phi)*Math.sin(th)});
+
+  // Local WebGL context (independent from global gl)
+  const g=cv.getContext('webgl');
+  if(!g)return;
+
+  // Inline shader compiler using local context
+  function mkShader(type,src){
+    var s=g.createShader(type);g.shaderSource(s,src);g.compileShader(s);return s;
   }
-  var t=0;
+  function mkProgLocal(vs,fs){
+    var p=g.createProgram();
+    g.attachShader(p,mkShader(g.VERTEX_SHADER,vs));
+    g.attachShader(p,mkShader(g.FRAGMENT_SHADER,fs));
+    g.linkProgram(p);return p;
+  }
+
+  // Build sphere geometry inline (same as sph() but with local g)
+  var vArr=[],nArr=[],iArr=[];
+  var ST=28,SL=36;
+  for(var a=0;a<=ST;a++){
+    var phi=Math.PI*a/ST;
+    for(var b=0;b<=SL;b++){
+      var th=2*Math.PI*b/SL;
+      var x=Math.sin(phi)*Math.cos(th),y=Math.cos(phi),z=Math.sin(phi)*Math.sin(th);
+      vArr.push(x*0.88,y*0.88,z*0.88);nArr.push(x,y,z);
+    }
+  }
+  for(var a=0;a<ST;a++)for(var b=0;b<SL;b++){
+    var p0=a*(SL+1)+b,q=p0+SL+1;
+    iArr.push(p0,q,p0+1,q,q+1,p0+1);
+  }
+  var vData=new Float32Array(vArr),nData=new Float32Array(nArr),iData=new Uint16Array(iArr);
+
+  var vBuf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vBuf);g.bufferData(g.ARRAY_BUFFER,vData,g.STATIC_DRAW);
+  var nBuf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,nBuf);g.bufferData(g.ARRAY_BUFFER,nData,g.STATIC_DRAW);
+  var iBuf=g.createBuffer();g.bindBuffer(g.ELEMENT_ARRAY_BUFFER,iBuf);g.bufferData(g.ELEMENT_ARRAY_BUFFER,iData,g.STATIC_DRAW);
+
+  var VS=`attribute vec3 aPos;attribute vec3 aNor;varying vec3 vN;varying float vExp;
+uniform float rotY;uniform float asp;uniform float explode;uniform float time;
+void main(){
+  // Per-chunk ID from quantized spherical angle (8 latitude x 8 longitude = 64 chunks)
+  float lat=floor((aNor.y*0.5+0.5)*8.0)/8.0;
+  float lon=floor((atan(aNor.z,aNor.x)/(3.14159*2.0)+0.5)*8.0)/8.0;
+  float seed=lat*13.7+lon*7.3;
+  float phase=fract(seed*0.618)*6.28318; // per-chunk time offset
+
+  // Animated explosion: each chunk bursts with its own phase
+  float burst=sin(time*2.2+phase)*0.5+0.5; // oscillates 0-1
+  float dist=explode*burst*3.5;            // fly out up to 3.5x radius
+
+  // Chunk flies along its own normal direction + slight spin
+  float spin=explode*burst*sin(phase)*4.0;
+  float cs=cos(spin),ss=sin(spin);
+  vec3 p=aPos+aNor*dist;
+  // Add lateral swirl
+  vec3 swirl=vec3(-aNor.z,0.0,aNor.x)*explode*burst*sin(phase+1.2)*0.8;
+  p+=swirl;
+
+  float cy=cos(rotY),sy=sin(rotY);
+  vec3 r=vec3(p.x*cy+p.z*sy,p.y,-p.x*sy+p.z*cy);
+  vec3 rn=vec3(aNor.x*cy+aNor.z*sy,aNor.y,-aNor.x*sy+aNor.z*cy);
+  float cp=cos(0.44),sp=sin(0.44);
+  vec3 v2=vec3(r.x,r.y*cp-r.z*sp,r.y*sp+r.z*cp);
+  vN=vec3(rn.x,rn.y*cp-rn.z*sp,rn.y*sp+rn.z*cp);
+  vExp=explode;
+  float camZ=1.3;vec3 cam=vec3(v2.x,v2.y,v2.z+camZ);
+  gl_Position=vec4(cam.x/cam.z*0.85/asp,cam.y/cam.z*0.85,(cam.z-0.1)/camZ*0.5,1.0);
+}`;
+  var FS=`precision mediump float;varying vec3 vN;varying float vExp;uniform int mode;uniform vec3 lDir;
+void main(){
+  vec3 n=normalize(vN);
+  if(mode==2){gl_FragColor=vec4(n*0.5+0.5,1.0);}
+  else{
+    vec3 L=normalize(lDir);
+    vec3 V=vec3(0.0,0.0,1.0);
+    vec3 col=mode==1?mix(vec3(0.85,0.15,0.15),vec3(1.0,0.55,0.05),vExp*2.0):vec3(0.85,0.15,0.15);
+
+    // Lambert primary light (main directional)
+    float lambert=max(dot(n,L),0.0);
+    vec3 diffuse=col*lambert*2.25;
+
+    // Lambert fill light from opposite-lower side (soften shadows)
+    vec3 fillL=normalize(vec3(-L.x*0.4,-L.y*0.3,-L.z*0.5+0.4));
+    float lambertFill=max(dot(n,fillL),0.0);
+    vec3 fill=col*lambertFill*0.75;
+
+    // Hemisphere ambient: sky (warm) + ground (cool)
+    float skyAmt=n.y*0.5+0.5;
+    vec3 skyCol=vec3(0.85,0.6,0.6);
+    vec3 groundCol=vec3(0.12,0.08,0.08);
+    vec3 ambient=mix(groundCol,skyCol,skyAmt)*col*1.5;
+
+    // Blinn-Phong specular
+    vec3 H=normalize(L+V);
+    float spec=pow(max(dot(n,H),0.0),64.0);
+    vec3 specular=vec3(1.0,0.92,0.82)*spec*3.3;
+
+    gl_FragColor=vec4(ambient+diffuse+fill+specular,1.0);
+  }
+}`;
+
+  var prog=mkProgLocal(VS,FS);
+  g.useProgram(prog);
+  var aPos=g.getAttribLocation(prog,'aPos'),aNor=g.getAttribLocation(prog,'aNor');
+  var uRot=g.getUniformLocation(prog,'rotY'),uAsp=g.getUniformLocation(prog,'asp');
+  var uExp=g.getUniformLocation(prog,'explode'),uMode=g.getUniformLocation(prog,'mode');
+  var uLight=g.getUniformLocation(prog,'lDir'),uTime=g.getUniformLocation(prog,'time');
+  g.enable(g.DEPTH_TEST);
+
+  var t=1.0;
   (function frame(){
-    t+=.02;
-    syncSize();
-    var W=cv.width,cx=W/2,cy=H/2,R=getR();
-    var mode=window._geMode,ex=mode==='explode'?(document.getElementById('explode-str').value/100):0;
-    // Rotate
-    var cosT=Math.cos(t*.4),sinT=Math.sin(t*.4);
-    ctx.fillStyle='#0a0614';ctx.fillRect(0,0,W,H);
-    // Light direction
-    var lx=Math.cos(t*.6),ly=.6,lz=Math.sin(t*.6);
-    var ll=Math.hypot(lx,ly,lz);lx/=ll;ly/=ll;lz/=ll;
-    // Sort by z
-    var visible=pts.map(function(p){
-      var expAmt=ex*(Math.sin(t*2+p.x*3+p.y*2)*.5+.5);
-      var px2=p.x*(1+expAmt),py2=p.y*(1+expAmt),pz2=p.z*(1+expAmt);
-      var rx=cosT*px2-sinT*pz2,rz=sinT*px2+cosT*pz2;
-      var rnx=cosT*p.nx-sinT*p.nz,rnz=sinT*p.nx+cosT*p.nz;
-      var scale=R/(3+rz);
-      return{sx:cx+rx*scale,sy:cy-py2*scale,sz:rz,nx:rnx,ny:p.ny,nz:rnz,
-        diff:Math.max(0,rnx*lx+p.ny*ly+rnz*lz)};
-    }).sort(function(a,b){return a.sz-b.sz;});
-    visible.forEach(function(p){
-      if(p.sz<-2.5)return;
-      var r2=2;
-      if(mode==='norm'){
-        var r=Math.round((p.nx*.5+.5)*255),g=Math.round((p.ny*.5+.5)*255),b=Math.round((p.nz*.5+.5)*255);
-        ctx.fillStyle='rgb('+r+','+g+','+b+')';
-      } else {
-        var bright=Math.round(50+p.diff*180);
-        ctx.fillStyle=mode==='explode'?
-          'rgb('+Math.min(255,bright+80)+','+Math.round(bright*.4)+','+Math.round(bright*.1)+')':
-          'rgb('+Math.round(bright*.5)+','+Math.round(bright*.8)+','+bright+')';
-      }
-      ctx.beginPath();ctx.arc(p.sx,p.sy,r2,0,Math.PI*2);ctx.fill();
-    });
+    t+=0.012;
+    var asp=syncSize();
+    g.viewport(0,0,cv.width,cv.height);
+    g.clearColor(0.04,0.03,0.09,1.0);
+    g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    var mode=window._geMode;
+    var exStr=mode==='explode'?(parseFloat(document.getElementById('explode-str').value)/100):0;
+    var exPulse=exStr;
+    var modeInt=mode==='norm'?2:mode==='explode'?1:0;
+    g.uniform1f(uRot,t);g.uniform1f(uAsp,asp);g.uniform1f(uExp,exPulse);g.uniform1i(uMode,modeInt);g.uniform1f(uTime,t);
+    g.uniform3f(uLight,Math.sin(t*0.3)*0.5-0.2, 0.7, 0.75);
+    g.bindBuffer(g.ARRAY_BUFFER,vBuf);g.enableVertexAttribArray(aPos);g.vertexAttribPointer(aPos,3,g.FLOAT,false,0,0);
+    g.bindBuffer(g.ARRAY_BUFFER,nBuf);g.enableVertexAttribArray(aNor);g.vertexAttribPointer(aNor,3,g.FLOAT,false,0,0);
+    g.bindBuffer(g.ELEMENT_ARRAY_BUFFER,iBuf);
+    g.drawElements(g.TRIANGLES,iData.length,g.UNSIGNED_SHORT,0);
     requestAnimationFrame(frame);
   })();
 }
 
-// Demo L8 - Instancing: 1 million grass blades
 function d8(cont){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-top"><div class="demo-label"><div class="live-dot"></div>實例化 — 大量草地渲染</div></div><canvas id="cv4-8" width="600" height="280" style="height:280px"></canvas></div>
   <div class="slider-row"><span class="slider-label">🌾 草的數量</span><input type="range" min="100" max="5000" value="2000" step="100" id="grass-n"><span class="slider-val" id="grass-nv">2000</span></div>
@@ -1006,7 +1091,7 @@ function d10(cont){
   var tmp=document.createElement('canvas');tmp.width=bW;tmp.height=bH;
   tmp.getContext('2d').putImageData(img,0,0);
   var scaleX=W/bW*.9,scaleY=H/bH*.9;
-  var t=0;
+  var t=1.0;
   (function frame(){
     t+=.012;
     var mode=window._nmMode;
