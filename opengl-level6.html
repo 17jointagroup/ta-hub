@@ -16,7 +16,7 @@ html{font-size:20px;}
   --glow:0 0 28px rgba(0,212,255,.3);
 }
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden}
+body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden;min-height:100vh;padding-bottom:120px}
 .stars{position:fixed;inset:0;pointer-events:none;z-index:0}
 .star{position:absolute;border-radius:50%;background:#88eeff;animation:tw var(--d,3s) var(--dl,0s) infinite}
 @keyframes tw{0%,100%{opacity:.08}50%{opacity:.7}}
@@ -45,7 +45,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(4,12,16,.9);backdrop-fi
 .lesson:hover:not(.locked){border-color:rgba(0,212,255,.4);box-shadow:var(--glow)}
 .lesson.locked{opacity:.45;cursor:not-allowed}
 .lesson.active{border-color:var(--acc);box-shadow:var(--glow)}
-.lesson.done{border-color:rgba(122,255,238,.4)}
+.lesson.done{}
 .lesson.boss:hover:not(.locked),.lesson.boss.active{border-color:var(--acc3);box-shadow:0 0 24px rgba(255,107,157,.3)}
 .lesson-header{display:flex;align-items:center;gap:16px;padding:16px 20px}
 .lesson-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
@@ -257,7 +257,7 @@ function makeStars(){const c=document.getElementById('stars');for(let i=0;i<90;i
 makeStars();
 function updateXP(){const total=earned.reduce((s,id)=>{const l=LESSONS.find(x=>x.id===id);return s+(l?l.xp:0);},0);document.getElementById('xp-fill').style.width=(total/TOTAL_XP*100)+'%';document.getElementById('xp-total').textContent=total+'/'+TOTAL_XP;document.getElementById('done-count').textContent=earned.length;}
 function showXPPop(xp,el){const r=el.getBoundingClientRect();const d=document.createElement('div');d.className='xp-pop';d.textContent='+'+xp+' ⚡';d.style.cssText=`left:${r.left+r.width/2-25}px;top:${r.top+window.scrollY-10}px`;document.body.appendChild(d);setTimeout(()=>d.remove(),950);}
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600);}
 function render(){
   const list=document.getElementById('lesson-list');list.innerHTML='';
   LESSONS.forEach((les,idx)=>{
@@ -281,7 +281,7 @@ function buildBody(les,done){
   return `<div class="tab-bar"><div class="tab on" onclick="switchTab(this,'s-${les.id}','${les.id}')">📖 故事</div><div class="tab" onclick="switchTab(this,'d-${les.id}','${les.id}')">🎮 互動</div><div class="tab" onclick="switchTab(this,'c-${les.id}','${les.id}')">💻 程式碼</div></div><div class="tab-content"><div id="s-${les.id}" class="tab-panel on"><div class="story-box">${les.story}<div class="school-badge">📚 ${les.school}</div></div><div class="quiz-box"><div class="quiz-title">🎯 挑戰問題</div><div class="quiz-q">${les.quiz.q}</div><div class="opts">${opts}</div><div class="explain-box" id="ex-${les.id}"></div></div><button class="done-btn" id="btn-${les.id}" onclick="complete('${les.id}')" ${done?'disabled':''}>${done?'✅ 已完成！':'⚡ 完成此關 → 解鎖下一關'}</button></div><div id="d-${les.id}" class="tab-panel"><div id="dc-${les.id}"><div style="text-align:center;padding:40px;color:var(--txt2)">🎮 載入 Demo…</div></div></div><div id="c-${les.id}" class="tab-panel">${buildCode(les)}</div></div>`;
 }
 function switchTab(el,panelId,lid){const body=document.getElementById('L'+lid).querySelector('.lesson-body');body.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));body.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById(panelId).classList.add('on');if(panelId.startsWith('d-'))initDemo(lid);}
-function checkQ(lid,idx){const les=LESSONS.find(l=>l.id===lid);document.querySelectorAll(`[id^="opt-${lid}-"]`).forEach((o,i)=>{o.classList.add('disabled');if(i===les.quiz.ans)o.classList.add('correct');else if(i===idx)o.classList.add('wrong');});const ex=document.getElementById('ex-'+lid);ex.innerHTML='💡 '+les.quiz.explain;ex.style.display='block';}
+function checkQ(lid,idx){const les=LESSONS.find(l=>l.id===lid);document.querySelectorAll(`[id^="opt-${lid}-"]`).forEach((o,i)=>{o.classList.add('disabled');if(i===idx){o.classList.add(i===les.quiz.ans?'correct':'wrong');}});const ex=document.getElementById('ex-'+lid);ex.innerHTML='❌ 答錯了，再試試看！';ex.style.display='block';}
 function complete(id){if(earned.includes(id))return;earned.push(id);localStorage.setItem('tower6_done',JSON.stringify(earned));setTimeout(checkCompletion,400);const les=LESSONS.find(l=>l.id===id);const btn=document.getElementById('btn-'+id);showXPPop(les.xp,btn);toast(`⚗️ +${les.xp} XP！「${les.title}」完成！`);setTimeout(()=>{current=null;render();updateXP();},500);}
 
 const inited={};
@@ -799,6 +799,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 // Also check after any storage changes
 window.addEventListener('storage', checkCompletion);
+
+// Hide overlay on back-forward cache restore
+window.addEventListener('pageshow', (e) => {
+  // Clear overlay/toast
+  const overlay = document.getElementById('compOverlay');
+  if (overlay) overlay.classList.remove('show');
+  const toast = document.getElementById('toast');
+  if (toast) toast.classList.remove('show');
+  // On bfcache restore: reset and re-render lessons cleanly
+  if (e.persisted) {
+    if (typeof currentLesson !== 'undefined') currentLesson = null;
+    if (typeof renderLessons === 'function') renderLessons();
+  }
+});
 </script>
 
 <!-- Completion Overlay -->

@@ -605,11 +605,12 @@ function checkAnswer(lessonId, idx){
   const opts = document.querySelectorAll(`[id^="opt-${lessonId}-"]`);
   opts.forEach((o,i)=>{
     o.onclick=null;
-    if(i===lesson.challenge.ans) o.classList.add('correct');
-    else if(i===idx && i!==lesson.challenge.ans) o.classList.add('wrong');
+    if(i===idx){
+      o.classList.add(i===lesson.challenge.ans?'correct':'wrong');
+    }
   });
   const ex = document.getElementById('explain-'+lessonId);
-  ex.textContent = '💡 '+lesson.challenge.explain;
+  ex.textContent = '❌ 答錯了，再試試看！';
   ex.style.display='block';
 }
 

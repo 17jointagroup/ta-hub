@@ -17,7 +17,7 @@ html{font-size:20px;}
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden}
+body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden;min-height:100vh;padding-bottom:120px}
 
 /* Stars */
 .stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -58,7 +58,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(9,8,15,.88);backdrop-fi
 .lesson:hover:not(.locked){border-color:rgba(255,217,61,.4);box-shadow:var(--glow)}
 .lesson.locked{opacity:.45;cursor:not-allowed}
 .lesson.active{border-color:var(--acc);box-shadow:var(--glow)}
-.lesson.done{border-color:rgba(0,212,255,.5)}
+.lesson.done{}
 .lesson.boss{border-color:rgba(255,107,157,.25)}
 .lesson.boss:hover:not(.locked),.lesson.boss.active{border-color:var(--acc2);box-shadow:0 0 24px rgba(255,107,157,.3)}
 .lesson-header{display:flex;align-items:center;gap:16px;padding:18px 20px}
@@ -73,7 +73,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(9,8,15,.88);backdrop-fi
 .lesson-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .xp-pill{background:rgba(255,217,61,.08);color:var(--acc);border:1px solid rgba(255,217,61,.25);border-radius:100px;padding:3px 10px;font-size:.72rem;font-weight:900;font-family:var(--mono)}
 .boss-pill{background:rgba(255,107,157,.08);color:var(--acc2);border:1px solid rgba(255,107,157,.3);border-radius:100px;padding:3px 10px;font-size:.7rem;font-weight:900}
-.check{width:28px;height:28px;border-radius:50%;background:rgba(0,212,255,.12);color:var(--acc3);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900}
+.check{width:28px;height:28px;border-radius:50%;background:transparent;color:var(--txt2);display:flex;align-items:center;justify-content:center;font-size:.9rem}
 .lock{width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--txt2);display:flex;align-items:center;justify-content:center;font-size:.82rem}
 
 /* Lesson body */
@@ -424,8 +424,7 @@ function showXPPop(xp,el){
 
 function toast(msg){
   const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2600);
+  t.textContent=msg;t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600);
 }
 
 // Render
@@ -524,11 +523,12 @@ function checkQ(lid,idx){
   const les=LESSONS.find(l=>l.id===lid);
   document.querySelectorAll(`[id^="opt-${lid}-"]`).forEach((o,i)=>{
     o.classList.add('disabled');
-    if(i===les.quiz.ans)o.classList.add('correct');
-    else if(i===idx)o.classList.add('wrong');
+    if(i===idx){
+      o.classList.add(i===les.quiz.ans?'correct':'wrong');
+    }
   });
   const ex=document.getElementById('ex-'+lid);
-  ex.innerHTML='💡 '+les.quiz.explain;ex.style.display='block';
+  ex.innerHTML = idx===les.quiz.ans ? '✅ 正確！' : '❌ 答錯了，再試試看！';ex.style.display='block';
 }
 
 function complete(id){
@@ -1240,6 +1240,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 // Also check after any storage changes
 window.addEventListener('storage', checkCompletion);
+
+// Hide overlay on back-forward cache restore
+window.addEventListener('pageshow', (e) => {
+  // Clear overlay/toast
+  const overlay = document.getElementById('compOverlay');
+  if (overlay) overlay.classList.remove('show');
+  const toast = document.getElementById('toast');
+  if (toast) toast.classList.remove('show');
+  // On bfcache restore: reset and re-render lessons cleanly
+  if (e.persisted) {
+    if (typeof currentLesson !== 'undefined') currentLesson = null;
+    if (typeof renderLessons === 'function') renderLessons();
+  }
+});
 </script>
 
 <!-- Completion Overlay -->
