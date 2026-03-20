@@ -107,6 +107,7 @@ html,body{font-family:'Nunito',sans-serif;overflow:hidden;height:100%;background
     </div>
   </div>
   <button class="hbtn" onclick="location.href='index.html'">🏠</button>
+    <button class="hbtn" onclick="location.href='opengl-map.html'">🏰</button>
 </div>
 
 <div class="outer" id="outer">
@@ -332,7 +333,7 @@ function renderCastles(hi){
       '<div class="c-stars">'+stars+'</div>'+
     '</div>';
 
-    if(unlocked){div.addEventListener('click',function(id){return function(){location.href='dx-dx-level'+id+'.html';};}(c.id));}
+    if(unlocked){div.addEventListener('click',function(id){return function(){location.href='dx-level'+id+'.html';};}(c.id));}
     layer.appendChild(div);
   });
 }

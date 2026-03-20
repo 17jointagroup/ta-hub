@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚔️ DirectX 要塞1 — HLSL 魔法王國</title>
+<title>⚔️ DirectX 要塞2 — 光影要塞</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 html{font-size:20px;}
@@ -119,7 +119,7 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 <header>
   <a href="dx-map.html" class="back-btn">🗺️ DX 地圖</a>
   <a href="index.html" class="back-btn">🏠 首頁</a>
-  <span class="header-title">⚔️ DirectX 要塞1</span>
+  <span class="header-title" style="color:var(--acc4)">🛡️ 光影要塞2</span>
   <div class="xp-bar">
     <span style="color:var(--txt2)">⚡</span>
     <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
@@ -127,119 +127,139 @@ input[type=range]{flex:1;accent-color:var(--acc)}
   </div>
 </header>
 <section class="hero">
-  <div class="tower-badge">⚔️ 要塞1 · 起源之城 · DirectX 11 Fundamentals</div>
-  <h1>征服 <span>DirectX 11</span></h1>
-  <p>DirectX 是 Windows 的圖形 API — 從 Xbox 到 AAA 遊戲都靠它！學會 HLSL，直接跟 GPU 說話！</p>
+  <div class="tower-badge" style="background:rgba(255,159,67,.12);border-color:rgba(255,159,67,.3);color:var(--acc4)">🛡️ 要塞2 · 光影要塞 · Advanced Lighting</div>
+  <h1>駕馭 <span style="background:linear-gradient(135deg,var(--acc4),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">光與影</span></h1>
+  <p>Specular、Bump Map、Point Light、Fog — 讓你的 DirectX 場景脫胎換骨！</p>
   <div class="stats-row">
     <div class="stat-chip"><div class="num" id="done-count">0</div><div class="lbl">已完成</div></div>
-    <div class="stat-chip"><div class="num">9</div><div class="lbl">關卡總數</div></div>
+    <div class="stat-chip"><div class="num">8</div><div class="lbl">關卡總數</div></div>
     <div class="stat-chip"><div class="num">920</div><div class="lbl">XP 總值</div></div>
     <div class="stat-chip"><div class="num">👑</div><div class="lbl">Boss 1 關</div></div>
   </div>
 </section>
 <div class="chapter-map"><div id="lesson-list"></div></div>
 <div class="toast" id="toast"></div>
-
 <script>
 (function(){
-  const s=document.getElementById('stars');
+  const s=document.getElementById("stars");
   for(let i=0;i<70;i++){
-    const d=document.createElement('div');d.className='star';
-    d.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;--d:'+(2+Math.random()*4)+'s;--dl:'+Math.random()*4+'s';
+    const d=document.createElement("div");d.className="star";
+    d.style.cssText="left:"+Math.random()*100+"%;top:"+Math.random()*100+"%;--d:"+(2+Math.random()*4)+"s;--dl:"+Math.random()*4+"s";
     s.appendChild(d);
   }
 })();
 
-const CASTLE_KEY='dx1_done', CASTLE_TOTAL=9, CASTLE_NUM=1, NEXT_CASTLE=2;
-let earned=JSON.parse(localStorage.getItem(CASTLE_KEY)||'[]');
+const CASTLE_KEY="dx2_done", CASTLE_TOTAL=8, CASTLE_NUM=2, NEXT_CASTLE=3;
+let earned=JSON.parse(localStorage.getItem(CASTLE_KEY)||"[]");
 let currentLesson=null;
 const demoInited={};
 
 const LESSONS=[
-  {id:"d1",num:"1-1",icon:"🛠️",title:"設定 DirectX 11 開發環境",desc:"Visual Studio 2022 + Windows SDK，準備出發！",xp:80,type:"normal",q:"DirectX 11 需要額外安裝哪個 SDK？",opts:["DirectX SDK（舊版）","Windows SDK（已內含）","OpenGL SDK","不需要 SDK"],ans:1,src:"rastertek.com/dx11win10tut01.html",story:`<span class="emoji-big">🛠️</span>DirectX 11 是 <span class="hl">Windows 原生</span>的圖形 API，不需要額外 SDK！<br><br>你只需要：<br>🔹 <span class="hl">Visual Studio 2022 Community</span>（免費）<br>🔹 安裝 <span class="hl">Game development with C++</span> 工作負載<br>🔹 Windows SDK 自動包含所有標頭和函式庫<br><br>和 OpenGL 不同：DirectX 是 <span class="hl">Microsoft 獨家</span>，只跑 Windows，但與 Xbox 完整整合！`,code:`<span class="cm">// DirectX11 標頭</span>
-<span class="kw">#include</span> <span class="str">&lt;d3d11.h&gt;</span>
-<span class="kw">#include</span> <span class="str">&lt;d3dcompiler.h&gt;</span>
-<span class="kw">#include</span> <span class="str">&lt;DirectXMath.h&gt;</span>
-<span class="kw">#pragma</span> comment(lib, <span class="str">"d3d11.lib"</span>)
-<span class="kw">#pragma</span> comment(lib, <span class="str">"dxgi.lib"</span>)`},
-  {id:"d2",num:"1-2",icon:"🪟",title:"建立框架與視窗",desc:"WinMain、SystemClass、ApplicationClass 架構",xp:100,type:"normal",q:"ApplicationClass 主要負責什麼？",opts:["處理鍵盤輸入","圖形渲染管理","管理視窗建立","處理網路"],ans:1,src:"rastertek.com/dx11win10tut02.html",story:`<span class="emoji-big">🪟</span>DirectX 程式骨架：<br><br><span class="hl">WinMain</span> → 入口點<br><span class="hl">SystemClass</span> → 封裝整個應用程式<br>&nbsp;&nbsp;├── <span class="hl">InputClass</span> → 鍵盤輸入<br>&nbsp;&nbsp;└── <span class="hl">ApplicationClass</span> → 圖形渲染<br><br>Win32 視窗建立後，用 <span class="hl">HWND</span> 傳給 DirectX 使用。`,code:`<span class="cm">// main.cpp — 入口點</span>
-<span class="kw">int</span> WINAPI <span class="fn">WinMain</span>(HINSTANCE h, HINSTANCE, PSTR, <span class="kw">int</span>) {
-  <span class="tp">SystemClass</span>* S = <span class="kw">new</span> <span class="tp">SystemClass</span>;
-  <span class="kw">if</span>(S-><span class="fn">Initialize</span>()) S-><span class="fn">Run</span>();
-  S-><span class="fn">Shutdown</span>(); <span class="kw">delete</span> S;
-  <span class="kw">return</span> <span class="num">0</span>;
-}`},
-  {id:"d3",num:"1-3",icon:"⚙️",title:"初始化 Direct3D",desc:"Device、DeviceContext、SwapChain 三劍客",xp:120,type:"normal",q:"SwapChain 的主要功能是？",opts:["建立 Buffer 資源","前後緩衝互換消除撕裂","處理輸入","載入紋理"],ans:1,src:"rastertek.com/dx11win10tut03.html",story:`<span class="emoji-big">⚙️</span>三個核心 DirectX 物件：<br><br>🔹 <span class="hl">ID3D11Device</span> — 硬體介面，建立資源<br>🔹 <span class="hl">ID3D11DeviceContext</span> — 命令列表，發出渲染指令<br>🔹 <span class="hl">IDXGISwapChain</span> — 雙緩衝，前後互換顯示<br><br>用 <span class="hl">D3D11CreateDeviceAndSwapChain()</span> 一次建立全部！`,code:`<span class="tp">DXGI_SWAP_CHAIN_DESC</span> sd = {};
-sd.BufferCount = <span class="num">1</span>;
-sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-sd.OutputWindow = hwnd;
-sd.Windowed = <span class="num">TRUE</span>;
-<span class="fn">D3D11CreateDeviceAndSwapChain</span>(
-  <span class="kw">nullptr</span>, D3D_DRIVER_TYPE_HARDWARE,
-  <span class="kw">nullptr</span>, <span class="num">0</span>, <span class="kw">nullptr</span>, <span class="num">0</span>,
-  D3D11_SDK_VERSION, &sd,
-  &m_swapChain, &m_device, <span class="kw">nullptr</span>, &m_deviceContext);`},
-  {id:"d4",num:"1-4",icon:"🔺",title:"Vertex Buffer 與第一個三角形",desc:"VB、IB、頂點結構體，左手座標系",xp:120,type:"normal",q:"DirectX 11 用什麼座標系？",opts:["右手座標系（Z 朝你）","左手座標系（Z 朝畫面裡）","兩者都支援","無座標系"],ans:1,src:"rastertek.com/dx11win10tut04.html",story:`<span class="emoji-big">🔺</span>3D 世界由三角形組成，三角形由頂點組成。<br><br><span class="hl">Vertex Buffer</span> — 儲存頂點資料<br><span class="hl">Index Buffer</span> — 索引重用頂點<br><br>⚠️ <span class="hl">左手座標系</span>：Z 朝畫面裡（OpenGL 是右手，Z 朝你）<br>三角形用<span class="hl">順時針</span>繞序（OpenGL 用逆時針）`,code:`<span class="kw">struct</span> <span class="tp">VertexType</span> { <span class="tp">XMFLOAT3</span> pos; <span class="tp">XMFLOAT4</span> col; };
-<span class="tp">VertexType</span> verts[<span class="num">3</span>] = {
-  { <span class="tp">XMFLOAT3</span>(-<span class="num">1</span>,-<span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">1,0,0,1</span>) },
-  { <span class="tp">XMFLOAT3</span>( <span class="num">0</span>, <span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">0,1,0,1</span>) },
-  { <span class="tp">XMFLOAT3</span>( <span class="num">1</span>,-<span class="num">1</span>,<span class="num">0</span>), <span class="tp">XMFLOAT4</span>(<span class="num">0,0,1,1</span>) },
-};
-m_device-><span class="fn">CreateBuffer</span>(&vbd, &init, &m_vb);`},
-  {id:"d5",num:"1-5",icon:"✨",title:"HLSL — GPU 的程式語言",desc:"Vertex Shader、Pixel Shader、Constant Buffer",xp:120,type:"normal",q:"cbuffer 的主要用途是？",opts:["儲存紋理","從 CPU 傳矩陣等資料給 Shader","定義頂點結構","控制混合"],ans:1,src:"rastertek.com/dx11win10tut04.html",story:`<span class="emoji-big">✨</span><span class="hl">HLSL</span> 是 DirectX 的著色器語言！<br><br>🔹 <span class="hl">Vertex Shader (.vs)</span> — 處理頂點位置<br>🔹 <span class="hl">Pixel Shader (.ps)</span> — 決定像素顏色<br><br>HLSL 語義：<code style="color:var(--acc2)">POSITION, SV_POSITION, TEXCOORD0, COLOR</code><br><br><span class="hl">cbuffer</span> = 從 CPU 傳資料（MVP 矩陣）給 Shader`,code:`<span class="tp">cbuffer</span> MatrixBuffer : register(b0) {
-  <span class="tp">matrix</span> worldMatrix;
-  <span class="tp">matrix</span> viewMatrix;
-  <span class="tp">matrix</span> projectionMatrix;
-};
-<span class="tp">PixelInput</span> <span class="fn">VS</span>(<span class="tp">VertexInput</span> input) {
-  <span class="tp">PixelInput</span> o;
-  input.position.w = <span class="num">1.0f</span>;
-  o.position = <span class="fn">mul</span>(input.position, worldMatrix);
-  o.position = <span class="fn">mul</span>(o.position, viewMatrix);
-  o.position = <span class="fn">mul</span>(o.position, projectionMatrix);
-  <span class="kw">return</span> o;
-}`},
-  {id:"d6",num:"1-6",icon:"🖼️",title:"貼圖與取樣器",desc:"Texture2D、SamplerState、UV 座標系統",xp:100,type:"normal",q:"DirectX 的 UV V=0 在哪裡？",opts:["畫面下方","畫面上方（與 OpenGL 相反）","畫面左方","畫面中心"],ans:1,src:"rastertek.com/dx11win10tut05.html",story:`<span class="emoji-big">🖼️</span><span class="hl">Texture2D</span> — 紋理物件<br><span class="hl">SamplerState</span> — 控制取樣方式<br><br>HLSL 取樣：<br><code style="color:var(--acc2)">shaderTexture.Sample(sampleType, input.tex)</code><br><br>⚠️ <span class="hl">重要差異</span>：DirectX UV 的 V=0 在<span class="hl">上方</span>（OpenGL 在下方！）`,code:`<span class="tp">Texture2D</span>    shaderTexture : register(t0);
-<span class="tp">SamplerState</span> sampleType   : register(s0);
+  {id:"e1",num:"2-1",icon:"📐",title:"2D 渲染與正交投影",desc:"Orthographic projection、2D sprite、UI 渲染",xp:100,type:"normal",q:"Orthographic 和 Perspective 最大差別？",opts:["Orthographic 沒有近大遠小","Orthographic 速度更慢","Perspective 只能 3D","沒有差別"],ans:0,src:"rastertek.com/dx11win10tut11.html",story:`<span class="emoji-big">📐</span>2D 渲染需要切換到 <span class="hl">Orthographic（正交）投影</span>！<br><br>🔹 <span class="hl">Perspective</span> — 透視投影，遠小近大（3D 感）<br>🔹 <span class="hl">Orthographic</span> — 正交投影，遠近大小相同（UI 用）<br><br>建立正交矩陣：<br><code style="color:var(--acc2)">XMMatrixOrthographicLH(screenW, screenH, near, far)</code><br><br>渲染順序：先畫 3D → <span class="hl">關閉深度測試</span> → 畫 2D UI → 重新開啟`,code:`<span class="cm">// 切換到正交投影渲染 2D</span>
+<span class="tp">XMMATRIX</span> ortho = <span class="fn">XMMatrixOrthographicLH</span>(
+  (<span class="kw">float</span>)screenW, (<span class="kw">float</span>)screenH,
+  <span class="num">0.1f</span>, <span class="num">1000.0f</span>);
 
-<span class="tp">float4</span> <span class="fn">PS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
-  <span class="kw">return</span> shaderTexture.<span class="fn">Sample</span>(sampleType, i.tex);
-}
-<span class="cm">// C++ 建立 SamplerState</span>
-<span class="tp">D3D11_SAMPLER_DESC</span> sd = {};
-sd.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-sd.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-m_device-><span class="fn">CreateSamplerState</span>(&sd, &m_ss);`},
-  {id:"d7",num:"1-7",icon:"💡",title:"Diffuse 漫反射光照",desc:"法線向量、光方向、Lambert 光照模型",xp:100,type:"normal",q:"Diffuse 光照使用什麼數學運算？",opts:["叉積 cross product","點積 dot product","矩陣乘法","三角函數"],ans:1,src:"rastertek.com/dx11win10tut06.html",story:`<span class="emoji-big">💡</span>光照讓 3D 物體看起來立體！DirectX 在 Pixel Shader 裡計算。<br><br><span class="hl">Lambert 漫反射</span>公式：<br><code style="color:var(--acc2)">float i = saturate(dot(normal, -lightDir));</code><br><br>🔹 <span class="hl">dot()</span> — 點積，計算法線與光的夾角<br>🔹 <span class="hl">saturate()</span> — 夾在 [0, 1]<br>🔹 <span class="hl">normalize()</span> — 正規化向量`,code:`<span class="tp">cbuffer</span> LightBuffer : register(b0) {
-  <span class="tp">float4</span> ambientColor, diffuseColor;
-  <span class="tp">float3</span> lightDirection; <span class="tp">float</span> padding;
+<span class="cm">// 渲染流程</span>
+Render3DScene();             <span class="cm">// 先畫 3D</span>
+m_D3D-><span class="fn">TurnZBufferOff</span>(); <span class="cm">// 關閉深度</span>
+Render2DUI(ortho);           <span class="cm">// 畫 2D UI</span>
+m_D3D-><span class="fn">TurnZBufferOn</span>();  <span class="cm">// 重新開啟</span>`},
+  {id:"e2",num:"2-2",icon:"💡",title:"Specular 高光反射",desc:"Phong 光照、鏡面反射、Shininess 控制",xp:120,type:"normal",q:"Specular highlight 的強度由哪個參數控制？",opts:["光的顏色","Shininess（光澤度）","法線方向","環境光強度"],ans:1,src:"rastertek.com/dx11win10tut10.html",story:`<span class="emoji-big">💡</span>Specular（高光）讓物體表面有光澤感！<br><br><span class="hl">Phong = Ambient + Diffuse + Specular</span><br><br><code style="color:var(--acc2)">float3 R = reflect(-lightDir, normal);<br>float spec = pow(saturate(dot(R, viewDir)), shininess);</code><br><br>🔹 <span class="hl">shininess 高</span> → 高光小且亮（金屬感）<br>🔹 <span class="hl">shininess 低</span> → 高光大且散（塑膠感）`,code:`<span class="tp">cbuffer</span> LightBuffer : register(b0) {
+  <span class="tp">float4</span> diffuseColor, specularColor;
+  <span class="tp">float3</span> lightDir; <span class="tp">float</span> specularPower;
 };
-<span class="tp">float4</span> <span class="fn">PS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
-  <span class="tp">float4</span> color = ambientColor;
-  <span class="tp">float</span>  intensity = <span class="fn">saturate</span>(<span class="fn">dot</span>(i.normal, -lightDirection));
-  <span class="kw">if</span>(intensity > <span class="num">0.0f</span>) color += diffuseColor * intensity;
-  <span class="kw">return</span> <span class="fn">saturate</span>(color) * shaderTexture.<span class="fn">Sample</span>(sampleType, i.tex);
+<span class="tp">float4</span> <span class="fn">SpecPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="tp">float3</span> viewDir = <span class="fn">normalize</span>(cameraPos - i.worldPos);
+  <span class="tp">float3</span> R = <span class="fn">reflect</span>(-lightDir, i.normal);
+  <span class="tp">float</span> spec = <span class="fn">pow</span>(<span class="fn">saturate</span>(<span class="fn">dot</span>(R, viewDir)), specularPower);
+  <span class="kw">return</span> diffuseColor * diffuse + specularColor * spec;
 }`},
-  {id:"d8",num:"1-8",icon:"📦",title:"3D 模型系統",desc:"ModelClass、輸入裝配階段、DrawIndexed",xp:100,type:"normal",q:"IASetPrimitiveTopology 設定什麼？",opts:["紋理格式","頂點組合方式（三角形/線/點）","深度測試","混合模式"],ans:1,src:"rastertek.com/dx11win10tut07.html",story:`<span class="emoji-big">📦</span>DirectX 的模型渲染流程：<br><br>1️⃣ <span class="hl">Initialize()</span> — 建立 VB/IB<br>2️⃣ <span class="hl">Render()</span> — 設定 IA Stage，繪製<br><br>設定輸入裝配（Input Assembler）後，用 <span class="hl">DrawIndexed()</span> 送出繪製指令`,code:`<span class="kw">void</span> <span class="tp">ModelClass</span>::<span class="fn">Render</span>(<span class="tp">ID3D11DeviceContext</span>* ctx) {
-  <span class="kw">unsigned int</span> stride = <span class="kw">sizeof</span>(<span class="tp">VertexType</span>);
-  <span class="kw">unsigned int</span> offset = <span class="num">0</span>;
-  ctx-><span class="fn">IASetVertexBuffers</span>(<span class="num">0</span>, <span class="num">1</span>, &m_vb, &stride, &offset);
-  ctx-><span class="fn">IASetIndexBuffer</span>(m_ib, DXGI_FORMAT_R32_UINT, <span class="num">0</span>);
-  ctx-><span class="fn">IASetPrimitiveTopology</span>(
-    D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-}
-ctx-><span class="fn">DrawIndexed</span>(m_indexCount, <span class="num">0</span>, <span class="num">0</span>);`},
-  {id:"d9",num:"1-9",icon:"👑",title:"Boss：Alpha Blending 透明混合",desc:"Blend State、透明效果、渲染排序",xp:180,type:"boss",q:"Alpha Blending 的正確渲染順序是？",opts:["從近到遠（前景先畫）","從遠到近（背景先畫）","隨機順序","依 Alpha 值排序"],ans:1,src:"rastertek.com/dx11win10tut10.html",story:`<span class="emoji-big">👑</span>Alpha Blending 讓你渲染半透明的玻璃、火焰、UI！<br><br>用 <span class="hl">Blend State</span> 控制混合：<br><code style="color:var(--acc2)">SrcBlend=SRC_ALPHA, DestBlend=INV_SRC_ALPHA, BlendOp=ADD</code><br><br>⚠️ <span class="hl">渲染排序</span>：必須從遠到近（Painter Algorithm）<br>否則半透明物體會遮住後面的東西！`,code:`<span class="tp">D3D11_BLEND_DESC</span> bd = {};
-bd.RenderTarget[<span class="num">0</span>].BlendEnable = <span class="num">TRUE</span>;
-bd.RenderTarget[<span class="num">0</span>].SrcBlend  = D3D11_BLEND_SRC_ALPHA;
-bd.RenderTarget[<span class="num">0</span>].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-bd.RenderTarget[<span class="num">0</span>].BlendOp   = D3D11_BLEND_OP_ADD;
-bd.RenderTarget[<span class="num">0</span>].RenderTargetWriteMask = <span class="num">0x0f</span>;
-m_device-><span class="fn">CreateBlendState</span>(&bd, &m_blendState);
-<span class="tp">float</span> bf[<span class="num">4</span>] = {<span class="num">0,0,0,0</span>};
-ctx-><span class="fn">OMSetBlendState</span>(m_blendState, bf, <span class="num">0xffffffff</span>);`},
+  {id:"e3",num:"2-3",icon:"🗺️",title:"Light Map 光照貼圖",desc:"預烘焙靜態光照、Multitexture 混合",xp:100,type:"normal",q:"Light Map 最大的優勢是什麼？",opts:["可以動態更新光源","預烘焙靜態光照，節省即時計算成本","比即時光照更精確","支援無限光源"],ans:1,src:"rastertek.com/dx11win10tut16.html",story:`<span class="emoji-big">🗺️</span><span class="hl">Light Map</span> = 把靜態光照預先烘焙成貼圖！<br><br>優勢：<br>🔹 <span class="hl">零即時計算成本</span> — 光照已烘焙好<br>🔹 <span class="hl">高品質靜態陰影</span> — 支援複雜間接光<br>🔹 <span class="hl">效能極佳</span> — 適合低階硬體<br><br>兩張貼圖相乘：<br><code style="color:var(--acc2)">color = colorTex.Sample(ss, tex) * lightTex.Sample(ss, tex);</code><br><br>劣勢：光源不能移動。UE5 的 Lumen 就是為了解決這個問題！`,code:`<span class="tp">Texture2D</span> colorTex : register(t0);
+<span class="tp">Texture2D</span> lightTex  : register(t1);
+
+<span class="tp">float4</span> <span class="fn">LightMapPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="tp">float4</span> color = colorTex.<span class="fn">Sample</span>(ss, i.tex);
+  <span class="tp">float4</span> light = lightTex.<span class="fn">Sample</span>(ss, i.tex);
+  <span class="kw">return</span> <span class="fn">saturate</span>(color * light * <span class="num">2.0f</span>);
+}`},
+  {id:"e4",num:"2-4",icon:"🏔️",title:"Bump Mapping 凹凸貼圖",desc:"Normal Map、TBN 切線空間、表面細節",xp:120,type:"normal",q:"Normal Map 儲存的是什麼資訊？",opts:["物體的高度差","每個像素的法線方向（RGB=XYZ）","物體的顏色","材質粗糙度"],ans:1,src:"rastertek.com/dx11win10tut20.html",story:`<span class="emoji-big">🏔️</span><span class="hl">Bump Mapping</span> 用貼圖偽造表面細節，不增加多邊形！<br><br><span class="hl">Normal Map</span>：RGB 儲存法線方向（R=X、G=Y、B=Z）<br><br>計算流程：<br>1️⃣ 從 Normal Map 取出法線<br>2️⃣ 轉換到 <span class="hl">TBN 切線空間</span><br>3️⃣ 用新法線計算光照<br><br>效果：低多邊形 + Normal Map = 高細節視覺效果！`,code:`<span class="tp">Texture2D</span> normalTex : register(t1);
+
+<span class="tp">float4</span> <span class="fn">BumpPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="tp">float4</span> bump = normalTex.<span class="fn">Sample</span>(ss, i.tex);
+  bump = (bump * <span class="num">2.0f</span>) - <span class="num">1.0f</span>; <span class="cm">// [0,1]→[-1,1]</span>
+  <span class="tp">float3</span> N = <span class="fn">normalize</span>(
+    bump.x * i.tangent +
+    bump.y * i.binormal +
+    bump.z * i.normal);
+  <span class="tp">float</span> d = <span class="fn">saturate</span>(<span class="fn">dot</span>(N, lightDir));
+  <span class="kw">return</span> colorTex.<span class="fn">Sample</span>(ss, i.tex) * d;
+}`},
+  {id:"e5",num:"2-5",icon:"🔵",title:"Point Light 點光源",desc:"位置光源、距離衰減 Attenuation",xp:120,type:"normal",q:"Point Light 和 Directional Light 最大的差別？",opts:["顏色更豐富","有位置和距離衰減，Directional 只有方向","效能更差","沒有本質差別"],ans:1,src:"rastertek.com/dx11win10tut16.html",story:`<span class="emoji-big">🔵</span><span class="hl">Point Light</span> 從一個位置向所有方向發光，光照強度隨距離衰減！<br><br>衰減公式（Attenuation）：<br><code style="color:var(--acc2)">float dist = length(lightPos - worldPos);<br>float att = 1.0 / (1.0 + 0.09*dist + 0.032*dist*dist);</code><br><br>🔹 <span class="hl">constant</span> = 保持近距離不爆<br>🔹 <span class="hl">linear</span> = 線性衰減<br>🔹 <span class="hl">quadratic</span> = 二次衰減（遠處更快消散）`,code:`<span class="tp">float4</span> <span class="fn">PointLightPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="tp">float3</span> toLight = lightPos - i.worldPos;
+  <span class="tp">float</span>  dist = <span class="fn">length</span>(toLight);
+  <span class="kw">if</span>(dist > lightRange) <span class="kw">return</span> ambient;
+
+  <span class="tp">float3</span> dir = <span class="fn">normalize</span>(toLight);
+  <span class="tp">float</span>  att = <span class="num">1.0f</span> / (<span class="num">1.0f</span> + <span class="num">0.09f</span>*dist
+                              + <span class="num">0.032f</span>*dist*dist);
+  <span class="tp">float</span>  diff = <span class="fn">saturate</span>(<span class="fn">dot</span>(i.normal, dir));
+  <span class="kw">return</span> lightColor * diff * att;
+}`},
+  {id:"e6",num:"2-6",icon:"🌊",title:"Multitexture 多重貼圖",desc:"多張貼圖混合、Detail Map、疊加混合",xp:100,type:"normal",q:"Detail Map 的主要用途是？",opts:["儲存法線","在近距離增加細節，遠處不可見","儲存光照","控制透明度"],ans:1,src:"rastertek.com/dx11win10tut15.html",story:`<span class="emoji-big">🌊</span><span class="hl">Multitexture</span> = 同時使用多張紋理，混合產生更豐富的視覺效果！<br><br>常見用法：<br>🔹 <span class="hl">Base + Detail</span> — 近距離細節增強<br>🔹 <span class="hl">Texture + Lightmap</span> — 靜態光照疊加<br>🔹 <span class="hl">Texture + Alpha Mask</span> — 混合遮罩<br><br>HLSL 支援最多 128 個貼圖（t0 ~ t127）！`,code:`<span class="tp">Texture2D</span> tex1 : register(t0); <span class="cm">// 基礎貼圖</span>
+<span class="tp">Texture2D</span> tex2 : register(t1); <span class="cm">// 細節貼圖</span>
+<span class="tp">Texture2D</span> tex3 : register(t2); <span class="cm">// 光照貼圖</span>
+
+<span class="tp">float4</span> <span class="fn">MultiTexPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="tp">float4</span> c1 = tex1.<span class="fn">Sample</span>(ss, i.tex);
+  <span class="tp">float4</span> c2 = tex2.<span class="fn">Sample</span>(ss, i.tex * <span class="num">4.0f</span>);
+  <span class="tp">float4</span> c3 = tex3.<span class="fn">Sample</span>(ss, i.tex);
+  <span class="kw">return</span> <span class="fn">saturate</span>(c1 * c2 * c3 * <span class="num">4.0f</span>);
+}`},
+  {id:"e7",num:"2-7",icon:"💎",title:"Reflection 反射效果",desc:"Cube Map、環境貼圖、lerp 混合",xp:100,type:"normal",q:"Cube Map 用幾個面儲存環境？",opts:["4 個面","6 個面（正方體六面）","12 個面","1 張全景圖"],ans:1,src:"rastertek.com/dx11win10tut25.html",story:`<span class="emoji-big">💎</span><span class="hl">Cube Map</span> 用 6 張圖模擬環境反射！<br><br>兩種反射方式：<br>🔹 <span class="hl">Cube Map</span> — 靜態環境貼圖，效能佳<br>🔹 <span class="hl">SSR（螢幕空間反射）</span> — 動態但有局限<br><br>HLSL：<br><code style="color:var(--acc2)">TextureCube envMap;<br>float3 R = reflect(-viewDir, normal);<br>float4 ref = envMap.Sample(ss, R);</code>`,code:`<span class="tp">TextureCube</span> envMap   : register(t0);
+<span class="tp">Texture2D</span>   colorTex : register(t1);
+
+<span class="tp">float4</span> <span class="fn">ReflectPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="tp">float3</span> viewDir = <span class="fn">normalize</span>(cameraPos - i.worldPos);
+  <span class="tp">float3</span> R = <span class="fn">reflect</span>(-viewDir, i.normal);
+  <span class="tp">float4</span> env  = envMap.<span class="fn">Sample</span>(ss, R);
+  <span class="tp">float4</span> base = colorTex.<span class="fn">Sample</span>(ss, i.tex);
+  <span class="kw">return</span> <span class="fn">lerp</span>(base, env, <span class="num">0.3f</span>);
+}`},
+  {id:"e8",num:"2-8",icon:"👑",title:"Boss：Fog 霧效與後處理基礎",desc:"線性霧化、指數霧、Render Texture",xp:160,type:"boss",q:"線性霧化（Linear Fog）的核心計算是什麼？",opts:["pow(dist, 2)","lerp(fogColor, sceneColor, fogFactor)","dist * density","dot(pos, fogDir)"],ans:1,src:"rastertek.com/dx11win10tut27.html",story:`<span class="emoji-big">👑</span><span class="hl">Fog（霧效）</span>是最簡單的後處理，讓遠處物體消失在霧中！<br><br>線性霧化因子：<br><code style="color:var(--acc2)">float fog = saturate((fogEnd-dist) / (fogEnd-fogStart));<br>return lerp(fogColor, texColor, fog);</code><br><br>三種霧化類型：<br>🔹 <span class="hl">Linear</span> — 線性，簡單<br>🔹 <span class="hl">Exponential</span> — exp(-density * dist)<br>🔹 <span class="hl">Exp²</span> — 更快消散<br><br>後處理架構：先渲染到 <span class="hl">Render Texture</span>，再對整張圖做效果！`,code:`<span class="tp">cbuffer</span> FogBuffer : register(b0) {
+  <span class="tp">float</span> fogStart, fogEnd;
+  <span class="tp">float4</span> fogColor;
+};
+<span class="tp">float4</span> <span class="fn">FogPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="tp">float4</span> tex = shaderTex.<span class="fn">Sample</span>(ss, i.tex);
+  <span class="tp">float</span>  dist = i.fogFactor;
+  <span class="tp">float</span>  fog = <span class="fn">saturate</span>((fogEnd - dist) / (fogEnd - fogStart));
+  <span class="kw">return</span> <span class="fn">lerp</span>(fogColor, tex, fog);
+}`},
 ];
 
+
+// ── Sphere helper ──
+function makeSphere(r){
+  const v=[];const ST=28,SL=36;
+  function pv(lat,lon){const x=Math.cos(lat)*Math.cos(lon),y=Math.sin(lat),z=Math.cos(lat)*Math.sin(lon);v.push(x*r,y*r,z*r,x,y,z);}
+  for(let si=0;si<ST;si++){
+    const la0=(si/ST-.5)*Math.PI,la1=((si+1)/ST-.5)*Math.PI;
+    for(let li=0;li<SL;li++){
+      const lo0=li/SL*Math.PI*2,lo1=(li+1)/SL*Math.PI*2;
+      pv(la0,lo0);pv(la1,lo0);pv(la1,lo1);
+      pv(la0,lo0);pv(la1,lo1);pv(la0,lo1);
+    }
+  }
+  return new Float32Array(v);
+}
+
+function mkProg(gl,vs,fs){
+  function sh(t,src){const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+  const p=gl.createProgram();
+  gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(p);return p;
+}
 
 function updateXP(){
   const tot=earned.reduce((s,id)=>{const l=LESSONS.find(x=>x.id===id);return s+(l?l.xp:0);},0);
@@ -362,11 +382,11 @@ function makeSphere(r){
   return new Float32Array(v);
 }
 
-function demoCompare(cont,isMobile){
+function demoCompare(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-label">⚔️ DirectX 11 vs OpenGL 對比</div><div style="padding:20px;font-size:.82rem;line-height:2"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="background:rgba(232,69,69,.08);border:1px solid rgba(232,69,69,.2);border-radius:12px;padding:16px"><div style="color:var(--acc);font-weight:900;margin-bottom:10px">⚔️ DirectX 11</div><div>📦 內含於 Windows SDK</div><div>🏭 Microsoft 獨家</div><div>🎮 Xbox 完整支援</div><div>📐 左手座標系</div><div>🔧 HLSL 著色語言</div><div>💾 COM 介面</div><div>🔄 順時針繞序</div></div><div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:16px"><div style="color:var(--acc2);font-weight:900;margin-bottom:10px">🌐 OpenGL</div><div>📦 需要 GLEW/GLAD</div><div>🌍 跨平台支援</div><div>🐧 Linux/macOS/Web</div><div>📐 右手座標系</div><div>🔧 GLSL 著色語言</div><div>💾 C 函式介面</div><div>🔄 逆時針繞序</div></div></div></div></div>';
 }
 
-function demoWindow(cont,isMobile){
+function demoWindow(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🪟 Win32 訊息迴圈模擬</div><canvas style="width:100%;display:block;height:220px"></canvas></div>';
   const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=220;
   const ctx=cv.getContext("2d");let msgs=[],t=0;
@@ -383,7 +403,7 @@ function demoWindow(cont,isMobile){
   frame();
 }
 
-function demoDevice(cont,isMobile){
+function demoDevice(cont){
   const{cv,gl}=mkGL(cont,"⚙️ Direct3D 初始化狀態（WebGL 模擬）",200);
   if(!gl){cont.innerHTML="<p style=padding:20px>WebGL 不支援</p>";return;}
   const p=mkProg(gl,"attribute vec2 pos;void main(){gl_Position=vec4(pos,0,1);}","precision mediump float;uniform float t;void main(){gl_FragColor=vec4(.5+.5*sin(t),.1,.8+.2*cos(t),.8);}");
@@ -415,7 +435,7 @@ function demoTri(cont,isMobile){
   frame();
 }
 
-function demoHLSL(cont,isMobile){
+function demoHLSL(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-label">✨ HLSL Shader 即時預覽</div><canvas style="width:100%;display:block;height:220px"></canvas></div><div class="slider-row"><label>🔴 R</label><input type="range" min="0" max="100" value="88" id="hr" oninput="updH()"><span class="slider-val" id="hvr">0.88</span></div><div class="slider-row"><label>🟢 G</label><input type="range" min="0" max="100" value="27" id="hg" oninput="updH()"><span class="slider-val" id="hvg">0.27</span></div><div class="slider-row"><label>🔵 B</label><input type="range" min="0" max="100" value="27" id="hb" oninput="updH()"><span class="slider-val" id="hvb">0.27</span></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setHFx(0)">⬛ 純色</button><button class="ctrl-btn" onclick="setHFx(1)">💓 脈衝</button><button class="ctrl-btn" onclick="setHFx(2)">🌈 漸層</button></div>';
   const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=220;
   const gl=cv.getContext("webgl");if(!gl)return;
@@ -431,7 +451,7 @@ function demoHLSL(cont,isMobile){
   frame();
 }
 
-function demoTex(cont,isMobile){
+function demoTex(cont){
   cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🖼️ UV 座標系統（V=0 在上方）</div><canvas style="width:100%;display:block;height:220px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setTF(0)">🗺️ UV 視覺化</button><button class="ctrl-btn" onclick="setTF(1)">📐 棋盤格</button><button class="ctrl-btn" onclick="setTF(2)">🌊 動態波</button></div>';
   const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=220;
   const gl=cv.getContext("webgl");if(!gl)return;
@@ -598,7 +618,7 @@ function showCompletion(){
   for(let i=0;i<28;i++){const d=document.createElement("div");d.className="fw";const tx=(Math.random()-.5)*300,ty=-100-Math.random()*200;d.style.cssText="width:6px;height:6px;background:"+colors[i%colors.length]+";left:"+(40+Math.random()*20)+"%;top:60%;--d:"+(0.6+Math.random()*.8)+"s;--dl:"+Math.random()*.5+"s;--tx:"+tx+"px;--ty:"+ty+"px";fw.appendChild(d);}
   ov.classList.add("show");
 }
-function goNextCastle(){window.location.href="dx-level2.html";}
+function goNextCastle(){window.location.href='dx-level3.html';}
 function goMap(){window.location.href="dx-map.html";}
 
 updateXP();renderLessons();
@@ -609,16 +629,315 @@ window.addEventListener("pageshow",(e)=>{
 });
 document.addEventListener("DOMContentLoaded",()=>{setTimeout(checkCompletion,500);});
 window.addEventListener("storage",checkCompletion);
+
+// ── Interactive Demos ──
+function initDemo(id){
+  if(demoInited[id])return;demoInited[id]=true;
+  const cont=document.getElementById("dc-"+id);
+  const isMobile=("ontouchstart" in window)||/iPhone|iPad|Android/i.test(navigator.userAgent);
+  ({e1:demo2D,e2:demoSpecular,e3:demoLightMap,e4:demoBump,e5:demoPointLight,e6:demoMultiTex,e7:demoReflect,e8:demoFog})[id]?.(cont,isMobile);
+}
+
+// Shared sphere setup helper
+function setupSphere(gl,r){
+  const verts=makeSphere(r);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
+  return{verts,buf,count:verts.length/6};
+}
+
+function syncCV(cv,h){
+  const w=cv.clientWidth||600;
+  if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;cv.style.height=h+"px";}
+  return w/h;
+}
+
+// 2-1: Orthographic vs Perspective demo
+function demo2D(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">📐 Orthographic vs Perspective 投影</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn active" onclick="set2D(0)">🔲 Orthographic</button>
+    <button class="ctrl-btn" onclick="set2D(1)">📷 Perspective</button>
+  </div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let mode=0,t=0;
+  const sph=setupSphere(gl,.88);
+  // Three spheres at different distances
+  const positions=[[-1.5,0,-1],[0,0,0],[1.5,0,1]];
+  const colors=[[.88,.27,.27],[.27,.6,.88],[.27,.88,.5]];
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying float vz;uniform float asp;uniform vec3 off;uniform int mode;void main(){vn=nor;vec3 wp=pos+off;float camZ=4.0;vec3 cp=vec3(wp.x,wp.y,wp.z+camZ);if(mode==0){gl_Position=vec4(wp.x*0.38/asp,wp.y*0.38,0,1);}else{float fov=0.8;gl_Position=vec4(cp.x/cp.z*fov/asp,cp.y/cp.z*fov,(cp.z-0.1)/camZ*.5,1.0);}vz=wp.z;}",
+    "precision mediump float;varying vec3 vn;varying float vz;uniform vec3 col;void main(){vec3 l=normalize(vec3(1.2,1.5,2.0));float d=max(dot(normalize(vn),l),0.0);gl_FragColor=vec4(col*(.2+d*.8),1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),uoff=gl.getUniformLocation(p,"off"),um=gl.getUniformLocation(p,"mode"),ucol=gl.getUniformLocation(p,"col");
+  gl.enable(gl.DEPTH_TEST);
+  window.set2D=m=>{mode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform1f(uasp,asp);gl.uniform1i(um,mode);
+    positions.forEach(([ox,oy,oz],i)=>{
+      gl.uniform3f(uoff,ox,oy,oz);
+      gl.uniform3f(ucol,...colors[i]);
+      gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-2: Specular lighting
+function demoSpecular(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">💡 Specular 高光 — 拖曳調整光源</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>✨ 光澤度</label><input type="range" min="1" max="128" value="32" id="shn" oninput="updSp()"><span class="slider-val" id="svs">32</span></div>
+  <div class="slider-row"><label>💡 光照角度</label><input type="range" min="-180" max="180" value="45" id="sang" oninput="updSp()"><span class="slider-val" id="svsa">45°</span></div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let shininess=32,ang=45;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec3 vw;uniform float asp;void main(){vn=nor;vw=pos;gl_Position=vec4(pos.x*0.92/asp,pos.y*0.92,pos.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec3 vw;uniform vec3 ld;uniform float shin;void main(){vec3 l=normalize(ld);vec3 n=normalize(vn);float diff=max(dot(n,l),0.0);vec3 r=reflect(-l,n);vec3 v=normalize(vec3(0,0,1)-vw);float spec=pow(max(dot(r,v),0.0),shin);vec3 col=vec3(.88,.27,.27);gl_FragColor=vec4(col*(.15+diff*.7)+vec3(1,1,1)*spec*.8,1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),uld=gl.getUniformLocation(p,"ld"),ushin=gl.getUniformLocation(p,"shin");
+  gl.enable(gl.DEPTH_TEST);
+  window.updSp=()=>{
+    shininess=parseFloat(document.getElementById("shn").value);
+    ang=parseFloat(document.getElementById("sang").value);
+    document.getElementById("svs").textContent=shininess;
+    document.getElementById("svsa").textContent=ang+"°";
+  };
+  function frame(){
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    const r=ang*Math.PI/180;
+    gl.uniform1f(uasp,asp);gl.uniform3f(uld,Math.cos(r),Math.sin(r),.5);gl.uniform1f(ushin,shininess);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-3: Light Map - two spheres, one with lightmap
+function demoLightMap(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🗺️ Light Map — 左：無光照貼圖，右：有光照貼圖</div><canvas style="width:100%;display:block;height:260px"></canvas></div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let t=0;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec2 vuv;uniform float asp;uniform float ox;void main(){vn=nor;vuv=vec2(pos.x*.5+.5,pos.y*.5+.5);vec3 wp=vec3(pos.x+ox,pos.y,pos.z);gl_Position=vec4(wp.x*0.92/asp,wp.y*0.92,wp.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec2 vuv;uniform int useLM;uniform float t;void main(){vec3 n=normalize(vn);float d=max(dot(n,normalize(vec3(.7,.9,.5))),0.0);vec3 base=vec3(.88,.27,.27)*(0.2+d*.8);if(useLM==1){float lm=0.5+0.5*sin(vuv.x*6.28+t);lm=clamp(lm,.1,1.);base*=lm*1.5;}gl_FragColor=vec4(base,1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),uox=gl.getUniformLocation(p,"ox"),ulm=gl.getUniformLocation(p,"useLM"),ut=gl.getUniformLocation(p,"t");
+  gl.enable(gl.DEPTH_TEST);
+  function frame(){
+    t+=.016;
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform1f(uasp,asp);gl.uniform1f(ut,t);
+    gl.uniform1f(uox,-1.0);gl.uniform1i(ulm,0);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    gl.uniform1f(uox,1.0);gl.uniform1i(ulm,1);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-4: Bump Map - normal variation visible on sphere
+function demoBump(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🏔️ Bump Map — 左：普通法線，右：Bump Map 法線</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>💡 光照角度</label><input type="range" min="-180" max="180" value="60" id="bang" oninput="updBmp()"><span class="slider-val" id="bvsa">60°</span></div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let ang=60;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec3 vp;uniform float asp;uniform float ox;void main(){vn=nor;vp=pos;vec3 wp=vec3(pos.x+ox,pos.y,pos.z);gl_Position=vec4(wp.x*0.92/asp,wp.y*0.92,wp.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec3 vp;uniform vec3 ld;uniform int bump;void main(){vec3 n=normalize(vn);if(bump==1){float bx=sin(vp.y*12.0)*0.4;float by=cos(vp.x*12.0)*0.4;n=normalize(n+vec3(bx,by,0));}float d=max(dot(n,ld),0.);vec3 c=vec3(.88,.27,.27);gl_FragColor=vec4(c*(.15+d*.85),1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),uox=gl.getUniformLocation(p,"ox"),ub=gl.getUniformLocation(p,"bump"),uld=gl.getUniformLocation(p,"ld");
+  gl.enable(gl.DEPTH_TEST);
+  window.updBmp=()=>{ang=parseFloat(document.getElementById("bang").value);document.getElementById("bvsa").textContent=ang+"°";};
+  function frame(){
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    const r=ang*Math.PI/180;
+    gl.uniform1f(uasp,asp);gl.uniform3f(uld,Math.cos(r),Math.sin(r),.5);
+    gl.uniform1f(uox,-1.0);gl.uniform1i(ub,0);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    gl.uniform1f(uox,1.0);gl.uniform1i(ub,1);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-5: Point Light - moving light with attenuation
+function demoPointLight(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🔵 Point Light — 移動光源衰減效果</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>📏 衰減係數</label><input type="range" min="1" max="50" value="15" id="pat" oninput="updPL()"><span class="slider-val" id="pvp">0.15</span></div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let attenuation=.15,t=0;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec3 vp;uniform float asp;void main(){vn=nor;vp=pos;gl_Position=vec4(pos.x*0.92/asp,pos.y*0.92,pos.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec3 vp;uniform vec3 lpos;uniform float att;void main(){vec3 toL=lpos-vp;float dist=length(toL);float a=1.0/(1.0+att*dist+att*dist*dist);vec3 dir=normalize(toL);float d=max(dot(normalize(vn),dir),0.);vec3 c=vec3(.88,.27,.27);float amb=.12;gl_FragColor=vec4(c*(amb+d*a*(1.-amb)),1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),ulp=gl.getUniformLocation(p,"lpos"),uat=gl.getUniformLocation(p,"att");
+  gl.enable(gl.DEPTH_TEST);
+  window.updPL=()=>{attenuation=document.getElementById("pat").value/100;document.getElementById("pvp").textContent=attenuation.toFixed(2);};
+  function frame(){
+    t+=.02;
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    const lx=Math.cos(t)*1.2,ly=Math.sin(t)*.8,lz=.5;
+    gl.uniform1f(uasp,asp);gl.uniform3f(ulp,lx,ly,lz);gl.uniform1f(uat,attenuation);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-6: Multitexture - procedural texture layers
+function demoMultiTex(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🌊 Multitexture — 三層程序貼圖混合</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn active" onclick="setMT(3)">🔲 三層混合</button>
+    <button class="ctrl-btn" onclick="setMT(1)">1️⃣ 基礎層</button>
+    <button class="ctrl-btn" onclick="setMT(2)">2️⃣ 細節層</button>
+  </div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let layers=3,t=0;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec3 vp;uniform float asp;void main(){vn=nor;vp=pos;gl_Position=vec4(pos.x*0.92/asp,pos.y*0.92,pos.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec3 vp;uniform int layers;uniform float t;void main(){vec3 n=normalize(vn);float d=max(dot(n,normalize(vec3(1,1.2,1.5))),0.);vec3 uv=vp;float c1=0.5+0.5*sin(uv.x*3.14+uv.y*2.0);float c2=0.5+0.5*sin(uv.y*8.0+t)*sin(uv.x*8.0-t);float c3=(.2+d*.8);vec3 col;if(layers==1)col=vec3(c1,.3+c1*.4,.2);else if(layers==2)col=vec3(c2,.2,c2*.5);else col=vec3(c1*c2,.3+c1*.3,c2*.3)*c3*2.0;gl_FragColor=vec4(clamp(col,0.,1.),1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),ul=gl.getUniformLocation(p,"layers"),ut2=gl.getUniformLocation(p,"t");
+  gl.enable(gl.DEPTH_TEST);
+  window.setMT=n=>{layers=n;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){
+    t+=.016;
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform1f(uasp,asp);gl.uniform1i(ul,layers);gl.uniform1f(ut2,t);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-7: Reflection - Fresnel + env cube map simulation
+function demoReflect(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">💎 Reflection — Fresnel 混合係數</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>💎 反射強度</label><input type="range" min="0" max="100" value="40" id="rfl" oninput="updRf()"><span class="slider-val" id="rvr">0.40</span></div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let reflStrength=.4,t=0;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec3 vr;uniform float asp;uniform float t;void main(){float cy=cos(t*.3),sy=sin(t*.3);vec3 rpos=vec3(pos.x*cy+pos.z*sy,pos.y,-pos.x*sy+pos.z*cy);vec3 rnor=vec3(nor.x*cy+nor.z*sy,nor.y,-nor.x*sy+nor.z*cy);vn=rnor;vec3 viewDir=normalize(vec3(0,0,1)-rpos);vr=reflect(-viewDir,rnor);gl_Position=vec4(rpos.x*0.92/asp,rpos.y*0.92,rpos.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec3 vr;uniform float rfl;void main(){vec3 n=normalize(vn);vec3 l=normalize(vec3(1,1.5,2));float d=max(dot(n,l),0.);vec3 base=vec3(.88,.27,.27)*(.2+d*.8);vec3 r=normalize(vr);float envR=.5+.5*sin(r.x*4.+r.y*3.);float envG=.5+.5*cos(r.y*4.+r.z*2.);float envB=.5+.5*sin(r.z*5.+r.x*2.);vec3 env=vec3(envR,envG,envB);gl_FragColor=vec4(mix(base,env,rfl),1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),urfl=gl.getUniformLocation(p,"rfl"),ut2=gl.getUniformLocation(p,"t");
+  gl.enable(gl.DEPTH_TEST);
+  window.updRf=()=>{reflStrength=document.getElementById("rfl").value/100;document.getElementById("rvr").textContent=reflStrength.toFixed(2);};
+  function frame(){
+    t+=.016;
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform1f(uasp,asp);gl.uniform1f(urfl,reflStrength);gl.uniform1f(ut2,t);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-8: Fog effect
+function demoFog(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">⚗️ Fog 霧效 — 三個距離不同的球體</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>🌫️ 霧濃度</label><input type="range" min="0" max="100" value="50" id="fdn" oninput="updFog()"><span class="slider-val" id="fvd">0.50</span></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn active" onclick="setFogT(0)">🔲 線性霧</button>
+    <button class="ctrl-btn" onclick="setFogT(1)">🌫️ 指數霧</button>
+  </div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let fogDensity=.5,fogType=0,t=0;
+  const sph=setupSphere(gl,.88);
+  const positions=[[-1.8,0,-1.5],[0,0,0],[1.8,0,1.5]];
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying float vdist;uniform float asp;uniform vec3 off;void main(){vn=nor;vec3 wp=pos+off;float camZ=4.0;vdist=length(wp)+camZ*.2;gl_Position=vec4(wp.x*0.38/asp,wp.y*0.38,0,1);}",
+    "precision mediump float;varying vec3 vn;varying float vdist;uniform float fogD;uniform int fogT;uniform vec3 col;void main(){vec3 l=normalize(vec3(1,1.5,2));float d=max(dot(normalize(vn),l),0.);vec3 base=col*(.2+d*.8);float fog;if(fogT==0){float s=0.5,e=4.0;fog=clamp((e-vdist)/(e-s),0.,1.);}else{fog=exp(-fogD*vdist);}vec3 fogCol=vec3(.15,.12,.2);gl_FragColor=vec4(mix(fogCol,base,fog),1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),uoff=gl.getUniformLocation(p,"off"),ufd=gl.getUniformLocation(p,"fogD"),uft=gl.getUniformLocation(p,"fogT"),ucol=gl.getUniformLocation(p,"col");
+  const cols=[[.88,.27,.27],[.27,.6,.88],[.27,.88,.5]];
+  gl.enable(gl.DEPTH_TEST);
+  window.updFog=()=>{fogDensity=document.getElementById("fdn").value/100;document.getElementById("fvd").textContent=fogDensity.toFixed(2);};
+  window.setFogT=n=>{fogType=n;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform1f(uasp,asp);gl.uniform1f(ufd,fogDensity);gl.uniform1i(uft,fogType);
+    positions.forEach(([ox,oy,oz],i)=>{
+      gl.uniform3f(uoff,ox,oy,oz);
+      gl.uniform3f(ucol,...cols[i]);
+      gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
 </script>
 
 <!-- Completion Overlay -->
 <div id="compOverlay" class="comp-overlay">
   <div class="fw-wrap"></div>
-  <div class="comp-trophy">⚔️</div>
+  <div class="comp-trophy">🛡️</div>
   <div class="comp-stars">🏆🏆🏆</div>
-  <div class="comp-title">要塞1 全通關！<br>起源之城</div>
-  <div class="comp-sub">你已掌握 DirectX 11 基礎！<br>獲得全部 XP！</div>
-  <button class="comp-next-btn" onclick="goNextCastle()">⚔️ 前往要塞2 →</button>
+  <div class="comp-title">要塞2 全通關！<br>光影要塞</div>
+  <div class="comp-sub">你已掌握進階光照技術！<br>獲得全部 XP！</div>
+  <button class="comp-next-btn" onclick="goNextCastle()">⚔️ 前往要塞3 →</button>
   <button class="comp-map-btn" onclick="goMap()">🗺️ 返回地圖</button>
 </div>
 </body>
