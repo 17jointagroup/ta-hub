@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚔️ DirectX 要塞2 — 光影要塞</title>
+<title>⚔️ DirectX 要塞3 — 著色器城</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 html{font-size:20px;}
@@ -119,21 +119,21 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 <header>
   <a href="dx-map.html" class="back-btn">🗺️ DX 地圖</a>
   <a href="index.html" class="back-btn">🏠 首頁</a>
-  <span class="header-title" style="color:var(--acc4)">🛡️ 光影要塞2</span>
+  <span class="header-title" style="color:#c084fc">🔮 著色器城3</span>
   <div class="xp-bar">
     <span style="color:var(--txt2)">⚡</span>
     <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
-    <span class="xp-total" id="xp-total">0 / 920</span>
+    <span class="xp-total" id="xp-total">0 / 1020</span>
   </div>
 </header>
 <section class="hero">
-  <div class="tower-badge" style="background:rgba(255,159,67,.12);border-color:rgba(255,159,67,.3);color:var(--acc4)">🛡️ 要塞2 · 光影要塞 · Advanced Lighting</div>
-  <h1>駕馭 <span style="background:linear-gradient(135deg,var(--acc4),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">光與影</span></h1>
-  <p>Specular、Bump Map、Point Light、Fog — 讓你的 DirectX 場景脫胎換骨！</p>
+  <div class="tower-badge" style="background:rgba(192,132,252,.12);border-color:rgba(192,132,252,.3);color:#c084fc">🔮 要塞3 · 著色器城 · Advanced Shaders</div>
+  <h1>進階 <span style="background:linear-gradient(135deg,#c084fc,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent">著色器技術</span></h1>
+  <p>多點光源、Specular Map、視錐剔除、水面反射、Shadow Map — 掌握 AAA 遊戲的核心渲染技術！</p>
   <div class="stats-row">
     <div class="stat-chip"><div class="num" id="done-count">0</div><div class="lbl">已完成</div></div>
-    <div class="stat-chip"><div class="num">8</div><div class="lbl">關卡總數</div></div>
-    <div class="stat-chip"><div class="num">920</div><div class="lbl">XP 總值</div></div>
+    <div class="stat-chip"><div class="num">9</div><div class="lbl">關卡總數</div></div>
+    <div class="stat-chip"><div class="num">1020</div><div class="lbl">XP 總值</div></div>
     <div class="stat-chip"><div class="num">👑</div><div class="lbl">Boss 1 關</div></div>
   </div>
 </section>
@@ -149,116 +149,125 @@ input[type=range]{flex:1;accent-color:var(--acc)}
   }
 })();
 
-const CASTLE_KEY="dx2_done", CASTLE_TOTAL=8, CASTLE_NUM=2, NEXT_CASTLE=3;
+const CASTLE_KEY="dx3_done",CASTLE_TOTAL=9,CASTLE_NUM=3,NEXT_CASTLE=4;
 let earned=JSON.parse(localStorage.getItem(CASTLE_KEY)||"[]");
 let currentLesson=null;
 const demoInited={};
 
 const LESSONS=[
-  {id:"e1",num:"2-1",icon:"📐",title:"2D 渲染與正交投影",desc:"Orthographic projection、2D sprite、UI 渲染",xp:100,type:"normal",q:"Orthographic 和 Perspective 最大差別？",opts:["Orthographic 沒有近大遠小","Orthographic 速度更慢","Perspective 只能 3D","沒有差別"],ans:0,src:"rastertek.com/dx11win10tut11.html",story:`<span class="emoji-big">📐</span>2D 渲染需要切換到 <span class="hl">Orthographic（正交）投影</span>！<br><br>🔹 <span class="hl">Perspective</span> — 透視投影，遠小近大（3D 感）<br>🔹 <span class="hl">Orthographic</span> — 正交投影，遠近大小相同（UI 用）<br><br>建立正交矩陣：<br><code style="color:var(--acc2)">XMMatrixOrthographicLH(screenW, screenH, near, far)</code><br><br>渲染順序：先畫 3D → <span class="hl">關閉深度測試</span> → 畫 2D UI → 重新開啟`,code:`<span class="cm">// 切換到正交投影渲染 2D</span>
-<span class="tp">XMMATRIX</span> ortho = <span class="fn">XMMatrixOrthographicLH</span>(
-  (<span class="kw">float</span>)screenW, (<span class="kw">float</span>)screenH,
-  <span class="num">0.1f</span>, <span class="num">1000.0f</span>);
-
-<span class="cm">// 渲染流程</span>
-Render3DScene();             <span class="cm">// 先畫 3D</span>
-m_D3D-><span class="fn">TurnZBufferOff</span>(); <span class="cm">// 關閉深度</span>
-Render2DUI(ortho);           <span class="cm">// 畫 2D UI</span>
-m_D3D-><span class="fn">TurnZBufferOn</span>();  <span class="cm">// 重新開啟</span>`},
-  {id:"e2",num:"2-2",icon:"💡",title:"Specular 高光反射",desc:"Phong 光照、鏡面反射、Shininess 控制",xp:120,type:"normal",q:"Specular highlight 的強度由哪個參數控制？",opts:["光的顏色","Shininess（光澤度）","法線方向","環境光強度"],ans:1,src:"rastertek.com/dx11win10tut10.html",story:`<span class="emoji-big">💡</span>Specular（高光）讓物體表面有光澤感！<br><br><span class="hl">Phong = Ambient + Diffuse + Specular</span><br><br><code style="color:var(--acc2)">float3 R = reflect(-lightDir, normal);<br>float spec = pow(saturate(dot(R, viewDir)), shininess);</code><br><br>🔹 <span class="hl">shininess 高</span> → 高光小且亮（金屬感）<br>🔹 <span class="hl">shininess 低</span> → 高光大且散（塑膠感）`,code:`<span class="tp">cbuffer</span> LightBuffer : register(b0) {
-  <span class="tp">float4</span> diffuseColor, specularColor;
-  <span class="tp">float3</span> lightDir; <span class="tp">float</span> specularPower;
+  {id:"f1",num:"3-1",icon:"🔵",title:"多點光源陣列",desc:"cbuffer 陣列、點光源批次處理",xp:100,type:"normal",q:"DirectX 中如何在 Shader 裡傳遞多個點光源？",opts:["分別傳多個 cbuffer","用 cbuffer 陣列一次傳入","每幀更換光源","只能用 1 個光源"],ans:1,src:"rastertek.com/dx11win10tut21.html",story:`<span class="emoji-big">🔵</span>場景有多個點光源時，最有效率的做法是用 <span class="hl">cbuffer 陣列</span>！<br><br><code style="color:var(--acc2)">cbuffer LightColorBuffer { float4 diffuseColor[4]; };<br>cbuffer LightPositionBuffer { float4 lightPos[4]; };</code><br><br>🔹 VS 計算每個光源方向並傳給 PS<br>🔹 PS 對所有光源做加總<br><br>cbuffer 最多支援 <span class="hl">4096 個 float4</span>，可傳大量光源！`,code:`<span class="tp">cbuffer</span> LightPos : register(b1) {
+  <span class="tp">float4</span> lightPos[<span class="num">4</span>];
 };
-<span class="tp">float4</span> <span class="fn">SpecPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
-  <span class="tp">float3</span> viewDir = <span class="fn">normalize</span>(cameraPos - i.worldPos);
+<span class="tp">PixelInput</span> <span class="fn">VS</span>(<span class="tp">VertexInput</span> v) {
+  <span class="tp">PixelInput</span> o;
+  o.pos = <span class="fn">mul</span>(v.pos, worldViewProj);
+  o.worldPos = <span class="fn">mul</span>(v.pos, world).xyz;
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i<<span class="num">4</span>;i++)
+    o.lightDir[i] = lightPos[i].xyz - o.worldPos;
+  <span class="kw">return</span> o;
+}`},
+  {id:"f2",num:"3-2",icon:"🗺️",title:"Specular Map 高光貼圖",desc:"高光遮罩、金屬度控制、Gloss Map",xp:100,type:"normal",q:"Specular Map 的 RGB 值代表什麼？",opts:["像素深度","該區域的高光強度與顏色","法線方向","透明度"],ans:1,src:"rastertek.com/dx11win10tut22.html",story:`<span class="emoji-big">🗺️</span><span class="hl">Specular Map</span> 用貼圖控制每個像素的高光強度！<br><br>🔹 白色 → 高光強（金屬、玻璃）<br>🔹 黑色 → 無高光（布料、橡皮）<br>🔹 彩色 → 有色彩的高光（彩虹金屬）<br><br><code style="color:var(--acc2)">float4 spec = specularMap.Sample(ss, tex);<br>specular *= spec.r; // 紅色通道控制強度</code>`,code:`<span class="tp">Texture2D</span> colorTex    : register(t0);
+<span class="tp">Texture2D</span> specularTex : register(t1);
+<span class="tp">float4</span> <span class="fn">PS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="tp">float4</span> col  = colorTex.<span class="fn">Sample</span>(ss, i.tex);
+  <span class="tp">float4</span> spec = specularTex.<span class="fn">Sample</span>(ss, i.tex);
   <span class="tp">float3</span> R = <span class="fn">reflect</span>(-lightDir, i.normal);
-  <span class="tp">float</span> spec = <span class="fn">pow</span>(<span class="fn">saturate</span>(<span class="fn">dot</span>(R, viewDir)), specularPower);
-  <span class="kw">return</span> diffuseColor * diffuse + specularColor * spec;
+  <span class="tp">float</span>  sh = <span class="fn">pow</span>(<span class="fn">saturate</span>(<span class="fn">dot</span>(R, viewDir)), specPower);
+  <span class="kw">return</span> col + specularColor * sh * spec.r;
 }`},
-  {id:"e3",num:"2-3",icon:"🗺️",title:"Light Map 光照貼圖",desc:"預烘焙靜態光照、Multitexture 混合",xp:100,type:"normal",q:"Light Map 最大的優勢是什麼？",opts:["可以動態更新光源","預烘焙靜態光照，節省即時計算成本","比即時光照更精確","支援無限光源"],ans:1,src:"rastertek.com/dx11win10tut16.html",story:`<span class="emoji-big">🗺️</span><span class="hl">Light Map</span> = 把靜態光照預先烘焙成貼圖！<br><br>優勢：<br>🔹 <span class="hl">零即時計算成本</span> — 光照已烘焙好<br>🔹 <span class="hl">高品質靜態陰影</span> — 支援複雜間接光<br>🔹 <span class="hl">效能極佳</span> — 適合低階硬體<br><br>兩張貼圖相乘：<br><code style="color:var(--acc2)">color = colorTex.Sample(ss, tex) * lightTex.Sample(ss, tex);</code><br><br>劣勢：光源不能移動。UE5 的 Lumen 就是為了解決這個問題！`,code:`<span class="tp">Texture2D</span> colorTex : register(t0);
-<span class="tp">Texture2D</span> lightTex  : register(t1);
-
-<span class="tp">float4</span> <span class="fn">LightMapPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
-  <span class="tp">float4</span> color = colorTex.<span class="fn">Sample</span>(ss, i.tex);
-  <span class="tp">float4</span> light = lightTex.<span class="fn">Sample</span>(ss, i.tex);
-  <span class="kw">return</span> <span class="fn">saturate</span>(color * light * <span class="num">2.0f</span>);
+  {id:"f3",num:"3-3",icon:"📷",title:"第一人稱相機",desc:"View Matrix、WASD 移動、滑鼠旋轉",xp:100,type:"normal",q:"View Matrix 的作用是什麼？",opts:["將物體投影到螢幕","將世界座標轉換到相機空間","定義光源位置","控制物體大小"],ans:1,src:"rastertek.com/dx11win10tut24.html",story:`<span class="emoji-big">📷</span>第一人稱相機讓玩家「進入」3D 世界！<br><br><span class="hl">View Matrix</span> = 相機的逆變換矩陣：<br><code style="color:var(--acc2)">viewMatrix = XMMatrixLookAtLH(eye, lookAt, up);</code><br><br>1️⃣ <span class="hl">位置</span>：eye += forward * speed（WASD）<br>2️⃣ <span class="hl">旋轉</span>：yaw += mouseX, pitch += mouseY<br>3️⃣ <span class="hl">重建方向</span>：forward = (sin(yaw), sin(pitch), cos(yaw))`,code:`<span class="kw">void</span> <span class="tp">Camera</span>::<span class="fn">Render</span>() {
+  <span class="tp">float</span> yaw  = XMConvertToRadians(m_rotation.y);
+  <span class="tp">float</span> pitch= XMConvertToRadians(m_rotation.x);
+  <span class="tp">XMFLOAT3</span> lookAt = {
+    m_pos.x + <span class="fn">sinf</span>(yaw),
+    m_pos.y - <span class="fn">sinf</span>(pitch),
+    m_pos.z + <span class="fn">cosf</span>(yaw)
+  };
+  <span class="tp">XMVECTOR</span> e=<span class="fn">XMLoadFloat3</span>(&m_pos);
+  <span class="tp">XMVECTOR</span> l=<span class="fn">XMLoadFloat3</span>(&lookAt);
+  <span class="tp">XMVECTOR</span> u=<span class="fn">XMVectorSet</span>(<span class="num">0,1,0,0</span>);
+  m_viewMatrix = <span class="fn">XMMatrixLookAtLH</span>(e,l,u);
 }`},
-  {id:"e4",num:"2-4",icon:"🏔️",title:"Bump Mapping 凹凸貼圖",desc:"Normal Map、TBN 切線空間、表面細節",xp:120,type:"normal",q:"Normal Map 儲存的是什麼資訊？",opts:["物體的高度差","每個像素的法線方向（RGB=XYZ）","物體的顏色","材質粗糙度"],ans:1,src:"rastertek.com/dx11win10tut20.html",story:`<span class="emoji-big">🏔️</span><span class="hl">Bump Mapping</span> 用貼圖偽造表面細節，不增加多邊形！<br><br><span class="hl">Normal Map</span>：RGB 儲存法線方向（R=X、G=Y、B=Z）<br><br>計算流程：<br>1️⃣ 從 Normal Map 取出法線<br>2️⃣ 轉換到 <span class="hl">TBN 切線空間</span><br>3️⃣ 用新法線計算光照<br><br>效果：低多邊形 + Normal Map = 高細節視覺效果！`,code:`<span class="tp">Texture2D</span> normalTex : register(t1);
-
-<span class="tp">float4</span> <span class="fn">BumpPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
-  <span class="tp">float4</span> bump = normalTex.<span class="fn">Sample</span>(ss, i.tex);
-  bump = (bump * <span class="num">2.0f</span>) - <span class="num">1.0f</span>; <span class="cm">// [0,1]→[-1,1]</span>
-  <span class="tp">float3</span> N = <span class="fn">normalize</span>(
-    bump.x * i.tangent +
-    bump.y * i.binormal +
-    bump.z * i.normal);
-  <span class="tp">float</span> d = <span class="fn">saturate</span>(<span class="fn">dot</span>(N, lightDir));
-  <span class="kw">return</span> colorTex.<span class="fn">Sample</span>(ss, i.tex) * d;
+  {id:"f4",num:"3-4",icon:"✂️",title:"Frustum Culling 視錐剔除",desc:"視錐體、AABB 測試、效能優化",xp:120,type:"normal",q:"Frustum Culling 的主要目的是什麼？",opts:["讓陰影更柔和","剔除不在視野內的物體節省渲染","增加光源數量","改善貼圖品質"],ans:1,src:"rastertek.com/dx11win10tut25.html",story:`<span class="emoji-big">✂️</span><span class="hl">Frustum Culling</span> = 不渲染相機看不到的物體！<br><br>視錐體由 6 個平面組成：Near、Far、Left、Right、Top、Bottom<br><br><code style="color:var(--acc2)">for(int i=0; i<6; i++)<br>  if(dot(plane[i].normal, center) + plane[i].d < -radius)<br>    return false; // 剔除！</code><br><br>🔥 大型場景可剔除 <span class="hl">70~90%</span> 的物體，效能提升巨大！`,code:`<span class="kw">bool</span> <span class="fn">CheckSphere</span>(<span class="tp">float</span> x,<span class="tp">float</span> y,<span class="tp">float</span> z,<span class="tp">float</span> r) {
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="num">0</span>;i<<span class="num">6</span>;i++)
+    <span class="kw">if</span>(m_planes[i].x*x+m_planes[i].y*y
+      +m_planes[i].z*z+m_planes[i].w <= -r)
+      <span class="kw">return</span> <span class="num">false</span>; <span class="cm">// 在視錐外</span>
+  <span class="kw">return</span> <span class="num">true</span>;  <span class="cm">// 在視錐內，渲染</span>
 }`},
-  {id:"e5",num:"2-5",icon:"🔵",title:"Point Light 點光源",desc:"位置光源、距離衰減 Attenuation",xp:120,type:"normal",q:"Point Light 和 Directional Light 最大的差別？",opts:["顏色更豐富","有位置和距離衰減，Directional 只有方向","效能更差","沒有本質差別"],ans:1,src:"rastertek.com/dx11win10tut16.html",story:`<span class="emoji-big">🔵</span><span class="hl">Point Light</span> 從一個位置向所有方向發光，光照強度隨距離衰減！<br><br>衰減公式（Attenuation）：<br><code style="color:var(--acc2)">float dist = length(lightPos - worldPos);<br>float att = 1.0 / (1.0 + 0.09*dist + 0.032*dist*dist);</code><br><br>🔹 <span class="hl">constant</span> = 保持近距離不爆<br>🔹 <span class="hl">linear</span> = 線性衰減<br>🔹 <span class="hl">quadratic</span> = 二次衰減（遠處更快消散）`,code:`<span class="tp">float4</span> <span class="fn">PointLightPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
-  <span class="tp">float3</span> toLight = lightPos - i.worldPos;
-  <span class="tp">float</span>  dist = <span class="fn">length</span>(toLight);
-  <span class="kw">if</span>(dist > lightRange) <span class="kw">return</span> ambient;
-
-  <span class="tp">float3</span> dir = <span class="fn">normalize</span>(toLight);
-  <span class="tp">float</span>  att = <span class="num">1.0f</span> / (<span class="num">1.0f</span> + <span class="num">0.09f</span>*dist
-                              + <span class="num">0.032f</span>*dist*dist);
-  <span class="tp">float</span>  diff = <span class="fn">saturate</span>(<span class="fn">dot</span>(i.normal, dir));
-  <span class="kw">return</span> lightColor * diff * att;
-}`},
-  {id:"e6",num:"2-6",icon:"🌊",title:"Multitexture 多重貼圖",desc:"多張貼圖混合、Detail Map、疊加混合",xp:100,type:"normal",q:"Detail Map 的主要用途是？",opts:["儲存法線","在近距離增加細節，遠處不可見","儲存光照","控制透明度"],ans:1,src:"rastertek.com/dx11win10tut15.html",story:`<span class="emoji-big">🌊</span><span class="hl">Multitexture</span> = 同時使用多張紋理，混合產生更豐富的視覺效果！<br><br>常見用法：<br>🔹 <span class="hl">Base + Detail</span> — 近距離細節增強<br>🔹 <span class="hl">Texture + Lightmap</span> — 靜態光照疊加<br>🔹 <span class="hl">Texture + Alpha Mask</span> — 混合遮罩<br><br>HLSL 支援最多 128 個貼圖（t0 ~ t127）！`,code:`<span class="tp">Texture2D</span> tex1 : register(t0); <span class="cm">// 基礎貼圖</span>
-<span class="tp">Texture2D</span> tex2 : register(t1); <span class="cm">// 細節貼圖</span>
-<span class="tp">Texture2D</span> tex3 : register(t2); <span class="cm">// 光照貼圖</span>
-
-<span class="tp">float4</span> <span class="fn">MultiTexPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
-  <span class="tp">float4</span> c1 = tex1.<span class="fn">Sample</span>(ss, i.tex);
-  <span class="tp">float4</span> c2 = tex2.<span class="fn">Sample</span>(ss, i.tex * <span class="num">4.0f</span>);
-  <span class="tp">float4</span> c3 = tex3.<span class="fn">Sample</span>(ss, i.tex);
-  <span class="kw">return</span> <span class="fn">saturate</span>(c1 * c2 * c3 * <span class="num">4.0f</span>);
-}`},
-  {id:"e7",num:"2-7",icon:"💎",title:"Reflection 反射效果",desc:"Cube Map、環境貼圖、lerp 混合",xp:100,type:"normal",q:"Cube Map 用幾個面儲存環境？",opts:["4 個面","6 個面（正方體六面）","12 個面","1 張全景圖"],ans:1,src:"rastertek.com/dx11win10tut25.html",story:`<span class="emoji-big">💎</span><span class="hl">Cube Map</span> 用 6 張圖模擬環境反射！<br><br>兩種反射方式：<br>🔹 <span class="hl">Cube Map</span> — 靜態環境貼圖，效能佳<br>🔹 <span class="hl">SSR（螢幕空間反射）</span> — 動態但有局限<br><br>HLSL：<br><code style="color:var(--acc2)">TextureCube envMap;<br>float3 R = reflect(-viewDir, normal);<br>float4 ref = envMap.Sample(ss, R);</code>`,code:`<span class="tp">TextureCube</span> envMap   : register(t0);
-<span class="tp">Texture2D</span>   colorTex : register(t1);
-
-<span class="tp">float4</span> <span class="fn">ReflectPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
-  <span class="tp">float3</span> viewDir = <span class="fn">normalize</span>(cameraPos - i.worldPos);
-  <span class="tp">float3</span> R = <span class="fn">reflect</span>(-viewDir, i.normal);
-  <span class="tp">float4</span> env  = envMap.<span class="fn">Sample</span>(ss, R);
-  <span class="tp">float4</span> base = colorTex.<span class="fn">Sample</span>(ss, i.tex);
-  <span class="kw">return</span> <span class="fn">lerp</span>(base, env, <span class="num">0.3f</span>);
-}`},
-  {id:"e8",num:"2-8",icon:"👑",title:"Boss：Fog 霧效與後處理基礎",desc:"線性霧化、指數霧、Render Texture",xp:160,type:"boss",q:"線性霧化（Linear Fog）的核心計算是什麼？",opts:["pow(dist, 2)","lerp(fogColor, sceneColor, fogFactor)","dist * density","dot(pos, fogDir)"],ans:1,src:"rastertek.com/dx11win10tut27.html",story:`<span class="emoji-big">👑</span><span class="hl">Fog（霧效）</span>是最簡單的後處理，讓遠處物體消失在霧中！<br><br>線性霧化因子：<br><code style="color:var(--acc2)">float fog = saturate((fogEnd-dist) / (fogEnd-fogStart));<br>return lerp(fogColor, texColor, fog);</code><br><br>三種霧化類型：<br>🔹 <span class="hl">Linear</span> — 線性，簡單<br>🔹 <span class="hl">Exponential</span> — exp(-density * dist)<br>🔹 <span class="hl">Exp²</span> — 更快消散<br><br>後處理架構：先渲染到 <span class="hl">Render Texture</span>，再對整張圖做效果！`,code:`<span class="tp">cbuffer</span> FogBuffer : register(b0) {
-  <span class="tp">float</span> fogStart, fogEnd;
-  <span class="tp">float4</span> fogColor;
+  {id:"f5",num:"3-5",icon:"🔲",title:"Clip Plane 裁切平面",desc:"SV_ClipDistance、水面裁切、鏡面反射",xp:100,type:"normal",q:"SV_ClipDistance 的值為負數時代表什麼？",opts:["像素被保留","像素被裁切掉","像素變透明","像素變白色"],ans:1,src:"rastertek.com/dx11win10tut28.html",story:`<span class="emoji-big">🔲</span><span class="hl">Clip Plane</span> 可以精確裁切掉場景的一部分！<br><br>最常見用途：<span class="hl">水面反射</span><br>渲染反射時，裁切掉水面以下！<br><br>HLSL 使用 <span class="hl">SV_ClipDistance</span>：<br><code style="color:var(--acc2)">o.clip = dot(mul(v.pos, world), clipPlane);<br>// 負值 = 裁切，正值 = 保留</code>`,code:`<span class="tp">cbuffer</span> ClipBuffer : register(b1) {
+  <span class="tp">float4</span> clipPlane;
 };
-<span class="tp">float4</span> <span class="fn">FogPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
-  <span class="tp">float4</span> tex = shaderTex.<span class="fn">Sample</span>(ss, i.tex);
-  <span class="tp">float</span>  dist = i.fogFactor;
-  <span class="tp">float</span>  fog = <span class="fn">saturate</span>((fogEnd - dist) / (fogEnd - fogStart));
-  <span class="kw">return</span> <span class="fn">lerp</span>(fogColor, tex, fog);
+<span class="kw">struct</span> <span class="tp">PixelInput</span> {
+  <span class="tp">float4</span> pos  : SV_POSITION;
+  <span class="tp">float2</span> tex  : TEXCOORD0;
+  <span class="tp">float</span>  clip : SV_ClipDistance0;
+};
+<span class="tp">PixelInput</span> <span class="fn">VS</span>(<span class="tp">VertexInput</span> v) {
+  <span class="tp">PixelInput</span> o;
+  o.pos  = <span class="fn">mul</span>(v.pos, worldViewProj);
+  <span class="tp">float4</span> wp = <span class="fn">mul</span>(v.pos, world);
+  o.clip = <span class="fn">dot</span>(wp, clipPlane); <span class="cm">// 負 = 裁切</span>
+  <span class="kw">return</span> o;
+}`},
+  {id:"f6",num:"3-6",icon:"💎",title:"Reflection Map 反射貼圖",desc:"Render-to-Texture、反射矩陣、平面反射",xp:120,type:"normal",q:"製作平面反射效果的正確步驟是？",opts:["直接翻轉螢幕","用反射矩陣重新渲染場景到 Render Texture","複製貼圖到反面","只用法線貼圖"],ans:1,src:"rastertek.com/dx11win10tut29.html",story:`<span class="emoji-big">💎</span><span class="hl">平面反射</span> = 讓地板/水面像鏡子！<br><br>步驟：<br>1️⃣ 建立 <span class="hl">Render Texture</span><br>2️⃣ 用 <span class="hl">反射矩陣</span> 翻轉相機<br>3️⃣ 渲染場景到 Render Texture<br>4️⃣ 渲染地板時貼上 Render Texture<br><br><code style="color:var(--acc2)">reflectionMatrix = XMMatrixReflect(reflPlane);</code>`,code:`<span class="kw">void</span> <span class="fn">RenderReflection</span>() {
+  m_RTT-><span class="fn">SetRenderTarget</span>(ctx);
+  m_RTT-><span class="fn">ClearRenderTarget</span>(ctx,<span class="num">0,0,0,1</span>);
+  <span class="tp">XMVECTOR</span> plane = <span class="fn">XMVectorSet</span>(<span class="num">0,1,0,0</span>);
+  <span class="tp">XMMATRIX</span> refMat = <span class="fn">XMMatrixReflect</span>(plane);
+  <span class="tp">XMMATRIX</span> refView = m_Camera->GetView() * refMat;
+  <span class="fn">RenderScene</span>(refView, refMat);
+  m_D3D-><span class="fn">SetBackBufferRenderTarget</span>();
+}`},
+  {id:"f7",num:"3-7",icon:"🌊",title:"Water Shader 水面效果",desc:"Normal Map 動畫、折射、Fresnel 混合",xp:120,type:"normal",q:"水面的波浪效果主要如何實現？",opts:["移動頂點座標","滾動 Normal Map UV + 折射扭曲","用粒子系統","直接繪製波形"],ans:1,src:"rastertek.com/dx11win10tut30.html",story:`<span class="emoji-big">🌊</span>水面 = 反射 + 折射 + Normal Map 動畫！<br><br>🔹 <span class="hl">反射</span>：倒映天空和場景<br>🔹 <span class="hl">折射</span>：透過水面看水底<br>🔹 <span class="hl">Normal Map 滾動</span>：讓表面波動<br><br><code style="color:var(--acc2)">float2 uvAnim = tex + float2(waveTime*0.03, waveTime*0.02);<br>float3 N = normalMap.Sample(ss, uvAnim);</code>`,code:`<span class="tp">float4</span> <span class="fn">WaterPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="tp">float3</span> N = normalTex.<span class="fn">Sample</span>(ss, normUV)*<span class="num">2</span>-<span class="num">1</span>;
+  <span class="cm">// Normal 扭曲反射/折射 UV</span>
+  <span class="tp">float4</span> refl = reflTex.<span class="fn">Sample</span>(ss, reflUV+N.xy*<span class="num">0.03</span>);
+  <span class="tp">float4</span> refr = refrTex.<span class="fn">Sample</span>(ss, refrUV+N.xy*<span class="num">0.02</span>);
+  <span class="cm">// Fresnel 混合</span>
+  <span class="tp">float</span> fresnel = <span class="fn">saturate</span>(<span class="num">1.0</span>-<span class="fn">dot</span>(N, viewDir));
+  <span class="kw">return</span> <span class="fn">lerp</span>(refr, refl, fresnel);
+}`},
+  {id:"f8",num:"3-8",icon:"🎯",title:"Render-to-Texture 離屏渲染",desc:"Render Target、Shader Resource View、後處理基礎",xp:100,type:"normal",q:"Render-to-Texture 最主要的用途是什麼？",opts:["直接顯示到螢幕","把場景渲染到貼圖供後續處理","增加光源數量","加速頂點計算"],ans:1,src:"rastertek.com/dx11win10tut22.html",story:`<span class="emoji-big">🎯</span><span class="hl">Render-to-Texture（RTT）</span> = 把場景渲染到一張貼圖，不是直接顯示！<br><br>用途：後處理（Bloom、模糊）、陰影貼圖、反射、小地圖<br><br>流程：<br>1️⃣ 建立 <span class="hl">RTV + SRV</span><br>2️⃣ 切換到此 RTT 渲染<br>3️⃣ 切回 Back Buffer，把 RTT 當貼圖使用`,code:`<span class="tp">D3D11_TEXTURE2D_DESC</span> d = {};
+d.BindFlags = D3D11_BIND_RENDER_TARGET
+           | D3D11_BIND_SHADER_RESOURCE;
+m_device-><span class="fn">CreateTexture2D</span>(&d, <span class="kw">nullptr</span>, &m_tex);
+m_device-><span class="fn">CreateRenderTargetView</span>(m_tex, <span class="kw">nullptr</span>, &m_rtv);
+m_device-><span class="fn">CreateShaderResourceView</span>(m_tex, <span class="kw">nullptr</span>, &m_srv);
+
+<span class="cm">// 使用</span>
+ctx-><span class="fn">OMSetRenderTargets</span>(<span class="num">1</span>, &m_rtv, m_dsv);
+<span class="fn">RenderScene</span>();
+ctx-><span class="fn">PSSetShaderResources</span>(<span class="num">0</span>,<span class="num">1</span>,&m_srv);`},
+  {id:"f9",num:"3-9",icon:"👑",title:"Boss：Shadow Map 陰影貼圖",desc:"深度貼圖、Shadow Bias、PCF 柔化陰影",xp:160,type:"boss",q:"Shadow Map 產生陰影的核心步驟是什麼？",opts:["從光源出發渲染深度圖，再比較深度","直接計算光線交叉","用法線貼圖模擬","複製場景到陰影緩衝"],ans:0,src:"rastertek.com/dx11win10tut16.html",story:`<span class="emoji-big">👑</span><span class="hl">Shadow Map</span> = 遊戲陰影的標準做法！<br><br>兩個 Pass：<br>1️⃣ <span class="hl">Shadow Pass</span>：從光源渲染深度到 Shadow Map<br>2️⃣ <span class="hl">Render Pass</span>：比較深度，決定是否在陰影中<br><br><code style="color:var(--acc2)">float d = shadowMap.Sample(ss, uv).r;<br>if(pixelDepth > d + bias) lit = 0.0;</code><br><br>🔹 <span class="hl">Shadow Bias</span> — 避免自陰影鋸齒<br>🔹 <span class="hl">PCF</span> — 多樣本平均柔化邊緣`,code:`<span class="tp">Texture2D</span> shadowMap : register(t1);
+<span class="tp">float4</span> <span class="fn">ShadowPS</span>(<span class="tp">PixelInput</span> i) : SV_TARGET {
+  <span class="tp">float2</span> uv = i.lightPos.xy/i.lightPos.w*<span class="tp">float2</span>(<span class="num">.5,-.5</span>)+<span class="num">.5</span>;
+  <span class="tp">float</span>  d  = shadowMap.<span class="fn">Sample</span>(ss, uv).r;
+  <span class="tp">float</span>  pz = i.lightPos.z/i.lightPos.w;
+  <span class="cm">// PCF 3×3</span>
+  <span class="tp">float</span> shadow=<span class="num">0</span>;
+  <span class="tp">float2</span> tx=<span class="num">1.0</span>/<span class="tp">float2</span>(<span class="num">1024,1024</span>);
+  <span class="kw">for</span>(<span class="kw">int</span> x=-<span class="num">1</span>;x<=<span class="num">1</span>;x++)<span class="kw">for</span>(<span class="kw">int</span> y=-<span class="num">1</span>;y<=<span class="num">1</span>;y++)
+    shadow+=shadowMap.<span class="fn">Sample</span>(ss,uv+tx*<span class="tp">float2</span>(x,y)).r;
+  <span class="kw">return</span> baseColor*(pz-<span class="num">0.001</span>>shadow/<span class="num">9.0</span>?<span class="num">0.3</span>:<span class="num">1.0</span>);
 }`},
 ];
 
-
-// ── Sphere helper ──
+// ── Helpers ──
 function makeSphere(r){
   const v=[];const ST=28,SL=36;
   function pv(lat,lon){const x=Math.cos(lat)*Math.cos(lon),y=Math.sin(lat),z=Math.cos(lat)*Math.sin(lon);v.push(x*r,y*r,z*r,x,y,z);}
-  for(let si=0;si<ST;si++){
-    const la0=(si/ST-.5)*Math.PI,la1=((si+1)/ST-.5)*Math.PI;
-    for(let li=0;li<SL;li++){
-      const lo0=li/SL*Math.PI*2,lo1=(li+1)/SL*Math.PI*2;
-      pv(la0,lo0);pv(la1,lo0);pv(la1,lo1);
-      pv(la0,lo0);pv(la1,lo1);pv(la0,lo1);
-    }
-  }
+  for(let si=0;si<ST;si++){const la0=(si/ST-.5)*Math.PI,la1=((si+1)/ST-.5)*Math.PI;for(let li=0;li<SL;li++){const lo0=li/SL*Math.PI*2,lo1=(li+1)/SL*Math.PI*2;pv(la0,lo0);pv(la1,lo0);pv(la1,lo1);pv(la0,lo0);pv(la1,lo1);pv(la0,lo1);}}
   return new Float32Array(v);
 }
-
 function mkProg(gl,vs,fs){
   function sh(t,src){const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s;}
-  const p=gl.createProgram();
-  gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));
-  gl.linkProgram(p);return p;
+  const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;
+}
+function syncCV(cv,h){
+  const w=cv.clientWidth||600;
+  if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;cv.style.height=h+"px";}
+  return w/h;
 }
 
 function updateXP(){
@@ -358,265 +367,566 @@ function copyC(btn){
   navigator.clipboard.writeText(text).then(()=>{btn.textContent="✓ 已複製";setTimeout(()=>btn.textContent="複製",2000);});
 }
 
+
 // ── Interactive Demos ──
 function initDemo(id){
   if(demoInited[id])return;demoInited[id]=true;
   const cont=document.getElementById("dc-"+id);
   const isMobile=("ontouchstart" in window)||/iPhone|iPad|Android/i.test(navigator.userAgent);
-  ({d1:demoCompare,d2:demoWindow,d3:demoDevice,d4:demoTri,d5:demoHLSL,d6:demoTex,d7:demoLight,d8:demoModel,d9:demoBlend})[id]?.(cont,isMobile);
+  ({f1:demoMultiLight,f2:demoSpecMap,f3:demoCamera,f4:demoFrustum,f5:demoClipPlane,f6:demoReflection,f7:demoWater,f8:demoRTT,f9:demoShadow})[id]?.(cont,isMobile);
 }
 
-function mkGL(cont,label,h){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">'+label+'</div><canvas style="width:100%;display:block;height:'+h+'px"></canvas></div>';
-  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=h;
-  return{cv,gl:cv.getContext("webgl")};
-}
-
-function mkProg(gl,vs,fs){
-  function sh(t,src){const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s;}
-  const p=gl.createProgram();
-  gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));
-  gl.linkProgram(p);return p;
-}
-
-// ── Sphere geometry helper (shared by 1-7, 1-8, 1-9) ──
-function makeSphere(r){
-  const v=[];const ST=28,SL=36;
-  function pv(lat,lon){const x=Math.cos(lat)*Math.cos(lon),y=Math.sin(lat),z=Math.cos(lat)*Math.sin(lon);v.push(x*r,y*r,z*r,x,y,z);}
-  for(let si=0;si<ST;si++){
-    const la0=(si/ST-.5)*Math.PI,la1=((si+1)/ST-.5)*Math.PI;
-    for(let li=0;li<SL;li++){
-      const lo0=li/SL*Math.PI*2,lo1=(li+1)/SL*Math.PI*2;
-      pv(la0,lo0);pv(la1,lo0);pv(la1,lo1);
-      pv(la0,lo0);pv(la1,lo1);pv(la0,lo1);
-    }
-  }
-  return new Float32Array(v);
-}
-
-function demoCompare(cont){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">⚔️ DirectX 11 vs OpenGL 對比</div><div style="padding:20px;font-size:.82rem;line-height:2"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="background:rgba(232,69,69,.08);border:1px solid rgba(232,69,69,.2);border-radius:12px;padding:16px"><div style="color:var(--acc);font-weight:900;margin-bottom:10px">⚔️ DirectX 11</div><div>📦 內含於 Windows SDK</div><div>🏭 Microsoft 獨家</div><div>🎮 Xbox 完整支援</div><div>📐 左手座標系</div><div>🔧 HLSL 著色語言</div><div>💾 COM 介面</div><div>🔄 順時針繞序</div></div><div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:16px"><div style="color:var(--acc2);font-weight:900;margin-bottom:10px">🌐 OpenGL</div><div>📦 需要 GLEW/GLAD</div><div>🌍 跨平台支援</div><div>🐧 Linux/macOS/Web</div><div>📐 右手座標系</div><div>🔧 GLSL 著色語言</div><div>💾 C 函式介面</div><div>🔄 逆時針繞序</div></div></div></div></div>';
-}
-
-function demoWindow(cont){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🪟 Win32 訊息迴圈模擬</div><canvas style="width:100%;display:block;height:220px"></canvas></div>';
-  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=220;
-  const ctx=cv.getContext("2d");let msgs=[],t=0;
-  const types=["WM_PAINT","WM_KEYDOWN","WM_MOUSEMOVE","WM_SIZE","WM_TIMER"],cols=["#e84545","#00d4ff","#ffd700","#ff9f43","#c084fc"];
+// f1: 4 orbiting colored point lights on a sphere
+function demoMultiLight(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🔵 4 個點光源陣列照射球體</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn active" onclick="setML(4)">💡 4 光源</button>
+    <button class="ctrl-btn" onclick="setML(2)">💡 2 光源</button>
+    <button class="ctrl-btn" onclick="setML(1)">💡 1 光源</button>
+  </div>`;
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  sync(); if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const sph=makeSphere(.88);
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+  const prog=mkP(
+    "attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vW;uniform float asp;void main(){vN=n;vW=p;gl_Position=vec4(p.x*0.92/asp,p.y*0.92,p.z*.01,1.);}",
+    `precision mediump float;varying vec3 vN,vW;
+     uniform vec3 lP[4],lC[4];uniform int nL;
+     void main(){
+       vec3 N=normalize(vN),V=vec3(0,0,1);
+       vec3 base=vec3(.85,.15,.15),amb=base*.22,lit=vec3(0);
+       for(int i=0;i<4;i++){
+         if(i>=nL)break;
+         vec3 toL=lP[i]-vW;float dist=max(length(toL),.001);
+         vec3 L=normalize(toL);
+         float att=1./(1.+dist*dist*.8);
+         float diff=max(dot(N,L),0.);
+         vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.),64.);
+         lit+=(base*lC[i]*diff+lC[i]*spec*.8)*att*4.;
+       }
+       gl_FragColor=vec4(clamp(amb+lit,0.,1.),1.);
+     }`
+  );
+  g.useProgram(prog);
+  const aP=g.getAttribLocation(prog,"p"),aN=g.getAttribLocation(prog,"n");
+  g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+  g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
+  const uAsp=g.getUniformLocation(prog,"asp"),uNL=g.getUniformLocation(prog,"nL");
+  const uLP=[0,1,2,3].map(i=>g.getUniformLocation(prog,"lP["+i+"]"));
+  const uLC=[0,1,2,3].map(i=>g.getUniformLocation(prog,"lC["+i+"]"));
+  const lCols=[[1,.7,.2],[.2,.6,1],[.3,1,.4],[1,.3,.8]];
+  g.enable(g.DEPTH_TEST);
+  let nL=4,t=0;
+  window.setML=n=>{nL=n;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  // dot prog
+  const dotP=mkP("attribute vec2 p;uniform float asp;void main(){gl_Position=vec4(p.x*.92/asp,p.y*.92,0,1);gl_PointSize=12.;}","precision mediump float;uniform vec3 c;void main(){float d=length(gl_PointCoord-.5)*2.;if(d>1.)discard;gl_FragColor=vec4(c,1.-d*.3);}");
+  const dBuf=g.createBuffer();
   function frame(){
-    t++;ctx.fillStyle="#07080f";ctx.fillRect(0,0,cv.width,cv.height);
-    if(t%25===0&&msgs.length<8)msgs.push({txt:types[Math.floor(Math.random()*types.length)],col:cols[Math.floor(Math.random()*cols.length)],age:0});
-    msgs=msgs.filter(m=>m.age<100);
-    ctx.font="bold 12px Space Mono";
-    msgs.forEach((m,i)=>{m.age++;ctx.globalAlpha=Math.max(0,1-m.age/100);ctx.fillStyle=m.col;ctx.fillText("[WndProc] "+m.txt+" → MessageHandler()",20,40+i*22);});
-    ctx.globalAlpha=1;ctx.fillStyle="rgba(232,69,69,.7)";ctx.fillText("SystemClass::Run() — 主迴圈運行中...",20,205);
+    t+=.016;const asp=sync();
+    g.viewport(0,0,cv.width,cv.height);g.clearColor(.04,.03,.09,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    const lps=lCols.map((_,i)=>[Math.cos(t+i*1.57)*1.2,Math.sin(t*.7+i*1.57)*.7,Math.sin(t+i*1.57)*.5+.6]);
+    g.useProgram(prog);g.uniform1f(uAsp,asp);g.uniform1i(uNL,nL);
+    lps.forEach(([x,y,z],i)=>{g.uniform3f(uLP[i],x,y,z);g.uniform3f(uLC[i],...lCols[i]);});
+    g.bindBuffer(g.ARRAY_BUFFER,vB);g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+    g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
+    g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    // dots
+    g.depthMask(false);
+    for(let i=0;i<nL;i++){
+      g.useProgram(dotP);
+      const d=new Float32Array([lps[i][0],lps[i][1]]);
+      g.bindBuffer(g.ARRAY_BUFFER,dBuf);g.bufferData(g.ARRAY_BUFFER,d,g.DYNAMIC_DRAW);
+      const aDP=g.getAttribLocation(dotP,"p");g.enableVertexAttribArray(aDP);g.vertexAttribPointer(aDP,2,g.FLOAT,false,0,0);
+      g.uniform3f(g.getUniformLocation(dotP,"c"),...lCols[i]);g.uniform1f(g.getUniformLocation(dotP,"asp"),asp);
+      g.drawArrays(g.POINTS,0,1);
+    }
+    g.depthMask(true);requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+// f2: Specular map — two spheres, left=no spec map, right=with spec map
+function demoSpecMap(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🗺️ Specular Map — 左：無 / 右：有高光遮罩</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>✨ Shininess</label><input type="range" min="1" max="200" value="64" id="shin" oninput="updShin()"><span class="slider-val" id="shinv">64</span></div>`;
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  sync(); if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const sph=makeSphere(.88);
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+  const prog=mkP(
+    "attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vW;uniform float asp;uniform float ox;void main(){vN=n;vW=p;vec3 wp=vec3(p.x+ox,p.y,p.z);gl_Position=vec4(wp.x*0.92/asp,wp.y*0.92,wp.z*.01,1.);}",
+    `precision mediump float;varying vec3 vN,vW;
+     uniform float shin;uniform int useSpecMap;
+     void main(){
+       vec3 N=normalize(vN);
+       vec3 L=normalize(vec3(0.5,0.7,0.8));
+       vec3 V=vec3(0.0,0.0,1.0);  // fixed front-facing view
+       vec3 H=normalize(L+V);
+       float diff=max(dot(N,L),0.0);
+       float spec=pow(max(dot(N,H),0.0),shin);
+       // Without spec map: uniform highlight (shininess effect clearly visible)
+       // With spec map: highlight only on equatorial band (dark poles = no metal)
+       float specMask=useSpecMap==1?(1.0-abs(vN.y)):1.0;
+       vec3 base=vec3(0.85,0.15,0.15);
+       vec3 diffuse=base*(0.2+diff*0.8);
+       vec3 specular=vec3(1.0,0.95,0.85)*spec*specMask*2.0;
+       gl_FragColor=vec4(clamp(diffuse+specular,0.0,1.0),1.0);
+     }`
+  );
+  g.useProgram(prog);
+  const aP=g.getAttribLocation(prog,"p"),aN=g.getAttribLocation(prog,"n");
+  g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+  g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
+  const uAsp=g.getUniformLocation(prog,"asp"),uOx=g.getUniformLocation(prog,"ox");
+  const uShin=g.getUniformLocation(prog,"shin"),uSM=g.getUniformLocation(prog,"useSpecMap");
+  g.enable(g.DEPTH_TEST);
+  let shin=64;
+  window.updShin=()=>{shin=parseInt(document.getElementById("shin").value);document.getElementById("shinv").textContent=shin;};
+  function frame(){
+    const asp=sync();
+    g.viewport(0,0,cv.width,cv.height);g.clearColor(.04,.03,.09,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    g.uniform1f(uAsp,asp);g.uniform1f(uShin,shin);
+    g.bindBuffer(g.ARRAY_BUFFER,vB);g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+    g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
+    g.uniform1f(uOx,-1.0);g.uniform1i(uSM,0);g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    g.uniform1f(uOx, 1.0);g.uniform1i(uSM,1);g.drawArrays(g.TRIANGLES,0,sph.length/6);
     requestAnimationFrame(frame);
   }
   frame();
 }
 
-function demoDevice(cont){
-  const{cv,gl}=mkGL(cont,"⚙️ Direct3D 初始化狀態（WebGL 模擬）",200);
-  if(!gl){cont.innerHTML="<p style=padding:20px>WebGL 不支援</p>";return;}
-  const p=mkProg(gl,"attribute vec2 pos;void main(){gl_Position=vec4(pos,0,1);}","precision mediump float;uniform float t;void main(){gl_FragColor=vec4(.5+.5*sin(t),.1,.8+.2*cos(t),.8);}");
-  gl.useProgram(p);
-  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-  const a=gl.getAttribLocation(p,"pos"),u=gl.getUniformLocation(p,"t");
-  gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
-  let t2=0;function frame(){t2+=.02;const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1f(u,t2);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
-  frame();
-  const ov=document.createElement("div");ov.style.cssText="padding:10px 16px;font-family:Space Mono;font-size:.72rem;display:grid;grid-template-columns:1fr 1fr;gap:6px";
-  ov.innerHTML=[["ID3D11Device","✅ 已建立"],["ID3D11DeviceContext","✅ 就緒"],["IDXGISwapChain","✅ 雙緩衝"],["RenderTargetView","✅ 連結"],["DepthStencilView","✅ 深度"],["Viewport","✅ 已設定"]].map(([k,v])=>"<div><span style=color:#4a5568>"+k+"</span><br><span style=color:#00d4ff>"+v+"</span></div>").join("");
-  cont.querySelector(".demo-wrap").appendChild(ov);
-}
-
-function demoTri(cont,isMobile){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🔺 DirectX 三角形（左手座標系，順時針繞序）</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setTM(\'c\')">🎨 純色</button><button class="ctrl-btn" onclick="setTM(\'s\')">🌀 旋轉</button><button class="ctrl-btn" onclick="setTM(\'w\')">🌊 波動</button></div>';
-  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=260;
-  const gl=cv.getContext("webgl");if(!gl)return;
-  let mode="c",t=0;
-  const p=mkProg(gl,"attribute vec2 pos;attribute vec3 col;varying vec3 vc;uniform float angle;void main(){float c=cos(angle),s=sin(angle);vec2 r=vec2(pos.x*c-pos.y*s,pos.x*s+pos.y*c);gl_Position=vec4(r*.85,0,1);vc=col;}","precision mediump float;varying vec3 vc;uniform float wave;void main(){gl_FragColor=vec4(vc*(.7+.3*wave),1.);}");
-  gl.useProgram(p);
-  const verts=new Float32Array([0,.85,0, 1,0,0, -.75,-.5,0, 0,1,0, .75,-.5,0, 0,0,1]);
-  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
-  const ap=gl.getAttribLocation(p,"pos"),ac=gl.getAttribLocation(p,"col"),ua=gl.getUniformLocation(p,"angle"),uw=gl.getUniformLocation(p,"wave");
-  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,20,0);
-  gl.enableVertexAttribArray(ac);gl.vertexAttribPointer(ac,3,gl.FLOAT,false,20,8);
-  window.setTM=m=>{mode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
-  function frame(){t+=.02;const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1f(ua,mode==="s"?t:mode==="w"?Math.sin(t)*.6:0);gl.uniform1f(uw,mode==="w"?Math.sin(t*2)*.5+.5:1);gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(frame);}
-  frame();
-}
-
-function demoHLSL(cont){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">✨ HLSL Shader 即時預覽</div><canvas style="width:100%;display:block;height:220px"></canvas></div><div class="slider-row"><label>🔴 R</label><input type="range" min="0" max="100" value="88" id="hr" oninput="updH()"><span class="slider-val" id="hvr">0.88</span></div><div class="slider-row"><label>🟢 G</label><input type="range" min="0" max="100" value="27" id="hg" oninput="updH()"><span class="slider-val" id="hvg">0.27</span></div><div class="slider-row"><label>🔵 B</label><input type="range" min="0" max="100" value="27" id="hb" oninput="updH()"><span class="slider-val" id="hvb">0.27</span></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setHFx(0)">⬛ 純色</button><button class="ctrl-btn" onclick="setHFx(1)">💓 脈衝</button><button class="ctrl-btn" onclick="setHFx(2)">🌈 漸層</button></div>';
-  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=220;
-  const gl=cv.getContext("webgl");if(!gl)return;
-  let col={r:.88,g:.27,b:.27},fx=0,t=0;
-  const p=mkProg(gl,"attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}","precision mediump float;varying vec2 uv;uniform vec3 col;uniform float t;uniform int fx;void main(){if(fx==0)gl_FragColor=vec4(col,1.);else if(fx==1){float v=sin(t*3.)*.5+.5;gl_FragColor=vec4(col*v,1.);}else gl_FragColor=vec4(col.r*uv.x,col.g*uv.y,col.b*(1.-uv.x),1.);}");
-  gl.useProgram(p);
-  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-  const a=gl.getAttribLocation(p,"p");gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
-  const uc=gl.getUniformLocation(p,"col"),ut=gl.getUniformLocation(p,"t"),uf=gl.getUniformLocation(p,"fx");
-  window.updH=()=>{col.r=document.getElementById("hr").value/100;col.g=document.getElementById("hg").value/100;col.b=document.getElementById("hb").value/100;document.getElementById("hvr").textContent=col.r.toFixed(2);document.getElementById("hvg").textContent=col.g.toFixed(2);document.getElementById("hvb").textContent=col.b.toFixed(2);};
-  window.setHFx=f=>{fx=f;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
-  function frame(){t+=.016;const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform3f(uc,col.r,col.g,col.b);gl.uniform1f(ut,t);gl.uniform1i(uf,fx);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
-  frame();
-}
-
-function demoTex(cont){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🖼️ UV 座標系統（V=0 在上方）</div><canvas style="width:100%;display:block;height:220px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setTF(0)">🗺️ UV 視覺化</button><button class="ctrl-btn" onclick="setTF(1)">📐 棋盤格</button><button class="ctrl-btn" onclick="setTF(2)">🌊 動態波</button></div>';
-  const cv=cont.querySelector("canvas");cv.width=cv.clientWidth||600;cv.height=220;
-  const gl=cv.getContext("webgl");if(!gl)return;
-  let mode=0,t=0;
-  const p=mkProg(gl,"attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}","precision mediump float;varying vec2 uv;uniform int mode;uniform float t;void main(){if(mode==0){gl_FragColor=vec4(uv.x,1.-uv.y,.3,1.);}else if(mode==1){float c=mod(floor(uv.x*8.)+floor(uv.y*8.),2.);gl_FragColor=vec4(vec3(c*.8+.1),1.);}else{float d=length(uv-.5)*8.;float w=sin(d-t*4.)*.5+.5;gl_FragColor=vec4(w*.9,.1,w*.3,1.);}}");
-  gl.useProgram(p);
-  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-  const a=gl.getAttribLocation(p,"p");gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
-  const um=gl.getUniformLocation(p,"mode"),ut2=gl.getUniformLocation(p,"t");
-  window.setTF=m=>{mode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
-  function frame(){t+=.016;const w=cv.clientWidth||600;if(cv.width!==w){cv.width=w;gl.viewport(0,0,w,cv.height);}gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1i(um,mode);gl.uniform1f(ut2,t);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
-  frame();
-}
-
-function demoLight(cont,isMobile){
-  const sliders = isMobile
-    ? `<div class="slider-row" style="flex-direction:column;align-items:flex-start;gap:4px"><label style="min-width:auto">💡 光照角度</label><div style="display:flex;width:100%;gap:8px;align-items:center"><input type="range" min="-180" max="180" value="45" id="la" oninput="updL()" style="flex:1"><span class="slider-val" id="lva">45°</span></div></div><div class="slider-row" style="flex-direction:column;align-items:flex-start;gap:4px"><label style="min-width:auto">🌙 環境光</label><div style="display:flex;width:100%;gap:8px;align-items:center"><input type="range" min="0" max="60" value="15" id="lb" oninput="updL()" style="flex:1"><span class="slider-val" id="lvb">0.15</span></div></div>`
-    : `<div class="slider-row"><label>💡 光照角度</label><input type="range" min="-180" max="180" value="45" id="la" oninput="updL()"><span class="slider-val" id="lva">45°</span></div><div class="slider-row"><label>🌙 環境光</label><input type="range" min="0" max="60" value="15" id="lb" oninput="updL()"><span class="slider-val" id="lvb">0.15</span></div>`;
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">💡 Lambert 漫反射光照（HLSL 模擬）</div><canvas style="width:100%;display:block;height:260px"></canvas></div>'+sliders;
+// f3: First-person camera simulation — WASD keys move camera
+function demoCamera(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">📷 第一人稱相機 — ${isMobile?'觸控':'WASD'} 移動視角</div><canvas style="width:100%;display:block;height:260px;cursor:crosshair"></canvas></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn" onclick="camMove('w')">⬆ W 前進</button>
+    <button class="ctrl-btn" onclick="camMove('s')">⬇ S 後退</button>
+    <button class="ctrl-btn" onclick="camMove('a')">⬅ A 左轉</button>
+    <button class="ctrl-btn" onclick="camMove('d')">➡ D 右轉</button>
+  </div>`;
   const cv=cont.querySelector("canvas");
-  let ang=45,amb=.15;
-
-  // syncSize: 保持 canvas pixel 尺寸，修正 aspect ratio
-  function syncSize(){
-    const w=cv.clientWidth||600;
-    const h=260;
-    if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;cv.style.height=h+'px';}
-    return w/h; // aspect ratio
-  }
-
-  const gl=cv.getContext("webgl");if(!gl)return;
-  syncSize();
-
-  // 真正的 3D 球體（lat/lon 球面三角網格）
-  const verts3d=[];
-  const STACKS=24,SLICES=32;
-  function pushVert(lat,lon){
-    const x=Math.cos(lat)*Math.cos(lon);
-    const y=Math.sin(lat);
-    const z=Math.cos(lat)*Math.sin(lon);
-    verts3d.push(x*.88,y*.88,z*.88, x,y,z); // pos(xyz) + normal(xyz)
-  }
-  for(let si=0;si<STACKS;si++){
-    const lat0=(si/STACKS-.5)*Math.PI;
-    const lat1=((si+1)/STACKS-.5)*Math.PI;
-    for(let li=0;li<SLICES;li++){
-      const lon0=li/SLICES*Math.PI*2;
-      const lon1=(li+1)/SLICES*Math.PI*2;
-      pushVert(lat0,lon0);pushVert(lat1,lon0);pushVert(lat1,lon1);
-      pushVert(lat0,lon0);pushVert(lat1,lon1);pushVert(lat0,lon1);
-    }
-  }
-
-  const p=mkProg(gl,
-    // aspect ratio uniform 修正球的形狀
-    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;uniform float asp;void main(){vn=nor;gl_Position=vec4(pos.x*0.92/asp,pos.y*0.92,pos.z*.01,1.);}",
-    "precision mediump float;varying vec3 vn;uniform vec3 ld;uniform float amb;void main(){vec3 n=normalize(vn);float d=max(dot(n,ld),0.);vec3 c=vec3(.88,.27,.27);gl_FragColor=vec4(c*(amb+d*(1.-amb)),1.);}");
-  gl.useProgram(p);
-  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts3d),gl.STATIC_DRAW);
-  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
-  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
-  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
-  const ul=gl.getUniformLocation(p,"ld"),ua=gl.getUniformLocation(p,"amb"),uasp=gl.getUniformLocation(p,"asp");
-  gl.enable(gl.DEPTH_TEST);
-  window.updL=()=>{
-    ang=parseFloat(document.getElementById("la").value);
-    amb=document.getElementById("lb").value/100;
-    document.getElementById("lva").textContent=ang+"°";
-    document.getElementById("lvb").textContent=amb.toFixed(2);
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  sync(); if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  // Grid of spheres (3x3) camera moves through
+  const sph=makeSphere(.35);
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+  const prog=mkP(
+    "attribute vec3 p;attribute vec3 n;varying vec3 vN;uniform mat4 vp;uniform vec3 wPos;void main(){vN=n;gl_Position=vp*vec4(p+wPos,1.);}",
+    "precision mediump float;varying vec3 vN;uniform vec3 col;void main(){vec3 N=normalize(vN);float d=max(dot(N,normalize(vec3(.5,.8,.6))),0.);gl_FragColor=vec4(col*(.2+d*.8),1.);}"
+  );
+  g.useProgram(prog);
+  const aP=g.getAttribLocation(prog,"p"),aN=g.getAttribLocation(prog,"n");
+  const uVP=g.getUniformLocation(prog,"vp"),uW=g.getUniformLocation(prog,"wPos"),uCol=g.getUniformLocation(prog,"col");
+  g.enable(g.DEPTH_TEST);
+  // Camera state
+  let camX=0,camZ=0,yaw=0;
+  const SPHERES=[];
+  const cols=[[.88,.22,.22],[.25,.55,.88],[.25,.78,.42],[.85,.65,.18],[.70,.25,.85],[.25,.78,.78],[.88,.5,.25],[.5,.88,.25],[.25,.5,.88]];
+  for(let i=0;i<3;i++)for(let j=0;j<3;j++)SPHERES.push({x:(i-1)*3,z:(j-1)*3+2,col:cols[i*3+j]});
+  window.camMove=dir=>{
+    const spd=0.4;
+    if(dir==='w'){camX+=Math.sin(yaw)*spd;camZ+=Math.cos(yaw)*spd;}
+    if(dir==='s'){camX-=Math.sin(yaw)*spd;camZ-=Math.cos(yaw)*spd;}
+    if(dir==='a')yaw-=.15;
+    if(dir==='d')yaw+=.15;
   };
-  function frame(){
-    const asp=syncSize();
-    gl.viewport(0,0,cv.width,cv.height);
-    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    const r=ang*Math.PI/180;
-    gl.uniform3f(ul,Math.cos(r),Math.sin(r),.5);
-    gl.uniform1f(ua,amb);
-    gl.uniform1f(uasp,asp);
-    gl.drawArrays(gl.TRIANGLES,0,verts3d.length/6);
-    requestAnimationFrame(frame);
+  document.addEventListener('keydown',e=>{
+    if(['w','a','s','d'].includes(e.key.toLowerCase()))window.camMove(e.key.toLowerCase());
+  });
+  function perspMat(fov,asp,n,f){
+    const s=1/Math.tan(fov/2);
+    return new Float32Array([s/asp,0,0,0, 0,s,0,0, 0,0,(f+n)/(n-f),-1, 0,0,2*f*n/(n-f),0]);
   }
-  frame();
-  if(isMobile) window.addEventListener('resize',syncSize);
-}
-
-function demoModel(cont,isMobile){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">📦 3D 模型渲染（旋轉球體）</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setMM(0)">⬛ 填充</button><button class="ctrl-btn" onclick="setMM(1)">💡 光照</button><button class="ctrl-btn" onclick="setMM(2)">🎨 法線</button></div>';
-  const cv=cont.querySelector("canvas");
-  const gl=cv.getContext("webgl");if(!gl)return;
-  function syncSize(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height='260px';}return w/260;}
-  syncSize();
-  let mode=0,t=0;
-  const sphVerts=makeSphere(.88);
-  const p=mkProg(gl,
-    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;uniform float asp;uniform float rot;void main(){float c=cos(rot),s=sin(rot);vec3 r=vec3(pos.x*c+pos.z*s,pos.y,-pos.x*s+pos.z*c);vn=vec3(nor.x*c+nor.z*s,nor.y,-nor.x*s+nor.z*c);gl_Position=vec4(r.x*0.92/asp,r.y*0.92,r.z*.01,1.);}",
-    "precision mediump float;varying vec3 vn;uniform int mode;void main(){if(mode==0){gl_FragColor=vec4(vec3(.88,.27,.27),1.);}else if(mode==1){vec3 l=normalize(vec3(1.2,1.5,2.));float d=max(dot(normalize(vn),l),0.);gl_FragColor=vec4(vec3(.88,.27,.27)*(.18+d*.82),1.);}else{gl_FragColor=vec4(normalize(vn)*.5+.5,1.);}}");
-  gl.useProgram(p);
-  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,sphVerts,gl.STATIC_DRAW);
-  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
-  const ur=gl.getUniformLocation(p,"rot"),um=gl.getUniformLocation(p,"mode"),uasp=gl.getUniformLocation(p,"asp");
-  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
-  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
-  gl.enable(gl.DEPTH_TEST);
-  window.setMM=m=>{mode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
-  if(isMobile)window.addEventListener('resize',syncSize);
-  function frame(){t+=.015;const asp=syncSize();gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform1f(ur,t);gl.uniform1i(um,mode);gl.uniform1f(uasp,asp);gl.drawArrays(gl.TRIANGLES,0,sphVerts.length/6);requestAnimationFrame(frame);}
-  frame();
-}
-function demoBlend(cont,isMobile){
-  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">⚗️ Alpha Blending — 兩個球體</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="slider-row"><label>透明度</label><input type="range" min="0" max="100" value="70" id="ba" oninput="updB()"><span class="slider-val" id="bva">0.70</span></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setBM(1)">✅ Blend ON</button><button class="ctrl-btn" onclick="setBM(0)">❌ Blend OFF</button></div>';
-  const cv=cont.querySelector("canvas");
-  const gl=cv.getContext("webgl");if(!gl)return;
-  function syncSize(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height='260px';}return w/260;}
-  syncSize();
-  let alpha=.7,blendOn=true,t=0;
-  const sphVerts=makeSphere(.88);
-  const p=mkProg(gl,
-    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;uniform float asp;uniform vec2 off;void main(){vn=nor;vec3 r=vec3(pos.x+off.x,pos.y,pos.z);gl_Position=vec4(r.x*0.92/asp,r.y*0.92,r.z*.01,1.);}",
-    "precision mediump float;varying vec3 vn;uniform vec3 col;uniform float alpha;void main(){vec3 l=normalize(vec3(1.2,1.5,2.));float d=max(dot(normalize(vn),l),0.);gl_FragColor=vec4(col*(.18+d*.82),alpha);}");
-  gl.useProgram(p);
-  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,sphVerts,gl.STATIC_DRAW);
-  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
-  const uasp=gl.getUniformLocation(p,"asp"),uoff=gl.getUniformLocation(p,"off"),ucol=gl.getUniformLocation(p,"col"),ualpha=gl.getUniformLocation(p,"alpha");
-  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
-  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
-  gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-  window.updB=()=>{alpha=document.getElementById("ba").value/100;document.getElementById("bva").textContent=alpha.toFixed(2);};
-  window.setBM=on=>{blendOn=on===1;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
-  if(isMobile)window.addEventListener('resize',syncSize);
+  function lookAt(ex,ey,ez,lx,ly,lz){
+    const fwd=norm(sub([lx,ly,lz],[ex,ey,ez]));
+    const right=norm(cross([0,1,0],fwd));
+    const up=cross(fwd,right);
+    return new Float32Array([
+      right[0],up[0],fwd[0],0,
+      right[1],up[1],fwd[1],0,
+      right[2],up[2],fwd[2],0,
+      -dot(right,[ex,ey,ez]),-dot(up,[ex,ey,ez]),-dot(fwd,[ex,ey,ez]),1
+    ]);
+  }
+  function norm(v){const l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])||1;return v.map(x=>x/l);}
+  function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+  function sub(a,b){return a.map((v,i)=>v-b[i]);}
+  function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+  function mul4(a,b){const r=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let k=0;k<4;k++)r[i*4+j]+=a[k*4+j]*b[i*4+k];return r;}
   function frame(){
-    const asp=syncSize();
-    gl.viewport(0,0,cv.width,cv.height);
-    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    if(blendOn){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);}
-    else gl.disable(gl.BLEND);
-    gl.uniform1f(uasp,asp);
-    // Back sphere (red, opaque) — draw first (farther)
-    gl.uniform2f(uoff,-.45,0);
-    gl.uniform3f(ucol,.88,.27,.27);
-    gl.uniform1f(ualpha,1.0);
-    gl.drawArrays(gl.TRIANGLES,0,sphVerts.length/6);
-    // Front sphere (blue, transparent) — draw second (closer)
-    gl.uniform2f(uoff,.45,0);
-    gl.uniform3f(ucol,.2,.5,1.0);
-    gl.uniform1f(ualpha,blendOn?alpha:1.0);
-    gl.drawArrays(gl.TRIANGLES,0,sphVerts.length/6);
+    const asp=sync();
+    g.viewport(0,0,cv.width,cv.height);g.clearColor(.04,.03,.09,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    const lx=camX+Math.sin(yaw),lz=camZ+Math.cos(yaw);
+    const view=lookAt(camX,0,camZ,lx,0,lz);
+    const proj=perspMat(1.0,asp,.1,20);
+    const vp=mul4(proj,view);
+    g.uniformMatrix4fv(uVP,false,vp);
+    g.bindBuffer(g.ARRAY_BUFFER,vB);g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+    g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
+    SPHERES.forEach(({x,z,col})=>{
+      g.uniform3f(uW,x,0,z);g.uniform3f(uCol,...col);
+      g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    });
     requestAnimationFrame(frame);
   }
   frame();
 }
 
+// f4: Frustum culling — show spheres, fade out-of-frustum ones
+function demoFrustum(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">✂️ Frustum Culling — 視錐外的球體被剔除（灰色）</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>👁 視野角 FOV</label><input type="range" min="20" max="120" value="60" id="fov" oninput="updFOV()"><span class="slider-val" id="fovv">60°</span></div>`;
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  sync(); if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const sph=makeSphere(.5);
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+  const prog=mkP(
+    "attribute vec3 p;attribute vec3 n;varying vec3 vN;uniform float asp;uniform vec2 off;void main(){vN=n;vec2 wp=vec2(p.x+off.x,p.y+off.y);gl_Position=vec4(wp.x*0.35/asp,wp.y*0.35,p.z*.01,1.);}",
+    "precision mediump float;varying vec3 vN;uniform float inFrustum;void main(){vec3 N=normalize(vN);float d=max(dot(N,normalize(vec3(.5,.8,.6))),0.);vec3 col=inFrustum>.5?vec3(.85,.22,.22):vec3(.3,.3,.35);gl_FragColor=vec4(col*(.2+d*.8),1.);}"
+  );
+  g.useProgram(prog);
+  const aP=g.getAttribLocation(prog,"p"),aN=g.getAttribLocation(prog,"n");
+  const uAsp=g.getUniformLocation(prog,"asp"),uOff=g.getUniformLocation(prog,"off"),uIF=g.getUniformLocation(prog,"inFrustum");
+  g.enable(g.DEPTH_TEST);
+  // 12 spheres in a grid
+  const POS=[];for(let x=-2;x<=2;x++)for(let y=-1;y<=1;y++)POS.push([x*1.3,y*1.3]);
+  let fovDeg=60;
+  window.updFOV=()=>{fovDeg=parseInt(document.getElementById("fov").value);document.getElementById("fovv").textContent=fovDeg+"°";};
+  function inFrustum(sx,sy){
+    // Simple 2D frustum: fovDeg controls X range
+    const halfW=Math.tan(fovDeg/2*Math.PI/180)*2.5;
+    return Math.abs(sx)<halfW&&Math.abs(sy)<2;
+  }
+  function frame(){
+    const asp=sync();
+    g.viewport(0,0,cv.width,cv.height);g.clearColor(.04,.03,.09,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    g.uniform1f(uAsp,asp);
+    g.bindBuffer(g.ARRAY_BUFFER,vB);g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+    g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
+    POS.forEach(([x,y])=>{
+      g.uniform2f(uOff,x,y);
+      g.uniform1f(uIF,inFrustum(x,y)?1:0);
+      g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
 
+// f5: Clip Plane — show clipping effect interactively
+function demoClipPlane(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🔲 Clip Plane — 拖曳滑桿控制裁切位置</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>✂️ 裁切高度</label><input type="range" min="-100" max="100" value="30" id="clip" oninput="updClip()"><span class="slider-val" id="clipv">0.30</span></div>`;
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  sync(); if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const sph=makeSphere(.88);
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+  const prog=mkP(
+    "attribute vec3 p;attribute vec3 n;varying vec3 vN;varying float vClip;uniform float asp;uniform float clipH;void main(){vN=n;vClip=p.y-clipH;gl_Position=vec4(p.x*0.92/asp,p.y*0.92,p.z*.01,1.);}",
+    "precision mediump float;varying vec3 vN;varying float vClip;void main(){if(vClip>0.)discard;vec3 N=normalize(vN);float d=max(dot(N,normalize(vec3(.5,.8,.6))),0.);gl_FragColor=vec4(vec3(.85,.22,.22)*(.2+d*.8),1.);}"
+  );
+  g.useProgram(prog);
+  const aP=g.getAttribLocation(prog,"p"),aN=g.getAttribLocation(prog,"n");
+  const uAsp=g.getUniformLocation(prog,"asp"),uClip=g.getUniformLocation(prog,"clipH");
+  g.enable(g.DEPTH_TEST);
+  let clipH=0.30;
+  window.updClip=()=>{clipH=document.getElementById("clip").value/100;document.getElementById("clipv").textContent=clipH.toFixed(2);};
+  function frame(){
+    const asp=sync();
+    g.viewport(0,0,cv.width,cv.height);g.clearColor(.04,.03,.09,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    g.uniform1f(uAsp,asp);g.uniform1f(uClip,clipH);
+    g.bindBuffer(g.ARRAY_BUFFER,vB);g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+    g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
+    g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+// f6: Reflection — sphere above a "mirror floor"
+function demoReflection(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">💎 平面反射 — 球體倒影於鏡面地板</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>💎 反射強度</label><input type="range" min="0" max="100" value="60" id="refl" oninput="updRefl()"><span class="slider-val" id="reflv">0.60</span></div>`;
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  sync(); if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const sph=makeSphere(.55);
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+  const prog=mkP(
+    "attribute vec3 p;attribute vec3 n;varying vec3 vN;uniform float asp;uniform float yOff;uniform float scaleY;void main(){vN=n;gl_Position=vec4(p.x*0.85/asp,(p.y*scaleY+yOff)*0.85,p.z*.01,1.);}",
+    "precision mediump float;varying vec3 vN;uniform vec3 col;uniform float alpha;void main(){vec3 N=normalize(vN);float d=max(dot(N,normalize(vec3(.5,.8,.6))),0.);gl_FragColor=vec4(col*(.2+d*.8),alpha);}"
+  );
+  g.useProgram(prog);
+  const aP=g.getAttribLocation(prog,"p"),aN=g.getAttribLocation(prog,"n");
+  const uAsp=g.getUniformLocation(prog,"asp"),uY=g.getUniformLocation(prog,"yOff");
+  const uSY=g.getUniformLocation(prog,"scaleY"),uCol=g.getUniformLocation(prog,"col"),uAlpha=g.getUniformLocation(prog,"alpha");
+  g.enable(g.DEPTH_TEST);g.enable(g.BLEND);g.blendFunc(g.SRC_ALPHA,g.ONE_MINUS_SRC_ALPHA);
+  let reflStr=0.60;
+  window.updRefl=()=>{reflStr=document.getElementById("refl").value/100;document.getElementById("reflv").textContent=reflStr.toFixed(2);};
+  // Floor quad
+  const floorProg=mkP(
+    "attribute vec2 p;uniform float asp;void main(){gl_Position=vec4(p.x/asp,p.y,0,1);}",
+    "precision mediump float;void main(){gl_FragColor=vec4(.15,.12,.2,1.);}"
+  );
+  const floorBuf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,floorBuf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1.5,-.18,1.5,-.18,-1.5,-.38,1.5,-.38]),g.STATIC_DRAW);
+  function frame(){
+    const asp=sync();
+    g.viewport(0,0,cv.width,cv.height);g.clearColor(.04,.03,.09,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    // Floor
+    g.useProgram(floorProg);
+    const fAP=g.getAttribLocation(floorProg,"p");
+    g.bindBuffer(g.ARRAY_BUFFER,floorBuf);g.enableVertexAttribArray(fAP);g.vertexAttribPointer(fAP,2,g.FLOAT,false,0,0);
+    g.uniform1f(g.getUniformLocation(floorProg,"asp"),asp);
+    g.drawArrays(g.TRIANGLE_STRIP,0,4);
+    // Sphere
+    g.useProgram(prog);
+    g.bindBuffer(g.ARRAY_BUFFER,vB);g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+    g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
+    g.uniform1f(uAsp,asp);
+    // Reflection (flipped Y, below floor line)
+    g.uniform1f(uY,-.55);g.uniform1f(uSY,-1.0);g.uniform3f(uCol,.85,.22,.22);g.uniform1f(uAlpha,reflStr);
+    g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    // Real sphere
+    g.uniform1f(uY,.2);g.uniform1f(uSY,1.0);g.uniform3f(uCol,.85,.22,.22);g.uniform1f(uAlpha,1.0);
+    g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+// f7: Water — animated normal map UV = rolling waves
+function demoWater(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🌊 Water Shader — Normal Map 滾動波浪</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>🌊 波速</label><input type="range" min="1" max="100" value="30" id="wspd" oninput="updWS()"><span class="slider-val" id="wspdv">0.30</span></div>`;
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  sync(); if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const prog=mkP(
+    "attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}",
+    `precision mediump float;varying vec2 uv;uniform float t;uniform float spd;
+     void main(){
+       // 模擬 Normal Map 滾動（用 sin 波近似）
+       float u1=uv.x+t*spd*.03, v1=uv.y+t*spd*.02;
+       float u2=uv.x-t*spd*.025,v2=uv.y+t*spd*.015;
+       // 從 normal map 計算擾動法線
+       float nx=sin(u1*12.+v1*8.)*0.35+sin(u2*9.)*0.2;
+       float ny=cos(v1*10.+u1*6.)*0.35+cos(u2*7.)*0.2;
+       vec3 N=normalize(vec3(nx,ny,1.));
+       // Fresnel
+       float fresnel=pow(1.-abs(N.z),.8);
+       // Deep water + foam + sky reflection
+       vec3 deepWater=vec3(.05,.2,.4);
+       vec3 sky=mix(vec3(.6,.75,.95),vec3(.2,.5,.9),uv.y);
+       vec3 foam=vec3(.9,.95,1.)*max(0.,N.z-.7)*3.;
+       // Light specular on water
+       vec3 L=normalize(vec3(.5,.8,.3));vec3 V=vec3(0,0,1);
+       vec3 H=normalize(L+V+vec3(N.xy*.3,0));
+       float spec=pow(max(dot(normalize(N),H),0.),64.)*1.5;
+       vec3 col=mix(deepWater,sky,fresnel)+foam+vec3(1,.95,.8)*spec;
+       gl_FragColor=vec4(clamp(col,0.,1.),1.);
+     }`
+  );
+  const buf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,buf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),g.STATIC_DRAW);
+  g.useProgram(prog);const aP=g.getAttribLocation(prog,"p");g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,2,g.FLOAT,false,0,0);
+  const uT=g.getUniformLocation(prog,"t"),uSpd=g.getUniformLocation(prog,"spd");
+  let wSpd=0.30,t=0;
+  window.updWS=()=>{wSpd=document.getElementById("wspd").value/100;document.getElementById("wspdv").textContent=wSpd.toFixed(2);};
+  function frame(){t+=.016;const asp=sync();g.viewport(0,0,cv.width,cv.height);g.clearColor(0,0,0,1);g.clear(g.COLOR_BUFFER_BIT);g.uniform1f(uT,t);g.uniform1f(uSpd,wSpd);g.drawArrays(g.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
+  frame();
+}
+
+// f8: RTT — "TV screen" shows a rendered scene
+function demoRTT(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🎯 Render-to-Texture — 球體渲染到螢幕</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div style="padding:8px 16px;font-size:.8rem;color:var(--txt2)">🔴 左：原始球體 &nbsp;|&nbsp; 📺 右：渲染到貼圖後顯示（含掃描線效果）</div>`;
+
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  sync(); if(isMobile)window.addEventListener("resize",sync);
+
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+
+  // RTT texture (256x256)
+  const SZ=256;
+  const rttTex=g.createTexture();
+  g.bindTexture(g.TEXTURE_2D,rttTex);
+  g.texImage2D(g.TEXTURE_2D,0,g.RGBA,SZ,SZ,0,g.RGBA,g.UNSIGNED_BYTE,null);
+  g.texParameteri(g.TEXTURE_2D,g.TEXTURE_MIN_FILTER,g.LINEAR);
+  g.texParameteri(g.TEXTURE_2D,g.TEXTURE_MAG_FILTER,g.LINEAR);
+  g.texParameteri(g.TEXTURE_2D,g.TEXTURE_WRAP_S,g.CLAMP_TO_EDGE);
+  g.texParameteri(g.TEXTURE_2D,g.TEXTURE_WRAP_T,g.CLAMP_TO_EDGE);
+
+  // Depth renderbuffer for RTT
+  const rttRB=g.createRenderbuffer();
+  g.bindRenderbuffer(g.RENDERBUFFER,rttRB);
+  g.renderbufferStorage(g.RENDERBUFFER,g.DEPTH_COMPONENT16,SZ,SZ);
+
+  // Framebuffer
+  const rttFB=g.createFramebuffer();
+  g.bindFramebuffer(g.FRAMEBUFFER,rttFB);
+  g.framebufferTexture2D(g.FRAMEBUFFER,g.COLOR_ATTACHMENT0,g.TEXTURE_2D,rttTex,0);
+  g.framebufferRenderbuffer(g.FRAMEBUFFER,g.DEPTH_ATTACHMENT,g.RENDERBUFFER,rttRB);
+  const status=g.checkFramebufferStatus(g.FRAMEBUFFER);
+  g.bindFramebuffer(g.FRAMEBUFFER,null);
+  if(status!==g.FRAMEBUFFER_COMPLETE){
+    cont.querySelector('.demo-wrap').innerHTML+='<p style="padding:20px;color:var(--acc)">⚠️ Framebuffer 不支援</p>';
+    return;
+  }
+
+  // Sphere geometry
+  const sph=makeSphere(.88);
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+
+  // Sphere shader (renders into RTT or directly)
+  const sphProg=mkP(
+    "attribute vec3 p;attribute vec3 n;varying vec3 vN;uniform float rot;uniform float asp;void main(){float cy=cos(rot),sy=sin(rot);vec3 r=vec3(p.x*cy+p.z*sy,p.y,-p.x*sy+p.z*cy);vN=vec3(n.x*cy+n.z*sy,n.y,-n.x*sy+n.z*cy);gl_Position=vec4(r.x*0.92/asp,r.y*0.92,r.z*.01,1.);}",
+    "precision mediump float;varying vec3 vN;void main(){vec3 N=normalize(vN);float d=max(dot(N,normalize(vec3(.5,.8,.6))),0.);vec3 col=vec3(.85,.22,.22);gl_FragColor=vec4(col*(.2+d*.8),1.);}"
+  );
+  const sAP=g.getAttribLocation(sphProg,"p"),sAN=g.getAttribLocation(sphProg,"n");
+  const sRot=g.getUniformLocation(sphProg,"rot"),sAsp=g.getUniformLocation(sphProg,"asp");
+
+  // Screen quad shader (shows RTT texture with scanlines)
+  const quadProg=mkP(
+    "attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}",
+    "precision mediump float;varying vec2 uv;uniform sampler2D tex;void main(){vec4 c=texture2D(tex,uv);float scan=mod(floor(uv.y*130.),2.)<1.?.85:1.;float vign=(1.-length(uv-.5)*1.2);gl_FragColor=vec4(c.rgb*scan*max(vign,.2),1.);}"
+  );
+  const qAP=g.getAttribLocation(quadProg,"p");
+  const qTex=g.getUniformLocation(quadProg,"tex");
+  const qBuf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,qBuf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),g.STATIC_DRAW);
+
+  g.enable(g.DEPTH_TEST);
+  let t=0;
+  function frame(){
+    t+=0.018;
+    const asp=sync();
+    // --- Pass 1: render sphere to RTT ---
+    g.bindFramebuffer(g.FRAMEBUFFER,rttFB);
+    g.viewport(0,0,SZ,SZ);
+    g.clearColor(.04,.03,.09,1.0);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    g.useProgram(sphProg);
+    g.bindBuffer(g.ARRAY_BUFFER,vB);
+    g.enableVertexAttribArray(sAP);g.vertexAttribPointer(sAP,3,g.FLOAT,false,24,0);
+    g.enableVertexAttribArray(sAN);g.vertexAttribPointer(sAN,3,g.FLOAT,false,24,12);
+    g.uniform1f(sRot,t);g.uniform1f(sAsp,1.0); // square RTT
+    g.drawArrays(g.TRIANGLES,0,sph.length/6);
+
+    // --- Pass 2: draw both to screen ---
+    g.bindFramebuffer(g.FRAMEBUFFER,null);
+    g.viewport(0,0,cv.width,cv.height);
+    g.clearColor(.04,.03,.09,1.0);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+
+    // Left half: direct sphere render
+    g.viewport(0,0,cv.width/2,cv.height);
+    g.useProgram(sphProg);
+    g.bindBuffer(g.ARRAY_BUFFER,vB);
+    g.enableVertexAttribArray(sAP);g.vertexAttribPointer(sAP,3,g.FLOAT,false,24,0);
+    g.enableVertexAttribArray(sAN);g.vertexAttribPointer(sAN,3,g.FLOAT,false,24,12);
+    g.uniform1f(sRot,t);g.uniform1f(sAsp,(cv.width/2)/cv.height);
+    g.drawArrays(g.TRIANGLES,0,sph.length/6);
+
+    // Right half: RTT texture with scanlines
+    g.viewport(cv.width/2,0,cv.width/2,cv.height);
+    g.useProgram(quadProg);
+    g.bindBuffer(g.ARRAY_BUFFER,qBuf);
+    g.enableVertexAttribArray(qAP);g.vertexAttribPointer(qAP,2,g.FLOAT,false,0,0);
+    g.bindTexture(g.TEXTURE_2D,rttTex);
+    g.uniform1i(qTex,0);
+    g.drawArrays(g.TRIANGLE_STRIP,0,4);
+
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function demoShadow(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">👑 Shadow Map — 球體在地面投射陰影</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>💡 光源角度</label><input type="range" min="-80" max="80" value="40" id="sang2" oninput="updSA()"><span class="slider-val" id="sav">40°</span></div>`;
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  sync(); if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const sph=makeSphere(.55);
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+  const sphProg=mkP(
+    "attribute vec3 p;attribute vec3 n;varying vec3 vN;uniform float asp;void main(){vN=n;gl_Position=vec4(p.x*0.85/asp,(p.y+.3)*0.85,p.z*.01,1.);}",
+    "precision mediump float;varying vec3 vN;uniform vec3 lDir;void main(){vec3 N=normalize(vN);float d=max(dot(N,lDir),0.);gl_FragColor=vec4(vec3(.85,.22,.22)*(.18+d*.82),1.);}"
+  );
+  // Floor + shadow ellipse
+  const floorProg=mkP(
+    "attribute vec2 p;uniform float asp;void main(){gl_Position=vec4(p.x/asp,p.y,0,1);}",
+    "precision mediump float;void main(){gl_FragColor=vec4(.18,.15,.22,1.);}"
+  );
+  const shadowProg=mkP(
+    "attribute vec2 p;uniform float asp;uniform vec2 sOff;void main(){gl_Position=vec4((p.x*.5+sOff.x)/asp,p.y*.18+sOff.y,0,1);}",
+    "precision mediump float;attribute vec2 p;void main(){gl_FragColor=vec4(0,0,0,.5);}"
+  );
+  // Build ellipse for shadow
+  const ellVerts=[];for(let i=0;i<=40;i++){const a=i/40*Math.PI*2;ellVerts.push(Math.cos(a),Math.sin(a));}
+  const ellBuf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,ellBuf);g.bufferData(g.ARRAY_BUFFER,new Float32Array(ellVerts),g.STATIC_DRAW);
+  const floorBuf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,floorBuf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1.5,-.25,1.5,-.25,-1.5,-.45,1.5,-.45]),g.STATIC_DRAW);
+  g.enable(g.DEPTH_TEST);g.enable(g.BLEND);g.blendFunc(g.SRC_ALPHA,g.ONE_MINUS_SRC_ALPHA);
+  let lightAng=40;
+  window.updSA=()=>{lightAng=parseInt(document.getElementById("sang2").value);document.getElementById("sav").textContent=lightAng+"°";};
+  function frame(){
+    const asp=sync();const r=lightAng*Math.PI/180;
+    const lx=Math.cos(r),ly=Math.sin(r)+.2,lz=.8;
+    const _lv=[lx,ly,lz];const _ll=Math.sqrt(lx*lx+ly*ly+lz*lz);const L=[lx/_ll,ly/_ll,lz/_ll];
+    // Shadow offset: light projects shadow opposite to light direction
+    const sOffX=-Math.cos(r)*.4,sOffY=-.28;
+    g.viewport(0,0,cv.width,cv.height);g.clearColor(.04,.03,.09,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    // Floor
+    g.useProgram(floorProg);
+    const fAP=g.getAttribLocation(floorProg,"p");
+    g.bindBuffer(g.ARRAY_BUFFER,floorBuf);g.enableVertexAttribArray(fAP);g.vertexAttribPointer(fAP,2,g.FLOAT,false,0,0);
+    g.uniform1f(g.getUniformLocation(floorProg,"asp"),asp);g.drawArrays(g.TRIANGLE_STRIP,0,4);
+    // Shadow ellipse
+    g.useProgram(shadowProg);
+    const sAP=g.getAttribLocation(shadowProg,"p");
+    g.bindBuffer(g.ARRAY_BUFFER,ellBuf);g.enableVertexAttribArray(sAP);g.vertexAttribPointer(sAP,2,g.FLOAT,false,0,0);
+    g.uniform1f(g.getUniformLocation(shadowProg,"asp"),asp);
+    g.uniform2f(g.getUniformLocation(shadowProg,"sOff"),sOffX,sOffY);
+    g.drawArrays(g.TRIANGLE_FAN,0,41);
+    // Sphere
+    g.useProgram(sphProg);
+    const aP=g.getAttribLocation(sphProg,"p"),aN=g.getAttribLocation(sphProg,"n");
+    g.bindBuffer(g.ARRAY_BUFFER,vB);g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+    g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
+    g.uniform1f(g.getUniformLocation(sphProg,"asp"),asp);
+    g.uniform3f(g.getUniformLocation(sphProg,"lDir"),...L);
+    g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
 function checkCompletion(){
   if(earned.length>=CASTLE_TOTAL&&!localStorage.getItem(CASTLE_KEY+"_comp_shown")){
     localStorage.setItem(CASTLE_KEY+"_comp_shown","1");
@@ -630,7 +940,7 @@ function showCompletion(){
   for(let i=0;i<28;i++){const d=document.createElement("div");d.className="fw";const tx=(Math.random()-.5)*300,ty=-100-Math.random()*200;d.style.cssText="width:6px;height:6px;background:"+colors[i%colors.length]+";left:"+(40+Math.random()*20)+"%;top:60%;--d:"+(0.6+Math.random()*.8)+"s;--dl:"+Math.random()*.5+"s;--tx:"+tx+"px;--ty:"+ty+"px";fw.appendChild(d);}
   ov.classList.add("show");
 }
-function goNextCastle(){window.location.href='dx-level3.html';}
+function goNextCastle(){window.location.href='dx-level4.html';}
 function goMap(){window.location.href="dx-map.html";}
 
 updateXP();renderLessons();
@@ -643,12 +953,7 @@ document.addEventListener("DOMContentLoaded",()=>{setTimeout(checkCompletion,500
 window.addEventListener("storage",checkCompletion);
 
 // ── Interactive Demos ──
-function initDemo(id){
-  if(demoInited[id])return;demoInited[id]=true;
-  const cont=document.getElementById("dc-"+id);
-  const isMobile=("ontouchstart" in window)||/iPhone|iPad|Android/i.test(navigator.userAgent);
-  ({e1:demo2D,e2:demoSpecular,e3:demoLightMap,e4:demoBump,e5:demoPointLight,e6:demoMultiTex,e7:demoReflect,e8:demoFog})[id]?.(cont,isMobile);
-}
+// initDemo defined above
 
 // Shared sphere setup helper
 function setupSphere(gl,r){
@@ -1186,15 +1491,16 @@ function demoFog(cont,isMobile){
   frame();
 }
 
+
 </script>
 
 <div id="compOverlay" class="comp-overlay">
   <div class="fw-wrap"></div>
-  <div class="comp-trophy">🛡️</div>
+  <div class="comp-trophy">🔮</div>
   <div class="comp-stars">🏆🏆🏆</div>
-  <div class="comp-title">要塞2 全通關！<br>光影要塞</div>
-  <div class="comp-sub">你已掌握進階光照技術！<br>獲得全部 XP！</div>
-  <button class="comp-next-btn" onclick="goNextCastle()">⚔️ 前往要塞3 →</button>
+  <div class="comp-title">要塞3 全通關！<br>著色器城</div>
+  <div class="comp-sub">你已掌握進階著色器技術！<br>獲得全部 XP！</div>
+  <button class="comp-next-btn" onclick="goNextCastle()">⚔️ 前往要塞4 →</button>
   <button class="comp-map-btn" onclick="goMap()">🗺️ 返回地圖</button>
 </div>
 </body>
