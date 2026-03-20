@@ -94,8 +94,8 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 .complete-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,69,69,.35)}
 .complete-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .connector{width:2px;height:12px;background:linear-gradient(var(--acc),transparent);margin:0 auto -2px;position:relative;z-index:1}
-.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--acc2);border-radius:100px;padding:12px 28px;font-weight:800;font-size:.9rem;color:var(--acc2);z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,212,255,.2)}
-.toast.show{transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(200px);opacity:0;background:var(--card);border:1px solid var(--acc2);border-radius:100px;padding:12px 28px;font-weight:800;font-size:.9rem;color:var(--acc2);z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .4s ease;box-shadow:0 8px 32px rgba(0,212,255,.2)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .xp-pop{position:fixed;font-family:var(--mono);font-weight:900;font-size:1.2rem;color:var(--acc3);pointer-events:none;z-index:9999;animation:xpFloat 1.2s ease forwards}
 @keyframes xpFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
 .comp-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(4,2,14,.9);backdrop-filter:blur(18px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
@@ -298,13 +298,18 @@ function switchTab(tabEl,panelId,lessonId){
 
 function checkAns(lessonId,idx){
   const lesson=LESSONS.find(l=>l.id===lessonId);
+  // Only mark the clicked option — no answer reveal
   document.querySelectorAll('[id^="opt-'+lessonId+'-"]').forEach((o,i)=>{
     o.classList.remove("correct","wrong");
-    if(i===lesson.ans)o.classList.add("correct");
-    else if(i===idx)o.classList.add("wrong");
+    if(i===idx){
+      o.classList.add(idx===lesson.ans?"correct":"wrong");
+    }
   });
   const ex=document.getElementById("ex-"+lessonId);
-  if(ex){ex.style.display="block";ex.textContent=idx===lesson.ans?"✅ 正確！":"❌ 再想想！正確答案已標示。";}
+  if(ex){
+    ex.style.display="block";
+    ex.textContent=idx===lesson.ans?"✅ 正確！":"❌ 答錯了，再試試看！";
+  }
   const btn=document.getElementById("btn-"+lessonId);
   if(btn&&idx===lesson.ans){btn.disabled=false;btn.textContent="✅ 完成此關 → 解鎖下一關";}
 }
@@ -317,7 +322,14 @@ function completeL(id){
   const btn=document.getElementById("btn-"+id);
   if(btn){const r=btn.getBoundingClientRect();const d=document.createElement("div");d.className="xp-pop";d.textContent="+"+lesson.xp+" XP!";d.style.cssText="left:"+r.left+"px;top:"+(r.top+window.scrollY)+"px";document.body.appendChild(d);setTimeout(()=>d.remove(),1200);}
   const t=document.getElementById("toast");t.textContent="🎉 +"+lesson.xp+" XP！「"+lesson.title+"」完成！";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);
-  setTimeout(()=>{currentLesson=null;renderLessons();updateXP();},600);
+  // 記住目前捲動位置，重繪後還原
+  const scrollY=window.scrollY;
+  setTimeout(()=>{
+    currentLesson=null;
+    renderLessons();
+    updateXP();
+    window.scrollTo({top:scrollY,behavior:'instant'});
+  },600);
   checkCompletion();
 }
 
