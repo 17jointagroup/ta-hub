@@ -34,18 +34,18 @@ html{font-size:20px;}
 @media(max-width:768px){html{font-size:16px;}}
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --bg:#0a0a0c;--surf:#111116;--surf2:#18181f;--bdr:#2a2a38;
-  --acc:#00e5a0;--acc3:#7b5fff;--txt:#e8e8f0;--muted:#666680;
-  --shader:#ff6b35;--proc:#7b5fff;--vfx:#00d4ff;--char:#ff3d9a;
-  --scene:#50fa7b;--gfx:#ffb86c;--anim:#ff79c6;--tools:#8be9fd;
-  --ue5r:#00b4d8;
-  --ue5opt:#f77f00;
+  --bg:#f2f0ed;--surf:#e8e5e0;--surf2:#dedad3;--bdr:#ccc9c2;
+  --acc:#4a8fa0;--acc3:#6b7fa8;--txt:#1a1816;--muted:#999690;
+  --shader:#c0623a;--proc:#6b7fa8;--vfx:#3a8fa0;--char:#a06b8f;
+  --scene:#5a8f5a;--gfx:#a08930;--anim:#8f6ba0;--tools:#4a8090;
+  --ue5r:#3a7a8a;
+  --ue5opt:#a07820;
   /* Art Tips channel colors */
-  --concept:#f7c948;--modeling:#4ecdc4;--texturing:#ff9f43;--lighting:#a29bfe;
-  --ai-art:#fd79a8;
+  --concept:#a08930;--modeling:#4a8a85;--texturing:#a06040;--lighting:#7a70a0;
+  --ai-art:#a06080;
 }
 body{background:var(--bg);color:var(--txt);font-family:'Barlow',-apple-system,BlinkMacSystemFont,'Helvetica Neue','Noto Sans TC',sans-serif;font-weight:300;font-size:17px;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--surf)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
 @keyframes fadeUp{from{opacity:1;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -61,12 +61,12 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',-apple-system,Bl
 #ticker-inner em{color:var(--acc);font-style:normal;margin:0 10px;}
 
 /* HEADER */
-header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:0 20px;flex-shrink:0;}
+header{background:rgba(242,240,237,.97);border-bottom:1px solid var(--bdr);padding:0 20px;flex-shrink:0;}
 .hdr{max-width:1420px;margin:0 auto;display:flex;align-items:center;gap:12px;height:56px;}
 .ch-sw{display:flex;border:1px solid var(--bdr);border-radius:3px;overflow:hidden;flex-shrink:0;margin-right:4px;}
 .ch-btn{background:none;border:none;padding:5px 12px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
 .ch-btn.active{background:var(--surf2);color:var(--txt);}
-.ch-btn.active.ch-ta{color:#00e5a0;}
+.ch-btn.active.ch-ta{color:#4a8fa0;}
 .ch-btn.active.ch-art{color:#f7c948;}
 .ch-btn.active.ch-show{color:#c084fc;}
 .ch-btn.active.ch-intro{color:#7ee8a2;}
@@ -77,8 +77,8 @@ header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:
 .show-badge{background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.3);border-radius:2px;padding:1px 6px;font-size:9px;font-family:"Space Mono",monospace;flex-shrink:0;}
 .card-role{font-size:10px;color:var(--muted);font-family:"Space Mono",monospace;margin-top:2px;letter-spacing:.04em;}
 .card-links{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
-.card-link{font-size:10px;color:var(--acc);text-decoration:none;border:1px solid rgba(0,229,160,.25);padding:2px 8px;border-radius:2px;font-family:"Space Mono",monospace;transition:all .15s;}
-.card-link:hover{background:rgba(0,229,160,.08);border-color:var(--acc);}
+.card-link{font-size:10px;color:var(--acc);text-decoration:none;border:1px solid rgba(74,143,160,.25);padding:2px 8px;border-radius:2px;font-family:"Space Mono",monospace;transition:all .15s;}
+.card-link:hover{background:rgba(74,143,160,.08);border-color:var(--acc);}
 .card-link.yt{color:#ff6b6b;border-color:rgba(255,107,107,.25);}
 .card-link.yt:hover{background:rgba(255,107,107,.08);border-color:#ff6b6b;}
 .card-link.as{color:#f7c948;border-color:rgba(247,201,72,.25);}
@@ -92,7 +92,7 @@ header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:
 .logo-dot{width:8px;height:8px;background:var(--acc);border-radius:50%;animation:pulse 2s ease-in-out infinite;}
 .live-badge{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);border:1px solid var(--bdr);padding:3px 8px;border-radius:2px;white-space:nowrap;}
 .live-badge b{color:var(--acc);}
-#new-banner{font-family:'Space Mono',monospace;font-size:9px;color:var(--acc);border:1px solid rgba(0,229,160,.3);background:rgba(0,229,160,.08);padding:3px 8px;border-radius:2px;display:none;animation:newPop .4s ease;}
+#new-banner{font-family:'Space Mono',monospace;font-size:9px;color:var(--acc);border:1px solid rgba(74,143,160,.3);background:rgba(74,143,160,.08);padding:3px 8px;border-radius:2px;display:none;animation:newPop .4s ease;}
 .last-collect{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
 .lang-sw{display:flex;border:1px solid var(--bdr);border-radius:3px;overflow:hidden;flex-shrink:0;}
 .lbtn{background:none;border:none;color:var(--muted);padding:4px 10px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;transition:all .15s;}
@@ -127,20 +127,20 @@ header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:
 .feed-ctrl{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
 .feed-ttl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.05em;text-transform:uppercase;}
 .feed-sub{font-size:14px;color:var(--muted);margin-top:2px;}
-.collect-btn{margin-left:auto;background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.22);color:var(--acc);padding:5px 12px;font-family:'Space Mono',monospace;font-size:10px;border-radius:2px;cursor:pointer;}
+.collect-btn{margin-left:auto;background:rgba(74,143,160,.07);border:1px solid rgba(74,143,160,.22);color:var(--acc);padding:5px 12px;font-family:'Space Mono',monospace;font-size:10px;border-radius:2px;cursor:pointer;}
 .collect-btn:disabled{opacity:.5;cursor:not-allowed;}
 .sort-sel{background:var(--surf2);border:1px solid var(--bdr);color:var(--muted);padding:5px 8px;font-family:'Space Mono',monospace;font-size:10px;outline:none;border-radius:2px;}
 
 /* COLLECT LOG */
-#collect-log{background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.18);border-radius:3px;padding:10px 14px;margin-bottom:10px;display:none;}
+#collect-log{background:rgba(74,143,160,.04);border:1px solid rgba(74,143,160,.18);border-radius:3px;padding:10px 14px;margin-bottom:10px;display:none;}
 .clog-hdr{font-family:'Space Mono',monospace;font-size:10px;color:var(--acc);margin-bottom:5px;display:flex;align-items:center;gap:6px;}
 .spin{display:inline-block;width:9px;height:9px;border:1.5px solid var(--acc);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;}
 .clog-line{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);line-height:1.9;}
 
 /* CARDS */
 .card{background:var(--surf);border:1px solid var(--bdr);border-left:3px solid transparent;border-radius:3px;padding:13px 15px;margin-bottom:8px;cursor:pointer;transition:border .15s;}
-.card:hover{border-color:rgba(0,229,160,.3);background:var(--surf2);transform:translateX(2px);}
-.card.is-new{background:linear-gradient(135deg,rgba(0,229,160,.05),rgba(123,95,255,.04));border-color:rgba(0,229,160,.22);border-left-color:var(--acc);}
+.card:hover{border-color:rgba(74,143,160,.3);background:var(--surf2);transform:translateX(2px);}
+.card.is-new{background:linear-gradient(135deg,rgba(74,143,160,.05),rgba(123,95,255,.04));border-color:rgba(74,143,160,.22);border-left-color:var(--acc);}
 .card-hd{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;}
 .card-ttl-en{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:22px;color:var(--txt);line-height:1.3;}
 .card-ttl-zh{font-size:17px;font-weight:500;color:var(--acc);line-height:1.4;margin-top:3px;}
@@ -153,7 +153,7 @@ header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:
 
 /* BADGES / PILLS */
 .src-badge{font-family:'Space Mono',monospace;font-size:9px;padding:2px 6px;border-radius:2px;white-space:nowrap;flex-shrink:0;}
-.new-badge{background:rgba(0,229,160,.15);color:var(--acc);border:1px solid rgba(0,229,160,.35);border-radius:2px;padding:1px 5px;font-size:9px;font-family:'Space Mono',monospace;animation:newPop .4s ease;flex-shrink:0;}
+.new-badge{background:rgba(74,143,160,.15);color:var(--acc);border:1px solid rgba(74,143,160,.35);border-radius:2px;padding:1px 5px;font-size:9px;font-family:'Space Mono',monospace;animation:newPop .4s ease;flex-shrink:0;}
 .tip-badge{background:rgba(247,201,72,.12);color:#f7c948;border:1px solid rgba(247,201,72,.3);border-radius:2px;padding:1px 5px;font-size:9px;font-family:'Space Mono',monospace;flex-shrink:0;}
 .card.is-tip{border-left-color:rgba(247,201,72,.5);}
 .card.is-tip:hover{border-left-color:#f7c948;}
@@ -183,10 +183,10 @@ header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:
 .src-type{margin-left:auto;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
 
 /* READER PANEL */
-#r-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;}
+#r-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;}
 #r-panel{position:fixed;top:0;right:0;bottom:0;width:min(860px,100vw);background:var(--surf);border-left:1px solid var(--bdr);z-index:600;display:none;flex-direction:column;}
 #r-panel.open{display:flex;animation:slideIn .32s cubic-bezier(.22,.6,.36,1);}
-.r-topbar{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--bdr);background:rgba(10,10,12,.9);flex-shrink:0;}
+.r-topbar{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--bdr);background:rgba(242,240,237,.9);flex-shrink:0;}
 .r-close{background:none;border:1px solid var(--bdr);color:var(--muted);width:28px;height:28px;border-radius:2px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
 .r-close:hover{border-color:var(--acc);color:var(--acc);}
 #r-src-badge{font-family:'Space Mono',monospace;font-size:9px;padding:2px 6px;border-radius:2px;white-space:nowrap;flex-shrink:0;}
@@ -236,7 +236,7 @@ header{background:rgba(10,10,12,.97);border-bottom:1px solid var(--bdr);padding:
 .sec h3.en{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;color:var(--acc);margin-bottom:8px;letter-spacing:.03em;}
 .sec h3.zh{font-family:'Barlow','Noto Sans TC',sans-serif;font-weight:700;font-size:19px;color:#9090cc;margin-bottom:8px;}
 .sec p{font-size:17px;line-height:2.0;}
-.callout{background:rgba(0,229,160,.05);border-left:3px solid var(--acc);padding:12px 18px;border-radius:0 3px 3px 0;font-size:17px;color:var(--muted);margin:10px 0;}
+.callout{background:rgba(74,143,160,.05);border-left:3px solid var(--acc);padding:12px 18px;border-radius:0 3px 3px 0;font-size:17px;color:var(--muted);margin:10px 0;}
 .skel{display:block;height:.78em;border-radius:2px;margin-bottom:5px;background:linear-gradient(90deg,var(--surf) 25%,var(--surf2) 50%,var(--surf) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
 
 /* Lang display modes */
@@ -412,18 +412,18 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 /* Intro hero */
 .int-hero{
   padding:40px 0 32px;text-align:center;max-width:860px;margin:0 auto;
-  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(0,229,160,.07),transparent 70%);
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(74,143,160,.07),transparent 70%);
   border-bottom:1px solid var(--border);margin-bottom:32px;
 }
 .int-badge{
   display:inline-flex;align-items:center;gap:6px;
-  background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.3);
+  background:rgba(74,143,160,.1);border:1px solid rgba(74,143,160,.3);
   border-radius:100px;padding:4px 14px;font-size:11px;color:var(--acc);
   font-weight:700;margin-bottom:16px;font-family:var(--mono);
 }
 .int-title{
   font-size:1.5rem;font-weight:900;line-height:1.15;margin-bottom:10px;
-  background:linear-gradient(135deg,#fff 0%,var(--acc) 60%,#7b5fff 100%);
+  background:linear-gradient(135deg,#fff 0%,var(--acc) 60%,#6b7fa8 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 .int-sub{color:#64748b;font-size:.95rem;font-weight:600;margin-bottom:24px}
@@ -443,9 +443,9 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
   text-decoration:none;display:inline-flex;align-items:center;gap:8px;
   transition:all .2s;border:none;cursor:pointer;font-family:var(--font);
 }
-.int-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,229,160,.3)}
-.int-cta.sec{background:transparent;color:var(--acc);border:1px solid rgba(0,229,160,.35)}
-.int-cta.sec:hover{background:rgba(0,229,160,.08)}
+.int-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(74,143,160,.3)}
+.int-cta.sec{background:transparent;color:var(--acc);border:1px solid rgba(74,143,160,.35)}
+.int-cta.sec:hover{background:rgba(74,143,160,.08)}
 
 /* Section headers */
 .int-sec{margin-bottom:40px;max-width:860px;margin-left:auto;margin-right:auto}
@@ -464,15 +464,15 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 .int-cmp-lbl.bad{color:#f87171}.int-cmp-lbl.good{color:var(--acc)}
 .int-scene{height:130px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative;overflow:hidden}
 .scene-bad{background:#111;border:1px solid #222}
-.scene-good{background:#0d1f1a;border:1px solid rgba(0,229,160,.2)}
+.scene-good{background:#0d1f1a;border:1px solid rgba(74,143,160,.2)}
 /* flat char */
 .fc{width:44px;height:60px;background:#444;border-radius:3px 3px 0 0;position:relative}
 .fc::before{content:'';position:absolute;top:-16px;left:7px;width:30px;height:30px;background:#555;border-radius:50%}
 /* glow char */
 .gc{width:44px;height:60px;position:relative;animation:gcf 2s ease-in-out infinite}
 @keyframes gcf{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.gc-b{width:44px;height:60px;background:linear-gradient(135deg,#1a5c4a,var(--acc));border-radius:3px 3px 0 0;box-shadow:0 0 15px rgba(0,229,160,.4)}
-.gc-h{position:absolute;top:-18px;left:5px;width:34px;height:34px;background:linear-gradient(135deg,#2d6b5a,#4ecca3);border-radius:50%;box-shadow:0 0 10px rgba(0,229,160,.3)}
+.gc-b{width:44px;height:60px;background:linear-gradient(135deg,#1a5c4a,var(--acc));border-radius:3px 3px 0 0;box-shadow:0 0 15px rgba(74,143,160,.4)}
+.gc-h{position:absolute;top:-18px;left:5px;width:34px;height:34px;background:linear-gradient(135deg,#2d6b5a,#4ecca3);border-radius:50%;box-shadow:0 0 10px rgba(74,143,160,.3)}
 .gc-e{position:absolute;top:11px;left:7px;width:20px;height:4px;display:flex;justify-content:space-between}
 .ge{width:6px;height:6px;background:#fff;border-radius:50%;animation:blink 3s infinite}
 @keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
@@ -480,7 +480,7 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 .orbs{position:absolute;inset:0;pointer-events:none}
 .ob{position:absolute;width:5px;height:5px;border-radius:50%;animation:obf 2s ease-in-out infinite}
 .ob1{background:var(--acc);top:30%;left:10%;animation-delay:.0s}
-.ob2{background:#7b5fff;top:60%;left:20%;animation-delay:.5s}
+.ob2{background:#6b7fa8;top:60%;left:20%;animation-delay:.5s}
 .ob3{background:#fbbf24;top:20%;right:15%;animation-delay:1s}
 .ob4{background:#f472b6;top:70%;right:12%;animation-delay:1.5s}
 @keyframes obf{0%,100%{transform:translateY(0) scale(1);opacity:.7}50%{transform:translateY(-10px) scale(1.4);opacity:1}}
@@ -547,7 +547,7 @@ body.lang-zh .card-ttl-en{font-family:'Barlow',sans-serif!important;font-size:13
 .int-ctrl-lbl{font-size:.75rem;font-weight:700;display:flex;justify-content:space-between;font-family:var(--mono)}
 .int-ctrl-lbl span{color:var(--acc)}
 input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
-.int-code{font-family:var(--mono);font-size:.7rem;color:var(--acc);background:rgba(0,229,160,.07);padding:8px 10px;border-radius:7px;margin-top:4px;word-break:break-all}
+.int-code{font-family:var(--mono);font-size:.7rem;color:var(--acc);background:rgba(74,143,160,.07);padding:8px 10px;border-radius:7px;margin-top:4px;word-break:break-all}
 .int-hint{font-size:.72rem;color:#475569;font-weight:600}
 .int-canvas-wrap{border-radius:10px;overflow:hidden;background:#050a12;display:flex;align-items:center;justify-content:center;min-height:180px;position:relative}
 .int-canvas-hint{position:absolute;bottom:6px;right:8px;font-family:var(--mono);font-size:.55rem;color:rgba(255,255,255,.2)}
@@ -557,7 +557,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
 
 /* Challenge */
 .int-challenge{
-  background:linear-gradient(135deg,rgba(123,95,255,.08),rgba(0,229,160,.05));
+  background:linear-gradient(135deg,rgba(123,95,255,.08),rgba(74,143,160,.05));
   border:1px solid rgba(123,95,255,.3);border-radius:14px;
   padding:28px;text-align:center;margin-bottom:32px;position:relative;overflow:hidden;
 }
@@ -569,7 +569,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
   padding:8px 14px;font-size:.82rem;font-weight:700;
   display:flex;align-items:center;gap:6px;
 }
-.int-ch-num{width:20px;height:20px;background:#7b5fff;border-radius:50%;font-size:.6rem;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.int-ch-num{width:20px;height:20px;background:#6b7fa8;border-radius:50%;font-size:.6rem;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .int-ch-hint{font-family:var(--mono);font-size:.7rem;background:rgba(0,0,0,.2);padding:6px 12px;border-radius:6px;color:var(--acc);margin-bottom:16px;display:inline-block}
 
 /* Next cards */
@@ -779,7 +779,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
         <div class="int-cmp-desc"><strong>發光材質</strong>、粒子特效、角色活了！</div>
       </div>
     </div>
-    <div style="background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.15);border-radius:14px;padding:18px 20px;margin-top:4px;text-align:center">
+    <div style="background:rgba(74,143,160,.06);border:1px solid rgba(74,143,160,.15);border-radius:14px;padding:18px 20px;margin-top:4px;text-align:center">
       <div style="font-size:1.05rem;font-weight:900;margin-bottom:6px">答案是 <span style="color:var(--acc)">Technical Artist（TA）</span></div>
       <div style="font-size:.85rem;color:var(--muted);font-weight:700;line-height:1.65">
         「懂程式的藝術家」＋「懂美術的工程師」<br>
@@ -819,7 +819,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
           <div><div class="int-ctrl-lbl">振幅 <span id="iav">35</span></div><input type="range" min="5" max="65" value="35" id="ia-sl" oninput="iUpdateWave()"></div>
           <div><div class="int-ctrl-lbl">波數 <span id="iwv">3</span></div><input type="range" min="1" max="8" value="3" id="iw-sl" oninput="iUpdateWave()"></div>
           <div class="int-clr-row">
-            <div onclick="iSetWaveCol('#00e5a0')" class="int-clr-btn active" style="background:#00e5a0"></div>
+            <div onclick="iSetWaveCol('#4a8fa0')" class="int-clr-btn active" style="background:#4a8fa0"></div>
             <div onclick="iSetWaveCol('#a78bfa')" class="int-clr-btn" style="background:#a78bfa"></div>
             <div onclick="iSetWaveCol('#f472b6')" class="int-clr-btn" style="background:#f472b6"></div>
             <div onclick="iSetWaveCol('#fbbf24')" class="int-clr-btn" style="background:#fbbf24"></div>
@@ -846,7 +846,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
       </div>
     </div>
     <!-- 玩過之後的引導 -->
-    <div style="margin-top:16px;background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.12);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px">
+    <div style="margin-top:16px;background:rgba(74,143,160,.04);border:1px solid rgba(74,143,160,.12);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px">
       <span style="font-size:1.4rem">💡</span>
       <div>
         <div style="font-size:.85rem;font-weight:900;margin-bottom:2px">剛才你控制的，就是 Shader 的基礎</div>
@@ -866,7 +866,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
 
       <div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:18px;position:relative">
         <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
-          <div style="width:36px;height:36px;border-radius:50%;background:rgba(0,229,160,.15);border:2px solid var(--acc);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;color:var(--acc);font-family:var(--mono)">0–4</div>
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(74,143,160,.15);border:2px solid var(--acc);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;color:var(--acc);font-family:var(--mono)">0–4</div>
           <div style="width:2px;flex:1;background:linear-gradient(var(--acc),rgba(255,140,66,.4));min-height:32px;margin-top:4px"></div>
         </div>
         <div style="padding-top:6px">
@@ -922,21 +922,21 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
 
   <!-- Step 4: 單一 CTA -->
   <div class="int-sec" style="padding-bottom:0">
-    <div style="background:linear-gradient(135deg,rgba(0,229,160,.08),rgba(124,111,255,.05));border:1px solid rgba(0,229,160,.2);border-radius:18px;padding:28px 24px;text-align:center">
+    <div style="background:linear-gradient(135deg,rgba(74,143,160,.08),rgba(124,111,255,.05));border:1px solid rgba(74,143,160,.2);border-radius:18px;padding:28px 24px;text-align:center">
       <div style="font-size:2rem;margin-bottom:10px">🎮</div>
       <div style="font-size:1.1rem;font-weight:900;margin-bottom:6px">準備好了嗎？</div>
       <div style="font-size:.84rem;color:var(--muted);font-weight:700;margin-bottom:20px;line-height:1.6">
         前 10 關免費，不需要帳號，打開就能學<br>
         學完再決定要不要繼續 Pro 進階關卡
       </div>
-      <button onclick="openCourse()" style="background:var(--acc);color:#07080f;border:none;border-radius:100px;padding:14px 40px;font-size:1rem;font-weight:900;cursor:pointer;font-family:var(--font);box-shadow:0 4px 22px rgba(0,229,160,.32);transition:all .2s;display:inline-block" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(0,229,160,.45)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 22px rgba(0,229,160,.32)'">🎓 開始免費學習</button>
+      <button onclick="openCourse()" style="background:var(--acc);color:#07080f;border:none;border-radius:100px;padding:14px 40px;font-size:1rem;font-weight:900;cursor:pointer;font-family:var(--font);box-shadow:0 4px 22px rgba(74,143,160,.32);transition:all .2s;display:inline-block" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(74,143,160,.45)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 22px rgba(74,143,160,.32)'">🎓 開始免費學習</button>
       <div style="font-size:.7rem;color:#2a3550;margin-top:10px;font-weight:700">← 左邊 TA HUB 頻道有更多 TA 資源</div>
     </div>
   </div>
 
   <!-- 訂閱制預告 -->
   <div class="int-sec" style="padding-bottom:0">
-    <div style="background:linear-gradient(135deg,rgba(124,111,255,.1),rgba(0,229,160,.06));border:1px solid rgba(124,111,255,.25);border-radius:18px;padding:24px;text-align:center;position:relative;overflow:hidden">
+    <div style="background:linear-gradient(135deg,rgba(124,111,255,.1),rgba(74,143,160,.06));border:1px solid rgba(124,111,255,.25);border-radius:18px;padding:24px;text-align:center;position:relative;overflow:hidden">
       <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(124,111,255,.08),transparent);pointer-events:none"></div>
       <div style="font-size:1.8rem;margin-bottom:10px">⭐</div>
       <div style="font-size:1rem;font-weight:900;margin-bottom:6px">TA HUB Pro — 解鎖進階 10 關</div>
@@ -944,7 +944,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
         程序化系統 · 進階應用 · PBR 材質 · 畢業作品<br>一次付費，永久存取全部 20 關
       </div>
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px">
-        <div style="background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;color:var(--acc)">⬡ 程序化建模 (5關)</div>
+        <div style="background:rgba(74,143,160,.1);border:1px solid rgba(74,143,160,.2);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;color:var(--acc)">⬡ 程序化建模 (5關)</div>
         <div style="background:rgba(124,111,255,.1);border:1px solid rgba(124,111,255,.2);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;color:#9d8fff">🔬 進階應用 (4關)</div>
         <div style="background:rgba(255,203,71,.1);border:1px solid rgba(255,203,71,.2);border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;color:#ffcb47">🏆 畢業作品</div>
       </div>
@@ -982,7 +982,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
     <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:.65rem;color:#4a5070">← 回到 TA HUB</span>
   </div>
   <div id="course-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(100vh - 56px);gap:16px;color:#4a5070">
-    <div style="width:40px;height:40px;border:3px solid #1d2035;border-top-color:#00e5a0;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+    <div style="width:40px;height:40px;border:3px solid #1d2035;border-top-color:#4a8fa0;border-radius:50%;animation:spin 0.8s linear infinite"></div>
     <div style="font-size:.85rem;font-weight:700">載入課程中…</div>
   </div>
   <div id="course-content" style="display:none"></div>
@@ -996,8 +996,8 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
     <div style="font-size:1.15rem;font-weight:900;margin-bottom:6px">搶先知道 TA HUB Pro</div>
     <div style="font-size:.82rem;color:#4a5070;font-weight:700;margin-bottom:20px">留下 Email，推出時第一個通知你</div>
     <input id="sub-email" type="email" placeholder="your@email.com" style="width:100%;background:#07080f;border:1.5px solid #282b42;border-radius:10px;padding:11px 14px;color:#e8eaf2;font-size:.9rem;font-family:'Nunito',sans-serif;margin-bottom:10px;box-sizing:border-box;outline:none" onfocus="this.style.borderColor='#7c6fff'" onblur="this.style.borderColor='#282b42'">
-    <button onclick="submitSub()" style="width:100%;background:linear-gradient(135deg,#7c6fff,#00e5a0);color:#07080f;border:none;border-radius:10px;padding:12px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif">📬 訂閱通知</button>
-    <div id="sub-msg" style="font-size:.78rem;margin-top:10px;color:#00e5a0;font-weight:700;display:none"></div>
+    <button onclick="submitSub()" style="width:100%;background:linear-gradient(135deg,#7c6fff,#4a8fa0);color:#07080f;border:none;border-radius:10px;padding:12px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif">📬 訂閱通知</button>
+    <div id="sub-msg" style="font-size:.78rem;margin-top:10px;color:#4a8fa0;font-weight:700;display:none"></div>
     <div style="font-size:.68rem;color:#3a4060;margin-top:10px;font-weight:700">不會發廣告，只通知 Pro 推出</div>
   </div>
 </div>
@@ -1006,7 +1006,7 @@ input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
 
   <!-- RIGHT SIDEBAR -->
   <aside class="sb-right" style="display:none">
-    <div class="api-panel" style="background:rgba(0,229,160,.06);border-color:rgba(0,229,160,.22);">
+    <div class="api-panel" style="background:rgba(74,143,160,.06);border-color:rgba(74,143,160,.22);">
       <div class="api-lbl" style="color:var(--acc);">🌐 翻譯引擎 — Google 翻譯</div>
       <div class="api-note" style="color:var(--muted);margin-top:0;">自動修正 TA 術語，口語化繁體中文</div>
     </div>
@@ -1081,7 +1081,7 @@ const TAGS = {
 };
 const TAG_COL = {
   // TA
-  shader:"#ff6b35",procedural:"#7b5fff",vfx:"#00d4ff",character:"#ff3d9a",
+  shader:"#ff6b35",procedural:"#6b7fa8",vfx:"#00d4ff",character:"#ff3d9a",
   scene:"#50fa7b",graphics:"#ffb86c",animation:"#ff79c6",tools:"#8be9fd",
   ue5rendering:"#00b4d8",ue5opt:"#f77f00",
   // Art Tips
@@ -1089,7 +1089,7 @@ const TAG_COL = {
   rigging:"#ff79c6",generalist:"#00d4ff"
 };
 const SRC_COL = {
-  gdc:"#ff6b35",siggraph:"#7b5fff",unrealblog:"#00d4ff",unityblog:"#50fa7b",
+  gdc:"#ff6b35",siggraph:"#6b7fa8",unrealblog:"#00d4ff",unityblog:"#50fa7b",
   "80lv":"#ff3d9a",catlike:"#ffb86c",houdini:"#ff79c6",blog:"#8be9fd",
   // Art Tips sources
   artstation:"#f7c948",substanceblog:"#ff9f43",polycount:"#4ecdc4",cgcookie:"#a29bfe"
@@ -1631,7 +1631,7 @@ const ART_POOL = [
 // Real TA portfolios, showreels, breakdowns — for people learning what TA work looks like
 const SHOW_CATS = {
   shader:   {en:"Shader / VFX",   zh:"Shader / 特效",  col:"#ff6b35"},
-  procedural:{en:"Procedural",    zh:"程序化",          col:"#7b5fff"},
+  procedural:{en:"Procedural",    zh:"程序化",          col:"#6b7fa8"},
   rigging:  {en:"Rigging / Anim", zh:"綁定 / 動畫",     col:"#ff79c6"},
   tools:    {en:"Tools / Pipeline",zh:"工具 / 流程",    col:"#8be9fd"},
   graphics: {en:"Graphics / Rendering", zh:"渲染 / 圖形",col:"#ffb86c"},
@@ -2182,7 +2182,7 @@ function updateSourceList(){
   if(hdr) hdr.textContent = `監控來源 (${sources.length})`;
   el.innerHTML = sources.map(s=>`
     <div class="src-row">
-      <div class="src-dot" style="background:${s.type==='rss'?'#ff6b35':'#7b5fff'}"></div>
+      <div class="src-dot" style="background:${s.type==='rss'?'#ff6b35':'#6b7fa8'}"></div>
       <span class="src-name">${s.name}</span>
       <span class="src-type">${s.type.toUpperCase()}</span>
     </div>`).join('');
@@ -2287,7 +2287,7 @@ async function openCourse(){
       <div style="font-size:2rem;margin-bottom:12px">⚠️</div>
       <div style="font-weight:900;margin-bottom:8px">無法載入課程</div>
       <div style="font-size:.8rem;color:#4a5070;margin-bottom:16px">${err.message}</div>
-      <a href="ta-course.html" target="_blank" style="background:var(--acc,#00e5a0);color:#07080f;padding:10px 24px;border-radius:100px;font-weight:900;text-decoration:none;font-size:.88rem">在新分頁開啟課程 →</a>
+      <a href="ta-course.html" target="_blank" style="background:var(--acc,#4a8fa0);color:#07080f;padding:10px 24px;border-radius:100px;font-weight:900;text-decoration:none;font-size:.88rem">在新分頁開啟課程 →</a>
     </div>`;
   }
 }
@@ -2312,7 +2312,7 @@ function submitSub(){
   // 儲存到 localStorage（暫時方案，正式版接 Supabase）
   const subs=JSON.parse(localStorage.getItem('tahub_subs')||'[]');
   if(!subs.includes(email)){subs.push(email);localStorage.setItem('tahub_subs',JSON.stringify(subs));}
-  msg.style.color='#00e5a0';msg.textContent='✓ 已收到！推出時會通知你 🎉';msg.style.display='block';
+  msg.style.color='#4a8fa0';msg.textContent='✓ 已收到！推出時會通知你 🎉';msg.style.display='block';
   document.getElementById('sub-email').value='';
   setTimeout(hideSubModal,2200);
 }
@@ -2887,7 +2887,7 @@ function renderReaderBody(){
   const tagH=a.tags.map(t=>tagPillHTML(t,false)).join('');
   const typeStyle=a.type==='rss'?
     'background:rgba(255,107,53,.1);color:#ff6b35;border:1px solid rgba(255,107,53,.25)':
-    'background:rgba(123,95,255,.1);color:#7b5fff;border:1px solid rgba(123,95,255,.25)';
+    'background:rgba(123,95,255,.1);color:#6b7fa8;border:1px solid rgba(123,95,255,.25)';
 
   const isJaBody = rLang==='ja';
   const titleKey  = isJaBody ? 'title_ja'  : 'title_zh';
