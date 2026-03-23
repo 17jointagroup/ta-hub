@@ -629,7 +629,7 @@ function buildBody(lesson, isDone){
         <div class="challenge-options">${opts}</div>
         <div id="explain-${lesson.id}" style="display:none;margin-top:12px;padding:12px;background:rgba(0,245,196,.05);border:1px solid rgba(0,245,196,.2);border-radius:10px;font-size:.85rem;line-height:1.6;color:var(--txt2)"></div>
       </div>
-      ${!isDone ? `<button class="complete-btn" id="btn-\${lesson.id}" onclick="completeLesson('\${lesson.id}')">
+      ${!isDone ? `<button class="complete-btn" id="btn-${lesson.id}" onclick="completeLesson('${lesson.id}')">
         ⚡ 完成此關 → 解鎖下一關
       </button>` : ''}
     </div>
