@@ -113,6 +113,59 @@ input[type=range]{flex:1;accent-color:var(--acc)}
 @keyframes fw{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--tx,0),var(--ty,-100px))}}
 @media(max-width:600px){.stats-row{gap:12px}.stat-chip .num{font-size:1.2rem}.hero h1{font-size:1.8rem}}
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style id="ghibli-theme">
+:root{--bg:#e8e4cc!important;--bg2:#f0ead4!important;--card:#faf6e8!important;--border:#a8c878!important;--bord:1px solid #a8c878!important;--acc:#c8440a!important;--acc2:#3d6860!important;--acc3:#5a9e40!important;--acc4:#e8c84a!important;--txt:#1e3410!important;--txt2:#5a7040!important;--font:"Zen Maru Gothic","Fredoka One",sans-serif!important;--glow:0 0 16px rgba(90,158,64,.3)!important}
+body{background:#e8e4cc!important;color:#1e3410!important;font-family:"Zen Maru Gothic","Fredoka One",sans-serif!important}
+header{background:#3d6860!important;border-bottom:3px solid #2e5048!important}
+.back-btn{background:rgba(255,255,255,.15)!important;border-color:rgba(255,255,255,.25)!important;color:#d8f0e8!important}
+.header-title{color:#f0f8ec!important}
+.xp-fill{background:linear-gradient(90deg,#5a9e40,#8bc34a)!important}
+.xp-total,.xp-bar span{color:#d8f0e0!important}
+.hero{background:linear-gradient(160deg,#d4e8a8,#c8f0b0)!important;border-bottom:3px dashed #8bc34a!important}
+.hero h1{color:#1e3a0e!important}
+.hero p{color:#3d6820!important}
+.tower-badge{background:rgba(61,90,27,.15)!important;border-color:rgba(61,90,27,.4)!important;color:#2d5a1b!important}
+.stat-chip{background:rgba(255,255,255,.5)!important;border:1.5px solid #a8c878!important}
+.stat-chip .num{color:#1e3a0e!important}
+.stat-chip .lbl{color:#5a7a40!important}
+.chapter-map{max-width:1100px!important}
+.lesson{background:#faf6e8!important;border:1.5px solid #b8d068!important;border-radius:16px!important}
+.lesson.active{border-color:#3d6860!important;box-shadow:0 4px 16px rgba(61,104,96,.2)!important}
+.lesson.done{background:#f0f8e0!important;border-color:#8bc34a!important}
+.lesson-title{font-family:"Fredoka One",sans-serif!important;color:#1e3a0e!important}
+.lesson-desc{color:#5a7a40!important}
+.lesson-num{background:#e8f4c8!important;color:#2d5a1b!important;border:1.5px solid #8bc34a!important}
+.active-num{background:#3d6860!important;color:#f0f8ec!important;border-color:#3d6860!important}
+.done-num{background:#5a9e40!important;color:#fff!important;border-color:#5a9e40!important}
+.locked-num{background:#d8d4c4!important;color:#8a8870!important;border-color:#b8b4a0!important}
+.xp-badge{background:#e8f4c8!important;color:#2d5a1b!important;border:1px solid #8bc34a!important}
+.boss-badge{background:#fdf0d8!important;color:#8a5010!important;border:1px solid #d8a840!important}
+.tab{color:#5a7a40!important;background:rgba(255,255,255,.4)!important;border:1px solid #b8d068!important}
+.tab.on{background:#3d6860!important;color:#f0f8ec!important;border-color:#3d6860!important}
+.story-box{background:#fffef4!important;border:1.5px solid #c8d890!important;color:#1e3a0e!important}
+.hl{color:#c8440a!important}
+.code-block{background:#1e3a0e!important;border:1.5px solid #3d6820!important}
+.opt{background:#faf6e8!important;border:1.5px solid #b8d068!important;color:#1e3a0e!important}
+.opt:hover{border-color:#3d6860!important;background:#e8f4c8!important}
+.opt.correct{background:#e8f8e0!important;border-color:#5a9e40!important}
+.opt.wrong{background:#fef0ec!important;border-color:#c8440a!important}
+.complete-btn{background:#3d6860!important;border-color:#3d6860!important;font-family:"Fredoka One",sans-serif!important;color:#fff!important}
+.comp-overlay{background:#f5f0d8!important}
+.comp-title{color:#1e3a0e!important;font-family:"Fredoka One",sans-serif!important}
+.comp-sub{color:#5a7a40!important}
+.comp-next-btn,.comp-map-btn{background:#3d6860!important;border-color:#3d6860!important;font-family:"Fredoka One",sans-serif!important;color:#fff!important}
+.demo-wrap{background:#1a3010!important}
+.demo-label{color:#c8e8a0!important}
+.ctrl-btn{background:#faf6e8!important;border:1.5px solid #b8d068!important;color:#1e3a0e!important}
+.ctrl-btn.active{background:#3d6860!important;border-color:#3d6860!important;color:#f0f8ec!important}
+.slider-row label{color:#3d6820!important}
+.slider-val{color:#c8440a!important;font-weight:700!important}
+.toast{background:#3d6860!important;color:#f0f8ec!important}
+.star{background:rgba(90,158,64,.2)!important}
+.conn-dot{background:#8bc34a!important}
+</style>
+
 </head>
 <body>
 <div class="stars" id="stars"></div>
@@ -451,59 +504,81 @@ function demoMultiLight(cont,isMobile){
 
 // f2: Specular map — two spheres, left=no spec map, right=with spec map
 function demoSpecMap(cont,isMobile){
-  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🗺️ Specular Map — 左：無 / 右：有高光遮罩</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
-  <div class="slider-row"><label>✨ Shininess</label><input type="range" min="1" max="200" value="64" id="shin" oninput="updShin()"><span class="slider-val" id="shinv">64</span></div>`;
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🗺️ Specular Map — 高光對比</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div style="display:flex;justify-content:space-around;padding:8px 0;font-size:.8rem;font-weight:800">
+    <span style="color:#aaa">光澤度 = 4（霧面）</span>
+    <span style="color:#aaa">光澤度 = 64（金屬）</span>
+  </div>`;
+
   const cv=cont.querySelector("canvas");
-  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  function sync(){
+    const w=cv.clientWidth||600;
+    if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height="260px";}
+    return cv.width/cv.height;
+  }
   sync(); if(isMobile)window.addEventListener("resize",sync);
+
   const g=cv.getContext("webgl");if(!g)return;
-  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkS(t,src){const s=g.createShader(t);g.shaderSource(s,src);g.compileShader(s);return s;}
   function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
-  const sph=makeSphere(.88);
+
+  const sph=makeSphere(1.0);
   const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+
   const prog=mkP(
-    "attribute vec3 p;attribute vec3 n;varying vec3 vN;varying vec3 vW;uniform float asp;uniform float ox;void main(){vN=n;vW=p;vec3 wp=vec3(p.x+ox,p.y,p.z);gl_Position=vec4(wp.x*0.92/asp,wp.y*0.92,wp.z*.01,1.);}",
-    `precision mediump float;varying vec3 vN,vW;
-     uniform float shin;uniform int useSpecMap;
+    // Simple: scale by r in world, divide x by asp for screen
+    `attribute vec3 p;attribute vec3 n;
+     varying vec3 vN;
+     uniform float asp;uniform float ox;uniform float r;
+     void main(){
+       vN=n;
+       gl_Position=vec4(p.x*r/asp+ox, p.y*r, p.z*0.01, 1.0);
+     }`,
+    `precision mediump float;
+     varying vec3 vN;
+     uniform float shin;uniform vec3 col;
      void main(){
        vec3 N=normalize(vN);
-       vec3 L=normalize(vec3(0.5,0.7,0.8));
-       vec3 V=vec3(0.0,0.0,1.0);  // fixed front-facing view
-       vec3 H=normalize(L+V);
-       float diff=max(dot(N,L),0.0);
-       float spec=pow(max(dot(N,H),0.0),shin);
-       // Without spec map: uniform highlight (shininess effect clearly visible)
-       // With spec map: highlight only on equatorial band (dark poles = no metal)
-       float specMask=useSpecMap==1?(1.0-abs(vN.y)):1.0;
-       vec3 base=vec3(0.85,0.15,0.15);
-       vec3 diffuse=base*(0.2+diff*0.8);
-       vec3 specular=vec3(1.0,0.95,0.85)*spec*specMask*2.0;
-       gl_FragColor=vec4(clamp(diffuse+specular,0.0,1.0),1.0);
+       vec3 L=normalize(vec3(1.2,0.5,0.4));
+       vec3 H=normalize(L+vec3(0,0,1));
+       float d=max(dot(N,L),0.0);
+       float s=pow(max(dot(N,H),0.0),shin);
+       gl_FragColor=vec4(clamp(col*(0.28+d*0.52)+vec3(1,.97,.85)*s*8.,0.,1.),1.);
      }`
   );
-  g.useProgram(prog);
+
   const aP=g.getAttribLocation(prog,"p"),aN=g.getAttribLocation(prog,"n");
-  g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
-  g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
   const uAsp=g.getUniformLocation(prog,"asp"),uOx=g.getUniformLocation(prog,"ox");
-  const uShin=g.getUniformLocation(prog,"shin"),uSM=g.getUniformLocation(prog,"useSpecMap");
+  const uR=g.getUniformLocation(prog,"r"),uShin=g.getUniformLocation(prog,"shin"),uCol=g.getUniformLocation(prog,"col");
   g.enable(g.DEPTH_TEST);
-  let shin=64;
-  window.updShin=()=>{shin=parseInt(document.getElementById("shin").value);document.getElementById("shinv").textContent=shin;};
+
+  const SPHERES=[
+    {ox:-0.30, shin:4,  col:[0.35,0.35,0.38]},
+    {ox: 0.30, shin:64, col:[0.35,0.35,0.38]},
+  ];
+
   function frame(){
     const asp=sync();
-    g.viewport(0,0,cv.width,cv.height);g.clearColor(.04,.03,.09,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
-    g.uniform1f(uAsp,asp);g.uniform1f(uShin,shin);
-    g.bindBuffer(g.ARRAY_BUFFER,vB);g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+    g.viewport(0,0,cv.width,cv.height);
+    g.clearColor(0.04,0.03,0.09,1);
+    g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    g.useProgram(prog);
+    g.uniform1f(uAsp,asp);
+    g.uniform1f(uR,0.50); // radius: 0.38 NDC height units = fills ~38% of height
+    g.bindBuffer(g.ARRAY_BUFFER,vB);
+    g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
     g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
-    g.uniform1f(uOx,-1.0);g.uniform1i(uSM,0);g.drawArrays(g.TRIANGLES,0,sph.length/6);
-    g.uniform1f(uOx, 1.0);g.uniform1i(uSM,1);g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    SPHERES.forEach(s=>{
+      g.uniform1f(uOx,s.ox);
+      g.uniform1f(uShin,s.shin);
+      g.uniform3f(uCol,...s.col);
+      g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    });
     requestAnimationFrame(frame);
   }
   frame();
 }
 
-// f3: First-person camera simulation — WASD keys move camera
 function demoCamera(cont,isMobile){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">📷 第一人稱相機 — ${isMobile?'觸控':'WASD'} 移動視角</div><canvas style="width:100%;display:block;height:260px;cursor:crosshair"></canvas></div>
   <div class="ctrl-row">
@@ -720,47 +795,82 @@ function demoReflection(cont,isMobile){
 function demoWater(cont,isMobile){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🌊 Water Shader — Normal Map 滾動波浪</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
   <div class="slider-row"><label>🌊 波速</label><input type="range" min="1" max="100" value="30" id="wspd" oninput="updWS()"><span class="slider-val" id="wspdv">0.30</span></div>`;
+
   const cv=cont.querySelector("canvas");
-  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;}return w/260;}
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height="260px";}return w/260;}
   sync(); if(isMobile)window.addEventListener("resize",sync);
-  const g=cv.getContext("webgl");if(!g)return;
-  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
-  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
-  const prog=mkP(
-    "attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}",
-    `precision mediump float;varying vec2 uv;uniform float t;uniform float spd;
-     void main(){
-       // 模擬 Normal Map 滾動（用 sin 波近似）
-       float u1=uv.x+t*spd*.03, v1=uv.y+t*spd*.02;
-       float u2=uv.x-t*spd*.025,v2=uv.y+t*spd*.015;
-       // 從 normal map 計算擾動法線
-       float nx=sin(u1*12.+v1*8.)*0.35+sin(u2*9.)*0.2;
-       float ny=cos(v1*10.+u1*6.)*0.35+cos(u2*7.)*0.2;
-       vec3 N=normalize(vec3(nx,ny,1.));
-       // Fresnel
-       float fresnel=pow(1.-abs(N.z),.8);
-       // Deep water + foam + sky reflection
-       vec3 deepWater=vec3(.05,.2,.4);
-       vec3 sky=mix(vec3(.6,.75,.95),vec3(.2,.5,.9),uv.y);
-       vec3 foam=vec3(.9,.95,1.)*max(0.,N.z-.7)*3.;
-       // Light specular on water
-       vec3 L=normalize(vec3(.5,.8,.3));vec3 V=vec3(0,0,1);
-       vec3 H=normalize(L+V+vec3(N.xy*.3,0));
-       float spec=pow(max(dot(normalize(N),H),0.),64.)*1.5;
-       vec3 col=mix(deepWater,sky,fresnel)+foam+vec3(1,.95,.8)*spec;
-       gl_FragColor=vec4(clamp(col,0.,1.),1.);
-     }`
-  );
-  const buf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,buf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),g.STATIC_DRAW);
-  g.useProgram(prog);const aP=g.getAttribLocation(prog,"p");g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,2,g.FLOAT,false,0,0);
-  const uT=g.getUniformLocation(prog,"t"),uSpd=g.getUniformLocation(prog,"spd");
-  let wSpd=0.30,t=0;
+
+  const g=cv.getContext("webgl"); if(!g)return;
+
+  const VS=`attribute vec2 a;void main(){gl_Position=vec4(a,0,1);}`;
+  const FS=`precision mediump float;
+uniform float t;uniform float spd;uniform vec2 res;
+void main(){
+  vec2 uv=gl_FragCoord.xy/res;
+  float tt=t*spd;
+  // Two-layer scrolling normal simulation
+  float u1=uv.x+tt*0.03, v1=uv.y+tt*0.02;
+  float u2=uv.x-tt*0.025,v2=uv.y+tt*0.015;
+  float nx=sin(u1*12.0+v1*8.0)*0.35+sin(u2*9.0)*0.2;
+  float ny=cos(v1*10.0+u1*6.0)*0.35+cos(u2*7.0)*0.2;
+  vec3 N=normalize(vec3(nx,ny,1.0));
+  // Fresnel effect
+  float fresnel=pow(1.0-abs(N.z),0.8);
+  // Colors
+  vec3 deep=vec3(0.04,0.18,0.38);
+  vec3 shallow=vec3(0.08,0.35,0.55);
+  vec3 skyTop=vec3(0.55,0.72,0.92);
+  vec3 skyBot=vec3(0.18,0.45,0.82);
+  vec3 sky=mix(skyBot,skyTop,uv.y);
+  // Water base color varies with depth (uv.y)
+  vec3 water=mix(deep,shallow,uv.y*0.6);
+  // Foam on wave peaks
+  float foam=max(0.0,(N.z-0.75)*4.0);
+  // Specular highlight
+  vec3 L=normalize(vec3(0.4,0.8,0.5));
+  vec3 H=normalize(L+vec3(0,0,1));
+  float spec=pow(max(dot(N,H),0.0),64.0)*1.5;
+  // Final mix: water + sky reflection via Fresnel
+  vec3 col=mix(water,sky,fresnel*0.65)+vec3(0.9,0.95,1.0)*foam+vec3(1,0.97,0.85)*spec;
+  gl_FragColor=vec4(clamp(col,0.0,1.0),1.0);
+}`;
+
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);if(!g.getShaderParameter(sh,g.COMPILE_STATUS))console.warn(g.getShaderInfoLog(sh));return sh;}
+  const prog=g.createProgram();
+  g.attachShader(prog,mkS(g.VERTEX_SHADER,VS));
+  g.attachShader(prog,mkS(g.FRAGMENT_SHADER,FS));
+  g.linkProgram(prog);
+  if(!g.getProgramParameter(prog,g.LINK_STATUS)){console.warn(g.getProgramInfoLog(prog));return;}
+
+  const buf=g.createBuffer();
+  g.bindBuffer(g.ARRAY_BUFFER,buf);
+  g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),g.STATIC_DRAW);
+
+  const aLoc=g.getAttribLocation(prog,"a");
+  const uT=g.getUniformLocation(prog,"t");
+  const uSpd=g.getUniformLocation(prog,"spd");
+  const uRes=g.getUniformLocation(prog,"res");
+
+  let wSpd=0.30, t=0;
   window.updWS=()=>{wSpd=document.getElementById("wspd").value/100;document.getElementById("wspdv").textContent=wSpd.toFixed(2);};
-  function frame(){t+=.016;const asp=sync();g.viewport(0,0,cv.width,cv.height);g.clearColor(0,0,0,1);g.clear(g.COLOR_BUFFER_BIT);g.uniform1f(uT,t);g.uniform1f(uSpd,wSpd);g.drawArrays(g.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);}
+
+  function frame(){
+    t+=0.016;
+    sync();
+    g.viewport(0,0,cv.width,cv.height);
+    g.useProgram(prog);
+    g.bindBuffer(g.ARRAY_BUFFER,buf);
+    g.enableVertexAttribArray(aLoc);
+    g.vertexAttribPointer(aLoc,2,g.FLOAT,false,0,0);
+    g.uniform1f(uT,t);
+    g.uniform1f(uSpd,wSpd);
+    g.uniform2f(uRes,cv.width,cv.height);
+    g.drawArrays(g.TRIANGLE_STRIP,0,4);
+    requestAnimationFrame(frame);
+  }
   frame();
 }
 
-// f8: RTT — "TV screen" shows a rendered scene
 function demoRTT(cont,isMobile){
   cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🎯 Render-to-Texture — 球體渲染到螢幕</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
   <div style="padding:8px 16px;font-size:.8rem;color:var(--txt2)">🔴 左：原始球體 &nbsp;|&nbsp; 📺 右：渲染到貼圖後顯示（含掃描線效果）</div>`;
@@ -814,11 +924,12 @@ function demoRTT(cont,isMobile){
 
   // Screen quad shader (shows RTT texture with scanlines)
   const quadProg=mkP(
-    "attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}",
+    "attribute vec2 p;varying vec2 uv;uniform float qAsp;void main(){uv=p*.5+.5;gl_Position=vec4(p.x/qAsp,p.y,0,1.0);}",
     "precision mediump float;varying vec2 uv;uniform sampler2D tex;void main(){vec4 c=texture2D(tex,uv);float scan=mod(floor(uv.y*130.),2.)<1.?.85:1.;float vign=(1.-length(uv-.5)*1.2);gl_FragColor=vec4(c.rgb*scan*max(vign,.2),1.);}"
   );
   const qAP=g.getAttribLocation(quadProg,"p");
   const qTex=g.getUniformLocation(quadProg,"tex");
+  const qAspU=g.getUniformLocation(quadProg,"qAsp");
   const qBuf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,qBuf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),g.STATIC_DRAW);
 
   g.enable(g.DEPTH_TEST);
@@ -858,6 +969,7 @@ function demoRTT(cont,isMobile){
     g.enableVertexAttribArray(qAP);g.vertexAttribPointer(qAP,2,g.FLOAT,false,0,0);
     g.bindTexture(g.TEXTURE_2D,rttTex);
     g.uniform1i(qTex,0);
+    g.uniform1f(qAspU,(cv.width/2)/cv.height);
     g.drawArrays(g.TRIANGLE_STRIP,0,4);
 
     requestAnimationFrame(frame);

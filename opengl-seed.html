@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 像素王國 — 圖形學種子課程</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html{font-size:20px;}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#eef5d8;--bg2:#e2edc4;--card:#f0ead4;--border:#8bc34a;
+  --acc:#c8440a;--acc2:#e8c84a;--acc3:#5a9e40;--acc4:#2d5a1b;
+  --txt:#1e3a0e;--txt2:#4a7230;--mono:"Space Mono",monospace;--font:"Fredoka One","Nunito",-apple-system,sans-serif;
+  --glow:0 0 18px rgba(138,195,74,.4);
+}
+body{background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden;min-height:100vh;padding-bottom:120px}
+header{position:sticky;top:0;z-index:100;background:rgba(245,240,216,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px}
+.back-btn{background:var(--card);border:1px solid var(--border);color:#4a7230;padding:6px 14px;border-radius:100px;font-family:var(--font);font-size:.8rem;font-weight:800;cursor:pointer;text-decoration:none;transition:.2s}
+.back-btn:hover{color:var(--acc2);border-color:var(--acc2)}
+.header-title{font-size:1.1rem;font-weight:900;color:var(--acc)}
+.xp-bar{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:800}
+.xp-total{color:var(--acc3);font-family:var(--mono)}
+.xp-track{width:120px;height:8px;background:var(--border);border-radius:100px;overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:100px;transition:width .6s cubic-bezier(.34,1.56,.64,1)}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:twinkle var(--d,3s) var(--dl,0s) ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+.hero{position:relative;z-index:1;text-align:center;padding:60px 24px 40px;overflow:hidden}
+.tower-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(200,68,10,.12);border:1px solid rgba(200,68,10,.3);border-radius:100px;padding:6px 18px;font-size:.8rem;font-weight:800;color:var(--acc);margin-bottom:20px;letter-spacing:.05em}
+.hero h1{font-size:clamp(2rem,6vw,3.5rem);font-weight:900;line-height:1.1;margin-bottom:12px}
+.hero h1 span{background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#4a7230;font-size:1rem;max-width:500px;margin:0 auto 32px;line-height:1.7}
+.stats-row{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+.stat-chip{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 20px;text-align:center}
+.stat-chip .num{font-size:1.5rem;font-weight:900;font-family:var(--mono);color:var(--acc3)}
+.stat-chip .lbl{font-size:.7rem;color:#4a7230;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.chapter-map{position:relative;z-index:1;padding:24px;max-width:1100px;margin:0 auto}
+.lesson{background:var(--card);border:1px solid var(--border);border-radius:20px;margin-bottom:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s;cursor:pointer}
+.lesson:hover{border-color:var(--acc);box-shadow:var(--glow)}
+.lesson.active{border-color:var(--acc);box-shadow:var(--glow)}
+.lesson.done{}
+.lesson.locked{opacity:.5;cursor:not-allowed}
+.lesson.boss{border-color:rgba(255,215,0,.3)}
+.lesson.boss:hover,.lesson.boss.active{border-color:var(--acc3);box-shadow:0 0 22px rgba(255,215,0,.3)}
+.lesson-header{display:flex;align-items:center;gap:14px;padding:16px 18px}
+.lesson-num{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-family:var(--mono);font-size:.9rem;flex-shrink:0}
+.done-num{background:var(--card);color:var(--acc2);border:1px solid var(--border)}
+.active-num{background:rgba(200,68,10,.15);color:var(--acc);border:1px solid var(--acc)}
+.locked-num{background:var(--border);color:#4a7230;border:1px solid transparent}
+.lesson-info{flex:1;min-width:0}
+.lesson-title{font-size:1rem;font-weight:900;margin-bottom:3px}
+.lesson-desc{font-size:.8rem;color:#4a7230;font-weight:700}
+.lesson-meta{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+.xp-badge{background:rgba(255,163,67,.1);color:var(--acc4);border:1px solid rgba(255,163,67,.3);border-radius:100px;padding:3px 10px;font-size:.75rem;font-weight:800;font-family:var(--mono)}
+.boss-badge{background:rgba(255,215,0,.1);color:var(--acc3);border:1px solid rgba(255,215,0,.3);border-radius:100px;padding:3px 10px;font-size:.72rem;font-weight:800}
+.check{width:28px;height:28px;border-radius:50%;background:transparent;color:#4a7230;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.lesson-body{display:none;border-top:1px solid var(--border);padding:24px}
+.lesson.active .lesson-body{display:block}
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg2);border-radius:12px;padding:4px}
+.tab{flex:1;text-align:center;padding:8px;border-radius:8px;font-size:.8rem;font-weight:800;cursor:pointer;transition:.15s;color:#4a7230}
+.tab.on{background:var(--card);color:var(--txt);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.tab-panel{display:none}.tab-panel.on{display:block}
+.story-box{background:linear-gradient(135deg,rgba(200,68,10,.06),rgba(0,212,255,.04));border:1px solid rgba(200,68,10,.2);border-radius:16px;padding:20px;margin-bottom:16px;font-size:.9rem;line-height:1.8}
+.hl{background:rgba(0,212,255,.15);color:var(--acc2);border-radius:4px;padding:1px 6px;font-weight:900}
+.emoji-big{font-size:2.5rem;display:block;margin-bottom:10px}
+.src-link{display:inline-flex;align-items:center;gap:6px;background:rgba(200,68,10,.08);border:1px solid rgba(200,68,10,.25);border-radius:8px;padding:4px 12px;font-size:.75rem;font-weight:800;color:var(--acc);margin-top:12px;text-decoration:none}
+.code-block{background:#050710;border:1px solid var(--border);border-radius:12px;padding:16px;font-family:var(--mono);font-size:.75rem;line-height:1.7;overflow-x:auto;position:relative;margin-bottom:16px;white-space:pre}
+.kw{color:#c8440a}.fn{color:#5a9e40}.str{color:#00f5c4}.num{color:#ffd93d}.cm{color:#4a5568}.tp{color:#c084fc}
+.copy-btn{position:absolute;top:10px;right:10px;background:var(--card);border:1px solid var(--border);color:#4a7230;padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:.7rem;cursor:pointer;transition:.2s}
+.copy-btn:hover{color:var(--acc2);border-color:var(--acc2)}
+.demo-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px}
+.demo-label{font-size:.75rem;font-weight:800;color:#4a7230;padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.demo-label::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 6px var(--acc);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+canvas{display:block;width:100%;max-width:100%}
+.ctrl-row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.ctrl-btn{background:var(--card);border:1px solid var(--border);color:var(--txt);padding:8px 18px;border-radius:100px;font-family:var(--font);font-size:.8rem;font-weight:800;cursor:pointer;transition:.15s}
+.ctrl-btn:hover,.ctrl-btn.on,.ctrl-btn.active{background:rgba(200,68,10,.12);border-color:var(--acc);color:var(--acc)}
+.slider-row{display:flex;align-items:center;gap:12px;margin:8px 0}
+.slider-row label{font-size:.8rem;font-weight:800;color:#4a7230;min-width:80px}
+input[type=range]{flex:1;accent-color:var(--acc)}
+.slider-val{font-family:var(--mono);font-size:.8rem;color:var(--acc3);min-width:40px}
+.quiz-box{background:rgba(200,68,10,.05);border:1px solid rgba(200,68,10,.2);border-radius:16px;padding:20px;margin-bottom:16px}
+.quiz-title{font-size:.85rem;font-weight:900;color:var(--acc);margin-bottom:10px}
+.quiz-q{font-size:.88rem;line-height:1.7;color:#4a7230;margin-bottom:14px}
+.opts{display:grid;gap:8px}
+.opt{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 16px;cursor:pointer;font-size:.88rem;font-weight:700;display:flex;align-items:center;gap:10px;transition:.15s}
+.opt:hover{border-color:var(--acc);background:rgba(200,68,10,.05)}
+.opt.correct{border-color:var(--acc2);background:rgba(0,212,255,.06);color:var(--acc2)}
+.opt.wrong{border-color:var(--acc);background:rgba(200,68,10,.06);color:var(--acc)}
+.opt-key{width:24px;height:24px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;flex-shrink:0}
+.complete-btn{width:100%;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#07080f;border:none;border-radius:100px;padding:14px;font-family:var(--font);font-size:.95rem;font-weight:900;cursor:pointer;margin-top:16px;transition:.2s}
+.complete-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(200,68,10,.35)}
+.complete-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.connector{width:2px;height:12px;background:linear-gradient(var(--acc),transparent);margin:0 auto -2px;position:relative;z-index:1}
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(200px);background:var(--card);border:1px solid var(--acc2);border-radius:100px;padding:12px 28px;font-weight:800;font-size:.9rem;color:var(--acc2);z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .4s ease;box-shadow:0 8px 32px rgba(0,212,255,.2);opacity:0}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.xp-pop{position:fixed;font-family:var(--mono);font-weight:900;font-size:1.2rem;color:var(--acc3);pointer-events:none;z-index:9999;animation:xpFloat 1.2s ease forwards}
+@keyframes xpFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+.comp-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(4,2,14,.9);backdrop-filter:blur(18px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.comp-overlay.show{display:flex;animation:fadeIn .5s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.comp-trophy{font-size:5rem;margin-bottom:16px;animation:bounce 1s ease infinite alternate}
+@keyframes bounce{from{transform:scale(1)}to{transform:scale(1.1)}}
+.comp-stars{font-size:2rem;margin-bottom:16px}
+.comp-title{font-size:2rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,var(--acc),var(--acc3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.comp-sub{color:#4a7230;margin-bottom:32px}
+.comp-next-btn{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#050210;border:none;border-radius:100px;padding:14px 32px;font-family:var(--font);font-size:1rem;font-weight:900;cursor:pointer;margin-bottom:12px;box-shadow:0 6px 28px rgba(200,68,10,.4)}
+.comp-map-btn{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:#4a7230;border-radius:100px;padding:10px 24px;font-family:var(--font);font-size:.85rem;font-weight:800;cursor:pointer}
+.fw-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.fw{position:absolute;border-radius:50%;animation:fw var(--d,.8s) var(--dl,0s) ease-out forwards}
+@keyframes fw{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--tx,0),var(--ty,-100px))}}
+@media(max-width:600px){.stats-row{gap:12px}.stat-chip .num{font-size:1.2rem}.hero h1{font-size:1.8rem}}
+</style>
+<style>body{font-weight:400;letter-spacing:.02em}.lesson-num{background:#e4ddb8!important}.lesson{background:#f0ead4!important}.lesson-title{font-weight:400!important;letter-spacing:.02em!important}.lesson-desc{font-weight:500!important}header{font-weight:600!important}</style>
+
+
+<style>
+/* Seed version overrides - bigger, friendlier */
+.hero h1{font-size:2.2rem;font-weight:900;letter-spacing:-.01em}
+.tower-badge{font-size:.95rem;padding:8px 18px}
+.lesson-card{border-radius:16px}
+.lesson-icon{font-size:1.5rem}
+.lesson-title{font-size:1.08rem;font-weight:700;letter-spacing:.01em}
+.fq-opt{font-size:1rem;padding:12px 16px;border-radius:12px}
+.emoji-big{font-size:2.5rem;display:block;text-align:center;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<header>
+  <a href="index.html" class="back-btn">🏠 首頁</a>
+  <span class="header-title" style="color:#2d5a1b">🌱 像素王國</span>
+  <div class="xp-bar"><span style="color:#4a7230">⭐</span><div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div><span class="xp-total" id="xp-total">0 / 730</span></div>
+</header>
+<section class="hero">
+  <div class="tower-badge" style="background:rgba(107,203,119,.12);border-color:rgba(107,203,119,.35);color:#4aba57">🌱 像素王國 · 給小朋友的圖形學</div>
+  <h1>遊戲畫面是<br><span style="background:linear-gradient(135deg,#3d7a28,#8bc34a);-webkit-background-clip:text;-webkit-text-fill-color:transparent">怎麼做的？</span></h1>
+  <p>用手電筒、積木、魔法咒語來認識電腦圖形！不需要任何基礎，一起探索遊戲背後的秘密！</p>
+  <div class="stats-row">
+    <div class="stat-chip"><div class="num" id="done-count">0</div><div class="lbl">已解鎖</div></div>
+    <div class="stat-chip"><div class="num">10</div><div class="lbl">關卡</div></div>
+    <div class="stat-chip"><div class="num">730</div><div class="lbl">星星數</div></div>
+    <div class="stat-chip"><div class="num">🌍</div><div class="lbl">Boss：星球</div></div>
+  </div>
+</section>
+<div class="chapter-map"><div id="lesson-list"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+(function(){const s=document.getElementById("stars");for(let i=0;i<60;i++){const d=document.createElement("div");d.className="star";d.style.cssText="left:"+Math.random()*100+"%;top:"+Math.random()*100+"%;--d:"+(2+Math.random()*4)+"s;--dl:"+Math.random()*4+"s";s.appendChild(d);}})();
+const CASTLE_KEY="seed_done",CASTLE_TOTAL=10,CASTLE_NUM=0,NEXT_CASTLE=0;
+let earned=JSON.parse(localStorage.getItem(CASTLE_KEY)||"[]");
+let currentLesson=null;
+const demoInited={};
+const LESSONS=[
+  {id:"s1",num:"1-1",icon:"🎨",title:"畫面是由什麼組成的？",desc:"像素、馬賽克拼圖、螢幕的秘密",xp:60,type:"normal",q:"螢幕上的每一個小格子叫做什麼？",opts:["馬賽克","像素","貼圖","點點"],ans:1,src:"opengl-intro",story:`<span class="emoji-big">🔍</span>你有沒有把臉貼近電視螢幕，看到一個個小格子？<br><br>那些小格子就叫做 <span class="hl">像素</span>（pixel）！<br><br>每個像素都是一個小小的彩色燈泡🔦<br>把成千上萬個像素排在一起，就變成了一張完整的畫面！<br><br>🖥️ 普通螢幕有 <span class="hl">約 200 萬個</span>像素<br>📱 手機螢幕有 <span class="hl">約 400 萬個</span>像素<br><br>電腦在每一秒鐘，要告訴所有像素「你要亮什麼顏色」——<br>這就是遊戲圖形的魔法！`,code:`<span class="cm">// 每個像素就是一個小格子</span>
+<span class="cm">// 這個格子在座標 (3, 2) 的位置</span>
+<span class="tp">pixel</span>[<span class="num">3</span>][<span class="num">2</span>] = <span class="str">紅色</span>;
+
+<span class="cm">// 把很多格子排在一起</span>
+<span class="cm">// 就組成了一張圖片！</span>
+<span class="tp">螢幕</span> = <span class="fn">排列</span>(所有像素);
+<span class="cm">// 一個全螢幕 HD 畫面</span>
+<span class="cm">// = 1920 × 1080 = 約200萬個像素</span>`},
+  {id:"s2",num:"1-2",icon:"🌈",title:"顏色是怎麼調出來的？",desc:"紅綠藍三原色、RGB、混色魔法",xp:60,type:"normal",q:"電腦的顏色是由哪三種顏色混合出來的？",opts:["紅黃藍","紅綠藍","白黑灰","橙紫綠"],ans:1,src:"opengl-color",story:`<span class="emoji-big">🌈</span>電腦的顏色有個超酷的秘密！<br><br>它只用 <span class="hl">三種顏色</span> 就能做出所有顏色：<br><br>🔴 <span class="hl">紅色（Red）</span><br>🟢 <span class="hl">綠色（Green）</span><br>🔵 <span class="hl">藍色（Blue）</span><br><br>就像用三支手電筒照在同一個地方：<br>🔴+🟢 = 黃色！<br>🔴+🔵 = 粉紅紫！<br>🟢+🔵 = 青色！<br>🔴+🟢+🔵 全部加在一起 = <span class="hl">白色</span>！<br><br>這就叫 <span class="hl">RGB</span>，每個顏色可以有 0~255 的強度`,code:`<span class="cm">// 用 RGB 描述顏色</span>
+<span class="tp">紅色</span> = RGB(<span class="num">255</span>, <span class="num">0</span>, <span class="num">0</span>);
+<span class="tp">綠色</span> = RGB(<span class="num">0</span>, <span class="num">255</span>, <span class="num">0</span>);
+<span class="tp">藍色</span> = RGB(<span class="num">0</span>, <span class="num">0</span>, <span class="num">255</span>);
+<span class="tp">黃色</span> = RGB(<span class="num">255</span>, <span class="num">255</span>, <span class="num">0</span>);
+<span class="tp">白色</span> = RGB(<span class="num">255</span>, <span class="num">255</span>, <span class="num">255</span>);
+<span class="tp">黑色</span> = RGB(<span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>);
+<span class="cm">// 試試看！</span>`},
+  {id:"s3",num:"1-3",icon:"📐",title:"電腦怎麼畫三角形？",desc:"頂點、連線、所有形狀的基礎",xp:60,type:"normal",q:"電腦畫出所有形狀的最基本積木是什麼？",opts:["圓形","正方形","三角形","線段"],ans:2,src:"opengl-triangle",story:`<span class="emoji-big">📐</span>遊戲裡的所有東西——龍、城堡、汽車——<br>其實都是由 <span class="hl">超多三角形</span> 拼起來的！<br><br>為什麼是三角形？<br>因為三角形是 <span class="hl">最穩定的形狀</span>，電腦很容易計算！<br><br>畫三角形很簡單：<br>1️⃣ 在地圖上放三個點（叫做<span class="hl">頂點</span>）<br>2️⃣ 把三個點連起來<br>3️⃣ 在裡面塗上顏色<br><br>🎮 一個遊戲角色大約由 <span class="hl">幾千到幾百萬</span> 個三角形組成！`,code:`<span class="cm">// 三個頂點的座標</span>
+<span class="tp">頂點A</span> = (x:<span class="num">0.0</span>, y:<span class="num">0.5</span>);  <span class="cm">// 最上面</span>
+<span class="tp">頂點B</span> = (x:-<span class="num">0.5</span>, y:-<span class="num">0.5</span>); <span class="cm">// 左下</span>
+<span class="tp">頂點C</span> = (x:<span class="num">0.5</span>, y:-<span class="num">0.5</span>);  <span class="cm">// 右下</span>
+
+<span class="cm">// 連起來就是三角形！</span>
+<span class="fn">畫三角形</span>(A, B, C, 顏色:<span class="str">橙色</span>);`},
+  {id:"s_move",num:"1-4",icon:"🕹️",title:"形狀怎麼移動？",desc:"XY座標、地圖定位、位置的秘密",xp:60,type:"normal",q:"要讓三角形往右移動，需要改變什麼？",opts:["改變顏色","增加 X 座標的數字","改變大小","換一個形狀"],ans:1,src:"opengl-move",story:`<span class="emoji-big">🕹️</span>電腦的畫面是一張大地圖！<br><br>每個位置都有一個地址，叫做 <span class="hl">座標</span>：<br><br>➡️ <span class="hl">X</span> = 左右方向（X 越大越靠右）<br>⬆️ <span class="hl">Y</span> = 上下方向（Y 越大越靠上）<br><br>就像地圖上的「幾街幾號」！<br><br>想讓三角形移動很簡單：<br>🔹 往右移 → X 的數字 + 1<br>🔹 往上移 → Y 的數字 + 1<br>🔹 每幀都加一點點 → 三角形就跑起來了！<br><br>這就是遊戲角色移動的秘密 🎮`,code:`<span class="cm">// 三角形的位置</span>
+<span class="tp">位置</span> = {x: <span class="num">0.0</span>, y: <span class="num">0.0</span>};
+
+<span class="cm">// 按下右鍵 → X 增加</span>
+<span class="kw">if</span>(按右鍵) 位置.x += <span class="num">0.05</span>;
+<span class="kw">if</span>(按左鍵) 位置.x -= <span class="num">0.05</span>;
+<span class="kw">if</span>(按上鍵) 位置.y += <span class="num">0.05</span>;
+<span class="kw">if</span>(按下鍵) 位置.y -= <span class="num">0.05</span>;
+
+<span class="cm">// 畫在新位置</span>
+<span class="fn">畫三角形</span>(位置.x, 位置.y);`},
+  {id:"s4",num:"2-1",icon:"✨",title:"Shader 是什麼魔法？",desc:"著色器、染色咒語、像素的命令",xp:70,type:"normal",q:"Shader（著色器）是用來做什麼的？",opts:["計算物理碰撞","告訴每個像素要顯示什麼顏色","存儲遊戲數據","播放音效"],ans:1,src:"opengl-shader",story:`<span class="emoji-big">✨</span>電腦怎麼知道每個像素要變什麼顏色？<br><br>靠的是 <span class="hl">Shader</span>（著色器）——就像一本 <span class="hl">魔法咒語書</span>！<br><br>每一幀畫面，電腦都要問螢幕上的每個像素：<br>「你現在要變什麼顏色？」<br><br>Shader 就是回答這個問題的程式：<br>🎨 「根據位置變顏色」<br>🌅 「根據光線角度變明暗」<br>🔥 「做出火焰效果」<br><br>Shader 是遊戲圖形最酷的魔法！`,code:`<span class="cm">// 這是一個超簡單的著色器</span>
+<span class="cm">// 它告訴每個像素「你要變紅色」</span>
+<span class="tp">function</span> <span class="fn">著色器</span>(這個像素在哪裡) {
+  <span class="kw">return</span> 紅色; <span class="cm">// 都變紅！</span>
+}
+
+<span class="cm">// 更聰明的著色器：</span>
+<span class="cm">// 靠左的像素變藍色</span>
+<span class="cm">// 靠右的像素變紅色</span>
+<span class="tp">function</span> <span class="fn">著色器</span>(x座標) {
+  <span class="kw">if</span>(x < <span class="num">0</span>) <span class="kw">return</span> 藍色;
+  <span class="kw">else</span> <span class="kw">return</span> 紅色;
+}`},
+  {id:"s5",num:"2-2",icon:"🌅",title:"讓顏色隨位置變化",desc:"漸層、日落天空、位置決定顏色",xp:70,type:"normal",q:"日落天空為什麼從橙色漸漸變成藍色？",opts:["太陽移動了","越靠近地平線光折射越多，讓顏色慢慢改變","雲遮住了","畫家畫的"],ans:1,src:"opengl-gradient",story:`<span class="emoji-big">🌅</span>你有沒有看過日落的天空？<br><br>最底下是橙紅色，慢慢往上變成深藍色——<br>這種漸漸改變的效果叫做 <span class="hl">漸層</span>！<br><br>在電腦裡，我們可以這樣告訴著色器：<br>「越靠下面就越紅，越靠上面就越藍」<br><br>這樣每個像素就會根據自己的 <span class="hl">位置</span> 自動算出顏色！<br><br>不用我們一個一個設定——<br>電腦會自己算出幾百萬個像素的顏色 🖥️`,code:`<span class="cm">// 根據高度決定顏色</span>
+<span class="tp">function</span> <span class="fn">日落著色器</span>(高度) {
+  <span class="cm">// 高度 0=底部 1=頂部</span>
+  <span class="tp">橙色</span> = RGB(<span class="num">255</span>, <span class="num">120</span>, <span class="num">0</span>);
+  <span class="tp">深藍</span> = RGB(<span class="num">0</span>, <span class="num">20</span>, <span class="num">100</span>);
+  
+  <span class="cm">// 用高度混合兩個顏色</span>
+  <span class="kw">return</span> <span class="fn">混合</span>(橙色, 深藍, 比例:高度);
+}`},
+  {id:"s6",num:"2-3",icon:"🎁",title:"貼圖是什麼？",desc:"照片貼紙、包裝紙、紋理的秘密",xp:70,type:"normal",q:"遊戲裡的磚牆為什麼看起來有磚頭的紋路？",opts:["用很多個三角形排出來","把磚牆照片貼到平面上（貼圖）","電腦自己畫的","光線反射"],ans:1,src:"opengl-texture",story:`<span class="emoji-big">🎁</span>遊戲裡的地板、牆壁、角色皮膚——<br>都是用 <span class="hl">貼圖</span> 做的！<br><br>就像包裝紙一樣：<br>🎁 先有一個簡單的形狀（盒子）<br>📸 再把圖片「貼」上去<br>✨ 立刻變得很真實！<br><br>貼圖的好處：<br>✅ 不需要更多三角形就能有豐富的細節<br>✅ 可以重複使用同一張貼圖<br>✅ 換一張圖就換了整個外觀<br><br>這就是為什麼遊戲貼圖美術師非常重要！`,code:`<span class="cm">// 把圖片載入為貼圖</span>
+<span class="tp">磚牆圖片</span> = <span class="fn">載入圖片</span>(<span class="str">"brick.png"</span>);
+
+<span class="cm">// 貼到形狀上</span>
+<span class="fn">畫牆壁</span>(
+  形狀: 四邊形,
+  貼圖: 磚牆圖片
+);
+
+<span class="cm">// 電腦會自動把圖片</span>
+<span class="cm">// 「拉伸」到形狀上！</span>`},
+  {id:"s7",num:"3-1",icon:"💡",title:"為什麼有陰影才有立體感？",desc:"光源、明暗、手電筒實驗",xp:80,type:"normal",q:"一個球看起來是立體的，是因為什麼？",opts:["球本身有厚度","光照到球的角度不同，造成明暗變化","球的顏色","球的大小"],ans:1,src:"opengl-lighting",story:`<span class="emoji-big">💡</span>拿一顆橘子放在桌上，用手電筒照它：<br><br>🔦 正對著光的那面 → 最亮<br>🌑 背對著光的那面 → 最暗<br>🌗 側面 → 灰色過渡<br><br>這就是為什麼東西看起來是 <span class="hl">立體</span> 的！<br><br>電腦也用一樣的原理：<br>計算每個三角形「朝向光源的角度」<br>越朝向光源 → 越亮<br>越背對光源 → 越暗<br><br>沒有光照的遊戲畫面看起來 <span class="hl">像紙板</span>，有了光才有深度！`,code:`<span class="cm">// 計算面朝向光源的角度</span>
+<span class="tp">function</span> <span class="fn">計算亮度</span>(面的方向, 光的方向) {
+  <span class="cm">// 兩個方向越接近，越亮</span>
+  <span class="tp">角度</span> = <span class="fn">計算夾角</span>(面的方向, 光的方向);
+  
+  <span class="cm">// 夾角0度 = 完全朝向光 = 最亮</span>
+  <span class="cm">// 夾角90度 = 側面 = 黑暗</span>
+  <span class="kw">return</span> <span class="fn">cos</span>(角度); <span class="cm">// 0 到 1</span>
+}`},
+  {id:"s8",num:"3-2",icon:"🎬",title:"讓東西動起來！",desc:"動畫幀、翻頁書、每秒60次的魔法",xp:80,type:"normal",q:"電腦動畫和翻頁動畫書有什麼共同點？",opts:["兩個都需要很多紙","兩個都是靠連續的靜態畫面快速切換產生動的感覺","兩個都用到顏色","兩個都是圓形"],ans:1,src:"opengl-animation",story:`<span class="emoji-big">🎬</span>你做過翻頁動畫書嗎？<br>在本子每一頁畫一個小人，<br>快速翻頁→小人就動起來了！<br><br>電腦動畫是一樣的原理：<br><br>📖 每一頁 = 每一個 <span class="hl">幀（Frame）</span><br>⚡ 每秒翻 <span class="hl">60 頁</span> = 遊戲跑 60 FPS<br>🏃 每頁的角色位置稍微移一點 = 看起來在跑！<br><br>所以遊戲工程師說的 <span class="hl">「60 FPS」</span><br>就是「每秒鐘重新畫 60 次畫面」！<br>畫得越快 → 動畫越流暢`,code:`<span class="cm">// 遊戲迴圈 - 每秒跑 60 次</span>
+<span class="tp">每一幀</span> {
+  <span class="cm">// 角色的 X 座標每幀增加一點</span>
+  角色.x += <span class="num">0.01</span>;
+  
+  <span class="cm">// 把整個畫面重新畫一次</span>
+  <span class="fn">清空畫面</span>();
+  <span class="fn">畫角色</span>(角色.x, 角色.y);
+  <span class="fn">顯示</span>();
+}<span class="cm">// ← 一秒跑 60 次</span>`},
+  {id:"s9",num:"3-3",icon:"🎆",title:"Boss 關：煙火特效！",desc:"綜合顏色、動畫、粒子，放出你的煙火",xp:120,type:"final",q:"煙火爆炸後粒子往下掉，是因為加入了什麼效果？",opts:["貼圖","重力（讓粒子速度往下加速）","光照","音效"],ans:1,src:"opengl-fireworks",story:`<span class="emoji-big">🎆</span>最終關卡！把所有學過的東西合起來！<br><br>煙火特效用到了這些技術：<br><br>🎨 <span class="hl">顏色</span> 每顆粒子有自己的 RGB 顏色<br>📍 <span class="hl">座標</span> 每顆粒子有 X、Y 位置<br>🎬 <span class="hl">動畫</span> 每幀更新粒子的位置<br>⬇️ <span class="hl">重力</span> 每幀讓速度往下增加一點點<br>✨ <span class="hl">拖尾</span> 記錄粒子過去的位置畫出軌跡<br><br>這就是遊戲裡<span class="hl">粒子系統</span>的基礎！<br>爆炸、魔法、煙霧——原理都一樣！<br><br>🎓 恭喜你完成像素王國的全部挑戰！`,code:`<span class="cm">// 煙火 = 很多個小粒子！</span>
+<span class="tp">粒子</span> = {
+  位置: {x: <span class="num">300</span>, y: <span class="num">200</span>},
+  速度: {x: <span class="fn">隨機方向</span>(), y: <span class="fn">隨機速度</span>()},
+  顏色: <span class="fn">隨機顏色</span>(),
+  壽命: <span class="num">1.0</span>
+};
+<span class="cm">// 每一幀更新</span>
+<span class="tp">每幀</span> {
+  粒子.速度.y += <span class="num">0.04</span>; <span class="cm">// 重力！</span>
+  粒子.位置.x += 粒子.速度.x;
+  粒子.位置.y += 粒子.速度.y;
+  粒子.壽命 -= <span class="num">0.02</span>;
+  <span class="fn">畫點點</span>(粒子);
+}`},
+];
+
+function makeSphere(r){const v=[];const ST=28,SL=36;function pv(la,lo){const x=Math.cos(la)*Math.cos(lo),y=Math.sin(la),z=Math.cos(la)*Math.sin(lo);v.push(x*r,y*r,z*r,x,y,z);}for(let si=0;si<ST;si++){const la0=(si/ST-.5)*Math.PI,la1=((si+1)/ST-.5)*Math.PI;for(let li=0;li<SL;li++){const lo0=li/SL*Math.PI*2,lo1=(li+1)/SL*Math.PI*2;pv(la0,lo0);pv(la1,lo0);pv(la1,lo1);pv(la0,lo0);pv(la1,lo1);pv(la0,lo1);}}return new Float32Array(v);}
+function syncCV(cv,h){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;cv.style.height=h+"px";}return w/h;}
+function updateXP(){
+  const tot=earned.reduce((s,id)=>{const l=LESSONS.find(x=>x.id===id);return s+(l?l.xp:0);},0);
+  const mx=LESSONS.reduce((s,l)=>s+l.xp,0);
+  document.getElementById("xp-fill").style.width=(tot/mx*100)+"%";
+  document.getElementById("xp-total").textContent=tot+" / "+mx;
+  document.getElementById("done-count").textContent=earned.length;
+}
+
+function renderLessons(){
+  const list=document.getElementById("lesson-list");
+  list.innerHTML="";
+  LESSONS.forEach((lesson,idx)=>{
+    const isDone=earned.includes(lesson.id);
+    const isActive=currentLesson===lesson.id;
+    const isLocked=idx>0&&!earned.includes(LESSONS[idx-1].id)&&!isDone&&!isActive;
+    const div=document.createElement("div");
+    div.className="lesson"+(isDone?" done":"")+(isActive?" active":"")+(isLocked?" locked":"")+(lesson.type==="boss"?" boss":"");
+    div.id="lesson-"+lesson.id;
+    const numCls=isDone?"done-num":isActive?"active-num":"locked-num";
+    const metaHTML=lesson.type==="boss"
+      ?'<span class="boss-badge">👑 BOSS</span><span class="xp-badge">+'+lesson.xp+' XP</span>'
+      :'<span class="xp-badge">+'+lesson.xp+' XP</span>';
+    const checkHTML=isDone?'<div class="check">✓</div>':(isLocked?'<div class="check" style="color:#4a7230">🔒</div>':"");
+    div.innerHTML='<div class="lesson-header"><div class="lesson-num '+numCls+'">'+(isDone?"✓":lesson.icon)+'</div><div class="lesson-info"><div class="lesson-title">'+lesson.num+" "+lesson.title+'</div><div class="lesson-desc">'+lesson.desc+'</div></div><div class="lesson-meta">'+metaHTML+checkHTML+'</div></div>'+(isActive?'<div class="lesson-body">'+buildBody(lesson,isDone)+'</div>':'<div class="lesson-body"></div>');
+    if(!isLocked)div.querySelector(".lesson-header").addEventListener("click",()=>toggleLesson(lesson.id));
+    if(idx<LESSONS.length-1){const conn=document.createElement("div");conn.className="connector";list.appendChild(div);list.appendChild(conn);}
+    else list.appendChild(div);
+  });
+}
+
+function toggleLesson(id){
+  currentLesson=(currentLesson===id)?null:id;
+  renderLessons();
+  if(currentLesson){
+    setTimeout(()=>{
+      const el=document.getElementById("lesson-"+id);
+      if(el)el.scrollIntoView({behavior:"smooth",block:"start"});
+      initDemo(id);
+    },50);
+  }
+}
+
+function buildBody(lesson,isDone){
+  const opts=lesson.opts.map((o,i)=>'<div class="opt" id="opt-'+lesson.id+"-"+i+'" onclick="checkAns(\''+lesson.id+"\',"+i+')"><div class="opt-key">'+["A","B","C","D"][i]+"</div>"+o+"</div>").join("");
+  return '<div class="tabs"><div class="tab on" onclick="switchTab(this,\'story-'+lesson.id+"\',\'"+lesson.id+'\')">📖 概念</div><div class="tab" onclick="switchTab(this,\'demo-'+lesson.id+"\',\'"+lesson.id+'\')">🎮 互動</div><div class="tab" onclick="switchTab(this,\'code-'+lesson.id+"\',\'"+lesson.id+'\')">💻 GLSL</div></div><div id="story-'+lesson.id+'" class="tab-panel on"><div class="story-box">'+lesson.story+'</div><div class="quiz-box" style="margin-top:16px"><div class="quiz-title">🎯 理解測驗</div><div class="quiz-q">'+lesson.q+'</div><div class="opts">'+opts+'</div><div id="ex-'+lesson.id+'" style="display:none;margin-top:12px;padding:12px;background:rgba(90,158,64,.08);border:1px solid rgba(90,158,64,.3);border-radius:10px;font-size:.85rem;color:#4a7230"></div></div>'+(isDone?'<button class="complete-btn" disabled style="background:var(--border);color:#4a7230">✅ 已完成！</button>':'<button class="complete-btn" id="btn-'+lesson.id+'" onclick="completeL(\''+lesson.id+'\')">完成測驗後解鎖 →</button>')+'</div><div id="demo-'+lesson.id+'" class="tab-panel"><div id="dc-'+lesson.id+'"><div style="text-align:center;padding:40px;color:#4a7230">點互動載入 Demo…</div></div></div><div id="code-'+lesson.id+'" class="tab-panel"><div class="code-block"><button class="copy-btn" onclick="copyC(this)">複製</button>'+lesson.code+'</div></div>';
+}
+
+function switchTab(tabEl,panelId,lessonId){
+  const body=document.getElementById("lesson-"+lessonId).querySelector(".lesson-body");
+  body.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
+  body.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("on"));
+  tabEl.classList.add("on");document.getElementById(panelId).classList.add("on");
+  if(panelId.startsWith("demo-"))initDemo(lessonId);
+}
+
+function checkAns(lessonId,idx){
+  const lesson=LESSONS.find(l=>l.id===lessonId);
+  // Only mark the clicked option — no answer reveal
+  document.querySelectorAll('[id^="opt-'+lessonId+'-"]').forEach((o,i)=>{
+    o.classList.remove("correct","wrong");
+    if(i===idx){
+      o.classList.add(idx===lesson.ans?"correct":"wrong");
+    }
+  });
+  const ex=document.getElementById("ex-"+lessonId);
+  if(ex){
+    ex.style.display="block";
+    ex.textContent=idx===lesson.ans?"✅ 正確！":"❌ 答錯了，再試試看！";
+  }
+  const btn=document.getElementById("btn-"+lessonId);
+  if(btn&&idx===lesson.ans){btn.disabled=false;btn.textContent="✅ 完成此關 → 解鎖下一關";}
+}
+
+function completeL(id){
+  if(earned.includes(id))return;
+  const lesson=LESSONS.find(l=>l.id===id);
+  earned.push(id);
+  localStorage.setItem(CASTLE_KEY,JSON.stringify(earned));
+  const btn=document.getElementById("btn-"+id);
+  if(btn){const r=btn.getBoundingClientRect();const d=document.createElement("div");d.className="xp-pop";d.textContent="+"+lesson.xp+" XP!";d.style.cssText="left:"+r.left+"px;top:"+(r.top+window.scrollY)+"px";document.body.appendChild(d);setTimeout(()=>d.remove(),1200);}
+  const t=document.getElementById("toast");t.textContent="🎉 +"+lesson.xp+" XP！「"+lesson.title+"」完成！";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);
+  // 記住目前捲動位置，重繪後還原
+  const scrollY=window.scrollY;
+  setTimeout(()=>{
+    currentLesson=null;
+    renderLessons();
+    updateXP();
+    window.scrollTo({top:scrollY,behavior:'instant'});
+  },600);
+  checkCompletion();
+}
+
+function copyC(btn){
+  const text=btn.parentElement.innerText.replace("複製","").trim();
+  navigator.clipboard.writeText(text).then(()=>{btn.textContent="✓ 已複製";setTimeout(()=>btn.textContent="複製",2000);});
+}
+
+
+
+
+function initDemo(id){
+  if(demoInited[id])return;demoInited[id]=true;
+  const cont=document.getElementById("dc-"+id);
+  const isMobile=("ontouchstart" in window)||/iPhone|iPad|Android/i.test(navigator.userAgent);
+  ({s1:demoPixelGrid,s2:demoRGBMixer,s3:demoTriangle,s_move:demoMove,s4:demoShaderSwitch,s5:demoGradient,s6:demoTexture,s7:demoLighting,s8:demoAnimation,s9:demoPlanet})[id]?.(cont,isMobile);
+}
+// Seed version demos - child-friendly interactive demos
+
+function demoPixelGrid(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🎨 像素塗色板 — 點格子讓它亮起來！</div><canvas id="pgrid" style="width:100%;display:block;image-rendering:pixelated;cursor:crosshair"></canvas></div><div style="display:flex;align-items:center;gap:8px;padding:8px;flex-wrap:wrap" id="color-btns"></div>';
+  const cv=cont.querySelector("canvas");
+  const W=32,H=30;
+  cv.width=W;cv.height=H;
+  cv.style.width="100%";cv.style.display="block";
+  function syncGrid(){
+    const dispW=cv.getBoundingClientRect().width||cv.offsetWidth||600;
+    cv.style.height=Math.round(dispW*H/W)+"px";
+  }
+  setTimeout(syncGrid,0);
+  window.addEventListener("resize",syncGrid);
+  new ResizeObserver(syncGrid).observe(cv);
+  const ctx=cv.getContext("2d");ctx.imageSmoothingEnabled=false;
+  const pixels=new Array(W*H).fill(null);
+  const COLORS=["#ff4d4d","#ff9900","#ffd700","#66cc66","#4da6ff","#cc66ff","#ff66b3","#ffffff","#888888","#000000"];
+  let curColor=COLORS[0],drawing=false;
+  const btns=cont.querySelector("#color-btns");
+  COLORS.forEach((c,i)=>{const b=document.createElement("button");b.style.cssText="width:28px;height:28px;border-radius:50%;background:"+c+";border:2px solid "+(curColor===c?"#333":"transparent")+";cursor:pointer;";b.onclick=()=>{curColor=c;btns.querySelectorAll("button").forEach((x,j)=>x.style.border="2px solid "+(j===i?"#333":"transparent"));};btns.appendChild(b);});
+  const clearBtn=document.createElement("button");
+  clearBtn.textContent="🗑️ 清空";
+  clearBtn.style.cssText="margin-left:auto;padding:5px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.07);color:rgba(255,255,255,.8);cursor:pointer;font-size:13px;font-weight:600;";
+  clearBtn.onmouseenter=()=>clearBtn.style.background="rgba(255,100,100,.22)";
+  clearBtn.onmouseleave=()=>clearBtn.style.background="rgba(255,255,255,.07)";
+  clearBtn.onclick=()=>{pixels.fill(null);ctx.fillStyle="#1a1a2e";ctx.fillRect(0,0,W,H);};
+  btns.appendChild(clearBtn);
+  function draw(e){
+    const r=cv.getBoundingClientRect();
+    const px=Math.floor((e.clientX-r.left)/r.width*W);
+    const py=Math.floor((e.clientY-r.top)/r.height*H);
+    if(px<0||px>=W||py<0||py>=H)return;
+    pixels[py*W+px]=curColor;
+    ctx.fillStyle=curColor;ctx.fillRect(px,py,1,1);
+  }
+  cv.addEventListener("mousedown",e=>{drawing=true;draw(e);});
+  cv.addEventListener("mousemove",e=>{if(drawing)draw(e);});
+  cv.addEventListener("mouseup",()=>drawing=false);
+  cv.addEventListener("touchstart",e=>{drawing=true;draw(e.touches[0]);e.preventDefault();},{passive:false});
+  cv.addEventListener("touchmove",e=>{draw(e.touches[0]);e.preventDefault();},{passive:false});
+  cv.addEventListener("touchend",()=>drawing=false);
+  // Draw grid
+  ctx.fillStyle="#1a1a2e";ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle="rgba(255,255,255,0.08)";ctx.lineWidth=0.05;
+  for(let x=0;x<W;x++){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y++){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+}
+
+function demoRGBMixer(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🌈 RGB 混色魔法 — 拖動滑桿調出你的顏色！</div><div id="color-preview" style="height:140px;border-radius:10px;background:#000;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(255,255,255,0.8);margin-bottom:10px;transition:background .1s">⬤</div></div><div style="padding:0 4px"><div class="slider-row"><label>🔴 紅色 Red</label><input type="range" min="0" max="255" value="0" id="sr" oninput="updRGB()"><span class="slider-val" id="rv">0</span></div><div class="slider-row"><label>🟢 綠色 Green</label><input type="range" min="0" max="255" value="0" id="sg" oninput="updRGB()"><span class="slider-val" id="gv">0</span></div><div class="slider-row"><label>🔵 藍色 Blue</label><input type="range" min="0" max="255" value="0" id="sb" oninput="updRGB()"><span class="slider-val" id="bv">0</span></div></div><div id="color-name" style="text-align:center;font-size:14px;color:var(--muted);padding:8px 0"></div>';
+  window.updRGB=()=>{
+    const r=parseInt(document.getElementById("sr").value);
+    const g=parseInt(document.getElementById("sg").value);
+    const b=parseInt(document.getElementById("sb").value);
+    document.getElementById("rv").textContent=r;
+    document.getElementById("gv").textContent=g;
+    document.getElementById("bv").textContent=b;
+    document.getElementById("color-preview").style.background=`rgb(${r},${g},${b})`;
+    const brightness=r*.299+g*.587+b*.114;
+    document.getElementById("color-preview").style.color=brightness>128?"rgba(0,0,0,.5)":"rgba(255,255,255,.6)";
+    const names=[];
+    if(r>200&&g<50&&b<50)names.push("紅色 🔴");
+    else if(r<50&&g>200&&b<50)names.push("綠色 🟢");
+    else if(r<50&&g<50&&b>200)names.push("藍色 🔵");
+    else if(r>200&&g>200&&b<50)names.push("黃色 💛");
+    else if(r>200&&g<50&&b>200)names.push("紫色/洋紅 💜");
+    else if(r<50&&g>200&&b>200)names.push("青色 🩵");
+    else if(r>200&&g>200&&b>200)names.push("白色 ⬜");
+    else if(r<30&&g<30&&b<30)names.push("黑色 ⬛");
+    else if(r>150&&g>80&&b<80)names.push("橙色 🟠");
+    else names.push(`自訂顏色 RGB(${r},${g},${b})`);
+    document.getElementById("color-name").textContent=names[0];
+  };
+}
+
+function demoTriangle(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">📐 拖動三個頂點，改變三角形的形狀！</div><canvas style="width:100%;display:block;height:280px;cursor:grab"></canvas></div>';
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==280){cv.width=w;cv.height=280;cv.style.height="280px";}return w;}
+  sync();
+  const ctx=cv.getContext("2d");
+  const w=cv.width,h=cv.height;
+  const pts=[{x:w/2,y:50},{x:w/2-130,y:h-60},{x:w/2+130,y:h-60}];
+  const colors=["#ff6b6b","#ffd93d","#6bcb77"];
+  let drag=-1;
+  function nearest(x,y){
+    const HIT=isMobile?40:24;
+    return pts.reduce((a,p,i)=>{const d=Math.hypot(p.x-x,p.y-y);return d<a.d?{d,i}:a;},{d:HIT,i:-1}).i;
+  }
+  function render(){
+    const w2=cv.width,h2=cv.height;
+    ctx.fillStyle="#0d0d1a";ctx.fillRect(0,0,w2,h2);
+    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);ctx.lineTo(pts[1].x,pts[1].y);ctx.lineTo(pts[2].x,pts[2].y);ctx.closePath();
+    const gr=ctx.createLinearGradient(pts[0].x,pts[0].y,pts[2].x,pts[2].y);
+    gr.addColorStop(0,"#ff6b6b");gr.addColorStop(0.5,"#ffd93d");gr.addColorStop(1,"#6bcb77");
+    ctx.fillStyle=gr;ctx.fill();
+    ctx.strokeStyle="rgba(255,255,255,.3)";ctx.lineWidth=1.5;ctx.stroke();
+    pts.forEach((p,i)=>{
+      ctx.beginPath();ctx.arc(p.x,p.y,10,0,Math.PI*2);
+      ctx.fillStyle=drag===i?"#fff":colors[i];ctx.fill();
+      ctx.strokeStyle="rgba(255,255,255,.6)";ctx.lineWidth=2;ctx.stroke();
+      const labels=["頂點 A","頂點 B","頂點 C"];
+      ctx.fillStyle="rgba(255,255,255,.9)";ctx.font="bold 11px sans-serif";ctx.textAlign="center";
+      ctx.fillText(labels[i],p.x,p.y+(i===0?-16:18));
+    });
+  }
+  function pos(e){
+    const r=cv.getBoundingClientRect();
+    const src=e.touches?e.touches[0]:e;
+    const scaleX=cv.width/r.width;
+    const scaleY=cv.height/r.height;
+    return{x:(src.clientX-r.left)*scaleX,y:(src.clientY-r.top)*scaleY};
+  }
+  cv.addEventListener("mousedown",e=>{const p=pos(e);drag=nearest(p.x,p.y);cv.style.cursor="grabbing";});
+  cv.addEventListener("mousemove",e=>{if(drag<0)return;const p=pos(e);pts[drag].x=p.x;pts[drag].y=p.y;render();});
+  cv.addEventListener("mouseup",()=>{drag=-1;cv.style.cursor="grab";});
+  cv.addEventListener("touchstart",e=>{const p=pos(e);drag=nearest(p.x,p.y);e.preventDefault();},{passive:false});
+  cv.addEventListener("touchmove",e=>{if(drag<0)return;const p=pos(e);pts[drag].x=p.x;pts[drag].y=p.y;render();e.preventDefault();},{passive:false});
+  cv.addEventListener("touchend",()=>drag=-1);
+  render();
+}
+
+function demoShaderSwitch(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">✨ 點擊按鈕，換不同的著色器咒語！</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setShader(0)">🔴 純紅色</button><button class="ctrl-btn" onclick="setShader(1)">🌈 彩虹</button><button class="ctrl-btn" onclick="setShader(2)">🌀 螺旋</button><button class="ctrl-btn" onclick="setShader(3)">🧱 磚塊</button></div>';
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height="260px";}return w/260;}
+  sync();if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const progs=[
+    mkP("attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}","precision mediump float;void main(){gl_FragColor=vec4(1.,0.,0.,1.);}"),
+    mkP("attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}","precision mediump float;uniform vec2 res;void main(){vec2 uv=gl_FragCoord.xy/res;gl_FragColor=vec4(uv.x,uv.y,1.-uv.x,1.);}"),
+    mkP("attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}","precision mediump float;uniform vec2 res;uniform float t;void main(){vec2 uv=(gl_FragCoord.xy/res)*2.-1.;uv.x*=res.x/res.y;float r=length(uv);float a=atan(uv.y,uv.x)+t;float v=sin(a*6.+r*10.-t*3.)*.5+.5;gl_FragColor=vec4(v,v*.5,1.-v,1.);}"),
+    mkP("attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}","precision mediump float;uniform vec2 res;void main(){vec2 uv=gl_FragCoord.xy/res;vec2 brick=uv*vec2(8.,5.);brick.x+=step(1.,mod(brick.y,2.))*.5;vec2 bf=fract(brick);float mortar=step(bf.x,.06)+step(1.-bf.x,.06)+step(bf.y,.08)+step(1.-bf.y,.08);vec3 brickCol=vec3(.72,.28,.14)+fract(floor(brick.x)*17.+floor(brick.y)*31.)*.08;gl_FragColor=vec4(mortar>.0?vec3(.22,.18,.14):brickCol,1.);}"),
+  ];
+  const buf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,buf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),g.STATIC_DRAW);
+  let shaderMode=0,t=0;
+  window.setShader=m=>{shaderMode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){
+    t+=0.016;sync();g.viewport(0,0,cv.width,cv.height);
+    const p=progs[shaderMode];g.useProgram(p);
+    const ap=g.getAttribLocation(p,"p");g.bindBuffer(g.ARRAY_BUFFER,buf);g.enableVertexAttribArray(ap);g.vertexAttribPointer(ap,2,g.FLOAT,false,0,0);
+    const ur=g.getUniformLocation(p,"res"),ut=g.getUniformLocation(p,"t");
+    if(ur)g.uniform2f(ur,cv.width,cv.height);if(ut)g.uniform1f(ut,t);
+    g.drawArrays(g.TRIANGLE_STRIP,0,4);requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function demoGradient(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🌅 調整日落天空的漸層</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="slider-row"><label>🔄 旋轉角度</label><input type="range" min="0" max="360" value="180" id="gradAngle" oninput="updGrad()"><span class="slider-val" id="gav">180°</span></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setGradPreset(0)">🌅 日落</button><button class="ctrl-btn" onclick="setGradPreset(1)">🌌 夜空</button><button class="ctrl-btn" onclick="setGradPreset(2)">🌊 海洋</button><button class="ctrl-btn" onclick="setGradPreset(3)">🌿 森林</button></div>';
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height="260px";}}
+  sync();if(isMobile)window.addEventListener("resize",sync);
+  const ctx=cv.getContext("2d");
+  const PRESETS=[
+    ["#ff6b35","#f7c59f","#2c3e7a","#0a0a2e"],
+    ["#0a0a2e","#1a1a4e","#4a2080","#000000"],
+    ["#006994","#00b4d8","#90e0ef","#caf0f8"],
+    ["#1a4731","#2d6a4f","#74c69d","#d8f3dc"],
+  ];
+  let angle=180,preset=0;
+  new ResizeObserver(()=>{sync();render();}).observe(cv);
+  window.updGrad=()=>{angle=parseInt(document.getElementById("gradAngle").value);document.getElementById("gav").textContent=angle+"°";render();};
+  window.setGradPreset=p=>{preset=p;render();cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function render(){
+    sync();const w=cv.width,h=cv.height;
+    const rad=angle*Math.PI/180;
+    const cx=w/2,cy=h/2;const len=Math.sqrt(w*w+h*h)/2;
+    const x0=cx-Math.cos(rad)*len,y0=cy-Math.sin(rad)*len;
+    const x1=cx+Math.cos(rad)*len,y1=cy+Math.sin(rad)*len;
+    const gr=ctx.createLinearGradient(x0,y0,x1,y1);
+    const cols=PRESETS[preset];
+    cols.forEach((c,i)=>gr.addColorStop(i/(cols.length-1),c));
+    ctx.fillStyle=gr;ctx.fillRect(0,0,w,h);
+    // Sun
+    if(preset===0){
+      const sx=w*.65,sy=h*.25;
+      ctx.beginPath();ctx.arc(sx,sy,25,0,Math.PI*2);
+      ctx.fillStyle="rgba(255,220,100,.9)";ctx.fill();
+      for(let i=0;i<8;i++){const a=i/8*Math.PI*2;ctx.beginPath();ctx.moveTo(sx+Math.cos(a)*28,sy+Math.sin(a)*28);ctx.lineTo(sx+Math.cos(a)*38,sy+Math.sin(a)*38);ctx.strokeStyle="rgba(255,220,100,.5)";ctx.lineWidth=2;ctx.stroke();}
+    }
+    // 🌙 Night sky: crescent moon + stars
+    if(preset===1){
+      const mx=w*.72,my=h*.22,mr=22;
+      ctx.beginPath();ctx.arc(mx,my,mr,0,Math.PI*2);
+      ctx.fillStyle="rgba(255,248,200,.95)";ctx.fill();
+      // Repaint sky gradient inside the bite — use same angle as background
+      ctx.save();
+      ctx.beginPath();ctx.arc(mx+11,my-4,mr*.82,0,Math.PI*2);ctx.clip();
+      const gr2=ctx.createLinearGradient(x0,y0,x1,y1);
+      PRESETS[1].forEach((col,i)=>gr2.addColorStop(i/(PRESETS[1].length-1),col));
+      ctx.fillStyle=gr2;ctx.fillRect(0,0,w,h);
+      ctx.restore();
+      [[w*.15,h*.15],[w*.35,h*.08],[w*.55,h*.18],[w*.2,h*.32],[w*.8,h*.12],[w*.65,h*.28],[w*.42,h*.22]].forEach(([sx,sy])=>{
+        ctx.beginPath();ctx.arc(sx,sy,1.5,0,Math.PI*2);ctx.fillStyle="rgba(255,255,220,.85)";ctx.fill();
+      });
+    }
+    // ⛵ Ocean: boat
+    if(preset===2){
+      const bx=w*.45,by=h*.62;
+      ctx.beginPath();ctx.moveTo(bx-38,by);ctx.lineTo(bx+38,by);ctx.lineTo(bx+28,by+18);ctx.lineTo(bx-28,by+18);ctx.closePath();
+      ctx.fillStyle="rgba(80,50,20,.95)";ctx.fill();
+      ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx,by-55);ctx.strokeStyle="rgba(160,120,60,.9)";ctx.lineWidth=2;ctx.stroke();
+      ctx.beginPath();ctx.moveTo(bx,by-50);ctx.lineTo(bx+32,by-18);ctx.lineTo(bx,by-8);ctx.closePath();
+      ctx.fillStyle="rgba(240,235,215,.85)";ctx.fill();
+    }
+    // 🌲 Forest: trees
+    if(preset===3){
+      [[w*.1,h*.72,38],[w*.25,h*.78,28],[w*.4,h*.68,44],[w*.56,h*.75,32],[w*.70,h*.70,46],[w*.82,h*.76,30],[w*.92,h*.72,36]].forEach(([tx,ty,ts])=>{
+        ctx.beginPath();ctx.rect(tx-3,ty,6,ts*.3);ctx.fillStyle="rgba(55,30,10,.85)";ctx.fill();
+        ctx.beginPath();ctx.moveTo(tx,ty-ts*.9);ctx.lineTo(tx-ts*.42,ty);ctx.lineTo(tx+ts*.42,ty);ctx.closePath();
+        ctx.fillStyle="rgba(30,80,30,.9)";ctx.fill();
+        ctx.beginPath();ctx.moveTo(tx,ty-ts*1.2);ctx.lineTo(tx-ts*.32,ty-ts*.35);ctx.lineTo(tx+ts*.32,ty-ts*.35);ctx.closePath();
+        ctx.fillStyle="rgba(40,100,35,.9)";ctx.fill();
+      });
+    }
+  }
+}
+
+function demoTexture(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🎁 選一種圖案貼到球上！</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setTex(1)">🧱 磚牆</button><button class="ctrl-btn" onclick="setTex(2)">🌊 水波</button><button class="ctrl-btn" onclick="setTex(3)">⭐ 星空</button></div>';
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height="260px";}return w/260;}
+  sync();if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const sph=(()=>{const v=[];const ST=32,SL=40;function pv(la,lo){const x=Math.cos(la)*Math.cos(lo),y=Math.sin(la),z=Math.cos(la)*Math.sin(lo);v.push(x,y,z,x,y,z,(lo/(Math.PI*2)+.5),(la/Math.PI+.5));}for(let si=0;si<ST;si++){const la0=(si/ST-.5)*Math.PI,la1=((si+1)/ST-.5)*Math.PI;for(let li=0;li<SL;li++){const lo0=li/SL*Math.PI*2,lo1=(li+1)/SL*Math.PI*2;pv(la0,lo0);pv(la1,lo0);pv(la1,lo1);pv(la0,lo0);pv(la1,lo1);pv(la0,lo1);}}return new Float32Array(v);})();
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+  const prog=mkP(
+    "attribute vec3 p;attribute vec3 n;attribute vec2 uv;varying vec3 vN;varying vec3 vW;varying vec2 vUV;uniform float asp;uniform float rot;void main(){float cy=cos(rot),sy=sin(rot);vec3 r=vec3(p.x*cy+p.z*sy,p.y,-p.x*sy+p.z*cy);vN=vec3(n.x*cy+n.z*sy,n.y,-n.x*sy+n.z*cy);vW=r;vUV=uv;gl_Position=vec4(r.x*.88/asp,r.y*.88,r.z*.01,1.);}",
+    "precision mediump float;varying vec3 vN,vW,vUV2;varying vec2 vUV;uniform int texMode;uniform float t;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}float n(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+1.),u.x),u.y);}void main(){vec3 N=normalize(vN);vec3 L=normalize(vec3(.6,.7,.8));float d=max(dot(N,L),0.);vec3 col;if(texMode==0){float PI=3.14159;float lon=vUV.x*PI*2.;float lat=(vUV.y-.5)*PI;float x=cos(lat)*cos(lon),y=sin(lat),z=cos(lat)*sin(lon);float p1=dot(vec3(x,y,z),normalize(vec3(0.,1.,.5)));float p2=dot(vec3(x,y,z),normalize(vec3(.95,.31,0.)));float p3=dot(vec3(x,y,z),normalize(vec3(-.59,.81,0.)));float p4=dot(vec3(x,y,z),normalize(vec3(-.59,-.81,0.)));float p5=dot(vec3(x,y,z),normalize(vec3(.95,-.31,0.)));float p6=dot(vec3(x,y,z),normalize(vec3(0.,-1.,.5)));float seam=smoothstep(.04,.0,abs(p1))+smoothstep(.04,.0,abs(p2))+smoothstep(.04,.0,abs(p3))+smoothstep(.04,.0,abs(p4))+smoothstep(.04,.0,abs(p5))+smoothstep(.04,.0,abs(p6));seam=clamp(seam,0.,1.);float pent=step(.85,max(max(abs(p1),abs(p2)),max(abs(p3),max(abs(p4),max(abs(p5),abs(p6))))));col=mix(mix(vec3(.95,.95,.92),vec3(.08,.08,.08),pent),vec3(.05,.05,.05),seam);}else if(texMode==1){float brd=(fract(vUV.x*8.+floor(vUV.y*12.)*.5)<.07||fract(vUV.y*12.)<.07)?1.:0.;vec3 brickC=vec3(.72,.28,.14)+n(floor(vUV*vec2(8.,12.)+.5))*.1;col=brd>.5?vec3(.20,.16,.12):brickC;}else if(texMode==2){float la2=vUV.y*3.14159-.5*3.14159;float lo2=vUV.x*6.28318;float wx=sin(lo2*3.+t*1.8)*.5+cos(la2*4.+t*1.2)*.3;float wy=sin(lo2*5.+la2*3.-t*2.2)*.4+cos(lo2*2.-t*1.)*.3;float wave=(wx+wy)*.5+.5;col=mix(vec3(.03,.12,.35),vec3(.15,.55,.85),wave);float foam=smoothstep(.75,.95,wave)*.3;col+=vec3(.8,.9,1.)*foam;}else{col=vec3(.01,.01,.06);vec2 cell=floor(vUV*18.);vec2 fc=fract(vUV*18.)-.5;float sv=hash(cell);if(sv>.82){float starR=length(fc);float dotMask=smoothstep(.18,.0,starR);float brightness=.6+sv*.4;col+=vec3(1.,.97,.85)*dotMask*brightness;}}col*=(.25+d*.75);gl_FragColor=vec4(clamp(col,0.,1.),1.);}"
+  );
+  const aP=g.getAttribLocation(prog,"p"),aN=g.getAttribLocation(prog,"n"),aUV=g.getAttribLocation(prog,"uv");
+  const uAsp=g.getUniformLocation(prog,"asp"),uRot=g.getUniformLocation(prog,"rot"),uTex=g.getUniformLocation(prog,"texMode"),uT=g.getUniformLocation(prog,"t");
+  g.enable(g.DEPTH_TEST);
+  let texMode=1,t=0;
+  window.setTex=m=>{texMode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){
+    t+=0.012;const asp=sync();
+    g.viewport(0,0,cv.width,cv.height);g.clearColor(.05,.04,.12,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    g.useProgram(prog);g.uniform1f(uAsp,asp);g.uniform1f(uRot,t*.4);g.uniform1i(uTex,texMode);g.uniform1f(uT,t);
+    g.bindBuffer(g.ARRAY_BUFFER,vB);
+    const stride=32;
+    g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,stride,0);
+    g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,stride,12);
+    g.enableVertexAttribArray(aUV);g.vertexAttribPointer(aUV,2,g.FLOAT,false,stride,24);
+    g.drawArrays(g.TRIANGLES,0,sph.length/(stride/4));
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function demoLighting(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">💡 移動光源，看看球哪裡亮哪裡暗！</div><canvas style="width:100%;display:block;height:260px"></canvas></div><div class="slider-row"><label>↔️ 光源左右</label><input type="range" min="-100" max="100" value="50" id="lx" oninput="updLight()"><span class="slider-val" id="lxv">右</span></div><div class="slider-row"><label>↕️ 光源上下</label><input type="range" min="-100" max="100" value="50" id="ly" oninput="updLight()"><span class="slider-val" id="lyv">上</span></div>';
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height="260px";}return w/260;}
+  sync();if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const sph=(()=>{const v=[];const ST=32,SL=40;function pv(la,lo){const x=Math.cos(la)*Math.cos(lo),y=Math.sin(la),z=Math.cos(la)*Math.sin(lo);v.push(x,y,z,x,y,z);}for(let si=0;si<ST;si++){const la0=(si/ST-.5)*Math.PI,la1=((si+1)/ST-.5)*Math.PI;for(let li=0;li<SL;li++){const lo0=li/SL*Math.PI*2,lo1=(li+1)/SL*Math.PI*2;pv(la0,lo0);pv(la1,lo0);pv(la1,lo1);pv(la0,lo0);pv(la1,lo1);pv(la0,lo1);}}return new Float32Array(v);})();
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+  const prog=mkP(
+    "attribute vec3 p;attribute vec3 n;varying vec3 vN;uniform float asp;void main(){vN=n;gl_Position=vec4(p.x*.88/asp,p.y*.88,p.z*.01,1.);}",
+    "precision mediump float;varying vec3 vN;uniform vec3 lDir;void main(){vec3 N=normalize(vN);float d=max(dot(N,lDir),0.);float fill=max(dot(N,normalize(vec3(-.5,.2,.7))),0.)*.45;float amb=.40;vec3 col=vec3(.72,.2,.18)*(amb+d*(1.-amb)+fill);vec3 spec=vec3(1.,.95,.8)*pow(max(dot(N,normalize(lDir+vec3(0,0,1))),0.),48.)*d*.9;gl_FragColor=vec4(clamp(col+spec,0.,1.),1.);}"
+  );
+  const aP=g.getAttribLocation(prog,"p"),aN=g.getAttribLocation(prog,"n"),uAsp=g.getUniformLocation(prog,"asp"),uL=g.getUniformLocation(prog,"lDir");
+  g.enable(g.DEPTH_TEST);
+  let lx=0.5,ly=0.5;
+  window.updLight=()=>{
+    lx=document.getElementById("lx").value/100;
+    ly=document.getElementById("ly").value/100;
+    document.getElementById("lxv").textContent=lx>0?"右":"左";
+    document.getElementById("lyv").textContent=ly>0?"上":"下";
+  };
+  function frame(){
+    const asp=sync();
+    g.viewport(0,0,cv.width,cv.height);g.clearColor(.05,.04,.12,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    g.useProgram(prog);g.uniform1f(uAsp,asp);
+    const L=[lx,ly,.8];const ll=Math.sqrt(L[0]*L[0]+L[1]*L[1]+L[2]*L[2]);
+    g.uniform3f(uL,L[0]/ll,L[1]/ll,L[2]/ll);
+    g.bindBuffer(g.ARRAY_BUFFER,vB);
+    g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,24,0);
+    g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,24,12);
+    g.drawArrays(g.TRIANGLES,0,sph.length/6);
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function demoAnimation(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🎬 翻頁動畫書 — 每秒幾頁決定流暢度！</div><canvas style="width:100%;display:block;height:240px"></canvas><div style="display:flex;align-items:center;justify-content:center;gap:18px;padding:8px 12px;background:rgba(0,0,0,.18);border-top:1px solid rgba(255,255,255,.06)"><div style="text-align:center"><div id="fps-num" style="font-size:2rem;font-weight:900;font-family:Space Mono,monospace;color:#6bcb77;line-height:1">0</div><div style="font-size:.7rem;color:rgba(255,255,255,.4);margin-top:2px">FPS（每秒幾頁）</div></div><div style="width:1px;height:36px;background:rgba(255,255,255,.1)"></div><div style="text-align:center"><div id="frame-num" style="font-size:2rem;font-weight:900;font-family:Space Mono,monospace;color:#ffd93d;line-height:1">0</div><div style="font-size:.7rem;color:rgba(255,255,255,.4);margin-top:2px">總幀數</div></div><div style="width:1px;height:36px;background:rgba(255,255,255,.1)"></div><div style="text-align:center"><div id="frame-time" style="font-size:2rem;font-weight:900;font-family:Space Mono,monospace;color:#ff9f43;line-height:1">—</div><div style="font-size:.7rem;color:rgba(255,255,255,.4);margin-top:2px">每幀時間(ms)</div></div></div></div><div class="slider-row"><label>⚡ 速度</label><input type="range" min="0" max="100" value="50" id="animSpd" oninput="updAnim()"><span class="slider-val" id="animv">正常 ~30 FPS</span></div><div class="ctrl-row"><button class="ctrl-btn active" onclick="setAnimObj(1)">🧱 磚塊</button></div>';
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height="260px";}return w/260;}
+  sync();if(isMobile)window.addEventListener("resize",sync);
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+  const sph=(()=>{const v=[];const ST=24,SL=32;function pv(la,lo){const x=Math.cos(la)*Math.cos(lo),y=Math.sin(la),z=Math.cos(la)*Math.sin(lo);v.push(x,y,z,x,y,z,(lo/(Math.PI*2)+.5),(la/Math.PI+.5));}for(let si=0;si<ST;si++){const la0=(si/ST-.5)*Math.PI,la1=((si+1)/ST-.5)*Math.PI;for(let li=0;li<SL;li++){const lo0=li/SL*Math.PI*2,lo1=(li+1)/SL*Math.PI*2;pv(la0,lo0);pv(la1,lo0);pv(la1,lo1);pv(la0,lo0);pv(la1,lo1);pv(la0,lo1);}}return new Float32Array(v);})();
+  const vB=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,vB);g.bufferData(g.ARRAY_BUFFER,sph,g.STATIC_DRAW);
+  const prog=mkP(
+    "attribute vec3 p;attribute vec3 n;attribute vec2 uv;varying vec3 vN;varying vec2 vUV;uniform float asp;uniform float rotX;uniform float rotY;void main(){float cx=cos(rotX),sx=sin(rotX),cy2=cos(rotY),sy2=sin(rotY);vec3 r=vec3(p.x*cy2+p.z*sy2,p.y*cx-(-p.x*sy2+p.z*cy2)*sx,p.y*sx+(-p.x*sy2+p.z*cy2)*cx);vN=r;vUV=uv;gl_Position=vec4(r.x*.88/asp,r.y*.88,r.z*.01,1.);}",
+    "precision mediump float;varying vec3 vN;varying vec2 vUV;uniform int obj;uniform float t;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}float nn(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+1.),u.x),u.y);}float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*nn(p);p*=2.1;a*=.5;}return v;}void main(){vec3 N=normalize(vN);vec3 L=normalize(vec3(.2,.3,1.0));float d=max(dot(N,L),0.);float fill=max(dot(N,normalize(vec3(-.5,.0,.8))),0.)*.5;float amb=.55;vec3 col;if(obj==0){float cn=fbm(vUV*3.+vec2(t*.08,0.))*.6+nn(vUV*8.+vec2(t*.1,0.))*.4;float land=smoothstep(.38,.55,cn);float icy=smoothstep(.6,.85,abs(vUV.y-.5)*2.);col=mix(mix(vec3(.08,.25,.65),vec3(.18,.5,.12),land),vec3(.85,.9,.95),icy);}else if(obj==1){float bx=floor(vUV.x*10.+floor(vUV.y*14.)*.5);float by=floor(vUV.y*14.);float brd=(fract(vUV.x*10.+floor(vUV.y*14.)*.5)<.06||fract(vUV.y*14.)<.06)?1.:0.;vec3 brickC=vec3(.68,.28,.14)+nn(floor(vUV*vec2(10.,14.)+.5))*.12;col=brd>.5?vec3(.20,.16,.12):brickC;}else{float bx2=floor(vUV.x*10.+floor(vUV.y*14.)*.5);float brd2=(fract(vUV.x*10.+floor(vUV.y*14.)*.5)<.06||fract(vUV.y*14.)<.06)?1.:0.;vec3 brickC2=vec3(.68,.28,.14)+nn(floor(vUV*vec2(10.,14.)+.5))*.12;col=brd2>.5?vec3(.20,.16,.12):brickC2;}vec3 H=normalize(L+vec3(0,0,1));float spec=pow(max(dot(N,H),0.),32.)*.4;col=col*(amb+d*(1.-amb)+fill)+spec;gl_FragColor=vec4(clamp(col,0.,1.),1.);}"
+  );
+  const stride=32;
+  const aP=g.getAttribLocation(prog,"p"),aN=g.getAttribLocation(prog,"n"),aUV=g.getAttribLocation(prog,"uv");
+  const uAsp=g.getUniformLocation(prog,"asp"),uRX=g.getUniformLocation(prog,"rotX"),uRY=g.getUniformLocation(prog,"rotY"),uObj=g.getUniformLocation(prog,"obj"),uT=g.getUniformLocation(prog,"t");
+  g.enable(g.DEPTH_TEST);
+  let spd=0.5,animObj=1,t=0,totalFrames=0;
+  let lastFpsTime=performance.now(),fpsCount=0,displayFps=0;
+  let lastFrameTime=performance.now();
+  function targetFps(){return Math.round(spd*59)+1;}
+  window.updAnim=()=>{
+    spd=document.getElementById("animSpd").value/100;
+    const fps=targetFps();
+    const labels=["停止(1 FPS)","超慢(~15 FPS)","正常(~30 FPS)","快速(~45 FPS)","超快！(60 FPS)"];
+    document.getElementById("animv").textContent="~"+fps+" FPS — "+labels[Math.round(spd*4)];
+  };
+  window.setAnimObj=m=>{animObj=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  let frameSkipAcc=0;
+  function frame(now){
+    const delta=now-lastFrameTime;lastFrameTime=now;
+    // Throttle rendering to match target FPS
+    const targetInterval=1000/targetFps();
+    frameSkipAcc+=delta;
+    if(frameSkipAcc>=targetInterval){
+      frameSkipAcc-=targetInterval;
+      const asp=sync();
+      t+=targetInterval/1000*spd*3;
+      totalFrames++;
+      // FPS measurement
+      fpsCount++;
+      if(now-lastFpsTime>=500){
+        displayFps=Math.round(fpsCount/((now-lastFpsTime)/1000));
+        fpsCount=0;lastFpsTime=now;
+        const fpsEl=document.getElementById("fps-num");
+        const ftEl=document.getElementById("frame-time");
+        if(fpsEl)fpsEl.textContent=displayFps;
+        if(ftEl)ftEl.textContent=(targetInterval).toFixed(1);
+        // Color code FPS
+        if(fpsEl){fpsEl.style.color=displayFps>=55?"#6bcb77":displayFps>=30?"#ffd93d":"#ff6b6b";}
+      }
+      const fnEl=document.getElementById("frame-num");
+      if(fnEl)fnEl.textContent=totalFrames;
+      g.viewport(0,0,cv.width,cv.height);g.clearColor(.05,.04,.12,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+      g.useProgram(prog);g.uniform1f(uAsp,asp);g.uniform1f(uRX,t*.4);g.uniform1f(uRY,t);g.uniform1i(uObj,animObj);g.uniform1f(uT,t);
+      g.bindBuffer(g.ARRAY_BUFFER,vB);
+      g.enableVertexAttribArray(aP);g.vertexAttribPointer(aP,3,g.FLOAT,false,stride,0);
+      g.enableVertexAttribArray(aN);g.vertexAttribPointer(aN,3,g.FLOAT,false,stride,12);
+      g.enableVertexAttribArray(aUV);g.vertexAttribPointer(aUV,2,g.FLOAT,false,stride,24);
+      g.drawArrays(g.TRIANGLES,0,sph.length/(stride/4));
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+function demoPlanet(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🎆 點擊畫面放煙火！</div><canvas style="width:100%;display:block;height:300px;cursor:crosshair"></canvas></div><div style="text-align:center;padding:6px;font-size:.8rem;color:var(--muted)">點擊任何地方發射煙火 ✨</div>';
+  const cv=cont.querySelector("canvas");
+  function sync(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==300){cv.width=w;cv.height=300;cv.style.height="300px";}return w;}
+  sync();if(isMobile)window.addEventListener("resize",sync);
+  const ctx=cv.getContext("2d");
+
+  const rockets=[],explosions=[];
+  const COLORS=[
+    ["#ff4444","#ff8800","#ffff44"],
+    ["#44aaff","#aa44ff","#ffffff"],
+    ["#44ff88","#ffff44","#ffffff"],
+    ["#ff44aa","#ff8844","#ffaaff"],
+    ["#ffffff","#aaddff","#ffeeaa"],
+    ["#ff6600","#ffcc00","#ff0044"],
+  ];
+
+  function spawnRocket(tx,ty){
+    const w=cv.width,h=cv.height;
+    const cols=COLORS[Math.floor(Math.random()*COLORS.length)];
+    rockets.push({
+      x:w*.3+Math.random()*w*.4, y:h,
+      tx:tx, ty:ty+(Math.random()-.5)*40,
+      vx:0, vy:0,
+      cols, trail:[], life:1
+    });
+  }
+
+  function explode(x,y,cols){
+    const count=80+Math.floor(Math.random()*60);
+    const burst=[];
+    // Main burst
+    for(let i=0;i<count;i++){
+      const a=Math.random()*Math.PI*2;
+      const spd=1.5+Math.random()*3.5;
+      burst.push({
+        x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,
+        col:cols[Math.floor(Math.random()*cols.length)],
+        life:1,maxLife:0.6+Math.random()*0.5,
+        size:1.5+Math.random()*2,trail:[]
+      });
+    }
+    // Sparkle ring
+    for(let i=0;i<20;i++){
+      const a=i/20*Math.PI*2;
+      const spd=4+Math.random()*.5;
+      burst.push({
+        x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,
+        col:"#ffffff",
+        life:1,maxLife:.4+Math.random()*.2,
+        size:2.5,trail:[]
+      });
+    }
+    explosions.push({particles:burst,x,y});
+  }
+
+  // Auto-launch a few rockets at start
+  setTimeout(()=>{const w=cv.width,h=cv.height;spawnRocket(w*.35,h*.25);},200);
+  setTimeout(()=>{const w=cv.width,h=cv.height;spawnRocket(w*.65,h*.2);},800);
+  setTimeout(()=>{const w=cv.width,h=cv.height;spawnRocket(w*.5,h*.15);},1400);
+
+  cv.addEventListener("click",e=>{
+    const r=cv.getBoundingClientRect();
+    spawnRocket(e.clientX-r.left,e.clientY-r.top);
+  });
+  cv.addEventListener("touchstart",e=>{
+    const r=cv.getBoundingClientRect();
+    spawnRocket(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top);
+    e.preventDefault();
+  },{passive:false});
+
+  let t=0;
+  function frame(){
+    t+=0.016;const w=cv.width,h=cv.height;
+    // Fade background
+    ctx.fillStyle="rgba(4,2,12,0.22)";ctx.fillRect(0,0,w,h);
+
+    // Update rockets
+    for(let i=rockets.length-1;i>=0;i--){
+      const r=rockets[i];
+      const dx=r.tx-r.x,dy=r.ty-r.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<12){
+        explode(r.x,r.y,r.cols);
+        rockets.splice(i,1);continue;
+      }
+      const spd=Math.min(12,dist*.15+4);
+      r.vx+=(dx/dist)*spd*.18;r.vy+=(dy/dist)*spd*.18;
+      r.vx*=.82;r.vy*=.82;
+      r.x+=r.vx;r.y+=r.vy;
+      r.trail.push({x:r.x,y:r.y});
+      if(r.trail.length>12)r.trail.shift();
+      // Draw trail
+      for(let j=1;j<r.trail.length;j++){
+        const p=r.trail[j-1],q=r.trail[j];
+        const a=j/r.trail.length;
+        ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+        ctx.strokeStyle=r.cols[0]+(Math.round(a*180).toString(16).padStart(2,"0"));
+        ctx.lineWidth=2*a;ctx.stroke();
+      }
+      // Rocket head glow
+      ctx.beginPath();ctx.arc(r.x,r.y,3,0,Math.PI*2);
+      ctx.fillStyle="#ffffff";ctx.fill();
+    }
+
+    // Update explosions
+    for(let e=explosions.length-1;e>=0;e--){
+      const exp=explosions[e];
+      let alive=false;
+      exp.particles.forEach(p=>{
+        p.life-=0.016/p.maxLife;
+        if(p.life<=0)return;
+        alive=true;
+        p.vx*=.97;p.vy=p.vy*.97+.04;// gravity
+        p.x+=p.vx;p.y+=p.vy;
+        p.trail.push({x:p.x,y:p.y});
+        if(p.trail.length>5)p.trail.shift();
+        const alpha=Math.max(0,p.life);
+        // Particle trail
+        for(let j=1;j<p.trail.length;j++){
+          const a2=(j/p.trail.length)*alpha;
+          const pr=p.trail[j-1],qr=p.trail[j];
+          ctx.beginPath();ctx.moveTo(pr.x,pr.y);ctx.lineTo(qr.x,qr.y);
+          ctx.strokeStyle=p.col+(Math.round(a2*160).toString(16).padStart(2,"0"));
+          ctx.lineWidth=p.size*(j/p.trail.length);ctx.stroke();
+        }
+        // Particle dot
+        ctx.beginPath();ctx.arc(p.x,p.y,p.size*alpha,0,Math.PI*2);
+        ctx.fillStyle=p.col+(Math.round(alpha*255).toString(16).padStart(2,"0"));
+        ctx.fill();
+      });
+      if(!alive)explosions.splice(e,1);
+    }
+
+    // Random auto-launch every ~3s
+    if(Math.random()<.005){
+      const w2=cv.width,h2=cv.height;
+      spawnRocket(w2*.2+Math.random()*w2*.6,h2*.1+Math.random()*h2*.25);
+    }
+
+    requestAnimationFrame(frame);
+  }
+  // Dark background
+  ctx.fillStyle="#04020c";ctx.fillRect(0,0,cv.width,cv.height);
+  frame();
+}
+
+function demoMove(cont,isMobile){
+  cont.innerHTML='<div class="demo-wrap"><div class="demo-label">🕹️ 拖動三角形到畫布任何地方！</div><canvas style="width:100%;display:block;height:280px;cursor:grab"></canvas></div><div style="padding:8px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div id="coord-display" style="font-family:Space Mono,monospace;font-size:13px;color:rgba(255,255,255,.7);background:rgba(255,255,255,.06);padding:5px 14px;border-radius:20px;border:0.5px solid rgba(255,255,255,.12)">X: 0.00 &nbsp;|&nbsp; Y: 0.00</div><button onclick="resetShape()" style="padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:rgba(255,255,255,.8);cursor:pointer;font-size:13px">⟳ 回中心</button></div>';
+  const cv=cont.querySelector("canvas");
+  function sync(){
+    const w=cv.getBoundingClientRect().width||cv.parentElement?.clientWidth||600;
+    if(Math.abs(cv.width-w)>1||cv.height!==280){cv.width=Math.round(w);cv.height=280;}
+    return {w:cv.width,h:cv.height};
+  }
+  const ctx=cv.getContext("2d");
+  let ox=0,oy=0,dragging=false,dragStartX=0,dragStartY=0,shapeStartX=0,shapeStartY=0;
+  window.addEventListener("resize",()=>{sync();render();});
+  const ro=new ResizeObserver(()=>{sync();render();});
+  ro.observe(cv);
+
+  function toCanvas(nx,ny){
+    const {w,h}=sync();
+    return {x:(nx+1)/2*w, y:(1-ny)/2*h};
+  }
+  function toNorm(cx,cy){
+    const {w,h}=sync();
+    return {x:(cx/w)*2-1, y:1-(cy/h)*2};
+  }
+
+  function render(){
+    const {w,h}=sync();
+    ctx.fillStyle="#0d0d1a";ctx.fillRect(0,0,w,h);
+    // Grid lines — use same pixel step for both axes so cells are square
+    const step=h/8;
+    ctx.strokeStyle="rgba(255,255,255,.06)";ctx.lineWidth=1;
+    for(let x=w/2%step;x<=w;x+=step){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+    for(let y=h/2%step;y<=h;y+=step){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+    // Axis labels
+    ctx.font="11px Space Mono,monospace";ctx.textAlign="center";ctx.fillStyle="rgba(255,255,255,.3)";
+    ctx.fillText("X: -1",w*.06,h*.5-6);ctx.fillText("X: +1",w*.94,h*.5-6);
+    ctx.textAlign="right";ctx.fillText("Y:+1",w*.5-8,h*.06);ctx.fillText("Y:-1",w*.5-8,h*.96);
+    // Center cross
+    ctx.strokeStyle="rgba(255,255,255,.15)";ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(w/2,0);ctx.lineTo(w/2,h);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,h/2);ctx.lineTo(w,h/2);ctx.stroke();
+    // Triangle
+    const ctr=toCanvas(ox,oy);
+    const size=Math.min(w,h)*0.14;
+    const tx=ctr.x,ty=ctr.y;
+    ctx.beginPath();
+    ctx.moveTo(tx, ty-size);
+    ctx.lineTo(tx-size*.85, ty+size*.6);
+    ctx.lineTo(tx+size*.85, ty+size*.6);
+    ctx.closePath();
+    const gr=ctx.createLinearGradient(tx,ty-size,tx,ty+size);
+    gr.addColorStop(0,"#ff6b6b");gr.addColorStop(1,"#ffd93d");
+    ctx.fillStyle=gr;ctx.fill();
+    ctx.strokeStyle="rgba(255,255,255,.4)";ctx.lineWidth=1.5;ctx.stroke();
+    // Drag handle dot
+    ctx.beginPath();ctx.arc(tx,ty,8,0,Math.PI*2);
+    ctx.fillStyle="rgba(255,255,255,.9)";ctx.fill();
+    // Coordinate label on shape
+    ctx.font="bold 12px Space Mono,monospace";ctx.textAlign="center";ctx.fillStyle="#fff";
+    ctx.fillText("("+ox.toFixed(2)+", "+oy.toFixed(2)+")",tx,ty+size+20);
+    // Update display
+    const disp=document.getElementById("coord-display");
+    if(disp)disp.innerHTML="X: <span style='color:#ff6b6b;font-weight:700'>"+ox.toFixed(2)+"</span> &nbsp;|&nbsp; Y: <span style='color:#6bcb77;font-weight:700'>"+oy.toFixed(2)+"</span>";
+  }
+
+  function getPos(e){
+    const r=cv.getBoundingClientRect();
+    const src=e.touches?e.touches[0]:e;
+    return {cx:(src.clientX-r.left)*cv.width/r.width, cy:(src.clientY-r.top)*cv.height/r.height};
+  }
+
+  cv.addEventListener("mousedown",e=>{
+    const {cx,cy}=getPos(e);
+    const ctr=toCanvas(ox,oy);
+    if(Math.hypot(cx-ctr.x,cy-ctr.y)<40){
+      dragging=true;dragStartX=cx;dragStartY=cy;shapeStartX=ox;shapeStartY=oy;
+      cv.style.cursor="grabbing";
+    }
+  });
+  cv.addEventListener("mousemove",e=>{
+    if(!dragging)return;
+    const {cx,cy}=getPos(e);
+    const dn=toNorm(cx,cy),ds=toNorm(dragStartX,dragStartY);
+    ox=Math.max(-0.9,Math.min(0.9,shapeStartX+(dn.x-ds.x)));
+    oy=Math.max(-0.9,Math.min(0.9,shapeStartY+(dn.y-ds.y)));
+    render();
+  });
+  cv.addEventListener("mouseup",()=>{dragging=false;cv.style.cursor="grab";});
+  cv.addEventListener("touchstart",e=>{
+    const {cx,cy}=getPos(e);
+    const ctr=toCanvas(ox,oy);
+    if(Math.hypot(cx-ctr.x,cy-ctr.y)<60){
+      dragging=true;dragStartX=cx;dragStartY=cy;shapeStartX=ox;shapeStartY=oy;
+    }
+    e.preventDefault();
+  },{passive:false});
+  cv.addEventListener("touchmove",e=>{
+    if(!dragging)return;
+    const {cx,cy}=getPos(e);
+    const dn=toNorm(cx,cy),ds=toNorm(dragStartX,dragStartY);
+    ox=Math.max(-0.9,Math.min(0.9,shapeStartX+(dn.x-ds.x)));
+    oy=Math.max(-0.9,Math.min(0.9,shapeStartY+(dn.y-ds.y)));
+    render();e.preventDefault();
+  },{passive:false});
+  cv.addEventListener("touchend",()=>dragging=false);
+  window.resetShape=()=>{ox=0;oy=0;render();};
+}
+
+function checkCompletion(){
+  if(earned.length>=CASTLE_TOTAL&&!localStorage.getItem(CASTLE_KEY+"_comp_shown")){
+    localStorage.setItem(CASTLE_KEY+"_comp_shown","1");
+    setTimeout(showCompletion,800);
+  }
+}
+function showCompletion(){
+  const ov=document.getElementById("compOverlay");if(!ov)return;
+  const fw=ov.querySelector(".fw-wrap");
+  const colors=["#e84545","#00d4ff","#ffd700","#ff9f43","#c084fc","#50fa7b"];
+  for(let i=0;i<28;i++){const d=document.createElement("div");d.className="fw";const tx=(Math.random()-.5)*300,ty=-100-Math.random()*200;d.style.cssText="width:6px;height:6px;background:"+colors[i%colors.length]+";left:"+(40+Math.random()*20)+"%;top:60%;--d:"+(0.6+Math.random()*.8)+"s;--dl:"+Math.random()*.5+"s;--tx:"+tx+"px;--ty:"+ty+"px";fw.appendChild(d);}
+  ov.classList.add("show");
+}
+function goNextCastle(){window.location.href='opengl-seed-map.html';}
+function goMap(){window.location.href="dx-map.html";}
+
+updateXP();renderLessons();
+window.addEventListener("pageshow",(e)=>{
+  const ov=document.getElementById("compOverlay");if(ov)ov.classList.remove("show");
+  const toast=document.getElementById("toast");if(toast)toast.classList.remove("show");
+  if(e.persisted){if(typeof currentLesson!=="undefined")currentLesson=null;if(typeof renderLessons==="function")renderLessons();}
+});
+document.addEventListener("DOMContentLoaded",()=>{setTimeout(checkCompletion,500);});
+window.addEventListener("storage",checkCompletion);
+
+// ── Interactive Demos ──
+// initDemo defined above
+
+// Shared sphere setup helper
+function setupSphere(gl,r){
+  const verts=makeSphere(r);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
+  return{verts,buf,count:verts.length/6};
+}
+
+function syncCV(cv,h){
+  const w=cv.clientWidth||600;
+  if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;cv.style.height=h+"px";}
+  return w/h;
+}
+
+// 2-1: Orthographic vs Perspective demo
+function demo2D(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">📐 Orthographic vs Perspective 投影</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn active" onclick="set2D(0)">🔲 Orthographic</button>
+    <button class="ctrl-btn" onclick="set2D(1)">📷 Perspective</button>
+  </div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let mode=0,t=0;
+  const sph=setupSphere(gl,.88);
+  // Three spheres at different distances
+  const positions=[[-0.9,0,-0.5],[0.0,0,0.0],[0.9,0,0.5]];
+  const colors=[[.88,.27,.27],[.27,.6,.88],[.27,.88,.5]];
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying float vz;uniform float asp;uniform vec3 off;uniform int mode;void main(){vn=nor;vec3 wp=pos+off;float camZ=2.0;vec3 cp=vec3(wp.x,wp.y,wp.z+camZ);if(mode==0){gl_Position=vec4(wp.x*0.58/asp,wp.y*0.58,0,1);}else{float fov=0.873;gl_Position=vec4(cp.x/cp.z*fov/asp,cp.y/cp.z*fov,(cp.z-0.1)/camZ*.5,1.0);}vz=wp.z;}",
+    "precision mediump float;varying vec3 vn;varying float vz;uniform vec3 col;void main(){vec3 l=normalize(vec3(1.2,1.5,2.0));float d=max(dot(normalize(vn),l),0.0);gl_FragColor=vec4(col*(.2+d*.8),1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),uoff=gl.getUniformLocation(p,"off"),um=gl.getUniformLocation(p,"mode"),ucol=gl.getUniformLocation(p,"col");
+  gl.enable(gl.DEPTH_TEST);
+  window.set2D=m=>{mode=m;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform1f(uasp,asp);gl.uniform1i(um,mode);
+    positions.forEach(([ox,oy,oz],i)=>{
+      gl.uniform3f(uoff,ox,oy,oz);
+      gl.uniform3f(ucol,...colors[i]);
+      gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-2: Specular lighting
+function demoSpecular(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">💡 Specular 高光 — 拖曳調整光源</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>✨ 光澤度</label><input type="range" min="1" max="128" value="32" id="shn" oninput="updSp()"><span class="slider-val" id="svs">32</span></div>
+  <div class="slider-row"><label>💡 光照角度</label><input type="range" min="-180" max="180" value="45" id="sang" oninput="updSp()"><span class="slider-val" id="svsa">45°</span></div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let shininess=32,ang=45;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec3 vw;uniform float asp;void main(){vn=nor;vw=pos;gl_Position=vec4(pos.x*0.92/asp,pos.y*0.92,pos.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec3 vw;uniform vec3 ld;uniform float shin;void main(){vec3 l=normalize(ld);vec3 n=normalize(vn);float diff=max(dot(n,l),0.0);vec3 r=reflect(-l,n);vec3 v=normalize(vec3(0,0,1)-vw);float spec=pow(max(dot(r,v),0.0),shin);vec3 col=vec3(.88,.27,.27);gl_FragColor=vec4(col*(.15+diff*.7)+vec3(1,1,1)*spec*.8,1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),uld=gl.getUniformLocation(p,"ld"),ushin=gl.getUniformLocation(p,"shin");
+  gl.enable(gl.DEPTH_TEST);
+  window.updSp=()=>{
+    shininess=parseFloat(document.getElementById("shn").value);
+    ang=parseFloat(document.getElementById("sang").value);
+    document.getElementById("svs").textContent=shininess;
+    document.getElementById("svsa").textContent=ang+"°";
+  };
+  function frame(){
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    const r=ang*Math.PI/180;
+    gl.uniform1f(uasp,asp);gl.uniform3f(uld,Math.cos(r),Math.sin(r),.5);gl.uniform1f(ushin,shininess);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-3: Light Map - two spheres, one with lightmap
+function demoLightMap(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🗺️ Light Map — 左：無光照貼圖，右：有光照貼圖</div><canvas style="width:100%;display:block;height:260px"></canvas></div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let t=0;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec2 vuv;uniform float asp;uniform float ox;void main(){vn=nor;vuv=vec2(pos.x*.5+.5,pos.y*.5+.5);vec3 wp=vec3(pos.x+ox,pos.y,pos.z);gl_Position=vec4(wp.x*0.92/asp,wp.y*0.92,wp.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec2 vuv;uniform int useLM;uniform float t;void main(){vec3 n=normalize(vn);float d=max(dot(n,normalize(vec3(.7,.9,.5))),0.0);vec3 base=vec3(.88,.27,.27)*(0.2+d*.8);if(useLM==1){float lm=0.5+0.5*sin(vuv.x*6.28+t);lm=clamp(lm,.1,1.);base*=lm*1.5;}gl_FragColor=vec4(base,1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),uox=gl.getUniformLocation(p,"ox"),ulm=gl.getUniformLocation(p,"useLM"),ut=gl.getUniformLocation(p,"t");
+  gl.enable(gl.DEPTH_TEST);
+  function frame(){
+    t+=.016;
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform1f(uasp,asp);gl.uniform1f(ut,t);
+    gl.uniform1f(uox,-1.0);gl.uniform1i(ulm,0);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    gl.uniform1f(uox,1.0);gl.uniform1i(ulm,1);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-4: Bump Map - normal variation visible on sphere
+function demoBump(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🏔️ Bump Map — 左：普通法線，右：Bump Map 法線</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>💡 光照角度</label><input type="range" min="-180" max="180" value="60" id="bang" oninput="updBmp()"><span class="slider-val" id="bvsa">60°</span></div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let ang=60;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec3 vp;uniform float asp;uniform float ox;void main(){vn=nor;vp=pos;vec3 wp=vec3(pos.x+ox,pos.y,pos.z);gl_Position=vec4(wp.x*0.92/asp,wp.y*0.92,wp.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec3 vp;uniform vec3 ld;uniform int bump;void main(){vec3 n=normalize(vn);if(bump==1){float bx=sin(vp.y*12.0)*0.4;float by=cos(vp.x*12.0)*0.4;n=normalize(n+vec3(bx,by,0));}float d=max(dot(n,ld),0.);vec3 c=vec3(.88,.27,.27);gl_FragColor=vec4(c*(.15+d*.85),1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),uox=gl.getUniformLocation(p,"ox"),ub=gl.getUniformLocation(p,"bump"),uld=gl.getUniformLocation(p,"ld");
+  gl.enable(gl.DEPTH_TEST);
+  window.updBmp=()=>{ang=parseFloat(document.getElementById("bang").value);document.getElementById("bvsa").textContent=ang+"°";};
+  function frame(){
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    const r=ang*Math.PI/180;
+    gl.uniform1f(uasp,asp);gl.uniform3f(uld,Math.cos(r),Math.sin(r),.5);
+    gl.uniform1f(uox,-1.0);gl.uniform1i(ub,0);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    gl.uniform1f(uox,1.0);gl.uniform1i(ub,1);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);
+    requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-5: Point Light - moving light with attenuation
+function demoPointLight(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🔵 Point Light — 移動光源衰減效果</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>📏 衰減係數</label><input type="range" min="1" max="100" value="10" id="pat" oninput="updPL()"><span class="slider-val" id="pvp">0.10</span></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn active" onclick="setPLM(9)">🔥 火焰模式</button>
+  </div>`;
+
+  const cv=cont.querySelector("canvas");
+  function syncSize(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height="260px";}return w/260;}
+  syncSize();
+  if(isMobile) window.addEventListener("resize",()=>syncSize());
+
+  const g=cv.getContext("webgl"); if(!g) return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+
+  // Sphere geometry
+  const ST=32,SL=40,vA=[],nA=[],iA=[];
+  for(let a=0;a<=ST;a++){const phi=Math.PI*a/ST;for(let b=0;b<=SL;b++){const th=2*Math.PI*b/SL;const x=Math.sin(phi)*Math.cos(th),y=Math.cos(phi),z=Math.sin(phi)*Math.sin(th);vA.push(x*.79,y*.79,z*.79);nA.push(x,y,z);}}
+  for(let a=0;a<ST;a++)for(let b=0;b<SL;b++){const p0=a*(SL+1)+b,q=p0+SL+1;iA.push(p0,q,p0+1,q,q+1,p0+1);}
+  const vD=new Float32Array(vA),nD=new Float32Array(nA),iD=new Uint16Array(iA);
+  function mkBuf(d,t){const b=g.createBuffer();g.bindBuffer(t,b);g.bufferData(t,d,g.STATIC_DRAW);return b;}
+  const vB=mkBuf(vD,g.ARRAY_BUFFER),nB=mkBuf(nD,g.ARRAY_BUFFER),iB=mkBuf(iD,g.ELEMENT_ARRAY_BUFFER);
+
+  const prog=mkP(
+    // VS: Y-rotation + orthographic projection
+    `attribute vec3 aPos;attribute vec3 aNor;
+     varying vec3 vN;varying vec3 vW;
+     uniform float asp;uniform float rotY;
+     void main(){
+       float cy=cos(rotY),sy=sin(rotY);
+       vec3 rp=vec3(aPos.x*cy+aPos.z*sy, aPos.y, -aPos.x*sy+aPos.z*cy);
+       vec3 rn=vec3(aNor.x*cy+aNor.z*sy, aNor.y, -aNor.x*sy+aNor.z*cy);
+       vN=rn; vW=rp;
+       gl_Position=vec4(rp.x*0.92/asp, rp.y*0.92+0.22, rp.z*0.1, 1.0);
+     }`,
+    `precision mediump float;
+     varying vec3 vN; varying vec3 vW;
+     uniform vec3 lP0,lP1,lP2, lC0,lC1,lC2;
+     uniform float k; uniform int nL; uniform float flameAtt;
+
+     // Fixed key light (directional, no attenuation) — always illuminates sphere front
+     vec3 keyLight(vec3 N, vec3 P){
+       vec3 L = normalize(vec3(-0.4, 0.6, 1.0));  // upper-left-front
+       vec3 V = normalize(vec3(0.0, 0.0, 2.5) - P);
+       vec3 H = normalize(L + V);
+       float lambert = max(dot(N, L), 0.0);
+       float spec    = pow(max(dot(N, H), 0.0), 96.0);
+       vec3 base = vec3(0.85, 0.15, 0.15);
+       return base * lambert * 1.8 + vec3(1.0,0.95,0.85) * spec * 2.2;
+     }
+
+     // Orbiting point light with attenuation — shows k slider effect
+     vec3 pointLight(vec3 N, vec3 P, vec3 lPos, vec3 lCol){
+       vec3 toL = lPos - P;
+       float dist = max(length(toL), 0.001);
+       vec3 L = normalize(toL);
+       float lambert = max(dot(N, L), 0.0);
+       vec3 V = normalize(vec3(0.0, 0.0, 2.5) - P);
+       vec3 H = normalize(L + V);
+       float spec = pow(max(dot(N, H), 0.0), 128.0);
+       // k=0.01 bright, k=1.0 nearly dark
+       float att = 1.0 / (1.0 + k*dist*2.0 + k*dist*dist*4.0);
+       vec3 base = vec3(0.85, 0.15, 0.15);
+       return (base * lCol * lambert * 3.5 + lCol * spec * 2.0) * att;
+     }
+
+     void main(){
+       vec3 N = normalize(vN);
+       vec3 base = vec3(0.85, 0.15, 0.15);
+
+       // Hemisphere ambient
+       float sky = N.y*0.5+0.5;
+       vec3 amb = base * mix(vec3(0.05,0.02,0.02), vec3(0.28,0.10,0.10), sky);
+
+       // Fire ground bounce: scales with attenuation — dimmer when k is high
+       float groundFire = max(-N.y, 0.0);
+       vec3 fireBounce = vec3(0.9, 0.35, 0.05) * groundFire * flameAtt * 1.8;
+
+       // Fixed key light (always visible, shows glossiness)
+       vec3 key = keyLight(N, vW);
+
+       // Orbiting point lights (show attenuation)
+       vec3 pts = pointLight(N, vW, lP0, lC0);
+       if(nL>=2) pts += pointLight(N, vW, lP1, lC1);
+       if(nL>=3) pts += pointLight(N, vW, lP2, lC2);
+
+       gl_FragColor = vec4(clamp(amb + fireBounce + key + pts, 0.0, 1.0), 1.0);
+     }`
+  );
+
+  g.useProgram(prog);
+  const aPos=g.getAttribLocation(prog,"aPos"), aNor=g.getAttribLocation(prog,"aNor");
+  const uAsp=g.getUniformLocation(prog,"asp"), uK=g.getUniformLocation(prog,"k"), uNL=g.getUniformLocation(prog,"nL"), uRotY=g.getUniformLocation(prog,"rotY");
+  const uFlameAtt=g.getUniformLocation(prog,"flameAtt");
+  const uLP=[0,1,2].map(i=>g.getUniformLocation(prog,"lP"+i));
+  const uLC=[0,1,2].map(i=>g.getUniformLocation(prog,"lC"+i));
+
+  // Light dot shader
+  const dotP=mkP(
+    `attribute vec2 p;uniform float asp;void main(){gl_Position=vec4(p.x*0.92/asp,p.y*0.92,0,1);gl_PointSize=14.0;}`,
+    `precision mediump float;uniform vec3 col;void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;gl_FragColor=vec4(col,1.0-d*0.3);}`
+  );
+  const haloP=mkP(
+    `attribute vec2 p;uniform float asp;void main(){gl_Position=vec4(p.x*0.92/asp,p.y*0.92,0,1);gl_PointSize=36.0;}`,
+    `precision mediump float;uniform vec3 col;void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;gl_FragColor=vec4(col,(1.0-d)*(1.0-d)*0.4);}`
+  );
+  const dotAP=g.getAttribLocation(dotP,"p"), dotUC=g.getUniformLocation(dotP,"col"), dotAS=g.getUniformLocation(dotP,"asp");
+  const haloAP=g.getAttribLocation(haloP,"p"), haloUC=g.getUniformLocation(haloP,"col"), haloAS=g.getUniformLocation(haloP,"asp");
+  const ptBuf=g.createBuffer();
+
+  g.enable(g.DEPTH_TEST);
+  g.enable(g.BLEND); g.blendFunc(g.SRC_ALPHA, g.ONE_MINUS_SRC_ALPHA);
+
+  const lCols=[[1.0,0.8,0.3],[0.3,0.6,1.0],[0.5,1.0,0.4]];
+  // Lights orbit at r=1.4 in front hemisphere
+  function lPos(i,t){
+    const speed=[0.9,0.6,1.2][i], phase=[0,2.1,4.2][i];
+    const a=t*speed+phase;
+    const x=Math.cos(a)*1.2;
+    const y=Math.sin(a)*0.9;
+    const z=0.7; // always in front
+    return [x,y,z];
+  }
+
+  // Flame: flickering position + intensity noise using sin harmonics
+  function flameNoise(t,seed){
+    return Math.sin(t*7.3+seed)*0.4 + Math.sin(t*13.1+seed*2.1)*0.2
+         + Math.sin(t*23.7+seed*0.7)*0.1 + Math.sin(t*43.0+seed*3.3)*0.05;
+  }
+  function flamePos(t){
+    // Flame hovers below sphere, flickers side-to-side
+    const jx = flameNoise(t, 0)*0.18;
+    const jy = flameNoise(t, 5)*0.12 - 0.80; // below sphere
+    const jz = 0.55;
+    return [jx, jy, jz];
+  }
+  function flameIntensity(t){
+    return 1.0 + flameNoise(t,1)*0.45; // 0.55 ~ 1.45 flicker range
+  }
+
+  let kVal=0.10, nL=9, t=0;
+  window.updPL=()=>{kVal=document.getElementById("pat").value/100;document.getElementById("pvp").textContent=kVal.toFixed(2);};
+  window.setPLM=n=>{nL=n;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+
+  function frame(){
+    t+=0.016;
+    const asp=syncSize();
+    g.viewport(0,0,cv.width,cv.height);
+    g.clearColor(0.04,0.03,0.09,1); g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+
+    // Flame mode (nL===9) vs normal mode
+    const isFlame = nL===9;
+    const lights = isFlame
+      ? [flamePos(t), flamePos(t+1.1), flamePos(t+2.2)]
+      : [0,1,2].map(i=>lPos(i,t));
+    const flameMult = isFlame ? Math.max(0.7, flameIntensity(t)) : 1.0;
+    const flameColors = isFlame ? [
+      [1.0*flameMult, 0.55*flameMult, 0.05],
+      [1.0*flameMult, 0.35*flameMult, 0.02],
+      [0.9*flameMult, 0.65*flameMult, 0.08],
+    ] : lCols;
+    const activeLights = isFlame ? 3 : nL;
+
+    // Draw sphere
+    g.useProgram(prog);
+    // Compute attenuation at sphere surface (dist≈0.79 from center) for fireBounce
+    const flameDist=0.79+Math.abs(lights[0][1]+0.80);
+    const flameAtt=1.0/(1.0+kVal*flameDist*2.0+kVal*flameDist*flameDist*4.0);
+    g.uniform1f(uAsp,asp); g.uniform1f(uK,kVal); g.uniform1i(uNL,activeLights); g.uniform1f(uRotY,t*0.5);
+    g.uniform1f(uFlameAtt, flameAtt);
+    lights.forEach(([x,y,z],i)=>{g.uniform3f(uLP[i],x,y,z); g.uniform3f(uLC[i],...flameColors[i]);});
+    g.bindBuffer(g.ARRAY_BUFFER,vB); g.enableVertexAttribArray(aPos); g.vertexAttribPointer(aPos,3,g.FLOAT,false,0,0);
+    g.bindBuffer(g.ARRAY_BUFFER,nB); g.enableVertexAttribArray(aNor); g.vertexAttribPointer(aNor,3,g.FLOAT,false,0,0);
+    g.bindBuffer(g.ELEMENT_ARRAY_BUFFER,iB);
+    g.drawElements(g.TRIANGLES,iD.length,g.UNSIGNED_SHORT,0);
+
+    // Draw halos & dots
+    g.depthMask(false);
+    for(let i=0;i<activeLights;i++){
+      const [x,y]=lights[i];
+      const d=new Float32Array([x,y]);
+      g.bindBuffer(g.ARRAY_BUFFER,ptBuf); g.bufferData(g.ARRAY_BUFFER,d,g.DYNAMIC_DRAW);
+      [haloP,dotP].forEach((p2,pi)=>{
+        g.useProgram(p2);
+        const ap=pi===0?haloAP:dotAP, uc=pi===0?haloUC:dotUC, as2=pi===0?haloAS:dotAS;
+        g.enableVertexAttribArray(ap); g.vertexAttribPointer(ap,2,g.FLOAT,false,0,0);
+        g.uniform3f(uc,...flameColors[i]); g.uniform1f(as2,asp);
+        g.drawArrays(g.POINTS,0,1);
+      });
+    }
+    g.depthMask(true);
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function demoMultiTex(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🌊 Multitexture — 三層程序貼圖混合</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn active" onclick="setMT(3)">🔲 三層混合</button>
+    <button class="ctrl-btn" onclick="setMT(1)">1️⃣ 基礎層</button>
+    <button class="ctrl-btn" onclick="setMT(2)">2️⃣ 細節層</button>
+  </div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let layers=3,t=0;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec3 vp;uniform float asp;void main(){vn=nor;vp=pos;gl_Position=vec4(pos.x*0.92/asp,pos.y*0.92,pos.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec3 vp;uniform int layers;uniform float t;void main(){vec3 n=normalize(vn);float d=max(dot(n,normalize(vec3(1,1.2,1.5))),0.);vec3 uv=vp;float c1=0.5+0.5*sin(uv.x*3.14+uv.y*2.0);float c2=0.5+0.5*sin(uv.y*8.0+t)*sin(uv.x*8.0-t);float c3=(.2+d*.8);vec3 col;if(layers==1)col=vec3(c1,.3+c1*.4,.2);else if(layers==2)col=vec3(c2,.2,c2*.5);else col=vec3(c1*c2,.3+c1*.3,c2*.3)*c3*2.0;gl_FragColor=vec4(clamp(col,0.,1.),1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),ul=gl.getUniformLocation(p,"layers"),ut2=gl.getUniformLocation(p,"t");
+  gl.enable(gl.DEPTH_TEST);
+  window.setMT=n=>{layers=n;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+  function frame(){
+    t+=.016;
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform1f(uasp,asp);gl.uniform1i(ul,layers);gl.uniform1f(ut2,t);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-7: Reflection - Fresnel + env cube map simulation
+function demoReflect(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">💎 Reflection — Fresnel 混合係數</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>💎 反射強度</label><input type="range" min="0" max="100" value="40" id="rfl" oninput="updRf()"><span class="slider-val" id="rvr">0.40</span></div>`;
+  const cv=cont.querySelector("canvas");
+  const gl=cv.getContext("webgl");if(!gl)return;
+  let reflStrength=.4,t=0;
+  const sph=setupSphere(gl,.88);
+  const p=mkProg(gl,
+    "attribute vec3 pos;attribute vec3 nor;varying vec3 vn;varying vec3 vr;uniform float asp;uniform float t;void main(){float cy=cos(t*.3),sy=sin(t*.3);vec3 rpos=vec3(pos.x*cy+pos.z*sy,pos.y,-pos.x*sy+pos.z*cy);vec3 rnor=vec3(nor.x*cy+nor.z*sy,nor.y,-nor.x*sy+nor.z*cy);vn=rnor;vec3 viewDir=normalize(vec3(0,0,1)-rpos);vr=reflect(-viewDir,rnor);gl_Position=vec4(rpos.x*0.92/asp,rpos.y*0.92,rpos.z*.01,1.);}",
+    "precision mediump float;varying vec3 vn;varying vec3 vr;uniform float rfl;void main(){vec3 n=normalize(vn);vec3 l=normalize(vec3(1,1.5,2));float d=max(dot(n,l),0.);vec3 base=vec3(.88,.27,.27)*(.2+d*.8);vec3 r=normalize(vr);float envR=.5+.5*sin(r.x*4.+r.y*3.);float envG=.5+.5*cos(r.y*4.+r.z*2.);float envB=.5+.5*sin(r.z*5.+r.x*2.);vec3 env=vec3(envR,envG,envB);gl_FragColor=vec4(mix(base,env,rfl),1.);}");
+  gl.useProgram(p);
+  const ap=gl.getAttribLocation(p,"pos"),an=gl.getAttribLocation(p,"nor");
+  gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+  const uasp=gl.getUniformLocation(p,"asp"),urfl=gl.getUniformLocation(p,"rfl"),ut2=gl.getUniformLocation(p,"t");
+  gl.enable(gl.DEPTH_TEST);
+  window.updRf=()=>{reflStrength=document.getElementById("rfl").value/100;document.getElementById("rvr").textContent=reflStrength.toFixed(2);};
+  function frame(){
+    t+=.016;
+    const asp=syncCV(cv,260);
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(.04,.03,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform1f(uasp,asp);gl.uniform1f(urfl,reflStrength);gl.uniform1f(ut2,t);
+    gl.drawArrays(gl.TRIANGLES,0,sph.count);requestAnimationFrame(frame);
+  }
+  frame();
+  if(isMobile)window.addEventListener("resize",()=>syncCV(cv,260));
+}
+
+// 2-8: Fog effect
+function demoFog(cont,isMobile){
+  cont.innerHTML=`<div class="demo-wrap"><div class="demo-label">🌫️ Fog — 遠處球體消失在霧中</div><canvas style="width:100%;display:block;height:260px"></canvas></div>
+  <div class="slider-row"><label>🌫️ 霧濃度</label><input type="range" min="0" max="100" value="40" id="fdn" oninput="updFog()"><span class="slider-val" id="fvd">0.40</span></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn active" onclick="setFogT(0)">📏 線性霧</button>
+    <button class="ctrl-btn" onclick="setFogT(1)">🌊 指數霧</button>
+  </div>`;
+
+  const cv=cont.querySelector("canvas");
+  function syncSize(){const w=cv.clientWidth||600;if(cv.width!==w||cv.height!==260){cv.width=w;cv.height=260;cv.style.height="260px";}return w/260;}
+  syncSize();
+  if(isMobile)window.addEventListener("resize",()=>syncSize());
+
+  const g=cv.getContext("webgl");if(!g)return;
+  function mkS(t,s){const sh=g.createShader(t);g.shaderSource(sh,s);g.compileShader(sh);return sh;}
+  function mkP(vs,fs){const p=g.createProgram();g.attachShader(p,mkS(g.VERTEX_SHADER,vs));g.attachShader(p,mkS(g.FRAGMENT_SHADER,fs));g.linkProgram(p);return p;}
+
+  // Unit sphere geometry
+  const ST=28,SL=36,vA=[],nA=[],iA=[];
+  for(let a=0;a<=ST;a++){const phi=Math.PI*a/ST;for(let b=0;b<=SL;b++){const th=2*Math.PI*b/SL;const x=Math.sin(phi)*Math.cos(th),y=Math.cos(phi),z=Math.sin(phi)*Math.sin(th);vA.push(x,y,z);nA.push(x,y,z);}}
+  for(let a=0;a<ST;a++)for(let b=0;b<SL;b++){const p0=a*(SL+1)+b,q=p0+SL+1;iA.push(p0,q,p0+1,q,q+1,p0+1);}
+  const vD=new Float32Array(vA),nD=new Float32Array(nA),iD=new Uint16Array(iA);
+  function mkBuf(d,t){const b=g.createBuffer();g.bindBuffer(t,b);g.bufferData(t,d,g.STATIC_DRAW);return b;}
+  const vB=mkBuf(vD,g.ARRAY_BUFFER),nB=mkBuf(nD,g.ARRAY_BUFFER),iB=mkBuf(iD,g.ELEMENT_ARRAY_BUFFER);
+
+  // VS: true perspective projection — same radius, different Z = different apparent size
+  const prog=mkP(
+    `attribute vec3 aPos;attribute vec3 aNor;
+     varying vec3 vN;varying float vFog;
+     uniform float asp;
+     uniform vec3 sPos;    // sphere world position
+     uniform float radius;
+     uniform float fogD;
+     uniform int fogT;
+     void main(){
+       vec3 wp = aPos*radius + sPos;
+       vN = aNor;
+       // Fog based on sphere depth (sPos.z, more negative = farther)
+       float depth = -sPos.z;
+       if(fogT==0){
+         float fogEnd = max(0.5, (1.0-fogD)*12.0);
+         vFog = clamp((depth-1.0)/fogEnd, 0.0, 1.0);
+       } else {
+         vFog = clamp(1.0-exp(-fogD*depth*0.5), 0.0, 1.0);
+       }
+       // Perspective: camera at z=0, scene at negative z
+       float fov=0.55;
+       float pz = -wp.z;
+       gl_Position = vec4(
+         wp.x/pz*fov/asp,
+         wp.y/pz*fov,
+         ((-wp.z-0.5)/15.0)*2.0-1.0,
+         1.0
+       );
+     }`,
+    `precision mediump float;
+     varying vec3 vN;varying float vFog;
+     uniform vec3 baseCol;
+     void main(){
+       vec3 N=normalize(vN);
+       vec3 L=normalize(vec3(0.5,0.8,0.5));
+       float diff=max(dot(N,L),0.0);
+       vec3 H=normalize(L+vec3(0,0,1));
+       float spec=pow(max(dot(N,H),0.0),64.0);
+       vec3 lit=baseCol*(0.22+diff*0.78)+vec3(1.0,0.95,0.9)*spec*0.55;
+       vec3 fogCol=vec3(0.14,0.12,0.18);
+       gl_FragColor=vec4(mix(lit,fogCol,vFog),1.0);
+     }`
+  );
+
+  g.useProgram(prog);
+  const aPos=g.getAttribLocation(prog,"aPos"),aNor=g.getAttribLocation(prog,"aNor");
+  const uAsp=g.getUniformLocation(prog,"asp");
+  const uSPos=g.getUniformLocation(prog,"sPos");
+  const uRad=g.getUniformLocation(prog,"radius");
+  const uCol=g.getUniformLocation(prog,"baseCol");
+  const uFogD=g.getUniformLocation(prog,"fogD");
+  const uFogT=g.getUniformLocation(prog,"fogT");
+
+  g.enable(g.DEPTH_TEST);
+
+  // 3 identical spheres at different Z depths — perspective makes them look different sizes
+  const SPHERES=[
+    {pos:[0.0, 0.0, -2.0],  col:[0.88,0.22,0.22]},  // near: appears large
+    {pos:[0.0, 0.0, -5.0],  col:[0.25,0.55,0.88]},  // mid
+    {pos:[0.0, 0.0, -11.0], col:[0.25,0.78,0.42]},  // far: appears small
+  ];
+  const RADIUS=1.50;
+
+  let fogD=0.40,fogT=0;
+  window.updFog=()=>{fogD=document.getElementById("fdn").value/100;document.getElementById("fvd").textContent=fogD.toFixed(2);};
+  window.setFogT=n=>{fogT=n;cont.querySelectorAll(".ctrl-btn").forEach(b=>b.classList.remove("active"));event.target.classList.add("active");};
+
+  function frame(){
+    const asp=syncSize();
+    g.viewport(0,0,cv.width,cv.height);
+    g.clearColor(0.14,0.12,0.18,1.0);
+    g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    g.useProgram(prog);
+    g.uniform1f(uAsp,asp);
+    g.uniform1f(uRad,RADIUS);
+    g.uniform1f(uFogD,fogD);
+    g.uniform1i(uFogT,fogT);
+
+    g.bindBuffer(g.ARRAY_BUFFER,vB);g.enableVertexAttribArray(aPos);g.vertexAttribPointer(aPos,3,g.FLOAT,false,0,0);
+    g.bindBuffer(g.ARRAY_BUFFER,nB);g.enableVertexAttribArray(aNor);g.vertexAttribPointer(aNor,3,g.FLOAT,false,0,0);
+    g.bindBuffer(g.ELEMENT_ARRAY_BUFFER,iB);
+
+    // Draw back to front
+    [...SPHERES].reverse().forEach(({pos,col})=>{
+      g.uniform3f(uSPos,...pos);
+      g.uniform3f(uCol,...col);
+      g.drawElements(g.TRIANGLES,iD.length,g.UNSIGNED_SHORT,0);
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+
+
+
+
+
+
+
+</script>
+<div id="compOverlay" class="comp-overlay">
+  <div class="fw-wrap"></div>
+  <div class="comp-trophy">🎆</div>
+  <div class="comp-stars">⭐⭐⭐</div>
+  <div class="comp-title">像素王國全通關！<br>你是圖形學小英雄！</div>
+  <div class="comp-sub">你學會了像素、顏色、光影和動畫的秘密！<br>獲得全部 730 顆星星！</div>
+  <button class="comp-next-btn" onclick="window.location='index.html'">🏠 回到首頁</button>
+</div>
+</body>
+</html>
