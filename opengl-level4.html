@@ -547,7 +547,10 @@ function buildBody(les,done){
 }
 
 function switchTab(el,panelId,lid){const body=document.getElementById('L'+lid).querySelector('.lesson-body');body.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));body.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById(panelId).classList.add('on');if(panelId.startsWith('d-'))initDemo(lid);}
-function checkQ(lid,idx){const les=LESSONS.find(l=>l.id===lid);document.querySelectorAll(`[id^="opt-${lid}-"]`).forEach((o,i)=>{o.classList.add('disabled');if(i===idx){o.classList.add(i===les.quiz.ans?'correct':'wrong');}});const ex=document.getElementById('ex-'+lid);ex.innerHTML='❌ 答錯了，再試試看！';ex.style.display='block';}
+function checkQ(lid,idx){const les=LESSONS.find(l=>l.id===lid);document.querySelectorAll(`[id^="opt-${lid}-"]`).forEach((o,i)=>{o.classList.add('disabled');if(i===idx){o.classList.add(i===les.quiz.ans?'correct':'wrong');}});const ex=document.getElementById('ex-'+lid);const isOk=idx===les.quiz.ans;
+    ex.innerHTML=isOk?'✅ 正確！太棒了！':'❌ 答錯了，再試試看！';
+    ex.style.display='block';
+    if(isOk)setTimeout(()=>complete(lid),600);}
 function complete(id){if(earned.includes(id))return;earned.push(id);localStorage.setItem('tower4_done',JSON.stringify(earned));setTimeout(checkCompletion,400);const les=LESSONS.find(l=>l.id===id);const btn=document.getElementById('btn-'+id);showXPPop(les.xp,btn);toast(`⚔️ +${les.xp} XP！「${les.title}」完成！`);setTimeout(()=>{current=null;render();updateXP();},500);}
 
 // ══════════════════════════════════════════════════════

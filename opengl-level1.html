@@ -662,8 +662,21 @@ function checkAnswer(lessonId, idx){
       o.classList.add(i===lesson.challenge.ans?'correct':'wrong');
     }
   });
+  const isCorrect = idx === lesson.challenge.ans;
   const ex = document.getElementById('explain-'+lessonId);
-  ex.textContent = '❌ 答錯了，再試試看！';
+  if(isCorrect){
+    ex.textContent = '✅ 答對了！太棒了！';
+    ex.style.color='#2d7a2d';
+    ex.style.background='rgba(45,122,45,.08)';
+    ex.style.borderColor='rgba(45,122,45,.25)';
+    // auto-unlock
+    setTimeout(()=>completeLesson(lessonId), 600);
+  } else {
+    ex.textContent = '❌ 答錯了，再試試看！';
+    ex.style.color='';ex.style.background='';ex.style.borderColor='';
+    // re-enable clicking
+    opts.forEach((o,i)=>{ if(i!==idx) o.onclick=()=>checkAnswer(lessonId,i); });
+  }
   ex.style.display='block';
 }
 
