@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+
+<script>
+// ── Device Detection (runs before page renders) ──
+(function(){
+  var ua=navigator.userAgent;
+  var w=window.innerWidth||screen.width;
+  var isMobile=/iPhone|iPad|iPod|Android|Mobile/i.test(ua)||w<=768;
+  var isIOS=/iPhone|iPad|iPod/i.test(ua);
+  var size=w<=390?'xs':w<=430?'sm':w<=768?'md':'lg';
+  document.documentElement.setAttribute('data-device',isMobile?'mobile':'desktop');
+  document.documentElement.setAttribute('data-size',size);
+  if(isIOS)document.documentElement.classList.add('ios');
+  window.DEV={isMobile:isMobile,isIOS:isIOS,size:size,W:w};
+})();
+</script>
+
+<style id="device-css">
+/* ── Desktop defaults (no change) ── */
+[data-device="desktop"] {}
+
+/* ── Mobile: hide desktop-only elements ── */
+[data-device="mobile"] .desktop-only { display:none !important; }
+[data-device="desktop"] .mobile-only { display:none !important; }
+
+/* ── Mobile layout switches ── */
+[data-device="mobile"] .main {
+  flex-direction: column !important;
+}
+/* Left panel → bottom drawer on mobile */
+[data-device="mobile"] .lp,
+[data-device="mobile"] .lpanel,
+[data-device="mobile"] .instr-panel {
+  width: 100% !important;
+  max-height: 44vh !important;
+  min-height: 44vh !important;
+  border-right: none !important;
+  border-top: 2px solid var(--border, #333) !important;
+  order: 2 !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+}
+/* Right panel → hidden on mobile */
+[data-device="mobile"] .rp,
+[data-device="mobile"] .rpanel,
+[data-device="mobile"] .right-panel { display: none !important; }
+
+/* Viewport → top half on mobile */
+[data-device="mobile"] .viewport {
+  flex: 1 !important;
+  order: 1 !important;
+  min-height: 0 !important;
+}
+
+/* Topbar compact */
+[data-device="mobile"] .tb-crumb { display: none !important; }
+[data-device="mobile"] .topbar { height: 38px !important; }
+[data-device="mobile"] .tb-logo { font-size: .85rem !important; padding: 0 10px !important; }
+
+/* Chapter tabs */
+[data-device="mobile"] .chtabs,
+[data-device="mobile"] .chapter-tabs { height: 30px !important; }
+[data-device="mobile"] .cht,
+[data-device="mobile"] .ch-tab { font-size: .55rem !important; }
+
+/* Step content */
+[data-device="mobile"] .stit,
+[data-device="mobile"] .step-title { font-size: .95rem !important; }
+[data-device="mobile"] .desc,
+[data-device="mobile"] .step-desc { font-size: .76rem !important; line-height: 1.6 !important; }
+[data-device="mobile"] .lbody,
+[data-device="mobile"] .instr-body { padding: 10px 12px !important; }
+
+/* Buttons */
+[data-device="mobile"] .abtn { padding: 10px !important; font-size: .9rem !important; }
+[data-device="mobile"] .kh { padding: 6px 9px !important; margin-bottom: 6px !important; }
+[data-device="mobile"] .ck { padding: 6px 8px !important; font-size: .74rem !important; }
+[data-device="mobile"] .sdesc,
+[data-device="mobile"] .desc { margin-bottom: 10px !important; }
+
+/* Hint bar */
+[data-device="mobile"] .vp-hint { font-size: .58rem !important; padding: 5px 12px !important; }
+
+/* Sliders */
+[data-device="mobile"] input[type=range] { width: 100% !important; }
+
+/* Index page */
+[data-device="mobile"] .nav-links { display: none !important; }
+[data-device="mobile"] .hero { flex-direction: column !important; padding: 18px 14px !important; gap: 12px !important; min-height: auto !important; }
+[data-device="mobile"] .hero-stats { display: none !important; }
+[data-device="mobile"] .hero-title { font-size: 1.35rem !important; }
+[data-device="mobile"] .hero-sub { font-size: .78rem !important; }
+[data-device="mobile"] .cat-tab { font-size: .72rem !important; padding: 10px 9px !important; }
+[data-device="mobile"] .c-card { min-width: 165px !important; max-width: 165px !important; }
+[data-device="mobile"] .c-card-wide { min-width: 220px !important; max-width: 220px !important; }
+[data-device="mobile"] .c-thumb { height: 105px !important; }
+[data-device="mobile"] .c-title { font-size: .78rem !important; }
+[data-device="mobile"] .course-entry-strip { gap: 8px !important; }
+[data-device="mobile"] .entry-pill { min-width: 130px !important; padding: 9px 11px !important; }
+
+/* Blender hub */
+[data-device="mobile"] .hero { flex-direction: column !important; padding: 18px 14px 20px !important; }
+[data-device="mobile"] .hero-progress { margin-left: 0 !important; width: 100% !important; text-align: center !important; }
+[data-device="mobile"] .lc-desc,
+[data-device="mobile"] .lc-skills { display: none !important; }
+[data-device="mobile"] .play-btn { font-size: .75rem !important; padding: 6px 12px !important; }
+
+/* World map */
+[data-device="mobile"] .tech-strip { padding: 5px 8px !important; gap: 4px !important; flex-wrap: wrap !important; }
+[data-device="mobile"] .tech-badge { font-size: .5rem !important; padding: 2px 5px !important; }
+[data-device="mobile"] .progress-strip { right: 8px !important; }
+[data-device="mobile"] .prog-name { font-size: .7rem !important; }
+[data-device="mobile"] .prog-xp { display: none !important; }
+[data-device="mobile"] .popup { width: 95vw !important; }
+[data-device="mobile"] .popup.show { bottom: 12px !important; }
+[data-device="mobile"] .hint-bar { bottom: 90px !important; font-size: .58rem !important; }
+
+/* Build progress (level6) */
+[data-device="mobile"] .build-progress { height: 36px !important; padding: 0 6px !important; }
+[data-device="mobile"] .bp-step { padding: 0 5px !important; font-size: .52rem !important; }
+[data-device="mobile"] .bp-step::after { display: none !important; }
+
+/* iOS safe area */
+.ios body { padding-bottom: env(safe-area-inset-bottom) !important; }
+</style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>🟠 Blender 建模入門 — 關卡地圖</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#141414;--panel:#1e1e1e;--panel2:#252525;--border:#303030;
+  --acc:#e8780a;--acc2:#ff9f40;--acc3:#ffd080;
+  --green:#8bc34a;--green2:#c8f0a0;
+  --txt:#e8e8e8;--txt2:#909090;--txt3:#505050;
+  --mono:'Space Mono',monospace;--title:'Fredoka One',sans-serif;
+}
+html,body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);min-height:100vh;background:var(--bg);color:var(--txt);font-family:'Noto Sans TC',sans-serif;}
+
+/* ── HEADER ── */
+header{
+  background:var(--panel);border-bottom:1px solid var(--border);
+  padding:0 32px;height:56px;
+  display:flex;align-items:center;gap:16px;
+  position:sticky;top:0;z-index:50;
+}
+.hdr-back{
+  font-family:var(--mono);font-size:.7rem;color:var(--txt3);
+  text-decoration:none;display:flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:6px;border:1px solid var(--border);
+  transition:.15s;
+}
+.hdr-back:hover{color:var(--txt2);border-color:var(--txt3);}
+.hdr-title{font-family:var(--title);font-size:1.1rem;color:var(--acc2);letter-spacing:.04em;}
+.hdr-sub{font-family:var(--mono);font-size:.65rem;color:var(--txt3);letter-spacing:.06em;}
+.hdr-xp{
+  margin-left:auto;display:flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:.72rem;
+}
+.hdr-xp-label{color:var(--txt3);}
+.hdr-xp-val{color:var(--acc3);font-weight:700;}
+.xp-track{width:100px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:3px;transition:width .8s cubic-bezier(.34,1.56,.64,1);}
+
+/* ── HERO ── */
+.hero{
+  background:linear-gradient(135deg,#1a1008 0%,#2a1808 50%,#1a1408 100%);
+  border-bottom:1px solid var(--border);
+  padding:36px 40px;
+  display:flex;align-items:center;gap:32px;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle at 70% 50%,rgba(232,120,10,.07) 0%,transparent 60%),
+    linear-gradient(rgba(232,120,10,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(232,120,10,.03) 1px,transparent 1px);
+  background-size:auto,36px 36px,36px 36px;
+}
+.hero-icon{font-size:4rem;position:relative;z-index:1;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hero-text{position:relative;z-index:1;}
+.hero-eyebrow{font-family:var(--mono);font-size:.62rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.hero-title{font-family:var(--title);font-size:1.9rem;color:var(--acc2);letter-spacing:.02em;line-height:1.2;margin-bottom:8px;}
+.hero-desc{font-size:.85rem;color:var(--txt2);line-height:1.8;max-width:42ch;}
+.hero-tags{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+.hero-tag{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.05em;
+  padding:3px 9px;border-radius:4px;
+  background:rgba(232,120,10,.1);border:1px solid rgba(232,120,10,.25);color:var(--acc2);
+}
+.hero-progress{
+  margin-left:auto;flex-shrink:0;position:relative;z-index:1;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:16px;padding:20px 24px;min-width:160px;text-align:center;
+}
+.hp-ring{
+  width:80px;height:80px;margin:0 auto 12px;
+  position:relative;
+}
+.hp-ring svg{width:80px;height:80px;transform:rotate(-90deg);}
+.hp-ring circle{fill:none;stroke-width:6;stroke-linecap:round;}
+.hp-ring .bg{stroke:var(--border);}
+.hp-ring .fg{stroke:var(--acc2);stroke-dasharray:220;stroke-dashoffset:220;transition:stroke-dashoffset 1s ease;}
+.hp-center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--title);font-size:1.1rem;color:var(--acc2);
+}
+.hp-label{font-family:var(--mono);font-size:.62rem;color:var(--txt3);letter-spacing:.06em;}
+
+/* ── SKILLS TRACK ── */
+.page{max-width:900px;margin:0 auto;padding:32px 24px 60px;}
+
+.track-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:24px;
+}
+.track-title{font-family:var(--title);font-size:1rem;color:var(--txt);letter-spacing:.03em;}
+.track-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+
+/* ── LEVEL CARD ── */
+.level-list{display:flex;flex-direction:column;gap:0;}
+
+.connector{
+  width:2px;height:20px;
+  background:linear-gradient(var(--border),var(--border));
+  margin:0 auto;
+}
+.connector.done{background:linear-gradient(var(--acc),var(--acc2));}
+
+.level-card{
+  background:var(--panel);border:1.5px solid var(--border);
+  border-radius:16px;overflow:hidden;
+  transition:all .2s;cursor:pointer;
+  position:relative;
+}
+.level-card:hover:not(.locked){
+  border-color:var(--acc);
+  box-shadow:0 0 0 1px var(--acc),0 8px 32px rgba(232,120,10,.15);
+  transform:translateY(-2px);
+}
+.level-card.done{border-color:rgba(139,195,74,.35);}
+.level-card.done:hover{border-color:var(--green);box-shadow:0 0 0 1px var(--green),0 8px 32px rgba(139,195,74,.15);}
+.level-card.locked{opacity:.45;cursor:not-allowed;}
+.level-card.active-next{
+  border-color:var(--acc2);
+  box-shadow:0 0 0 1px var(--acc2),0 0 24px rgba(255,159,64,.2);
+}
+
+/* done stripe */
+.level-card.done::before{
+  content:'';position:absolute;top:0;left:0;width:4px;height:100%;
+  background:linear-gradient(var(--green),var(--green2));
+}
+
+.lc-inner{display:flex;align-items:center;gap:16px;padding:18px 20px;}
+.lc-num{
+  width:52px;height:52px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--title);font-size:1.2rem;
+  position:relative;
+}
+.lc-num.done-num{background:rgba(139,195,74,.15);border:1.5px solid rgba(139,195,74,.4);color:var(--green2);}
+.lc-num.active-num{background:rgba(232,120,10,.15);border:1.5px solid rgba(232,120,10,.5);color:var(--acc2);}
+.lc-num.locked-num{background:var(--panel2);border:1.5px solid var(--border);color:var(--txt3);}
+
+.lc-info{flex:1;min-width:0;}
+.lc-tag{font-family:var(--mono);font-size:.6rem;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+.lc-title{font-family:var(--title);font-size:1rem;color:var(--txt);letter-spacing:.02em;margin-bottom:4px;}
+.lc-desc{font-size:.78rem;color:var(--txt2);line-height:1.5;}
+.lc-skills{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+.skill-pill{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.04em;
+  padding:2px 8px;border-radius:4px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--txt3);
+}
+.skill-pill.done{background:rgba(139,195,74,.1);border-color:rgba(139,195,74,.3);color:var(--green2);}
+
+.lc-meta{flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.xp-badge{
+  font-family:var(--mono);font-size:.75rem;font-weight:700;
+  padding:4px 10px;border-radius:6px;
+  background:rgba(232,120,10,.1);border:1px solid rgba(232,120,10,.25);color:var(--acc2);
+}
+.xp-badge.done{background:rgba(139,195,74,.1);border-color:rgba(139,195,74,.3);color:var(--green2);}
+.lc-status{font-family:var(--mono);font-size:.62rem;color:var(--txt3);letter-spacing:.04em;}
+.lc-status.done{color:var(--green2);}
+.lc-status.active{color:var(--acc2);}
+.play-btn{
+  background:var(--acc);border:none;color:#fff;
+  font-family:var(--title);font-size:.82rem;
+  padding:7px 16px;border-radius:8px;cursor:pointer;
+  transition:.15s;white-space:nowrap;
+  text-decoration:none;display:inline-flex;align-items:center;gap:5px;
+}
+.play-btn:hover{background:var(--acc2);}
+.play-btn.replay{background:rgba(139,195,74,.2);color:var(--green2);border:1px solid rgba(139,195,74,.3);}
+.play-btn.replay:hover{background:rgba(139,195,74,.3);}
+
+/* ── FINAL REWARD ── */
+.reward-card{
+  background:linear-gradient(135deg,#1a1008,#2a1808);
+  border:1.5px solid rgba(232,120,10,.3);
+  border-radius:16px;padding:24px;text-align:center;
+  margin-top:8px;
+}
+.reward-icon{font-size:3rem;margin-bottom:10px;}
+.reward-title{font-family:var(--title);font-size:1.3rem;color:var(--acc2);margin-bottom:6px;}
+.reward-desc{font-size:.82rem;color:var(--txt2);}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--panel);border:1px solid var(--green);border-radius:100px;
+  padding:10px 24px;font-family:var(--mono);font-size:.75rem;color:var(--green2);
+  z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 4px 20px rgba(139,195,74,.2);
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+
+  .hero-progress { margin-left:0 !important; width:100% !important; }
+  .hp-ring { width:64px !important; height:64px !important; }
+  .hp-ring svg { width:64px !important; height:64px !important; }
+  .page { padding:16px 12px 40px !important; }
+  .lc-inner { padding:12px 14px !important; gap:10px !important; }
+  .lc-title { font-size:.88rem !important; }
+  .lc-desc { font-size:.72rem !important; display:none !important; }
+  .lc-skills { display:none !important; }
+  .lc-meta { gap:4px !important; }
+  .play-btn { padding:6px 12px !important; font-size:.75rem !important; }
+  .xp-badge { font-size:.65rem !important; padding:2px 7px !important; }
+  header { padding:0 12px !important; }
+  .hdr { gap:8px !important; }
+  .hdr-title { font-size:.88rem !important; }
+  .hdr-back { font-size:.6rem !important; padding:0 8px !important; }
+  .hero-title { font-size:1.4rem !important; }
+  .hero-desc { font-size:.78rem !important; max-width:100% !important; }
+  .hero-tags { gap:4px !important; }
+  .hero-tag { font-size:.55rem !important; padding:2px 6px !important; }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="hdr-back">← TA HUB</a>
+  <div>
+    <div class="hdr-title">🟠 Blender 建模入門</div>
+    <div class="hdr-sub">BLENDER MODELING FUNDAMENTALS</div>
+  </div>
+  <div class="hdr-xp">
+    <span class="hdr-xp-label">總 XP</span>
+    <div class="xp-track"><div class="xp-fill" id="total-xp-fill" style="width:0%"></div></div>
+    <span class="hdr-xp-val" id="total-xp-val">0 / 1800</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-icon">🏗️</div>
+  <div class="hero-text">
+    <div class="hero-eyebrow">BLENDER · 建模入門 · 6 個關卡</div>
+    <div class="hero-title">從零開始學<br>3D 建模</div>
+    <div class="hero-desc">在捷運上也能學 Blender！透過互動式 3D 關卡，從視角操控到完整建模流程，每個操作都能親手在瀏覽器裡實作。</div>
+    <div class="hero-tags">
+      <span class="hero-tag">Three.js WebGL</span>
+      <span class="hero-tag">互動操作</span>
+      <span class="hero-tag">關卡制學習</span>
+      <span class="hero-tag">行動裝置支援</span>
+    </div>
+  </div>
+  <div class="hero-progress">
+    <div class="hp-ring">
+      <svg viewBox="0 0 80 80">
+        <circle class="bg" cx="40" cy="40" r="35"/>
+        <circle class="fg" id="progress-ring" cx="40" cy="40" r="35"/>
+      </svg>
+      <div class="hp-center" id="progress-pct">0%</div>
+    </div>
+    <div class="hp-label" id="progress-label">0 / 6 完成</div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="track-header">
+    <span class="track-title">📍 學習路線</span>
+    <div class="track-line"></div>
+  </div>
+
+  <div class="level-list" id="level-list"></div>
+
+  <div class="reward-card" id="reward-card" style="opacity:.35;">
+    <div class="reward-icon">🏆</div>
+    <div class="reward-title">Blender 建模師</div>
+    <div class="reward-desc">完成全部 6 關，獲得「Blender 建模入門」認證徽章<br>解鎖下一章：<strong>材質與 PBR 貼圖</strong></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const LEVELS = [
+  {
+    id:1, file:'blender-level1.html',
+    icon:'🏠', tag:'視角 · 基礎操作',
+    title:'你的第一個 3D 物件',
+    desc:'學習視角旋轉、編輯模式切換、面選取、Extrude 擠出、Scale 縮放',
+    skills:['Orbit 視角','Edit Mode','Face Select','Extrude','Scale'],
+    xp:350, totalXP:350,
+    key:'blender_l1'
+  },
+  {
+    id:2, file:'blender-level2.html',
+    icon:'✂️', tag:'Loop Cut · 邊線操作',
+    title:'Loop Cut 切割與滑動',
+    desc:'用 Ctrl+R 加入 Loop Cut，選取中間環狀邊，Scale 做出桶形或腰身',
+    skills:['Loop Cut','Edge Select','Ring Select','Edge Slide'],
+    xp:380, totalXP:730,
+    key:'blender_l2'
+  },
+  {
+    id:3, file:'blender-level3.html',
+    icon:'🔲', tag:'Inset · Bevel · 細節',
+    title:'Inset Face & Bevel',
+    desc:'選取面後用 Inset 縮進、Bevel 倒角讓邊緣圓潤，打造精緻細節',
+    skills:['Inset Faces','Bevel','Crease','Edge Loops'],
+    xp:400, totalXP:1130,
+    key:'blender_l3'
+  },
+  {
+    id:4, file:'blender-level4.html',
+    icon:'🏛️', tag:'Boolean · 挖洞',
+    title:'Boolean 挖洞操作',
+    desc:'用 Boolean Modifier 做差集，挖出門洞、窗框、圓孔等複雜形狀',
+    skills:['Boolean','Modifier','Difference','Apply'],
+    xp:420, totalXP:1550,
+    key:'blender_l4'
+  },
+  {
+    id:5, file:'blender-level5.html',
+    icon:'🔄', tag:'Subdivision · 曲面',
+    title:'Subdivision Surface 平滑',
+    desc:'加入 Subdivision 修改器讓模型平滑，搭配 Crease 控制邊緣銳利度',
+    skills:['Subdivision','Crease','Smooth Shading','Modifier Stack'],
+    xp:280, totalXP:1830,
+    key:'blender_l5'
+  },
+  {
+    id:6, file:'blender-level6.html',
+    icon:'🏡', tag:'綜合專題',
+    title:'Boss 關：建一棟小房子',
+    desc:'綜合運用所有技巧，從一個立方體建出完整的低多邊形小屋',
+    skills:['綜合應用','Low Poly','Scene Layout','Camera'],
+    xp:420, totalXP:2250,
+    key:'blender_l6',
+    isBoss:true
+  },
+];
+
+const TOTAL_XP = LEVELS.reduce((s,l)=>s+l.xp,0);
+
+function getLevelDone(key){ try{return JSON.parse(localStorage.getItem(key)||'[]').includes('done');}catch{return false;} }
+
+function renderLevels(){
+  const list = document.getElementById('level-list');
+  let totalEarned = 0;
+  let completedCount = 0;
+
+  list.innerHTML = LEVELS.map((lv,i)=>{
+    const done = getLevelDone(lv.key);
+    if(done){totalEarned+=lv.xp;completedCount++;}
+    const prev = i===0 || getLevelDone(LEVELS[i-1].key);
+    const locked = !prev && !done;
+    const isNext = prev && !done && !locked;
+
+    let cls = 'level-card';
+    if(done) cls+=' done';
+    else if(locked) cls+=' locked';
+    else if(isNext) cls+=' active-next';
+
+    const numCls = done?'done-num':locked?'locked-num':'active-num';
+    const numIcon = done?'✓':locked?'🔒':lv.icon;
+    const xpCls = done?'xp-badge done':'xp-badge';
+    const statusTxt = done?'✦ 已完成':locked?'🔒 未解鎖':isNext?'▶ 可開始':'－';
+    const statusCls = done?'done':isNext?'active':'';
+
+    const btn = done
+      ? `<a href="${lv.file}" class="play-btn replay">🔄 再練一次</a>`
+      : locked
+        ? `<span style="font-family:var(--mono);font-size:.62rem;color:var(--txt3);">完成上一關解鎖</span>`
+        : `<a href="${lv.file}" class="play-btn">▶ 開始關卡</a>`;
+
+    const connector = i < LEVELS.length-1
+      ? `<div class="connector${done?' done':''}"></div>`
+      : '';
+
+    return `
+      <div class="${cls}" id="lc-${lv.id}">
+        <div class="lc-inner">
+          <div class="lc-num ${numCls}">${numIcon}</div>
+          <div class="lc-info">
+            <div class="lc-tag">關卡 ${lv.id} · ${lv.tag}${lv.isBoss?' · 👑 BOSS':''}</div>
+            <div class="lc-title">${lv.title}</div>
+            <div class="lc-desc">${lv.desc}</div>
+            <div class="lc-skills">
+              ${lv.skills.map(s=>`<span class="skill-pill${done?' done':''}">${s}</span>`).join('')}
+            </div>
+          </div>
+          <div class="lc-meta">
+            <div class="${xpCls}">+${lv.xp} XP</div>
+            <div class="lc-status ${statusCls}">${statusTxt}</div>
+            ${btn}
+          </div>
+        </div>
+      </div>
+      ${connector}`;
+  }).join('');
+
+  // Update progress UI
+  const pct = Math.round(completedCount/LEVELS.length*100);
+  document.getElementById('progress-pct').textContent = pct+'%';
+  document.getElementById('progress-label').textContent = completedCount+' / '+LEVELS.length+' 完成';
+  const dash = 220;
+  document.getElementById('progress-ring').style.strokeDashoffset = dash - (dash * pct/100);
+  document.getElementById('total-xp-val').textContent = totalEarned+' / '+TOTAL_XP;
+  document.getElementById('total-xp-fill').style.width = (totalEarned/TOTAL_XP*100)+'%';
+  if(completedCount===LEVELS.length) document.getElementById('reward-card').style.opacity='1';
+}
+
+// Listen for completion messages from level pages
+window.addEventListener('storage', e=>{
+  if(e.key && e.key.startsWith('blender_l')) renderLevels();
+});
+
+// DEV: reset button (remove in prod)
+// localStorage.clear();
+
+renderLevels();
+
+// ── Blender Hub Mobile ──
+if(DEV.isMobile){
+  const mNav=document.createElement('div');
+  mNav.style.cssText='position:fixed;bottom:0;left:0;right:0;height:52px;background:#1a1a1a;border-top:1px solid #333;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)';
+  [['🏠','首頁','index.html'],['🗺️','地圖','blender-hub.html'],['🟠','關卡1','blender-level1.html'],['🌍','世界','world-map.html']].forEach(([ic,lb,hr])=>{
+    const a=document.createElement('a');a.href=hr;
+    a.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-decoration:none;color:rgba(255,200,100,.6);font-family:Fredoka One,sans-serif;';
+    a.innerHTML=`<span style="font-size:1rem">${ic}</span><span style="font-size:.5rem">${lb}</span>`;
+    mNav.appendChild(a);
+  });
+  document.body.appendChild(mNav);
+  document.body.style.paddingBottom='52px';
+}
+
+</script>
+</body>
+</html>

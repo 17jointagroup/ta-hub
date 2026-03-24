@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+
+<script>
+// ── Device Detection (runs before page renders) ──
+(function(){
+  var ua=navigator.userAgent;
+  var w=window.innerWidth||screen.width;
+  var isMobile=/iPhone|iPad|iPod|Android|Mobile/i.test(ua)||w<=768;
+  var isIOS=/iPhone|iPad|iPod/i.test(ua);
+  var size=w<=390?'xs':w<=430?'sm':w<=768?'md':'lg';
+  document.documentElement.setAttribute('data-device',isMobile?'mobile':'desktop');
+  document.documentElement.setAttribute('data-size',size);
+  if(isIOS)document.documentElement.classList.add('ios');
+  window.DEV={isMobile:isMobile,isIOS:isIOS,size:size,W:w};
+})();
+</script>
+
+<style id="device-css">
+/* ── Desktop defaults (no change) ── */
+[data-device="desktop"] {}
+
+/* ── Mobile: hide desktop-only elements ── */
+[data-device="mobile"] .desktop-only { display:none !important; }
+[data-device="desktop"] .mobile-only { display:none !important; }
+
+/* ── Mobile layout switches ── */
+[data-device="mobile"] .main {
+  flex-direction: column !important;
+}
+/* Left panel → bottom drawer on mobile */
+[data-device="mobile"] .lp,
+[data-device="mobile"] .lpanel,
+[data-device="mobile"] .instr-panel {
+  width: 100% !important;
+  max-height: 44vh !important;
+  min-height: 44vh !important;
+  border-right: none !important;
+  border-top: 2px solid var(--border, #333) !important;
+  order: 2 !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+}
+/* Right panel → hidden on mobile */
+[data-device="mobile"] .rp,
+[data-device="mobile"] .rpanel,
+[data-device="mobile"] .right-panel { display: none !important; }
+
+/* Viewport → top half on mobile */
+[data-device="mobile"] .viewport {
+  flex: 1 !important;
+  order: 1 !important;
+  min-height: 0 !important;
+}
+
+/* Topbar compact */
+[data-device="mobile"] .tb-crumb { display: none !important; }
+[data-device="mobile"] .topbar { height: 38px !important; }
+[data-device="mobile"] .tb-logo { font-size: .85rem !important; padding: 0 10px !important; }
+
+/* Chapter tabs */
+[data-device="mobile"] .chtabs,
+[data-device="mobile"] .chapter-tabs { height: 30px !important; }
+[data-device="mobile"] .cht,
+[data-device="mobile"] .ch-tab { font-size: .55rem !important; }
+
+/* Step content */
+[data-device="mobile"] .stit,
+[data-device="mobile"] .step-title { font-size: .95rem !important; }
+[data-device="mobile"] .desc,
+[data-device="mobile"] .step-desc { font-size: .76rem !important; line-height: 1.6 !important; }
+[data-device="mobile"] .lbody,
+[data-device="mobile"] .instr-body { padding: 10px 12px !important; }
+
+/* Buttons */
+[data-device="mobile"] .abtn { padding: 10px !important; font-size: .9rem !important; }
+[data-device="mobile"] .kh { padding: 6px 9px !important; margin-bottom: 6px !important; }
+[data-device="mobile"] .ck { padding: 6px 8px !important; font-size: .74rem !important; }
+[data-device="mobile"] .sdesc,
+[data-device="mobile"] .desc { margin-bottom: 10px !important; }
+
+/* Hint bar */
+[data-device="mobile"] .vp-hint { font-size: .58rem !important; padding: 5px 12px !important; }
+
+/* Sliders */
+[data-device="mobile"] input[type=range] { width: 100% !important; }
+
+/* Index page */
+[data-device="mobile"] .nav-links { display: none !important; }
+[data-device="mobile"] .hero { flex-direction: column !important; padding: 18px 14px !important; gap: 12px !important; min-height: auto !important; }
+[data-device="mobile"] .hero-stats { display: none !important; }
+[data-device="mobile"] .hero-title { font-size: 1.35rem !important; }
+[data-device="mobile"] .hero-sub { font-size: .78rem !important; }
+[data-device="mobile"] .cat-tab { font-size: .72rem !important; padding: 10px 9px !important; }
+[data-device="mobile"] .c-card { min-width: 165px !important; max-width: 165px !important; }
+[data-device="mobile"] .c-card-wide { min-width: 220px !important; max-width: 220px !important; }
+[data-device="mobile"] .c-thumb { height: 105px !important; }
+[data-device="mobile"] .c-title { font-size: .78rem !important; }
+[data-device="mobile"] .course-entry-strip { gap: 8px !important; }
+[data-device="mobile"] .entry-pill { min-width: 130px !important; padding: 9px 11px !important; }
+
+/* Blender hub */
+[data-device="mobile"] .hero { flex-direction: column !important; padding: 18px 14px 20px !important; }
+[data-device="mobile"] .hero-progress { margin-left: 0 !important; width: 100% !important; text-align: center !important; }
+[data-device="mobile"] .lc-desc,
+[data-device="mobile"] .lc-skills { display: none !important; }
+[data-device="mobile"] .play-btn { font-size: .75rem !important; padding: 6px 12px !important; }
+
+/* World map */
+[data-device="mobile"] .tech-strip { padding: 5px 8px !important; gap: 4px !important; flex-wrap: wrap !important; }
+[data-device="mobile"] .tech-badge { font-size: .5rem !important; padding: 2px 5px !important; }
+[data-device="mobile"] .progress-strip { right: 8px !important; }
+[data-device="mobile"] .prog-name { font-size: .7rem !important; }
+[data-device="mobile"] .prog-xp { display: none !important; }
+[data-device="mobile"] .popup { width: 95vw !important; }
+[data-device="mobile"] .popup.show { bottom: 12px !important; }
+[data-device="mobile"] .hint-bar { bottom: 90px !important; font-size: .58rem !important; }
+
+/* Build progress (level6) */
+[data-device="mobile"] .build-progress { height: 36px !important; padding: 0 6px !important; }
+[data-device="mobile"] .bp-step { padding: 0 5px !important; font-size: .52rem !important; }
+[data-device="mobile"] .bp-step::after { display: none !important; }
+
+/* iOS safe area */
+.ios body { padding-bottom: env(safe-area-inset-bottom) !important; }
+</style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>🟠 關卡1 — Blender 初體驗</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#141414;--panel:#1e1e1e;--panel2:#252525;--panel3:#2d2d2d;
+  --border:#333;--border2:#404040;
+  --acc:#e8780a;--acc2:#ff9f40;--acc3:#ffd080;
+  --green:#8bc34a;--green2:#c8f0a0;
+  --blue:#4a90d9;--blue2:#88c0ff;
+  --txt:#e8e8e8;--txt2:#a0a0a0;--txt3:#606060;--txt4:#404040;
+  --mono:'Space Mono',monospace;--title:'Fredoka One',sans-serif;--noto:'Noto Sans TC',sans-serif;
+}
+html,body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:var(--noto);}
+body{display:flex;flex-direction:column;}
+
+.topbar{height:42px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;flex-shrink:0;}
+.tb-logo{padding:0 14px;color:var(--acc2);font-family:var(--title);font-size:.95rem;letter-spacing:.05em;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.tb-back{padding:0 12px;color:var(--txt3);font-family:var(--mono);font-size:.68rem;display:flex;align-items:center;gap:5px;height:100%;border-right:1px solid var(--border);text-decoration:none;transition:.15s;}
+.tb-back:hover{color:var(--txt2);}
+.tb-crumb{padding:0 12px;color:var(--txt2);font-family:var(--mono);font-size:.68rem;display:flex;align-items:center;gap:6px;height:100%;}
+.tb-crumb span{color:var(--acc2);}
+.tb-xp{margin-left:auto;padding:0 14px;display:flex;align-items:center;gap:8px;border-left:1px solid var(--border);}
+.xp-lbl{font-family:var(--mono);font-size:.62rem;color:var(--txt3);letter-spacing:.06em;}
+.xp-num{font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--acc3);}
+.xp-track{width:80px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:2px;transition:width .6s cubic-bezier(.34,1.56,.64,1);}
+
+/* ── chapter tabs ── */
+.chtabs{height:36px;background:var(--panel2);border-bottom:1px solid var(--border);display:flex;flex-shrink:0;}
+.cht{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--mono);font-size:.63rem;letter-spacing:.05em;color:var(--txt4);border-right:1px solid var(--border);cursor:default;position:relative;transition:.2s;}
+.cht.done{color:var(--green);background:rgba(139,195,74,.04);}
+.cht.done::after,.cht.act::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.cht.done::after{background:var(--green);}
+.cht.act{color:var(--acc2);background:rgba(232,120,10,.06);}
+.cht.act::after{background:var(--acc2);}
+.cht-num{width:17px;height:17px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;flex-shrink:0;}
+.cht.done .cht-num{background:var(--green);color:#fff;border-color:var(--green);}
+
+/* ── layout ── */
+.main{flex:1;display:flex;overflow:hidden;min-height:0;}
+
+/* ── left panel ── */
+.lp{width:288px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sphdr{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.sdots{display:flex;gap:4px;}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:.3s;}
+.sdot.done{background:var(--green);}
+.sdot.act{background:var(--acc2);box-shadow:0 0 5px var(--acc);}
+.slbl{font-family:var(--mono);font-size:.6rem;color:var(--txt3);letter-spacing:.06em;margin-left:auto;}
+
+.lbody{flex:1;overflow-y:auto;padding:16px;}
+.lbody::-webkit-scrollbar{width:3px;}
+.lbody::-webkit-scrollbar-thumb{background:var(--border2);}
+
+.sc{display:none;}
+.sc.on{display:block;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:7px;}
+.stitle{font-family:var(--title);font-size:1.12rem;letter-spacing:.03em;margin-bottom:10px;line-height:1.25;}
+.sdesc{font-size:.82rem;color:var(--txt2);line-height:1.75;margin-bottom:14px;}
+.sdesc strong{color:var(--txt);}
+.sdesc code{font-family:var(--mono);background:var(--panel3);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;font-size:.73rem;color:var(--blue2);}
+.sdesc em{color:var(--acc2);font-style:normal;font-weight:700;}
+
+.kh{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:8px;padding:7px 11px;margin-bottom:8px;}
+.kb{font-family:var(--mono);font-size:.67rem;font-weight:700;background:var(--panel3);border:1px solid var(--border2);border-radius:5px;padding:2px 7px;color:var(--acc2);box-shadow:0 2px 0 var(--border);flex-shrink:0;white-space:nowrap;}
+.kd{font-size:.73rem;color:var(--txt2);}
+
+.ck{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;background:var(--panel2);margin-bottom:6px;font-size:.78rem;color:var(--txt2);border:1px solid var(--border);transition:.3s;}
+.ck.done{background:rgba(139,195,74,.07);border-color:rgba(139,195,74,.3);color:var(--green2);}
+
+.abtn{width:100%;padding:11px;border-radius:10px;background:var(--acc);border:none;cursor:pointer;font-family:var(--title);font-size:.95rem;color:#fff;letter-spacing:.03em;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
+.abtn:hover:not(:disabled){background:var(--acc2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,120,10,.28);}
+.abtn:active:not(:disabled){transform:scale(.97);}
+.abtn:disabled{background:var(--border);color:var(--txt3);cursor:not-allowed;}
+.abtn.g{background:var(--green);}
+.abtn.g:hover:not(:disabled){background:#9cd44a;box-shadow:0 4px 14px rgba(139,195,74,.28);}
+
+/* ── blender UI mockup ── */
+.bl-mock{background:#1a1a1a;border:1px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+.bl-mock-grid{display:grid;grid-template:"menu menu menu" 20px "tool view prop" minmax(80px,1fr) "time time time" 14px / 22px 1fr 22px;width:100%;}
+.bm-menu{grid-area:menu;background:#252525;border-bottom:1px solid #333;display:flex;align-items:center;gap:1px;padding:0 5px;}
+.bm-menu span{color:#888;padding:2px 5px;border-radius:2px;font-family:var(--mono);font-size:.48rem;cursor:default;}
+.bm-menu span.hi{background:rgba(232,120,10,.25);color:var(--acc2);}
+.bm-tool{grid-area:tool;background:#232323;border-right:1px solid #333;display:flex;flex-direction:column;align-items:center;padding:3px 2px;gap:2px;}
+.bm-tool div{width:16px;height:16px;border-radius:2px;background:#2e2e2e;border:1px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-size:.65rem;}
+.bm-tool div.hi{background:rgba(232,120,10,.2);border-color:var(--acc);}
+.bm-view{grid-area:view;background:#1e1e1e;position:relative;min-height:80px;}
+.bm-prop{grid-area:prop;background:#232323;border-left:1px solid #333;display:flex;flex-direction:column;align-items:center;padding:3px 2px;gap:2px;}
+.bm-prop div{width:16px;height:16px;border-radius:2px;background:#2e2e2e;border:1px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-size:.55rem;}
+.bm-time{grid-area:time;background:#252525;border-top:1px solid #333;}
+.bm-label{position:absolute;background:rgba(232,120,10,.18);border:1px solid rgba(232,120,10,.5);border-radius:4px;padding:2px 6px;font-family:var(--mono);font-size:.5rem;color:var(--acc2);white-space:nowrap;pointer-events:none;}
+.bm-caption{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:6px 8px;background:#191919;border-top:1px solid #252525;}
+.bm-cap-item{font-family:var(--mono);font-size:.52rem;color:#666;}
+.bm-cap-item span{color:var(--acc2);}
+
+/* ── view buttons ── */
+.view-btns{display:flex;gap:6px;margin-bottom:12px;}
+.vbtn{flex:1;padding:7px 4px;background:var(--panel2);border:1px solid var(--border2);color:var(--txt2);border-radius:7px;cursor:pointer;font-family:var(--mono);font-size:.62rem;letter-spacing:.04em;transition:.15s;text-align:center;line-height:1.5;}
+.vbtn:hover{border-color:var(--blue2);color:var(--blue2);}
+.vbtn.done{border-color:var(--green2);color:var(--green2);}
+
+/* ── viewport ── */
+.viewport{flex:1;position:relative;overflow:hidden;background:#1a1a1a;min-height:200px;}
+
+.vp-tl{position:absolute;top:10px;left:10px;display:flex;gap:6px;align-items:center;pointer-events:none;}
+.vp-tr{position:absolute;top:10px;right:10px;pointer-events:none;}
+.vpb{font-family:var(--mono);font-size:.63rem;letter-spacing:.05em;padding:3px 9px;border-radius:4px;background:rgba(12,12,12,.88);border:1px solid var(--border2);color:var(--txt2);backdrop-filter:blur(4px);}
+.vpb.o{color:#e8a030;border-color:rgba(232,160,48,.35);}
+.vpb.g{color:var(--green2);border-color:rgba(139,195,74,.35);}
+.vpb.sm{font-size:.56rem;color:var(--txt3);}
+.axes-wrap{position:absolute;bottom:14px;right:14px;pointer-events:none;}
+.vp-hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(12,12,12,.9);border:1px solid var(--border2);border-radius:100px;padding:6px 16px;font-family:var(--mono);font-size:.63rem;color:var(--txt2);letter-spacing:.04em;white-space:nowrap;pointer-events:none;}
+.sf{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:1.3rem;font-weight:700;color:#fff;background:rgba(0,0,0,.75);border:2px solid var(--acc2);border-radius:10px;padding:7px 18px;pointer-events:none;z-index:50;display:none;}
+@keyframes sfA{0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.96)}}
+
+/* Add menu overlay */
+.add-menu{background:#2a2a2a;border:1px solid #555;border-radius:6px;font-family:var(--mono);font-size:.7rem;z-index:60;min-width:130px;box-shadow:0 8px 28px rgba(0,0,0,.6);overflow:hidden;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+.am-item{padding:6px 14px;cursor:pointer;color:#ccc;border-bottom:1px solid #333;transition:.12s;}
+.am-item:last-child{border-bottom:none;}
+.am-item:hover{background:rgba(255,255,255,.07);}
+.am-item.hi{color:var(--acc2);background:rgba(232,160,48,.1);}
+
+/* ── right panel ── */
+.rp{width:185px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;}
+.rpsec{border-bottom:1px solid var(--border);padding:10px 12px;}
+.rptitle{font-family:var(--mono);font-size:.58rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.rprow{display:flex;justify-content:space-between;margin-bottom:5px;font-size:.75rem;}
+.rpk{color:var(--txt2);}
+.rpv{font-family:var(--mono);font-size:.68rem;color:var(--acc3);}
+
+/* xp pop */
+.xpp{position:fixed;font-family:var(--title);font-size:1.3rem;color:var(--acc3);pointer-events:none;z-index:9999;text-shadow:0 0 18px rgba(232,120,10,.6);animation:xpF 1.3s ease forwards;}
+@keyframes xpF{0%{opacity:1;transform:translateY(0) scale(.8)}20%{opacity:1;transform:translateY(-8px) scale(1.1)}100%{opacity:0;transform:translateY(-60px) scale(.9)}}
+
+/* completion */
+.comp{display:none;position:absolute;inset:0;z-index:300;background:rgba(8,8,15,.94);backdrop-filter:blur(14px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;}
+.comp.on{display:flex;animation:fadeIn .5s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.c-icon{font-size:4.5rem;animation:bonce .9s ease infinite alternate;margin-bottom:10px;}
+@keyframes bonce{from{transform:scale(1)}to{transform:scale(1.1)}}
+.c-stars{font-size:1.8rem;margin-bottom:14px;}
+.c-title{font-family:var(--title);font-size:2.1rem;color:var(--acc2);margin-bottom:8px;}
+.c-sub{color:var(--txt2);font-size:.88rem;line-height:1.7;margin-bottom:10px;max-width:38ch;}
+.c-xp{font-family:var(--title);font-size:1.3rem;color:var(--acc3);background:rgba(232,120,10,.1);border:1px solid rgba(232,120,10,.25);border-radius:100px;padding:7px 24px;margin-bottom:24px;}
+.c-btn{background:var(--acc);color:#fff;border:none;cursor:pointer;font-family:var(--title);font-size:1rem;padding:12px 32px;border-radius:100px;transition:.2s;text-decoration:none;display:inline-block;margin:4px;}
+.c-btn:hover{background:var(--acc2);}
+.c-btn.sec{background:rgba(255,255,255,.07);border:1px solid var(--border2);color:var(--txt2);}
+.fw{position:absolute;border-radius:50%;animation:fw .85s ease-out forwards;}
+@keyframes fw{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--tx),var(--ty))}}
+.lp{width:250px;}}
+
+
+
+  /* Left panel becomes bottom sheet on mobile */
+  body { overflow:hidden; }
+  .main { flex-direction:column !important; }
+
+  /* Left panel: fixed bottom drawer */
+  .lp, .lpanel, .instr-panel {
+    width:100% !important;
+    max-height:42vh !important;
+    min-height:42vh !important;
+    border-right:none !important;
+    border-top:2px solid var(--border,#333) !important;
+    order:2;
+    flex-shrink:0 !important;
+  }
+  .lbody { padding:12px 14px !important; }
+
+  /* Viewport takes remaining space */
+  .viewport {
+    flex:1 !important;
+    order:1;
+    min-height:0 !important;
+  }
+
+  /* Topbar compact */
+  .topbar { height:38px !important; }
+  .tb-crumb { display:none !important; }
+  .tb-logo { font-size:.85rem !important; padding:0 10px !important; }
+  .tb-xp { padding:0 8px !important; }
+  .xp-track { width:60px !important; }
+
+  /* Chapter tabs smaller */
+  .chtabs, .chapter-tabs { height:30px !important; }
+  .cht, .ch-tab { font-size:.55rem !important; }
+
+  /* Step title smaller */
+  .stit, .step-title, .sc-title { font-size:.95rem !important; }
+  .desc, .step-desc, .sc-desc { font-size:.76rem !important; line-height:1.6 !important; }
+  .ey, .step-num, .sc-eyebrow { font-size:.52rem !important; }
+
+  /* Hint bar */
+  .vp-hint { font-size:.58rem !important; padding:5px 12px !important; bottom:8px !important; }
+
+  /* Build progress strip */
+  .build-progress { height:36px !important; padding:0 8px !important; }
+  .bp-step { padding:0 6px !important; font-size:.55rem !important; }
+
+  /* Sliders full width */
+  input[type=range] { width:100% !important; }
+
+  /* Buttons */
+  .abtn { padding:9px !important; font-size:.88rem !important; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-logo">🌿 TA HUB</div>
+  <a class="tb-back" href="blender-hub.html">← 地圖</a>
+  <div class="tb-crumb">Blender › 建模入門 › <span>關卡 1</span></div>
+  <div class="tb-xp">
+    <span class="xp-lbl">XP</span>
+    <div class="xp-track"><div class="xp-fill" id="xpf" style="width:0%"></div></div>
+    <span class="xp-num" id="xpn">0 / 300</span>
+  </div>
+</div>
+
+<div class="chtabs">
+  <div class="cht act" id="cht0"><div class="cht-num">1</div>認識介面</div>
+  <div class="cht" id="cht1"><div class="cht-num">2</div>視角操控</div>
+  <div class="cht" id="cht2"><div class="cht-num">3</div>建立 Cube</div>
+</div>
+
+<div class="main">
+  <div class="lp">
+    <div class="sphdr">
+      <div class="sdots" id="sdots"></div>
+      <span class="slbl" id="slbl">步驟 1</span>
+    </div>
+    <div class="lbody" id="lbody"></div>
+  </div>
+
+  <div class="viewport" id="vp">
+    <!-- Three.js canvas injected by JS -->
+    <div class="vp-tl">
+      <div class="vpb o" id="vpmode">Perspective</div>
+      <div class="vpb g" id="vpsub" style="display:none">Object Mode</div>
+    </div>
+    <div class="vp-tr">
+      <div class="vpb sm" id="vpstat">Verts: 8 · Faces: 6</div>
+    </div>
+    <div class="axes-wrap"><canvas id="axcv" width="56" height="56" style="display:block;"></canvas></div>
+    <div class="vp-hint" id="hint">⏳ 請先閱讀左側介面說明</div>
+    <div class="sf" id="sf"></div>
+
+    <div class="comp" id="comp">
+      <div class="c-icon">🟠</div>
+      <div class="c-stars">⭐⭐⭐</div>
+      <div class="c-title">關卡 1 完成！</div>
+      <div class="c-sub">你學會了 Blender 的三大基礎：<br><strong>介面認識 · 視角操控 · 新增物件</strong><br><br>這就是每一個 3D 藝術家的起點！</div>
+      <div class="c-xp">+300 XP 🟠</div>
+      <a href="blender-level2.html" class="c-btn">▶ 關卡 2：Loop Cut →</a>
+      <a href="blender-hub.html" class="c-btn sec">🗺 關卡地圖</a>
+    </div>
+  </div>
+
+  <div class="rp">
+    <div class="rpsec">
+      <div class="rptitle">物件</div>
+      <div class="rprow"><span class="rpk">名稱</span><span class="rpv" id="rp-name">—</span></div>
+      <div class="rprow"><span class="rpk">位置 X</span><span class="rpv" id="rp-x">0.000</span></div>
+      <div class="rprow"><span class="rpk">位置 Y</span><span class="rpv" id="rp-y">0.000</span></div>
+      <div class="rprow"><span class="rpk">位置 Z</span><span class="rpv" id="rp-z">0.000</span></div>
+    </div>
+    <div class="rpsec">
+      <div class="rptitle">視角</div>
+      <div class="rprow"><span class="rpk">類型</span><span class="rpv" id="rp-vt">Persp</span></div>
+      <div class="rprow"><span class="rpk">距離</span><span class="rpv" id="rp-dist">9.0</span></div>
+    </div>
+    <div class="rpsec" style="flex:1">
+      <div class="rptitle">快捷鍵</div>
+      <div style="font-family:var(--mono);font-size:.6rem;line-height:2;color:var(--txt3);">
+        <div><span style="color:var(--acc2)">中鍵拖</span> 旋轉</div>
+        <div><span style="color:var(--acc2)">Shift+中</span> 平移</div>
+        <div><span style="color:var(--acc2)">滾輪</span> 縮放</div>
+        <div><span style="color:var(--acc2)">Num 1/3/7</span> 正/側/頂</div>
+        <div><span style="color:var(--acc2)">Shift+A</span> 新增</div>
+        <div><span style="color:var(--acc2)">G / R / S</span> 移/旋/縮</div>
+        <div><span style="color:var(--acc2)">X / Del</span> 刪除</div>
+        <div><span style="color:var(--acc2)">Tab</span> 切換模式</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Three.js ──────────────────────────────────
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.setClearColor(0x1a1a1a,1);
+const cv=renderer.domElement;
+cv.style.cssText='position:absolute;top:0;left:0;display:block;';
+document.getElementById('vp').appendChild(cv);
+
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog(0x1a1a1a,22,40);
+const camera=new THREE.PerspectiveCamera(45,1,.1,100);
+camera.position.set(5,4,5);
+camera.lookAt(0,1,0);
+
+scene.add(new THREE.AmbientLight(0xffffff,.35));
+const sun=new THREE.DirectionalLight(0xfff5e0,.9);sun.position.set(5,10,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+scene.add(Object.assign(new THREE.DirectionalLight(0x8888ff,.15),{position:new THREE.Vector3(-4,-3,-5)}));
+scene.add(new THREE.GridHelper(14,28,0x2e2e2e,0x242424));
+const axH=new THREE.AxesHelper(.7);axH.position.y=.01;scene.add(axH);
+const flr=new THREE.Mesh(new THREE.PlaneGeometry(14,14),new THREE.ShadowMaterial({opacity:.08}));flr.rotation.x=-Math.PI/2;flr.position.y=-.01;flr.receiveShadow=true;scene.add(flr);
+
+let cubeMesh=null,cubeEdge=null;
+let cubeY=0,cubeScaleZ=1;
+
+function buildCube(){
+  if(cubeMesh)scene.remove(cubeMesh);
+  if(cubeEdge)scene.remove(cubeEdge);
+  const geo=new THREE.BoxGeometry(2,2,2);
+  cubeMesh=new THREE.Mesh(geo,new THREE.MeshPhongMaterial({color:0x4a6a8a,shininess:55,specular:0x1a2a3a,transparent:true,opacity:.9}));
+  cubeMesh.castShadow=true;cubeMesh.receiveShadow=true;
+  cubeMesh.position.y=1+cubeY;cubeMesh.scale.y=cubeScaleZ;
+  scene.add(cubeMesh);
+  cubeEdge=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0xff7f00}));
+  cubeEdge.position.copy(cubeMesh.position);cubeEdge.scale.copy(cubeMesh.scale);cubeEdge.scale.multiplyScalar(1.006);
+  scene.add(cubeEdge);
+  document.getElementById('rp-name').textContent='Cube';
+  document.getElementById('vpstat').textContent='Verts: 8 · Faces: 6';
+}
+buildCube();
+
+function syncCube(){
+  if(!cubeMesh)return;
+  cubeMesh.position.y=1+cubeY;cubeMesh.scale.y=cubeScaleZ;
+  cubeEdge.position.copy(cubeMesh.position);cubeEdge.scale.set(1,cubeScaleZ*1.006,1);
+  document.getElementById('rp-z').textContent=cubeY.toFixed(3);
+}
+
+// ── Orbit ──
+const orb={d:false,px:0,py:0,th:Math.PI/4,ph:.72,r:9,drag:0};
+function gp(e){return e.touches?{x:e.touches[0].clientX,y:e.touches[0].clientY}:{x:e.clientX,y:e.clientY};}
+function updCam(){
+  const s=Math.sin(orb.ph),c2=Math.cos(orb.ph);
+  camera.position.set(orb.r*s*Math.sin(orb.th),orb.r*c2,orb.r*s*Math.cos(orb.th));
+  camera.lookAt(0,.5,0);
+  drawAxes();
+  document.getElementById('rp-dist').textContent=orb.r.toFixed(1);
+}
+updCam();
+
+cv.addEventListener('mousedown',e=>{orb.d=true;const p=gp(e);orb.px=p.x;orb.py=p.y;orb.drag=0;});
+cv.addEventListener('touchstart',e=>{e.preventDefault();orb.d=true;const p=gp(e);orb.px=p.x;orb.py=p.y;orb.drag=0;},{passive:false});
+window.addEventListener('mouseup',()=>orb.d=false);
+window.addEventListener('touchend',()=>orb.d=false);
+window.addEventListener('mousemove',e=>{if(!orb.d)return;const p=gp(e);const dx=p.x-orb.px,dy=p.y-orb.py;orb.th-=dx*.009;orb.ph=Math.max(.12,Math.min(2.8,orb.ph+dy*.008));orb.px=p.x;orb.py=p.y;orb.drag+=Math.sqrt(dx*dx+dy*dy);updCam();handleOrbit();});
+window.addEventListener('touchmove',e=>{if(!orb.d)return;e.preventDefault();const p=gp(e);const dx=p.x-orb.px,dy=p.y-orb.py;orb.th-=dx*.009;orb.ph=Math.max(.12,Math.min(2.8,orb.ph+dy*.008));orb.px=p.x;orb.py=p.y;orb.drag+=Math.sqrt(dx*dx+dy*dy);updCam();handleOrbit();},{passive:false});
+cv.addEventListener('wheel',e=>{orb.r=Math.max(2,Math.min(28,orb.r+e.deltaY*.04));updCam();handleZoom();});
+
+// ── Axes gizmo ──
+const axcv=document.getElementById('axcv');const axctx=axcv.getContext('2d');
+function drawAxes(){
+  axctx.clearRect(0,0,56,56);
+  const cx=28,cy=28,r=20;
+  [{d:[1,0,0],c:'#e85050',l:'X'},{d:[0,1,0],c:'#70c030',l:'Y'},{d:[0,0,1],c:'#4090d0',l:'Z'}].forEach(v=>{
+    const px2=v.d[0]*Math.cos(orb.th)+v.d[2]*Math.sin(orb.th);
+    const py2=-v.d[0]*Math.sin(orb.th)*Math.cos(orb.ph)+v.d[1]*Math.sin(orb.ph)+v.d[2]*Math.cos(orb.th)*Math.cos(orb.ph);
+    const ex=cx+px2*r,ey=cy-py2*r;
+    axctx.beginPath();axctx.moveTo(cx,cy);axctx.lineTo(ex,ey);axctx.strokeStyle=v.c;axctx.lineWidth=2;axctx.stroke();
+    axctx.fillStyle=v.c;axctx.font='bold 9px Space Mono,monospace';axctx.fillText(v.l,ex-4,ey+3);
+  });
+}
+
+// ── State ──
+let ch=0,st=0,xp=0,tasks={};
+const TOTAL_XP=300;
+
+// ── Chapter / Step data ──
+const CHS=[
+  {label:'認識介面',steps:[
+    {id:'ui1',ey:'第1章 · 步驟 1/4',title:'Blender 的五大<br>介面區域',col:'var(--acc2)',
+     body:`Blender 開啟後有幾個固定區域，每個都有不同用途。先看懂它們，才能快速找到工具！<br><br>右側有一個 <strong>Blender 介面預覽圖</strong>，對照各個區域位置看看吧。`,
+     diag:true,btn:{l:'👀 我看懂了，繼續',fn:'ns',dis:false}},
+    {id:'ui2',ey:'第1章 · 步驟 2/4',title:'頂部選單列<br>與工作區標籤',col:'var(--acc2)',
+     body:`最上方是 <strong>Blender 主選單</strong>（File / Edit / Render…）。<br><br>旁邊是<strong>工作區標籤</strong>。<em>Layout</em> 是預設，用來建模擺物件。<em>Shading</em> 是材質，<em>Animation</em> 是動畫。<br><br>每個工作區的視窗佈局不一樣，但 3D Viewport 都在中間。`,
+     hints:[{k:'File',d:'儲存、匯入匯出、新建檔案'},{k:'Render',d:'渲染靜態圖或動畫'},{k:'Layout',d:'預設工作區，建模用'}],
+     btn:{l:'繼續',fn:'ns',dis:false}},
+    {id:'ui3',ey:'第1章 · 步驟 3/4',title:'工具列 (T) 與<br>側邊 N-Panel',col:'var(--acc2)',
+     body:`左側<strong>工具列 (Toolbar)</strong> 放常用操作按鈕，按 <code>T</code> 顯示/隱藏。<br><br>按 <code>N</code> 打開右側 <strong>N-Panel</strong>，顯示物件的精確數值（位置 / 旋轉 / 大小）。<br><br>右方垂直那排圖示是 <strong>Properties 面板</strong>——管理材質、修改器、場景等所有設定。`,
+     hints:[{k:'T',d:'顯示/隱藏 工具列'},{k:'N',d:'顯示/隱藏 N-Panel 數值欄'}],
+     btn:{l:'繼續',fn:'ns',dis:false}},
+    {id:'ui4',ey:'第1章 · 步驟 4/4',title:'3D Viewport<br>是你的主舞台',col:'var(--acc2)',
+     body:`畫面正中間最大那塊就是 <strong>3D Viewport</strong>，你的建模、擺物件、觀察場景全在這裡。<br><br>底部的<strong>時間軸 (Timeline)</strong> 是動畫課才會用到的。<br><br>現在，我們進入第 2 章——學會在 3D Viewport 裡<strong>自由移動視角</strong>！`,
+     btn:{l:'✅ 第1章完成！進入視角操控 →',fn:'cc',dis:false,g:true}},
+  ]},
+  {label:'視角操控',steps:[
+    {id:'nv0',ey:'第2章 · 步驟 1/4',title:'3D 視角的<br>三種核心操作',col:'var(--blue2)',
+     body:`在 3D Viewport 裡，用<strong>滑鼠</strong>有三種視角操控方式：<br><br>
+🔄 <strong>旋轉 Orbit</strong>：中鍵拖動（這裡用左鍵模擬）<br>
+🔁 <strong>平移 Pan</strong>：Shift + 中鍵拖動<br>
+🔍 <strong>縮放 Zoom</strong>：滾輪上下<br><br>
+Blender 也支援觸控板：雙指拖動平移，捏合縮放。`,
+     hints:[{k:'中鍵拖動',d:'旋轉視角 Orbit'},{k:'Shift+中鍵',d:'平移視角 Pan'},{k:'滾輪',d:'縮放 Zoom In/Out'}],
+     btn:{l:'🎮 開始練習旋轉！',fn:'startNav',dis:false}},
+    {id:'nv1',ey:'第2章 · 步驟 2/4',title:'練習：旋轉視角<br>觀察立方體',col:'var(--blue2)',
+     body:`在右側 3D 視窗裡，<strong>按住左鍵拖動</strong>旋轉視角（模擬 Blender 的中鍵旋轉）。<br><br>試著把立方體轉到你能看到<strong>所有六個面</strong>，包括底面！`,
+     hints:[{k:'左鍵拖動',d:'旋轉視角（模擬中鍵）'}],
+     cks:[{id:'ck-orb',l:'旋轉超過 90°'},{id:'ck-bot',l:'視角低到看見底面'}],
+     btn:{l:'✓ 繼續',fn:'ns',dis:true,id:'btn-orb'}},
+    {id:'nv2',ey:'第2章 · 步驟 3/4',title:'練習：滾輪<br>縮放距離',col:'var(--blue2)',
+     body:`用<strong>滾輪</strong>把視角拉近到幾乎充滿畫面，再拉遠到能看到整個場景和地板格線。`,
+     hints:[{k:'滾輪↑',d:'放大（靠近）Zoom In'},{k:'滾輪↓',d:'縮小（遠離）Zoom Out'}],
+     cks:[{id:'ck-zi',l:'縮放靠近（距離 < 5）'},{id:'ck-zo',l:'縮放遠離（距離 > 18）'}],
+     btn:{l:'✓ 繼續',fn:'ns',dis:true,id:'btn-zoom'}},
+    {id:'nv3',ey:'第2章 · 步驟 4/4',title:'快速切換<br>標準視圖',col:'var(--blue2)',
+     body:`小鍵盤有固定視角快捷鍵，按一下立刻跳到精確視角——建模時非常常用！<br><br>點下方按鈕或按對應數字鍵來練習：`,
+     hints:[{k:'Num 1',d:'正視圖 Front'},{k:'Num 3',d:'側視圖 Right'},{k:'Num 7',d:'頂視圖 Top'}],
+     viewBtns:true,
+     cks:[{id:'ck-front',l:'切換正視圖 Num 1'},{id:'ck-top',l:'切換頂視圖 Num 7'}],
+     btn:{l:'✅ 第2章完成！進入建立 Cube →',fn:'cc',dis:true,g:true,id:'btn-nv3'}},
+  ]},
+  {label:'建立 Cube',steps:[
+    {id:'cb0',ey:'第3章 · 步驟 1/4',title:'Shift+A<br>新增物件選單',col:'var(--green2)',
+     body:`在 3D Viewport 裡按 <code>Shift + A</code>，會彈出<strong>新增物件</strong>選單。<br><br>裡面可以新增：<br>
+• <em>Mesh</em>（立方體、球、圓柱⋯）<br>
+• <em>Light</em>（燈光）<br>
+• <em>Camera</em>（攝影機）<br>
+• <em>Empty</em>（空物件，用於綁定）<br><br>
+今天從最基本的 <em>Mesh → Cube</em> 開始！`,
+     hints:[{k:'Shift+A',d:'開啟新增物件選單'},{k:'Mesh → Cube',d:'新增立方體到場景'}],
+     btn:{l:'📦 打開 Shift+A 選單',fn:'openMenu',dis:false}},
+    {id:'cb1',ey:'第3章 · 步驟 2/4',title:'從選單選<br>Mesh → Cube',col:'var(--green2)',
+     body:`選單已開啟！Blender 預設場景其實已有一個 Cube，這裡我們模擬<strong>刪掉它再新增一個</strong>的流程。<br><br>點下方選單中的 <em>🔲 Cube</em>！`,
+     cks:[{id:'ck-add',l:'新增 Cube 到場景'}],
+     btn:{l:'📦 Mesh → Cube',fn:'addCube',dis:false}},
+    {id:'cb2',ey:'第3章 · 步驟 3/4',title:'用 G 移動<br>你的 Cube',col:'var(--green2)',
+     body:`選取 Cube 後，按 <code>G</code> 進入<strong>移動模式</strong>，滑鼠移動 Cube 跟著動。<br><br>按 <code>G → Z</code> 限制只能沿 Z 軸（上下）移動。<br><br>拖動滑桿模擬 G → Z 的效果：`,
+     hints:[{k:'G',d:'移動（Grab）物件'},{k:'G → Z',d:'只沿 Z 軸移動'}],
+     slider:{id:'sl-move',label:'G → Z  Z 軸高度',min:-200,max:200,val:0,fn:'moveC'},
+     cks:[{id:'ck-mov',l:'沿 Z 軸移動 Cube'}],
+     btn:{l:'✓ 繼續',fn:'ns',dis:true,id:'btn-cb2'}},
+    {id:'cb3',ey:'第3章 · 步驟 4/4',title:'用 S 縮放<br>完成關卡！',col:'var(--green2)',
+     body:`按 <code>S</code> 進入<strong>縮放模式</strong>，等比放大縮小物件。<br><br><code>S → Z</code> 只縮放 Z 軸高度，做出<strong>細長柱</strong>或<strong>扁平板</strong>。<br><br>試著做出一個高挑的方柱或薄薄的地板！`,
+     hints:[{k:'S',d:'等比縮放物件'},{k:'S → Z',d:'只縮放 Z 軸高度'}],
+     slider:{id:'sl-scale',label:'S → Z  高度縮放',min:20,max:300,val:100,fn:'scaleC'},
+     cks:[{id:'ck-sc',l:'縮放改變 Cube 形狀'}],
+     btn:{l:'🎉 完成關卡！獲得 XP！',fn:'fin',dis:true,g:true,id:'btn-cb3'}},
+  ]},
+];
+
+// ── Render ──────────────────────────────────
+function renderS(){
+  const C=CHS[ch],S=C.steps[st];
+  // chapter tabs
+  CHS.forEach((_,i)=>{
+    const t=document.getElementById('cht'+i);
+    t.className='cht'+(i<ch?' done':i===ch?' act':'');
+  });
+  // dots
+  document.getElementById('sdots').innerHTML=C.steps.map((_,i)=>
+    `<div class="sdot${i<st?' done':i===st?' act':''}"></div>`).join('');
+  document.getElementById('slbl').textContent=`步驟 ${st+1} / ${C.steps.length}`;
+
+  let h=`<div class="sc on">
+    <div class="eyebrow">${S.ey}</div>
+    <div class="stitle" style="color:${S.col}">${S.title}</div>
+    <div class="sdesc">${S.body}</div>`;
+
+  if(S.diag) h+=makeDiag();
+
+  (S.hints||[]).forEach(k=>{h+=`<div class="kh"><span class="kb">${k.k}</span><span class="kd">${k.d}</span></div>`;});
+
+  if(S.viewBtns) h+=`<div class="view-btns">
+    <div class="vbtn${tasks['ck-front']?' done':''}" id="vb1" onclick="sv('front')">Num 1<br><span style="color:var(--txt3)">正視圖</span></div>
+    <div class="vbtn" onclick="sv('right')">Num 3<br><span style="color:var(--txt3)">側視圖</span></div>
+    <div class="vbtn${tasks['ck-top']?' done':''}" id="vb7" onclick="sv('top')">Num 7<br><span style="color:var(--txt3)">頂視圖</span></div>
+  </div>`;
+
+  if(S.slider){const sl=S.slider;h+=`
+    <div style="margin:12px 0;">
+      <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.64rem;color:var(--txt3);margin-bottom:5px;">
+        <span>${sl.label}</span><span id="slv" style="color:var(--acc3)">0</span>
+      </div>
+      <input type="range" id="${sl.id}" min="${sl.min}" max="${sl.max}" value="${sl.val}"
+        style="width:100%;accent-color:var(--acc);cursor:pointer;"
+        oninput="${sl.fn}(this.value)">
+    </div>`;}
+
+  (S.cks||[]).forEach(c=>{h+=`<div class="ck${tasks[c.id]?' done':''}" id="${c.id}">
+    <span style="font-size:.85rem;flex-shrink:0">${tasks[c.id]?'✅':'⭕'}</span> ${c.l}
+  </div>`;});
+
+  const b=S.btn;
+  h+=`<button class="abtn${b.g?' g':''}" ${b.id?'id="'+b.id+'"':''} onclick="${b.fn}()" ${b.dis?'disabled':''}>${b.l}</button>`;
+  h+='</div>';
+  document.getElementById('lbody').innerHTML=h;
+}
+
+function makeDiag(){
+  return `<div class="bl-mock">
+  <div class="bl-mock-grid">
+    <div class="bm-menu">
+      <span class="hi">File</span><span>Edit</span><span>Render</span><span>Window</span>
+      <span style="margin:0 4px;color:#444">|</span>
+      <span style="color:#aaa">Layout</span><span style="color:#555">Modeling</span><span style="color:#555">Shading</span>
+    </div>
+    <div class="bm-tool">
+      <div class="hi">⬚</div><div>✛</div><div>↻</div><div>⊞</div><div>✏</div>
+    </div>
+    <div class="bm-view" id="bmv">
+      <canvas id="diagcv" style="width:100%;height:100%;display:block;"></canvas>
+      <div class="bm-label" style="top:3px;left:36px;">← 3D Viewport（主舞台）</div>
+    </div>
+    <div class="bm-prop">
+      <div>🎬</div><div>🌐</div><div style="background:rgba(232,120,10,.2)">📦</div><div>🔧</div><div>🎨</div>
+    </div>
+    <div class="bm-time"></div>
+  </div>
+  <div class="bm-caption">
+    <div class="bm-cap-item"><span>① 頂部選單</span> File/Edit/Render</div>
+    <div class="bm-cap-item"><span>② 工具列</span> T鍵顯示/隱藏</div>
+    <div class="bm-cap-item"><span>③ 3D Viewport</span> 主要建模區</div>
+    <div class="bm-cap-item"><span>④ 屬性面板</span> 材質/修改器</div>
+  </div>
+</div>`;
+}
+
+// ── Actions ──────────────────────────────────
+function ns(){st++;if(st>=CHS[ch].steps.length)st=CHS[ch].steps.length-1;renderS();uh();}
+function cc(){xpadd(30);ch++;st=0;if(ch>=CHS.length){fin();return;}renderS();uh();flash(ch===1?'第 2 章！':'第 3 章！');}
+function startNav(){document.getElementById('vpmode').textContent='Perspective · 視角練習';document.getElementById('vpmode').classList.add('o');ns();}
+function openMenu(){ns();showMenu();}
+function addCube(){buildCube();mark('ck-add');xpadd(40);hint('🎉 Cube 新增！');flash('Mesh → Cube ✓');setTimeout(ns,600);}
+function moveC(v){cubeY=v/100;const el=document.getElementById('slv');if(el)el.textContent=cubeY.toFixed(2);syncCube();if(Math.abs(cubeY)>.3&&!tasks['ck-mov']){mark('ck-mov');xpadd(35);const b=document.getElementById('btn-cb2');if(b)b.disabled=false;hint('✅ G→Z 完成！');}}
+function scaleC(v){cubeScaleZ=v/100;const el=document.getElementById('slv');if(el)el.textContent=cubeScaleZ.toFixed(2);syncCube();if((cubeScaleZ<.7||cubeScaleZ>1.5)&&!tasks['ck-sc']){mark('ck-sc');xpadd(35);const b=document.getElementById('btn-cb3');if(b)b.disabled=false;hint('🎉 S→Z 完成！可以完成關卡！');}}
+function fin(){xpadd(TOTAL_XP-xp);try{localStorage.setItem('blender_l1',JSON.stringify(['done']));}catch(e){}const ov=document.getElementById('comp');const cols=['#e8780a','#ffd166','#8bc34a','#c8f0a0','#4a90d9'];for(let i=0;i<36;i++){const d=document.createElement('div');d.className='fw';const tx=(Math.random()-.5)*500,ty=-80-Math.random()*360;d.style.cssText=`width:8px;height:8px;background:${cols[i%5]};left:${30+Math.random()*40}%;top:45%;--tx:${tx}px;--ty:${ty}px;animation-delay:${Math.random()*.5}s`;ov.appendChild(d);}ov.classList.add('on');}
+
+// Nav handlers
+function handleOrbit(){
+  if(ch!==1)return;const S=CHS[1].steps[st];
+  if(S&&S.id==='nv1'){
+    if(orb.drag>85&&!tasks['ck-orb']){mark('ck-orb');xpadd(25);hint('✅ 旋轉完成！試著看到底面');}
+    if(orb.ph>1.1&&!tasks['ck-bot']){mark('ck-bot');xpadd(25);}
+    if(tasks['ck-orb']&&tasks['ck-bot']){const b=document.getElementById('btn-orb');if(b)b.disabled=false;hint('✅ 旋轉全部完成！');}
+  }
+}
+function handleZoom(){
+  if(ch!==1)return;const S=CHS[1].steps[st];
+  if(S&&S.id==='nv2'){
+    if(orb.r<5&&!tasks['ck-zi']){mark('ck-zi');xpadd(20);}
+    if(orb.r>18&&!tasks['ck-zo']){mark('ck-zo');xpadd(20);}
+    if(tasks['ck-zi']&&tasks['ck-zo']){const b=document.getElementById('btn-zoom');if(b)b.disabled=false;hint('✅ 縮放完成！');}
+  }
+}
+
+function sv(v){
+  if(v==='front'){orb.th=0;orb.ph=Math.PI/2+.01;flash('Num 1  正視圖');}
+  if(v==='right'){orb.th=Math.PI/2;orb.ph=Math.PI/2+.01;flash('Num 3  側視圖');}
+  if(v==='top'){orb.th=0;orb.ph=.01;flash('Num 7  頂視圖');}
+  updCam();
+  if(ch===1&&st===3){
+    if(v==='front'&&!tasks['ck-front']){mark('ck-front');xpadd(20);const el=document.getElementById('vb1');if(el)el.classList.add('done');}
+    if(v==='top'&&!tasks['ck-top']){mark('ck-top');xpadd(20);const el=document.getElementById('vb7');if(el)el.classList.add('done');}
+    if(tasks['ck-front']&&tasks['ck-top']){const b=document.getElementById('btn-nv3');if(b)b.disabled=false;hint('✅ 視圖切換全部完成！');}
+  }
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='1')sv('front');if(e.key==='3')sv('right');if(e.key==='7')sv('top');
+});
+
+// Add menu
+function showMenu(){
+  let m=document.getElementById('amenu');if(m)m.remove();
+  m=document.createElement('div');m.id='amenu';m.className='add-menu';
+  [['📐 Mesh ▶','m'],['💡 Light ▶',''],['📷 Camera',''],['✕ Empty ▶','']].forEach(([l,t])=>{
+    const d=document.createElement('div');d.className='am-item'+(t==='m'?' hi':'');d.textContent=l;
+    if(t==='m')d.onclick=showMeshSub;
+    else d.onclick=()=>{m.remove();hint('💡 這次先練習 Cube！');};
+    m.appendChild(d);
+  });
+  document.getElementById('vp').appendChild(m);
+}
+function showMeshSub(){
+  let m=document.getElementById('amenu');if(m)m.remove();
+  m=document.createElement('div');m.id='amenu';m.className='add-menu';
+  [['🔲 Cube','c'],['⚬ UV Sphere',''],['○ Circle',''],['⌺ Cylinder',''],['⌔ Cone',''],['⬡ Torus','']].forEach(([l,t])=>{
+    const d=document.createElement('div');d.className='am-item'+(t==='c'?' hi':'');d.textContent=l;
+    if(t==='c')d.onclick=()=>{m.remove();addCube();};
+    else d.onclick=()=>{m.remove();hint('💡 這次先練習 Cube！');};
+    m.appendChild(d);
+  });
+  document.getElementById('vp').appendChild(m);
+}
+
+// XP / task helpers
+function xpadd(a){xp=Math.min(TOTAL_XP,xp+a);document.getElementById('xpf').style.width=(xp/TOTAL_XP*100)+'%';document.getElementById('xpn').textContent=xp+' / '+TOTAL_XP;const p=document.createElement('div');p.className='xpp';p.textContent='+'+a+' XP';p.style.cssText=`left:${window.innerWidth*.62}px;top:${window.innerHeight*.28}px`;document.body.appendChild(p);setTimeout(()=>p.remove(),1400);}
+function mark(id){tasks[id]=true;const el=document.getElementById(id);if(el){el.classList.add('done');el.innerHTML='<span style="font-size:.85rem;flex-shrink:0">✅</span> '+el.textContent.replace('⭕','').trim();}}
+function hint(t){document.getElementById('hint').textContent=t;}
+function flash(t){const sf=document.getElementById('sf');sf.textContent=t;sf.style.display='block';sf.style.animation='none';requestAnimationFrame(()=>{sf.style.animation='sfA .9s ease forwards';});setTimeout(()=>sf.style.display='none',920);}
+function uh(){
+  const hints={
+    'ui1':'👀 認識 Blender 的五大介面區域',
+    'ui2':'📌 頂部選單是主要控制中心',
+    'ui3':'⌨ 按 T 或 N 試試看！',
+    'ui4':'🎬 3D Viewport 是主舞台',
+    'nv0':'🖱 看完後按「開始練習」！',
+    'nv1':'🖱 左鍵拖動旋轉視角，看到底面！',
+    'nv2':'🖱 滾輪拉近再拉遠！',
+    'nv3':'⌨ 按右側按鈕或數字鍵切換視圖',
+    'cb0':'📦 Shift+A 是建模最重要的快捷鍵',
+    'cb1':'📦 點「Mesh → Cube」',
+    'cb2':'🔧 拖動滑桿模擬 G→Z 移動',
+    'cb3':'🔧 拖動滑桿模擬 S→Z 縮放',
+  };
+  const S=CHS[ch].steps[st];if(S&&hints[S.id])hint(hints[S.id]);
+}
+
+// ── Resize: use getBoundingClientRect for accuracy ──
+function doResize(){
+  const vp=document.getElementById('vp');
+  const w=vp.clientWidth||vp.offsetWidth||600;
+  const h=vp.clientHeight||vp.offsetHeight||500;
+  if(w<10||h<10)return;
+  renderer.setSize(w,h);
+  camera.aspect=w/h;
+  camera.updateProjectionMatrix();
+}
+// ResizeObserver fires after actual layout paint
+const _ro=new ResizeObserver(doResize);
+_ro.observe(cv.parentElement);
+window.addEventListener('resize',doResize);
+
+// ── Render loop ──────────────────────────────
+let t2=0;
+(function loop(){
+  requestAnimationFrame(loop);t2+=.016;
+  /* resize handled by ResizeObserver */
+  if(cubeMesh){
+    if(ch<2){cubeMesh.rotation.y+=.004;if(cubeEdge)cubeEdge.rotation.y=cubeMesh.rotation.y;}
+    cubeMesh.position.y=1+cubeY+Math.sin(t2*.7)*.04;
+    if(cubeEdge)cubeEdge.position.y=cubeMesh.position.y;
+  }
+  renderer.render(scene,camera);
+})();
+
+// ── Init ──────────────────────────────────────
+renderS();
+// Staggered resize calls to catch layout completion
+[0,16,50,150,400].forEach(ms=>setTimeout(()=>{ doResize(); updCam(); renderer.render(scene,camera); },ms));
+setTimeout(()=>{ xpadd(10); uh(); },600);
+
+// ── Mobile 3D Layout Adjustments ──
+if(DEV.isMobile){
+  // Larger touch targets for sliders
+  document.querySelectorAll('input[type=range]').forEach(s=>{
+    s.style.height='32px';
+  });
+  // Show mobile hint
+  const hint=document.getElementById('hint')||document.getElementById('vp-hint');
+  if(hint) hint.textContent='👆 拖動旋轉 · 雙指縮放';
+  // Reduce render quality slightly for performance
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
+}
+
+
+// ── Level Mobile Bottom Nav ──
+if(DEV.isMobile){
+  const mNav=document.createElement('div');
+  mNav.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:200';
+  // The bottom panel already acts as nav - just add safe area
+  mNav.style.paddingBottom='env(safe-area-inset-bottom)';
+  // Add back button pill
+  const back=document.createElement('a');
+  back.href='blender-hub.html';
+  back.style.cssText='position:fixed;top:42px;left:0;background:#1e1e1e;border:1px solid #333;border-left:none;border-radius:0 6px 6px 0;padding:5px 10px 5px 8px;font-family:Space Mono,monospace;font-size:.6rem;color:#a0a0a0;text-decoration:none;z-index:150;display:flex;align-items:center;gap:4px;';
+  back.innerHTML='← 地圖';
+  document.body.appendChild(back);
+}
+
+</script>
+</body>
+</html>
