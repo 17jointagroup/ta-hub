@@ -629,7 +629,7 @@ function buildBody(lesson, isDone){
         <div class="challenge-options">${opts}</div>
         <div id="explain-${lesson.id}" style="display:none;margin-top:12px;padding:12px;background:rgba(0,245,196,.05);border:1px solid rgba(0,245,196,.2);border-radius:10px;font-size:.85rem;line-height:1.6;color:var(--txt2)"></div>
       </div>
-      ${!isDone ? `<button class="complete-btn" id="btn-${lesson.id}" onclick="completeLesson('${lesson.id}')">
+      ${!isDone ? `<button class="complete-btn" id="btn-${lesson.id}" onclick="completeLesson('${lesson.id}')" disabled>
         ⚡ 完成此關 → 解鎖下一關
       </button>` : ''}
     </div>
@@ -665,12 +665,12 @@ function checkAnswer(lessonId, idx){
   const isCorrect = idx === lesson.challenge.ans;
   const ex = document.getElementById('explain-'+lessonId);
   if(isCorrect){
-    ex.textContent = '✅ 答對了！太棒了！';
+    ex.textContent = '✅ 答對了！太棒了！請按下方按鈕繼續 👇';
     ex.style.color='#2d7a2d';
     ex.style.background='rgba(45,122,45,.08)';
     ex.style.borderColor='rgba(45,122,45,.25)';
-    // auto-unlock
-    setTimeout(()=>completeLesson(lessonId), 600);
+    const btn1=document.getElementById('btn-'+lessonId);
+    if(btn1){btn1.disabled=false;btn1.textContent='✅ 完成此關 → 解鎖下一關';}
   } else {
     ex.textContent = '❌ 答錯了，再試試看！';
     ex.style.color='';ex.style.background='';ex.style.borderColor='';

@@ -550,7 +550,7 @@ function buildBody(les,done){
           <div class="opts">${opts}</div>
           <div class="explain-box" id="ex-${les.id}"></div>
         </div>
-        <button class="done-btn" id="btn-${les.id}" onclick="complete('${les.id}')" ${done?'disabled':''}>
+        <button class="done-btn" id="btn-${les.id}" onclick="complete('${les.id}')" ${done?'':'disabled'}>
           ${done?'✅ 已完成！':'⚡ 完成此關 → 解鎖下一關'}
         </button>
       </div>
@@ -582,6 +582,7 @@ function checkQ(lid,idx){
   });
   const ex=document.getElementById('ex-'+lid);
   ex.innerHTML = idx===les.quiz.ans ? '✅ 正確！' : '❌ 答錯了，再試試看！';ex.style.display='block';
+  if(idx===les.quiz.ans){const b=document.getElementById('btn-'+lid);if(b){b.disabled=false;b.textContent='✅ 完成此關 → 解鎖下一關';}}
 }
 
 function complete(id){
