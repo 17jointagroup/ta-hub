@@ -1,999 +1,1085 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-
-<script>
-// ── Device Detection (runs before page renders) ──
-(function(){
-  var ua=navigator.userAgent;
-  var w=window.innerWidth||screen.width;
-  var isMobile=/iPhone|iPad|iPod|Android|Mobile/i.test(ua)||w<=768;
-  var isIOS=/iPhone|iPad|iPod/i.test(ua);
-  var size=w<=390?'xs':w<=430?'sm':w<=768?'md':'lg';
-  document.documentElement.setAttribute('data-device',isMobile?'mobile':'desktop');
-  document.documentElement.setAttribute('data-size',size);
-  if(isIOS)document.documentElement.classList.add('ios');
-  window.DEV={isMobile:isMobile,isIOS:isIOS,size:size,W:w};
-})();
-</script>
-
-<style id="device-css">
-/* ── Desktop defaults (no change) ── */
-[data-device="desktop"] {}
-
-/* ── Mobile: hide desktop-only elements ── */
-[data-device="mobile"] .desktop-only { display:none !important; }
-[data-device="desktop"] .mobile-only { display:none !important; }
-
-/* ── Mobile layout switches ── */
-[data-device="mobile"] .main {
-  flex-direction: column !important;
-}
-/* Left panel → bottom drawer on mobile */
-[data-device="mobile"] .lp,
-[data-device="mobile"] .lpanel,
-[data-device="mobile"] .instr-panel {
-  width: 100% !important;
-  max-height: 44vh !important;
-  min-height: 44vh !important;
-  border-right: none !important;
-  border-top: 2px solid var(--border, #333) !important;
-  order: 2 !important;
-  flex-shrink: 0 !important;
-  overflow: hidden !important;
-}
-/* Right panel → hidden on mobile */
-[data-device="mobile"] .rp,
-[data-device="mobile"] .rpanel,
-[data-device="mobile"] .right-panel { display: none !important; }
-
-/* Viewport → top half on mobile */
-[data-device="mobile"] .viewport {
-  flex: 1 !important;
-  order: 1 !important;
-  min-height: 0 !important;
-}
-
-/* Topbar compact */
-[data-device="mobile"] .tb-crumb { display: none !important; }
-[data-device="mobile"] .topbar { height: 38px !important; }
-[data-device="mobile"] .tb-logo { font-size: .85rem !important; padding: 0 10px !important; }
-
-/* Chapter tabs */
-[data-device="mobile"] .chtabs,
-[data-device="mobile"] .chapter-tabs { height: 30px !important; }
-[data-device="mobile"] .cht,
-[data-device="mobile"] .ch-tab { font-size: .55rem !important; }
-
-/* Step content */
-[data-device="mobile"] .stit,
-[data-device="mobile"] .step-title { font-size: .95rem !important; }
-[data-device="mobile"] .desc,
-[data-device="mobile"] .step-desc { font-size: .76rem !important; line-height: 1.6 !important; }
-[data-device="mobile"] .lbody,
-[data-device="mobile"] .instr-body { padding: 10px 12px !important; }
-
-/* Buttons */
-[data-device="mobile"] .abtn { padding: 10px !important; font-size: .9rem !important; }
-[data-device="mobile"] .kh { padding: 6px 9px !important; margin-bottom: 6px !important; }
-[data-device="mobile"] .ck { padding: 6px 8px !important; font-size: .74rem !important; }
-[data-device="mobile"] .sdesc,
-[data-device="mobile"] .desc { margin-bottom: 10px !important; }
-
-/* Hint bar */
-[data-device="mobile"] .vp-hint { font-size: .58rem !important; padding: 5px 12px !important; }
-
-/* Sliders */
-[data-device="mobile"] input[type=range] { width: 100% !important; }
-
-/* Index page */
-[data-device="mobile"] .nav-links { display: none !important; }
-[data-device="mobile"] .hero { flex-direction: column !important; padding: 18px 14px !important; gap: 12px !important; min-height: auto !important; }
-[data-device="mobile"] .hero-stats { display: none !important; }
-[data-device="mobile"] .hero-title { font-size: 1.35rem !important; }
-[data-device="mobile"] .hero-sub { font-size: .78rem !important; }
-[data-device="mobile"] .cat-tab { font-size: .72rem !important; padding: 10px 9px !important; }
-[data-device="mobile"] .c-card { min-width: 165px !important; max-width: 165px !important; }
-[data-device="mobile"] .c-card-wide { min-width: 220px !important; max-width: 220px !important; }
-[data-device="mobile"] .c-thumb { height: 105px !important; }
-[data-device="mobile"] .c-title { font-size: .78rem !important; }
-[data-device="mobile"] .course-entry-strip { gap: 8px !important; }
-[data-device="mobile"] .entry-pill { min-width: 130px !important; padding: 9px 11px !important; }
-
-/* Blender hub */
-[data-device="mobile"] .hero { flex-direction: column !important; padding: 18px 14px 20px !important; }
-[data-device="mobile"] .hero-progress { margin-left: 0 !important; width: 100% !important; text-align: center !important; }
-[data-device="mobile"] .lc-desc,
-[data-device="mobile"] .lc-skills { display: none !important; }
-[data-device="mobile"] .play-btn { font-size: .75rem !important; padding: 6px 12px !important; }
-
-/* World map */
-[data-device="mobile"] .tech-strip { padding: 5px 8px !important; gap: 4px !important; flex-wrap: wrap !important; }
-[data-device="mobile"] .tech-badge { font-size: .5rem !important; padding: 2px 5px !important; }
-[data-device="mobile"] .progress-strip { right: 8px !important; }
-[data-device="mobile"] .prog-name { font-size: .7rem !important; }
-[data-device="mobile"] .prog-xp { display: none !important; }
-[data-device="mobile"] .popup { width: 95vw !important; }
-[data-device="mobile"] .popup.show { bottom: 12px !important; }
-[data-device="mobile"] .hint-bar { bottom: 90px !important; font-size: .58rem !important; }
-
-/* Build progress (level6) */
-[data-device="mobile"] .build-progress { height: 36px !important; padding: 0 6px !important; }
-[data-device="mobile"] .bp-step { padding: 0 5px !important; font-size: .52rem !important; }
-[data-device="mobile"] .bp-step::after { display: none !important; }
-
-/* iOS safe area */
-.ios body { padding-bottom: env(safe-area-inset-bottom) !important; }
-</style>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>TA HUB — 技術美術精品課程</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Zen+Maru+Gothic:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TA HUB — 特勤技藝局 CLASSIFIED</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Special+Elite&family=Oswald:wght@400;600;700&family=Permanent+Marker&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-html{font-size:16px;}
+/* ══════════════════════════════════════════════════════
+   百戰天龍 × 馬蓋仙
+   1980s ACTION TV · VHS · MISSION DOSSIER · CRT
+   珊瑚粉 + 日落橙 + 水鴨青 + 奶油紙 + 特勤黑
+   ══════════════════════════════════════════════════════ */
 :root{
-  /* ── 三鷹之森 吉卜力美術館 配色 ── */
-  --nav:#2e4228;        /* 深森林苔綠：導覽列 */
-  --nav2:#1e2e18;       /* 更深林綠：border */
-  --nav-txt:#e4edd8;    /* 嫩葉白：nav文字 */
-  --bg:#f0ebe0;         /* 暖奶茶：主背景 */
-  --surf:#f8f4ea;       /* 象牙白：卡片表面 */
-  --surf2:#ede7d8;      /* 米亞麻：次表面 */
-  --bdr:#c8c0a8;        /* 亞麻邊框 */
-  --bdr2:#ddd5c0;       /* 淡米邊框 */
-  --txt:#2a1e0e;        /* 深茶棕：主文字 */
-  --muted:#5a5040;      /* 暗橡木：次文字 */
-  --muted2:#8a806a;     /* 舊木頭：輔助文字 */
-  --acc:#b85c2a;        /* 橡實橙棕：強調 */
-  --acc-hover:#9a4a20;  /* 深橡實 */
-  --acc-green:#4a7030;  /* 森林綠 */
-  --teal:#3d5a3a;       /* 苔蘚深綠 */
-  --gold:#c87820;       /* 秋葉金 */
-  --leaf:#8ab040;       /* 新芽綠 */
-  --white:#fffff8;      /* 微暖白 */
+  --black:#0a0806;
+  --dark:#120e08;
+  --dark2:#1a1510;
+  --dark3:#231c14;
+  --manila:#e8d5a8;
+  --manila2:#f0e0b8;
+  --manila3:#f8ecd0;
+  --cream:#fdf6e8;
+  --typed:#2a1a08;
+  --teal-dark:#0a3030;
+  --teal:#0d5050;
+  --teal2:#167878;
+  --teal3:#20a0a0;
+  --teal4:#40c8c0;
+  --coral:#e84830;
+  --coral2:#ff6040;
+  --coral3:#ff8060;
+  --sunset:#ff8c00;
+  --sunset2:#ffaa30;
+  --sunset3:#ffcc60;
+  --pink:#d41460;
+  --pink2:#ff1a78;
+  --yellow:#f0d020;
+  --yellow2:#ffe040;
+  --duct:#4a4038;
+  --duct2:#5a5048;
+  --static:#c8c0b0;
+  --static2:#e0d8c8;
+  --red-stamp:#cc1010;
+  --txt:#2a1a08;
+  --txt2:#4a3520;
+  --txt3:#6a5038;
+  --txt-light:#c8a870;
+  --vhs-cyan:rgba(0,229,229,.5);
+  --vhs-red:rgba(255,60,0,.4);
+  --mono:'VT323',monospace;
+  --typer:'Special Elite',monospace;
+  --headline:'Oswald',sans-serif;
+  --marker:'Permanent Marker',cursive;
+  --noto:'Noto Sans TC',sans-serif;
 }
-body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
-  background:var(--bg);
-  color:var(--txt);
-  font-family:'Zen Maru Gothic',sans-serif;
-  font-weight:500;
-  min-height:100dvh;
-  display:flex;flex-direction:column;
-  overflow-x:hidden;
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;min-height:100%;background:var(--black);}
+body{
+  font-family:var(--noto);color:var(--manila2);overflow-x:hidden;
+  background:
+    radial-gradient(ellipse 120% 50% at 50% 0%,rgba(13,80,80,.5) 0%,transparent 55%),
+    radial-gradient(ellipse 70% 60% at 0% 60%,rgba(232,72,48,.12) 0%,transparent 45%),
+    radial-gradient(ellipse 70% 50% at 100% 40%,rgba(255,140,0,.08) 0%,transparent 40%),
+    var(--dark);
 }
 
-/* ════════════════════ NAV ════════════════════ */
-/* sticky wrapper */
-.sticky-top{
-  position:sticky;top:0;z-index:100;
-  box-shadow:0 2px 12px rgba(30,52,16,.1);
+/* ── CRT Scanlines ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,.15),rgba(0,0,0,.15) 1px,
+    transparent 1px,transparent 4px
+  );
+  animation:scanFlicker 8s ease infinite;
 }
+@keyframes scanFlicker{
+  0%,97%,100%{opacity:1}
+  98%{opacity:.85}
+  99%{opacity:.95}
+}
+
+/* ── VHS Color fringe ── */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:998;
+  background:
+    linear-gradient(90deg,rgba(0,229,229,.025),transparent 30%,transparent 70%,rgba(255,60,0,.025));
+  animation:vhsFringe 12s ease infinite;
+}
+@keyframes vhsFringe{
+  0%,100%{transform:translateX(0)}
+  33%{transform:translateX(-1px)}
+  66%{transform:translateX(1px)}
+}
+
+/* ── Canvas ── */
+#vhs-canvas{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.35;}
+
+/* ══ VHS TIMECODE BAR ══ */
+.timecode{
+  height:26px;background:#000;
+  border-bottom:2px solid var(--teal2);
+  display:flex;align-items:center;padding:0 16px;gap:12px;
+  font-family:var(--mono);font-size:.85rem;letter-spacing:.06em;
+  position:relative;z-index:100;overflow:hidden;
+}
+.tc-rec{
+  display:flex;align-items:center;gap:5px;color:var(--coral2);
+  font-weight:700;animation:recBlink 1.2s ease infinite;
+}
+@keyframes recBlink{0%,100%{opacity:1}50%{opacity:.2}}
+.tc-rec::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--coral2);box-shadow:0 0 6px var(--coral);}
+.tc-time{color:var(--yellow);letter-spacing:.1em;}
+.tc-mid{flex:1;overflow:hidden;}
+.tc-scroll{display:inline-flex;gap:28px;white-space:nowrap;color:rgba(64,200,192,.5);
+  animation:tickerRun 35s linear infinite;font-size:.78rem;}
+.tc-scroll b{color:rgba(64,200,192,.9);}
+@keyframes tickerRun{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tc-sp{color:rgba(64,200,192,.2);margin:0 6px;}
+.tc-ch{color:var(--teal4);letter-spacing:.08em;}
+
+/* ══ NAV ══ */
 nav{
-  background:#fff;
-  border-bottom:1px solid var(--bdr);
-  padding:0 32px;
-  height:60px;
-  display:flex;align-items:center;gap:20px;
+  position:sticky;top:0;z-index:100;height:56px;
+  background:linear-gradient(180deg,rgba(10,8,6,.99),rgba(16,12,8,.97));
+  border-bottom:3px solid var(--teal2);
+  display:flex;align-items:center;padding:0 24px;
+  box-shadow:0 4px 20px rgba(0,0,0,.8),0 0 0 1px rgba(13,80,80,.3) inset;
 }
-.logo{
-  font-family:'Fredoka One',sans-serif;
-  font-size:1.3rem;color:var(--teal);
-  letter-spacing:.05em;
-  display:flex;align-items:center;gap:8px;
-  text-decoration:none;flex-shrink:0;
+nav::after{
+  content:'';position:absolute;bottom:-6px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--coral),var(--sunset),var(--coral),transparent);
+  opacity:.4;
 }
-.logo-leaf{font-size:1.1rem;}
 
-.nav-links{display:flex;align-items:center;gap:4px;}
-.nav-link{
-  font-size:.82rem;color:var(--muted);
-  padding:6px 12px;border-radius:6px;
-  cursor:pointer;text-decoration:none;
-  transition:all .15s;white-space:nowrap;
-  font-weight:500;
-}
-.nav-link:hover{color:var(--teal);background:rgba(61,90,58,.07);}
-
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
-.search-box{
-  display:flex;align-items:center;gap:8px;
-  background:var(--bg);
-  border:1px solid var(--bdr);
-  border-radius:100px;padding:7px 16px;
-  width:220px;transition:.2s;
-}
-.search-box:focus-within{border-color:var(--teal);background:#fff;}
-.search-box input{background:none;border:none;outline:none;font-size:.8rem;color:var(--txt);width:100%;}
-.search-box input::placeholder{color:var(--muted2);}
-.search-icon{color:var(--muted2);font-size:.85rem;}
-.nav-cart{
-  width:38px;height:38px;border-radius:50%;
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:20px;flex-shrink:0;}
+.logo-badge{
+  width:42px;height:42px;
+  background:linear-gradient(135deg,var(--teal),var(--teal-dark));
+  border:2px solid var(--teal3);border-radius:4px;
   display:flex;align-items:center;justify-content:center;
-  background:var(--bg);border:1px solid var(--bdr);
-  cursor:pointer;font-size:1rem;position:relative;
-  transition:all .15s;
+  position:relative;overflow:hidden;
+  box-shadow:0 0 12px rgba(13,80,80,.6),inset 0 0 8px rgba(0,0,0,.3);
 }
-.nav-cart:hover{background:#fff;border-color:var(--teal);}
-.cart-badge{
-  position:absolute;top:-2px;right:-2px;
-  width:15px;height:15px;border-radius:50%;
-  background:var(--acc);color:#fff;
-  font-size:.6rem;font-weight:700;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Space Mono',monospace;
-  border:2px solid #fff;
+.logo-badge::before{
+  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:linear-gradient(45deg,transparent 40%,rgba(64,200,192,.1) 50%,transparent 60%);
+  animation:badgeSheen 4s ease infinite;
 }
-.btn-login{
-  font-size:.8rem;font-weight:600;
-  padding:8px 18px;border-radius:100px;
-  border:1.5px solid var(--bdr);
-  background:#fff;color:var(--txt);
-  cursor:pointer;transition:.15s;
+@keyframes badgeSheen{0%{transform:translateX(-60%) translateY(-60%)}100%{transform:translateX(60%) translateY(60%)}}
+.logo-icon{font-size:1.4rem;position:relative;z-index:1;filter:drop-shadow(0 0 6px rgba(64,200,192,.5));}
+.logo-text{display:flex;flex-direction:column;gap:0;}
+.logo-main{
+  font-family:var(--headline);font-size:1.15rem;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--teal4);
+  text-shadow:0 0 12px rgba(32,160,160,.5),2px 2px 0 rgba(0,0,0,.5);
 }
-.btn-login:hover{border-color:var(--teal);color:var(--teal);}
-.btn-signup{
-  font-size:.8rem;font-weight:700;
-  padding:8px 18px;border-radius:100px;
-  background:var(--acc-green);color:#fff;
-  border:none;cursor:pointer;transition:.2s;
+.logo-sub{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.15em;
+  color:var(--coral3);opacity:.9;margin-top:-1px;
 }
-.btn-signup:hover{background:#2e4228;box-shadow:0 4px 12px rgba(61,90,58,.3);}
 
-/* ════════════════════ CATEGORY BAR ════════════════════ */
+.nav-divider{width:1px;height:28px;background:rgba(13,80,80,.4);margin:0 4px;}
+
+.nl{
+  padding:0 11px;height:56px;display:flex;align-items:center;gap:5px;
+  font-family:var(--headline);font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(200,160,120,.5);text-decoration:none;border:none;background:none;cursor:pointer;
+  transition:.18s;border-right:1px solid rgba(13,80,80,.2);white-space:nowrap;
+  position:relative;
+}
+.nl::after{
+  content:'';position:absolute;bottom:0;left:50%;right:50%;height:2px;
+  background:var(--teal4);transition:.2s;
+}
+.nl:hover{color:var(--teal4);}
+.nl:hover::after{left:0;right:0;}
+
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.search-field{
+  display:flex;align-items:center;gap:7px;
+  background:rgba(13,80,80,.15);border:1px solid rgba(13,80,80,.4);
+  padding:5px 12px;font-family:var(--mono);font-size:.85rem;
+  transition:.18s;
+}
+.search-field:hover{border-color:rgba(64,200,192,.5);}
+.search-field input{
+  background:none;border:none;outline:none;
+  color:var(--teal4);font-family:var(--mono);font-size:.85rem;letter-spacing:.06em;width:160px;
+}
+.search-field input::placeholder{color:rgba(32,160,160,.4);}
+.search-icon{color:var(--teal4);opacity:.7;font-size:.9rem;}
+
+.btn-mission{
+  font-family:var(--headline);font-size:.72rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;padding:7px 16px;
+  background:linear-gradient(135deg,var(--coral),var(--coral2));
+  border:1px solid var(--sunset2);color:#fff;cursor:pointer;transition:.2s;
+  box-shadow:0 2px 10px rgba(232,72,48,.35);
+  position:relative;overflow:hidden;
+}
+.btn-mission::before{
+  content:'CLASSIFIED';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-15deg);
+  font-family:var(--headline);font-size:.55rem;font-weight:900;letter-spacing:.15em;
+  color:rgba(255,255,255,.08);white-space:nowrap;
+}
+.btn-mission:hover{box-shadow:0 4px 18px rgba(232,72,48,.55);}
+
+/* ══ DOSSIER CAT BAR ══ */
 .cat-bar{
-  background:#fff;
-  border-bottom:2px solid var(--bdr);
-  padding:0 32px;
-  display:flex;align-items:center;
-  overflow-x:auto;flex-shrink:0;
-  gap:2px;
+  background:rgba(10,8,6,.97);
+  border-bottom:2px solid rgba(13,80,80,.3);
+  display:flex;align-items:stretch;padding:0 24px;
+  overflow-x:auto;position:sticky;top:56px;z-index:90;
 }
 .cat-bar::-webkit-scrollbar{height:0;}
 .cat-tab{
-  font-size:.84rem;font-weight:600;
-  color:var(--muted);
-  padding:14px 16px;
-  border:none;background:none;cursor:pointer;
-  border-bottom:2.5px solid transparent;
-  margin-bottom:-2px;white-space:nowrap;
-  transition:all .18s;
-  display:flex;align-items:center;gap:6px;
-  letter-spacing:.01em;
+  padding:0 15px;height:38px;display:flex;align-items:center;gap:6px;
+  font-family:var(--headline);font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(200,160,120,.4);cursor:pointer;border:none;background:none;
+  border-bottom:3px solid transparent;transition:.18s;white-space:nowrap;
+  border-right:1px solid rgba(13,80,80,.15);
 }
-.cat-tab:hover{color:var(--teal);}
-.cat-tab.active{color:var(--teal);border-bottom-color:var(--acc);font-weight:700;}
+.cat-tab:hover{color:var(--static2);}
+.cat-tab.active{color:var(--sunset2);border-bottom-color:var(--coral);}
 
-/* sub pills */
 .sub-bar{
-  background:#f8f4ea;
-  border-bottom:1px solid var(--bdr);
-  padding:0 32px;
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-  max-height:0;overflow:hidden;
-  transition:max-height .32s cubic-bezier(.4,0,.2,1),padding .28s ease;
+  background:rgba(8,6,4,.99);border-bottom:1px solid rgba(13,80,80,.2);
+  padding:0 24px;display:flex;gap:5px;align-items:center;
+  min-height:0;max-height:0;overflow:hidden;transition:max-height .25s,padding .25s;
+  position:sticky;top:94px;z-index:80;
 }
-.sub-bar.open{max-height:80px;padding:10px 32px;}
+.sub-bar.open{max-height:48px;padding:7px 24px;}
 .pill{
-  font-size:.78rem;font-weight:600;
-  color:#2a1e0e;
-  background:#f0ebe0;
-  border:1.5px solid #b8a888;
-  border-radius:100px;padding:5px 14px;cursor:pointer;
-  transition:all .18s cubic-bezier(.34,1.56,.64,1);
-  position:relative;overflow:hidden;white-space:nowrap;
+  font-family:var(--mono);font-size:.8rem;letter-spacing:.07em;
+  padding:3px 10px;border:1px solid rgba(13,80,80,.25);
+  cursor:pointer;color:rgba(200,160,120,.4);transition:.15s;
 }
-.pill::after{
-  content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);
-  transform:skewX(-15deg);transition:none;pointer-events:none;
-}
-.pill:hover{
-  transform:translateY(-2px) scale(1.06);
-  background:#c8e890;color:#2a1e0e;
-  border-color:#4a7030;
-  box-shadow:0 0 0 1px #4a7030,0 4px 10px rgba(74,112,48,.25);
-}
-.pill:hover::after{left:140%;transition:left .38s ease;}
-.pill:active{transform:scale(.95);transition:all .07s;}
-.pill.on{background:var(--teal);color:#d8f5e8;border-color:var(--teal);}
-.pill.on:hover{background:#2e4228;color:#d8f5e8;transform:translateY(-2px) scale(1.04);}
+.pill:hover{border-color:rgba(64,200,192,.45);color:var(--teal4);}
+.pill.on{background:rgba(13,80,80,.25);border-color:rgba(64,200,192,.5);color:var(--teal4);}
 
-/* ════════════════════ HERO BANNER ════════════════════ */
+/* ══ HERO — MISSION DOSSIER ══ */
 .hero{
-  background:linear-gradient(135deg,#2a1e0e 0%,#2e4228 50%,#1a3830 100%);
-  padding:40px 32px;
-  display:flex;align-items:center;gap:32px;
-  position:relative;overflow:hidden;min-height:200px;
+  position:relative;display:flex;align-items:stretch;
+  min-height:360px;overflow:hidden;
+  border-bottom:2px solid rgba(13,80,80,.2);
 }
-.hero::before{
-  content:'';position:absolute;inset:0;
+
+/* Sunset gradient bg */
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(160deg,
+      rgba(10,8,6,.95) 0%,
+      rgba(13,48,48,.85) 40%,
+      rgba(20,40,10,.7) 70%,
+      rgba(30,20,8,.8) 100%
+    );
+  pointer-events:none;
+}
+/* Grid paper lines */
+.hero-grid{
+  position:absolute;inset:0;pointer-events:none;opacity:.08;
   background-image:
-    linear-gradient(rgba(138,176,64,.05) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(138,176,64,.05) 1px,transparent 1px);
+    linear-gradient(rgba(64,200,192,.4) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(64,200,192,.4) 1px,transparent 1px);
   background-size:32px 32px;
 }
-.hero-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  background:rgba(184,92,42,.2);
-  border:1px solid rgba(184,92,42,.5);
-  border-radius:100px;padding:4px 12px;
-  font-family:'Space Mono',monospace;
-  font-size:.65rem;color:#f0b090;letter-spacing:.06em;
-  margin-bottom:12px;
+
+/* Left: hero content */
+.hero-left{
+  flex:1;padding:44px 48px;display:flex;flex-direction:column;justify-content:center;
+  position:relative;z-index:2;
 }
-.hero-title{
-  font-family:'Fredoka One',sans-serif;
-  font-size:2rem;color:#f0f8ec;
-  letter-spacing:-.01em;line-height:1.2;
-  margin-bottom:8px;
+
+/* Right: classified dossier panel */
+.dossier-panel{
+  width:320px;flex-shrink:0;
+  background:var(--manila2);
+  border-left:4px solid var(--teal2);
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
 }
+/* Manila folder texture */
+.dossier-panel::before{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  opacity:.6;
+}
+.dossier-header{
+  background:var(--teal);border-bottom:3px solid var(--teal3);
+  padding:10px 14px;display:flex;align-items:center;justify-content:space-between;
+  position:relative;z-index:1;
+}
+.dossier-title-text{
+  font-family:var(--headline);font-size:.7rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--teal4);
+}
+.dossier-id{
+  font-family:var(--mono);font-size:.8rem;color:rgba(64,200,192,.7);letter-spacing:.1em;
+}
+.dossier-body{flex:1;padding:12px 14px;position:relative;z-index:1;}
+/* Classified stamp */
+.classified-stamp{
+  position:absolute;top:14px;right:10px;
+  font-family:var(--headline);font-size:.65rem;font-weight:900;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--red-stamp);
+  border:2px solid var(--red-stamp);padding:3px 8px;
+  transform:rotate(-12deg);opacity:.75;
+  text-shadow:none;box-shadow:inset 0 0 4px rgba(204,16,16,.2);
+}
+.dossier-field{
+  margin-bottom:9px;border-bottom:1px dashed rgba(90,60,20,.25);padding-bottom:8px;
+}
+.dossier-field:last-child{border-bottom:none;}
+.df-label{
+  font-family:var(--headline);font-size:.58rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--teal);margin-bottom:2px;
+}
+.df-val{
+  font-family:var(--typer);font-size:.82rem;color:var(--typed);line-height:1.4;
+}
+.df-val.redacted{
+  background:var(--typed);color:var(--typed);user-select:none;
+  letter-spacing:.1em;border-radius:2px;padding:0 4px;cursor:default;
+  transition:background .2s,color .2s;
+}
+.df-val.redacted:hover{background:transparent;color:var(--typed);}
+/* Duct tape strip */
+.tape-strip{
+  position:absolute;right:-8px;top:50%;transform:translateY(-50%) rotate(2deg);
+  width:24px;height:80px;
+  background:repeating-linear-gradient(
+    90deg,rgba(74,64,56,.6),rgba(74,64,56,.6) 2px,
+    rgba(90,80,72,.5) 2px,rgba(90,80,72,.5) 4px
+  );
+  opacity:.7;
+}
+/* Paperclip */
+.paperclip{
+  position:absolute;top:-4px;left:24px;
+  width:16px;height:40px;
+  border:2px solid rgba(180,160,120,.6);
+  border-bottom:none;border-radius:10px 10px 0 0;
+  background:transparent;
+}
+
+/* Hero content */
+.mission-tag{
+  display:flex;align-items:center;gap:8px;margin-bottom:14px;
+}
+.mission-pill{
+  font-family:var(--mono);font-size:.82rem;letter-spacing:.12em;
+  background:var(--teal);border:1px solid var(--teal3);
+  color:var(--teal4);padding:3px 12px;
+  display:flex;align-items:center;gap:6px;
+}
+.mission-pill::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--teal4);box-shadow:0 0 6px var(--teal4);
+  animation:recBlink 1.4s ease infinite;
+}
+.mission-no{
+  font-family:var(--mono);font-size:.8rem;color:rgba(64,200,192,.4);letter-spacing:.15em;
+}
+
+h1.hero-title{
+  font-family:var(--headline);font-size:2.8rem;font-weight:700;
+  line-height:1.05;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--manila3);margin-bottom:10px;
+  text-shadow:2px 2px 0 rgba(0,0,0,.6);
+}
+h1.hero-title em{
+  font-style:normal;
+  color:var(--teal4);
+  text-shadow:0 0 16px rgba(32,160,160,.5),2px 2px 0 rgba(0,0,0,.5);
+}
+h1.hero-title .sub-line{
+  display:block;font-size:1.6rem;color:var(--sunset2);
+}
+
+/* Duct tape divider */
+.duct-divider{
+  display:flex;align-items:center;gap:0;margin-bottom:14px;
+}
+.duct-piece{
+  height:18px;flex:1;
+  background:repeating-linear-gradient(
+    90deg,var(--duct),var(--duct) 3px,
+    var(--duct2) 3px,var(--duct2) 6px
+  );
+  opacity:.6;position:relative;
+}
+.duct-piece::before,.duct-piece::after{
+  content:'';position:absolute;top:0;bottom:0;width:2px;
+  background:rgba(0,0,0,.2);
+}
+.duct-piece::before{left:0;}
+.duct-piece::after{right:0;}
+.duct-icon{
+  padding:0 12px;font-family:var(--marker);font-size:.75rem;color:var(--sunset2);
+  white-space:nowrap;
+}
+
 .hero-sub{
-  font-size:.88rem;color:rgba(216,240,232,.65);
-  max-width:44ch;line-height:1.7;margin-bottom:20px;
+  font-family:var(--typer);font-size:.92rem;color:var(--txt-light);
+  line-height:1.75;margin-bottom:18px;max-width:44ch;
+  letter-spacing:.02em;
 }
-.hero-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.hero-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:22px;}
+.hero-tag{
+  font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;
+  padding:2px 10px;border:1px solid rgba(64,200,192,.25);
+  color:rgba(64,200,192,.6);background:rgba(13,80,80,.2);
+}
+.hero-btns{display:flex;gap:8px;}
+.hbtn{
+  font-family:var(--headline);font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:11px 22px;text-decoration:none;display:inline-flex;align-items:center;gap:7px;
+  transition:.2s;position:relative;overflow:hidden;
+}
+.hbtn::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
+  transition:.45s;
+}
+.hbtn:hover::before{left:100%;}
 .hbtn-p{
-  font-family:'Fredoka One',sans-serif;font-size:.88rem;
-  background:#c8e890;color:#2a1e0e;
-  padding:10px 22px;border-radius:100px;
-  border:none;cursor:pointer;text-decoration:none;
-  transition:.2s;display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--teal),var(--teal2));
+  border:1px solid var(--teal4);color:var(--teal4);
+  box-shadow:0 4px 14px rgba(13,80,80,.5);
 }
-.hbtn-p:hover{background:#b8e888;transform:translateY(-1px);box-shadow:0 4px 14px rgba(74,112,48,.3);}
+.hbtn-p:hover{box-shadow:0 6px 22px rgba(13,80,80,.7),0 0 28px rgba(64,200,192,.2);}
 .hbtn-s{
-  font-family:'Fredoka One',sans-serif;font-size:.88rem;
-  background:transparent;color:#d8f0e8;
-  padding:10px 22px;border-radius:100px;
-  border:1.5px solid rgba(255,255,255,.25);cursor:pointer;text-decoration:none;
-  transition:.2s;display:inline-flex;align-items:center;gap:6px;
+  background:transparent;border:1px solid rgba(200,160,120,.3);
+  color:var(--sunset2);
 }
-.hbtn-s:hover{background:rgba(255,255,255,.1);}
-.hero-stats{
-  display:flex;gap:28px;margin-left:auto;flex-shrink:0;
-  padding:20px 24px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:16px;
-  backdrop-filter:blur(8px);
-}
-.hero-stat{text-align:center;}
-.hero-stat-num{
-  font-family:'Fredoka One',sans-serif;
-  font-size:1.6rem;color:#c8e890;letter-spacing:-.01em;
-  line-height:1.1;
-}
-.hero-stat-lbl{
-  font-family:'Space Mono',monospace;
-  font-size:.62rem;color:rgba(216,240,232,.5);
-  letter-spacing:.06em;text-transform:uppercase;margin-top:3px;
-}
+.hbtn-s:hover{border-color:var(--sunset2);color:var(--sunset3);}
 
-/* ════════════════════ PAGE BODY ════════════════════ */
-.page{max-width:1440px;margin:0 auto;padding:0 32px 48px;width:100%;}
+/* ══ INTEL STRIP ══ */
+.intel-strip{
+  background:var(--teal-dark);
+  border-top:2px solid var(--teal2);border-bottom:2px solid var(--teal2);
+  padding:7px 24px;display:flex;align-items:center;gap:12px;overflow:hidden;
+  position:relative;
+}
+.intel-strip::before{
+  content:'';position:absolute;top:0;bottom:0;left:0;width:4px;background:var(--coral);
+}
+.intel-badge{
+  font-family:var(--headline);font-size:.7rem;font-weight:700;letter-spacing:.18em;
+  color:var(--teal4);background:rgba(0,0,0,.4);border:1px solid rgba(64,200,192,.3);
+  padding:2px 10px;flex-shrink:0;text-transform:uppercase;
+}
+.intel-scroll{flex:1;overflow:hidden;
+  mask-image:linear-gradient(90deg,transparent,black 5%,black 95%,transparent);}
+.intel-inner{
+  display:inline-flex;gap:32px;white-space:nowrap;
+  font-family:var(--typer);font-size:.82rem;color:var(--teal4);
+  animation:tickerRun 30s linear infinite;
+}
+.intel-inner b{color:var(--sunset2);}
 
-/* ════════════════════ SECTION ════════════════════ */
-.section{margin-top:40px;}
+/* ══ PAGE ══ */
+.page{max-width:1440px;margin:0 auto;padding:0 24px 60px;position:relative;z-index:2;}
+
+/* ══ SECTIONS ══ */
+.section{margin-top:38px;}
 .sec-hdr{
-  display:flex;align-items:baseline;gap:10px;
-  margin-bottom:18px;
-  padding-bottom:12px;
-  border-bottom:1.5px solid var(--bdr);
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;padding-bottom:10px;
+  border-bottom:2px dashed rgba(64,200,192,.2);
+  position:relative;
+}
+.sec-hdr::before{
+  content:'';position:absolute;bottom:-2px;left:0;width:80px;height:2px;
+  background:linear-gradient(90deg,var(--coral),var(--sunset),transparent);
 }
 .sec-title{
-  font-family:'Fredoka One',sans-serif;
-  font-size:1.15rem;color:var(--txt);letter-spacing:.01em;
+  font-family:var(--headline);font-size:.82rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--teal4);display:flex;align-items:center;gap:10px;
 }
-/* sat.cool inline count style */
-.sec-meta{
-  font-family:'Space Mono',monospace;
-  font-size:.68rem;color:var(--muted2);letter-spacing:.04em;
+.sec-file-num{
+  font-family:var(--mono);font-size:.72rem;color:rgba(64,200,192,.4);letter-spacing:.1em;
 }
 .sec-more{
-  margin-left:auto;
-  font-size:.78rem;color:var(--teal);font-weight:600;
-  cursor:pointer;text-decoration:none;
-  display:flex;align-items:center;gap:4px;
-  transition:.15s;
+  font-family:var(--typer);font-size:.72rem;letter-spacing:.08em;
+  color:rgba(200,160,120,.4);text-decoration:none;transition:.15s;
 }
-.sec-more:hover{color:#2e4228;}
+.sec-more:hover{color:var(--sunset2);}
 
-/* ════════════════════ CARD ROW — sat.cool style horizontal scroll ════════════════════ */
-.card-row{
-  display:flex;gap:14px;
-  overflow-x:auto;
-  padding-bottom:8px;
-  scroll-snap-type:x mandatory;
-}
-.card-row::-webkit-scrollbar{height:4px;}
-.card-row::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px;}
+/* ══ CARDS — Polaroid + Dossier ══ */
+.card-row{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;}
+.card-row::-webkit-scrollbar{height:0;display:none;}
 
-/* ── Course Card ── */
 .c-card{
-  background:#fff;
-  border-radius:14px;
-  overflow:hidden;
-  border:1px solid var(--bdr);
-  min-width:230px;max-width:230px;
-  cursor:pointer;
-  scroll-snap-align:start;
-  transition:all .2s;
-  flex-shrink:0;
+  min-width:200px;max-width:200px;
+  background:var(--manila2);
+  border:none;
+  flex-shrink:0;cursor:pointer;transition:all .22s;
+  text-decoration:none;color:inherit;display:block;
+  position:relative;
+  /* Polaroid frame */
+  box-shadow:0 4px 12px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.3);
+  transform:rotate(var(--rot, 0deg));
 }
+.c-card:nth-child(odd){--rot:-0.8deg;}
+.c-card:nth-child(even){--rot:0.5deg;}
+.c-card:nth-child(3n){--rot:-0.3deg;}
 .c-card:hover{
-  transform:translateY(-4px);
-  box-shadow:0 10px 28px rgba(30,52,16,.12);
-  border-color:#c8c0a8;
+  transform:rotate(0deg) translateY(-5px) scale(1.02);
+  box-shadow:0 12px 32px rgba(0,0,0,.6);
+  z-index:10;
 }
+/* Polaroid tape top */
+.c-card::before{
+  content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  width:48px;height:16px;
+  background:repeating-linear-gradient(
+    90deg,rgba(74,64,56,.5),rgba(74,64,56,.5) 3px,
+    rgba(90,80,72,.4) 3px,rgba(90,80,72,.4) 6px
+  );
+  opacity:.7;
+}
+.c-card-wide{min-width:280px;max-width:280px;}
+
 .c-thumb{
-  height:136px;
+  height:114px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--teal-dark),var(--dark3));
   display:flex;align-items:center;justify-content:center;
-  font-size:2.8rem;
-  position:relative;overflow:hidden;
+  /* Polaroid photo area */
+  margin:12px 12px 0;
+  border:1px solid rgba(0,0,0,.15);
 }
-.c-thumb.g1{background:linear-gradient(135deg,#d4f0a8,#a8d878);}
-.c-thumb.g2{background:linear-gradient(135deg,#b8d4f0,#88b8e8);}
-.c-thumb.g3{background:linear-gradient(135deg,#f0d0a8,#e8b878);}
-.c-thumb.g4{background:linear-gradient(135deg,#d8c8f0,#b8a0e0);}
-.c-thumb.g5{background:linear-gradient(135deg,#f0c8d0,#e0a0b0);}
-.c-thumb.g6{background:linear-gradient(135deg,#c8f0e8,#90d8c8);}
+/* CRT scanline on photo */
+.c-thumb::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,rgba(0,0,0,.1),rgba(0,0,0,.1) 1px,
+    transparent 1px,transparent 3px
+  );z-index:1;
+}
+/* VHS timestamp */
+.c-thumb::after{
+  content:'REC  00:' attr(data-time);
+  position:absolute;bottom:4px;right:6px;
+  font-family:var(--mono);font-size:.65rem;color:rgba(255,200,0,.7);
+  z-index:2;letter-spacing:.04em;
+}
+.c-icon{font-size:2.8rem;position:relative;z-index:1;
+  filter:drop-shadow(0 0 10px rgba(64,200,192,.3));}
 
-/* sat.cool style: badge overlay on thumb */
+/* Polaroid caption area */
+.c-body{padding:8px 12px 12px;}
 .c-badge{
-  position:absolute;top:10px;left:10px;
-  font-family:'Space Mono',monospace;font-size:.62rem;font-weight:700;
-  padding:3px 9px;border-radius:100px;letter-spacing:.04em;
+  display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;
+  padding:1px 7px;margin-bottom:5px;
 }
-.cb-fund{background:#b85c2a;color:#fff;}
-.cb-sale{background:#c87820;color:#fff;}
-.cb-hot{background:#3d5a3a;color:#fff;}
-.cb-new{background:#3d6a28;color:#fff;}
-.cb-soon{background:rgba(30,52,16,.6);color:#d8f0e8;backdrop-filter:blur(4px);}
-
-/* fundraising progress */
-.fund-bar{
-  position:absolute;bottom:0;left:0;right:0;
-  background:rgba(0,0,0,.2);height:3px;
+.cb-fund{background:rgba(64,200,192,.15);border:1px solid rgba(64,200,192,.3);color:var(--teal4);}
+.cb-sale{
+  background:var(--coral);color:#fff;
+  font-family:var(--headline);font-weight:700;letter-spacing:.12em;
+  box-shadow:1px 1px 0 rgba(0,0,0,.3);
 }
-.fund-fill{height:100%;background:linear-gradient(90deg,#8ab040,#c8e890);border-radius:2px;}
+.cb-new{background:var(--teal);border:1px solid var(--teal3);color:var(--teal4);}
 
-.c-body{padding:12px 14px 14px;}
 .c-title{
-  font-size:.88rem;font-weight:700;color:var(--txt);
-  line-height:1.45;margin-bottom:6px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-family:var(--noto);font-size:.79rem;color:var(--typed);
+  line-height:1.4;margin-bottom:4px;font-weight:700;
 }
 .c-teacher{
-  font-family:'Space Mono',monospace;
-  font-size:.65rem;color:var(--muted2);
-  letter-spacing:.03em;margin-bottom:10px;
+  font-family:var(--typer);font-size:.68rem;color:var(--txt2);margin-bottom:6px;letter-spacing:.03em;
 }
-.c-price{display:flex;align-items:baseline;gap:6px;margin-bottom:8px;}
-.c-price-now{
-  font-family:'Fredoka One',sans-serif;
-  font-size:1rem;color:var(--acc);letter-spacing:.01em;
-}
-.c-price-ori{
-  font-family:'Space Mono',monospace;
-  font-size:.68rem;color:var(--muted2);
-  text-decoration:line-through;
-}
-.c-footer{
-  display:flex;align-items:center;gap:8px;
-  font-family:'Space Mono',monospace;
-  font-size:.63rem;color:var(--muted2);letter-spacing:.03em;
-}
-.c-dot{width:3px;height:3px;border-radius:50%;background:var(--bdr);}
+.c-price{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.c-price-now{font-family:var(--headline);font-size:.9rem;font-weight:700;color:var(--teal);}
+.c-price-free{font-family:var(--headline);font-size:.9rem;font-weight:700;color:var(--teal2);}
+.c-price-ori{font-family:var(--typer);font-size:.65rem;color:var(--txt3);text-decoration:line-through;}
+.c-footer{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.72rem;color:var(--txt3);}
+.c-dot{width:3px;height:3px;border-radius:50%;background:var(--txt3);}
+.c-countdown{color:var(--coral)!important;font-weight:700;}
+.fund-bar{height:3px;background:rgba(13,80,80,.2);margin-bottom:4px;overflow:hidden;}
+.fund-fill{height:100%;background:linear-gradient(90deg,var(--teal3),var(--teal4));}
+.fund-pct{font-family:var(--mono);font-size:.66rem;color:var(--teal2);}
 
-/* fundraising reached */
-.fund-reached{
-  font-family:'Space Mono',monospace;
-  font-size:.62rem;color:#3d6a28;font-weight:700;
-  background:rgba(61,106,40,.1);
-  border-radius:4px;padding:1px 6px;letter-spacing:.03em;
+/* Marker annotation on card */
+.c-marker{
+  position:absolute;bottom:8px;right:8px;
+  font-family:var(--marker);font-size:.65rem;
+  color:rgba(90,60,20,.3);transform:rotate(-6deg);
 }
 
-/* ── Wide card (募資 highlight) ── */
-.c-card-wide{
-  background:#fff;border-radius:14px;overflow:hidden;
-  border:1px solid var(--bdr);
-  min-width:300px;max-width:300px;
-  cursor:pointer;scroll-snap-align:start;
-  transition:all .2s;flex-shrink:0;
-}
-.c-card-wide:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(30,52,16,.12);border-color:#c8c0a8;}
-.c-card-wide .c-thumb{height:175px;font-size:3.5rem;}
-
-/* ════════════════════ NEWS STRIP ════════════════════ */
-.news-strip{
-  background:linear-gradient(90deg,#2e4228,#3d5a3a);
-  border-radius:12px;padding:16px 24px;
-  display:flex;align-items:center;gap:16px;
-  margin-top:24px;overflow:hidden;
-}
-.news-label{
-  font-family:'Space Mono',monospace;font-size:.65rem;
-  color:#c8e890;letter-spacing:.08em;text-transform:uppercase;
-  flex-shrink:0;background:rgba(200,240,160,.15);
-  padding:3px 8px;border-radius:4px;
-}
-.news-items{
-  display:flex;gap:24px;overflow-x:auto;flex:1;
-}
-.news-items::-webkit-scrollbar{height:0;}
-.news-item{
-  font-size:.82rem;color:rgba(216,240,232,.8);
-  white-space:nowrap;cursor:pointer;transition:.15s;
-}
-.news-item:hover{color:#d8f0e8;}
-.news-item span{color:#c8e890;margin-right:8px;font-family:'Space Mono',monospace;font-size:.7rem;}
-
-/* ════════════════════ EMPTY STATE ════════════════════ */
-.empty-state{
-  text-align:center;padding:40px 0;
-  font-family:'Space Mono',monospace;
-  font-size:.78rem;color:var(--muted2);letter-spacing:.04em;
-  border:1.5px dashed var(--bdr);border-radius:12px;
-}
-
-/* ════════════════════ FOOTER ════════════════════ */
-footer{
-  background:#2a1e0e;
-  padding:16px 32px;
-  text-align:center;
-}
-.footer-txt{
-  font-family:'Space Mono',monospace;
-  font-size:.62rem;color:rgba(216,240,232,.3);
-  letter-spacing:.1em;text-transform:uppercase;
-}
-
-/* ── Course Entry Strip ── */
-.course-entry-strip{
-  display:flex;gap:10px;padding:16px 0 0;flex-wrap:wrap;
-}
+/* ══ ENTRY STRIP — File tabs ══ */
+.entry-strip{display:flex;gap:8px;padding:16px 0 0;flex-wrap:wrap;}
 .entry-pill{
-  display:inline-flex;align-items:center;gap:8px;
-  text-decoration:none;
-  background:var(--surf);
-  border:1.5px solid var(--bdr);
-  border-radius:12px;
-  padding:10px 16px;
-  transition:all .2s;
-  box-shadow:0 0 0 1px var(--bdr);
-  flex:1;min-width:140px;
+  display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+  background:var(--manila);border:1px solid rgba(90,60,20,.3);
+  border-top:3px solid var(--teal2);
+  padding:9px 13px;transition:all .2s;flex:1;min-width:150px;
+  position:relative;
+  box-shadow:2px 2px 6px rgba(0,0,0,.3);
 }
-.entry-pill:hover{
-  border-color:var(--acc);
-  box-shadow:0 0 0 1px var(--acc),0 4px 12px rgba(184,92,42,.15);
-  transform:translateY(-2px);
+.entry-pill:hover{border-top-color:var(--coral);transform:translateY(-2px);box-shadow:4px 4px 12px rgba(0,0,0,.4);}
+.ep-icon{font-size:1.4rem;}
+.ep-text{display:flex;flex-direction:column;gap:1px;}
+.ep-name{font-family:var(--headline);font-size:.82rem;font-weight:600;color:var(--typed);letter-spacing:.05em;text-transform:uppercase;}
+.ep-meta{font-family:var(--typer);font-size:.62rem;color:var(--txt2);letter-spacing:.04em;}
+.ep-badge{
+  margin-left:auto;font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;
+  padding:2px 8px;border:1px solid rgba(13,80,80,.4);
+  color:var(--teal2);flex-shrink:0;background:rgba(13,80,80,.08);
 }
-.entry-pill-icon{font-size:1.5rem;}
-.entry-pill-text{display:flex;flex-direction:column;}
-.entry-pill-name{font-family:'Fredoka One',sans-serif;font-size:.88rem;color:var(--txt);letter-spacing:.02em;}
-.entry-pill-meta{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted2);letter-spacing:.04em;margin-top:1px;}
-.entry-pill-badge{
-  margin-left:auto;font-family:'Space Mono',monospace;font-size:.58rem;
-  padding:2px 7px;border-radius:100px;
-  background:rgba(184,92,42,.1);border:1px solid rgba(184,92,42,.3);
-  color:var(--acc);flex-shrink:0;
-}
-.entry-pill.free .entry-pill-badge{
-  background:rgba(74,112,48,.1);border-color:rgba(74,112,48,.3);color:var(--acc-green);
-}
-.entry-pill.free:hover{border-color:var(--acc-green);box-shadow:0 0 0 1px var(--acc-green),0 4px 12px rgba(74,112,48,.15);}
-
-
-  .nav-links { display:none !important; }
-  .search-box { width:140px !important; }
-  .btn-login { display:none !important; }
-
-  .hero { flex-direction:column !important; padding:20px 16px 20px !important; gap:14px !important; min-height:auto !important; }
-  .hero-title { font-size:1.4rem !important; }
-  .hero-sub { font-size:.78rem !important; }
-  .hero-stats { display:none !important; }
-
-  .cat-bar { padding:0 10px !important; }
-  .cat-tab { font-size:.72rem !important; padding:10px 10px !important; gap:4px !important; }
-  .cat-icon { font-size:.8rem !important; }
-
-  .sub-bar.open { padding:8px 10px !important; gap:5px !important; max-height:100px !important; }
-  .pill { font-size:.7rem !important; padding:4px 10px !important; }
-
-  .page { padding:0 10px 40px !important; }
-  .section { margin-top:20px !important; }
-  .sec-hdr { margin-bottom:12px !important; }
-
-  /* Horizontal scroll cards - make them narrower */
-  .c-card { min-width:170px !important; max-width:170px !important; }
-  .c-card-wide { min-width:230px !important; max-width:230px !important; }
-  .c-thumb { height:110px !important; }
-  .c-title { font-size:.78rem !important; }
-  .c-teacher { font-size:.58rem !important; }
-  .c-price-now { font-size:.88rem !important; }
-  .c-footer { font-size:.58rem !important; }
-
-  /* News strip */
-  .news-strip { padding:12px 14px !important; }
-  .news-label { font-size:.58rem !important; }
-  .news-item { font-size:.72rem !important; }
-
-  /* Course entry strip */
-  .course-entry-strip { gap:8px !important; }
-  .entry-pill { padding:8px 10px !important; min-width:130px !important; }
-  .entry-pill-name { font-size:.78rem !important; }
-  .entry-pill-meta { font-size:.55rem !important; }
+.entry-pill.free .ep-badge{
+  background:var(--teal2);color:#fff;border-color:var(--teal2);
 }
 
+/* ══ EMPTY ══ */
+.empty{
+  padding:48px;text-align:center;background:rgba(232,213,168,.05);
+  border:2px dashed rgba(64,200,192,.12);
+  font-family:var(--typer);font-size:.9rem;color:rgba(64,200,192,.3);letter-spacing:.1em;
+}
+
+/* ══ FOOTER ══ */
+footer{
+  background:var(--teal-dark);border-top:3px solid var(--teal2);
+  padding:18px 24px;position:relative;z-index:2;
+  border-top:3px solid var(--teal);
+}
+footer::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--teal4),var(--coral2),var(--teal4),transparent);opacity:.4;
+}
+.footer-inner{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;}
+.footer-txt{font-family:var(--typer);font-size:.7rem;letter-spacing:.1em;color:var(--teal4);opacity:.6;}
+.footer-mono{font-family:var(--mono);font-size:.8rem;color:rgba(64,200,192,.4);letter-spacing:.15em;}
+.footer-marker{font-family:var(--marker);font-size:.9rem;color:var(--coral3);opacity:.5;transform:rotate(-2deg);display:inline-block;}
+
+/* ══ SCROLLBAR ══ */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--black);}
+::-webkit-scrollbar-thumb{background:rgba(13,80,80,.5);}
+::-webkit-scrollbar-thumb:hover{background:var(--teal2);}
+
+/* ══ REVEAL ══ */
+.reveal{opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
 </style>
 </head>
 <body>
 
-<!-- ── STICKY TOP: NAV + CATEGORY BAR + SUB PILLS ── -->
-<div class="sticky-top">
+<canvas id="vhs-canvas"></canvas>
 
-<!-- ── NAV ── -->
-<nav>
-  <a href="#" class="logo"><span class="logo-leaf">🌿</span> TA HUB</a>
-  <div class="nav-links">
-    <a href="#" class="nav-link">找課程</a>
-    <a href="opengl-seed.html" class="nav-link" style="color:#8ab040">🌱 像素王國</a>
-    <a href="opengl-map.html" class="nav-link">🏰 OpenGL</a>
-    <a href="dx-map.html" class="nav-link">⚔️ DirectX</a>
-    <a href="blender-hub.html" class="nav-link">🟠 Blender</a>
-  </div>
-  <div class="nav-right">
-    <div class="search-box">
-      <span class="search-icon">⌕</span>
-      <input type="text" placeholder="搜尋課程、講師、技術...">
+<!-- VHS TIMECODE BAR -->
+<div class="timecode">
+  <div class="tc-rec">REC</div>
+  <div class="tc-time" id="tc-time">00:00:00</div>
+  <div class="tc-mid">
+    <div class="tc-scroll">
+      <b>INTEL:</b> Blender 建模入門全新改版，Loop Cut 互動模組已解密 <span class="tc-sp">·</span>
+      <b>FUNDED:</b> DirectX 12 Work Graphs 募資達標 167%，任務成功！ <span class="tc-sp">·</span>
+      <b>FREE:</b> OpenGL 像素王國限時免費開放 <span class="tc-sp">·</span>
+      <b>NEW MODULE:</b> Subdivision Surface 第五關卡正式啟動 <span class="tc-sp">·</span>
+      <b>INTEL:</b> Blender 建模入門全新改版，Loop Cut 互動模組已解密 <span class="tc-sp">·</span>
+      <b>FUNDED:</b> DirectX 12 Work Graphs 募資達標 167%，任務成功！ <span class="tc-sp">·</span>
     </div>
-    <div class="nav-cart">🛒<span class="cart-badge">2</span></div>
-    <button class="btn-login">登入</button>
-    <button class="btn-signup">免費註冊</button>
+  </div>
+  <div class="tc-ch">CH 80</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="logo-badge"><span class="logo-icon">🔧</span></div>
+    <div class="logo-text">
+      <div class="logo-main">TA HUB</div>
+      <div class="logo-sub">SPECIAL TECH UNIT · EST. 1985</div>
+    </div>
+  </a>
+  <div class="nav-divider"></div>
+  <button class="nl" onclick="setCat(this,'blender')">BLENDER</button>
+  <button class="nl" onclick="setCat(this,'substance')">SUBSTANCE</button>
+  <button class="nl" onclick="setCat(this,'ue5')">UE5</button>
+  <button class="nl" onclick="setCat(this,'houdini')">HOUDINI</button>
+  <a class="nl" href="opengl-seed.html">OPENGL</a>
+  <a class="nl" href="dx-map.html">DIRECTX</a>
+  <div class="nav-right">
+    <div class="search-field">
+      <span class="search-icon">📡</span>
+      <input placeholder="SEARCH INTEL DATABASE..." />
+    </div>
+    <button class="btn-mission">▶ ACCEPT MISSION</button>
   </div>
 </nav>
 
-<!-- ── CATEGORY BAR ── -->
-<div class="cat-bar">
-  <button class="cat-tab active" onclick="setCat(this,'blender')">🟠 Blender</button>
-  <button class="cat-tab" onclick="setCat(this,'substance')">💠 Substance</button>
-  <button class="cat-tab" onclick="setCat(this,'ue5')">⬡ UE5</button>
-  <button class="cat-tab" onclick="setCat(this,'houdini')">🟡 Houdini</button>
-  <button class="cat-tab" onclick="setCat(this,'opengl')">💎 OpenGL</button>
-  <button class="cat-tab" onclick="setCat(this,'directx')">✕ DirectX</button>
-  <button class="cat-tab" onclick="setCat(this,'news')">📡 最新消息</button>
+<!-- CAT BAR -->
+<div class="cat-bar" id="cat-bar">
+  <button class="cat-tab active" onclick="setCat(this,'blender')">🔧 BLENDER</button>
+  <button class="cat-tab" onclick="setCat(this,'substance')">⚗ SUBSTANCE</button>
+  <button class="cat-tab" onclick="setCat(this,'ue5')">🏝 UE5</button>
+  <button class="cat-tab" onclick="setCat(this,'houdini')">💡 HOUDINI</button>
+  <button class="cat-tab" onclick="setCat(this,'opengl')">📺 OPENGL</button>
+  <button class="cat-tab" onclick="setCat(this,'directx')">⚔ DIRECTX</button>
+  <button class="cat-tab" onclick="setCat(this,'news')">📻 DISPATCH</button>
 </div>
+<div class="sub-bar" id="sub-bar"></div>
 
-<!-- ── SUB PILLS ── -->
-<div class="sub-bar open" id="sub-bar"></div>
-
-</div><!-- /sticky-top -->
-
-<!-- ── HERO ── -->
+<!-- HERO -->
 <div class="hero">
-  <div style="position:relative;z-index:1;">
-    <div class="hero-badge">🎓 技術美術學習平台 · TECHNICAL ARTIST HUB</div>
-    <div class="hero-title">從零到遊戲公司 TA<br>最完整的技術美術課程</div>
-    <div class="hero-sub">Blender · Substance · UE5 · Houdini · OpenGL · DirectX<br>跟著專業 TA 從理論到實戰，直接可用於業界</div>
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <!-- Left: mission content -->
+  <div class="hero-left">
+    <div class="mission-tag">
+      <div class="mission-pill">MISSION ACTIVE</div>
+      <div class="mission-no">OP-1985-TA // TECH ARTS DIVISION</div>
+    </div>
+    <h1 class="hero-title">
+      <span class="sub-line">從零到遊戲公司</span>
+      TA 最完整的<br>
+      <em>技術美術課程</em>
+    </h1>
+    <div class="duct-divider">
+      <div class="duct-piece"></div>
+      <div class="duct-icon">🔧 MacGyver 式學習法</div>
+      <div class="duct-piece"></div>
+    </div>
+    <p class="hero-sub">
+      Blender · Substance · UE5 · Houdini · OpenGL · DirectX<br>
+      只要一台電腦、一份技術，就能搞定一切。跟著專業特勤 TA 從理論到實戰。
+    </p>
+    <div class="hero-tags">
+      <span class="hero-tag">🔧 23 個任務</span>
+      <span class="hero-tag">📡 2,600+ 特工</span>
+      <span class="hero-tag">🏆 業界直達</span>
+      <span class="hero-tag">📼 永久存取</span>
+    </div>
     <div class="hero-btns">
-      <a href="opengl-seed.html" class="hbtn-p">🌱 免費體驗課程</a>
-      <a href="opengl-map.html" class="hbtn-s">瀏覽所有課程 →</a>
+      <a href="world-map.html" class="hbtn hbtn-p">🗺 進入任務世界</a>
+      <a href="world-map.html" class="hbtn hbtn-s">🗺 查看任務地圖</a>
     </div>
   </div>
-  <div class="hero-stats">
-    <div class="hero-stat">
-      <div class="hero-stat-num">23</div>
-      <div class="hero-stat-lbl">關卡課程</div>
+
+  <!-- Right: classified dossier -->
+  <div class="dossier-panel">
+    <div class="paperclip"></div>
+    <div class="dossier-header">
+      <span class="dossier-title-text">TOP SECRET DOSSIER</span>
+      <span class="dossier-id">FILE #4728</span>
     </div>
-    <div class="hero-stat">
-      <div class="hero-stat-num">2.6k</div>
-      <div class="hero-stat-lbl">學習人數</div>
+    <div class="dossier-body">
+      <div class="classified-stamp">CLASSIFIED</div>
+      <div class="dossier-field">
+        <div class="df-label">OPERATION</div>
+        <div class="df-val">技藝特勤計畫 ALPHA</div>
+      </div>
+      <div class="dossier-field">
+        <div class="df-label">LOCATION</div>
+        <div class="df-val">台灣 · 任何有網路的地方</div>
+      </div>
+      <div class="dossier-field">
+        <div class="df-label">SUBJECTS ENROLLED</div>
+        <div class="df-val">2,631 名特工</div>
+      </div>
+      <div class="dossier-field">
+        <div class="df-label">TECH MODULES</div>
+        <div class="df-val">23 個任務關卡</div>
+      </div>
+      <div class="dossier-field">
+        <div class="df-label">CLEARANCE</div>
+        <div class="df-val" style="color:var(--teal)">● 免費入門可用</div>
+      </div>
+      <div class="dossier-field">
+        <div class="df-label">HANDLER</div>
+        <div class="df-val redacted" title="點此顯示">███████████</div>
+      </div>
+      <div class="dossier-field">
+        <div class="df-label">STATUS</div>
+        <div class="df-val" style="color:var(--coral);font-weight:700;">MISSION IN PROGRESS</div>
+      </div>
     </div>
-    <div class="hero-stat">
-      <div class="hero-stat-num">95%</div>
-      <div class="hero-stat-lbl">好評率</div>
+    <div class="tape-strip"></div>
+  </div>
+</div>
+
+<!-- INTEL STRIP -->
+<div class="intel-strip">
+  <div class="intel-badge">📻 INTEL</div>
+  <div class="intel-scroll">
+    <div class="intel-inner">
+      <b>UPDATE:</b> Blender 建模入門關卡全新改版，Loop Cut 互動模組正式解鎖
+      <span class="tc-sp">—</span>
+      <b>SUCCESS:</b> DirectX 12 Work Graphs 任務募資達標 167%
+      <span class="tc-sp">—</span>
+      <b>FREE ACCESS:</b> OpenGL 像素王國全系列課程限時開放
+      <span class="tc-sp">—</span>
+      <b>NEW MODULE:</b> Subdivision Surface 第五關卡正式啟動
+      <span class="tc-sp">—</span>
+      <b>UPDATE:</b> Blender 建模入門關卡全新改版，Loop Cut 互動模組正式解鎖
+      <span class="tc-sp">—</span>
+      <b>SUCCESS:</b> DirectX 12 Work Graphs 任務募資達標 167%
     </div>
   </div>
 </div>
 
-<!-- ── PAGE BODY ── -->
-<div class="page" id="page-body">
-  <!-- rendered by JS -->
-</div>
+<!-- PAGE BODY -->
+<div class="page" id="page-body"></div>
 
+<!-- FOOTER -->
 <footer>
-  <div class="footer-txt">TA HUB · TECHNICAL ARTIST LEARNING PLATFORM · 2026 © 塔渥工作室</div>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-mono">TA HUB // SPECIAL TECH UNIT</div>
+      <div class="footer-txt" style="margin-top:2px;">2026 © 塔渥工作室 · STATION: TAIPEI</div>
+    </div>
+    <div class="footer-marker">MacGyver approved ✓</div>
+    <div class="footer-txt" style="text-align:right;">
+      <div>FREQ: 147.3 MHz</div>
+      <div>ENCRYPTION: ACTIVE</div>
+    </div>
+  </div>
 </footer>
 
 <script>
-// ── Data ────────────────────────────────────────────────────
-const PILLS = {
-  blender:   ['全部','建模','雕刻','材質','渲染','動畫','程序化','Geometry Nodes','三渲二'],
-  substance: ['全部','PBR 基礎','材質繪製','程序材質','貼圖烘焙','Smart Material'],
-  ue5:       ['全部','Nanite','Lumen','Niagara','PCG','材質 Graph','Shader','TA 工具'],
-  houdini:   ['全部','程序化建模','特效模擬','VEX','Python','遊戲資產'],
-  opengl:    ['全部','像素王國','進階城堡','著色器','光照模型','紋理映射'],
-  directx:   ['全部','DX11 基礎','DX12','Compute Shader','HLSL'],
-  news:      ['全部','GDC','Siggraph','工具更新','教學資源','行業動態'],
-};
+// ════════════════════════════════════════
+//  VHS STATIC + INTERFERENCE CANVAS
+// ════════════════════════════════════════
+(function(){
+  const cv = document.getElementById('vhs-canvas');
+  const ctx = cv.getContext('2d');
+  let W, H;
+  function resize(){ cv.width = W = window.innerWidth; cv.height = H = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
 
+  let glitchTimer = 0;
+  let glitchActive = false;
+
+  function drawStatic(){
+    // Very sparse static dots
+    const count = Math.floor(W * H * .00012);
+    for(let i = 0; i < count; i++){
+      const x = Math.random()*W, y = Math.random()*H;
+      const b = Math.random()*.35;
+      ctx.fillStyle = `rgba(200,220,200,${b})`;
+      ctx.fillRect(x, y, 1, 1);
+    }
+  }
+
+  function drawHorizLines(){
+    // Occasional horizontal interference lines
+    if(Math.random() > .97){
+      const y = Math.random()*H;
+      const h = Math.random()*3+1;
+      ctx.fillStyle = `rgba(0,229,229,${Math.random()*.06})`;
+      ctx.fillRect(0, y, W, h);
+    }
+  }
+
+  function drawVHSGlitch(){
+    // Rare color channel shift
+    if(!glitchActive && Math.random() > .996){
+      glitchActive = true;
+      glitchTimer = 6 + Math.floor(Math.random()*8);
+    }
+    if(glitchActive && glitchTimer > 0){
+      glitchTimer--;
+      const y = Math.random()*H*.7 + H*.1;
+      const h = Math.random()*8+2;
+      ctx.save();
+      ctx.globalAlpha = .15 + Math.random()*.1;
+      ctx.fillStyle = Math.random() > .5 ? 'rgba(0,229,229,1)' : 'rgba(255,60,0,1)';
+      ctx.fillRect(Math.random()*20-10, y, W, h);
+      ctx.restore();
+      if(glitchTimer === 0) glitchActive = false;
+    }
+  }
+
+  function loop(){
+    ctx.clearRect(0, 0, W, H);
+    drawStatic();
+    drawHorizLines();
+    drawVHSGlitch();
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// ════════════════════════════════════════
+//  VHS TIMECODE CLOCK
+// ════════════════════════════════════════
+(function(){
+  let secs = 0;
+  function tick(){
+    secs++;
+    const h = String(Math.floor(secs/3600)).padStart(2,'0');
+    const m = String(Math.floor((secs%3600)/60)).padStart(2,'0');
+    const s = String(secs%60).padStart(2,'0');
+    const el = document.getElementById('tc-time');
+    if(el) el.textContent = `${h}:${m}:${s}`;
+  }
+  setInterval(tick, 1000);
+})();
+
+// ════════════════════════════════════════
+//  REDACTED hover
+// ════════════════════════════════════════
+document.querySelectorAll('.df-val.redacted').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    el.style.background = 'transparent';
+    el.style.color = 'var(--typed)';
+    el.textContent = '塔渥特勤局局長';
+  });
+  el.addEventListener('mouseleave', () => {
+    el.style.background = 'var(--typed)';
+    el.style.color = 'var(--typed)';
+    el.textContent = '███████████';
+  });
+});
+
+// ════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════
 const DB = {
-  blender: {
+  blender:{
     fund:[
-      {icon:'🏗️',bg:'g1',title:'Blender 程序化建築生成完整課程',teacher:'查克 · 資深 TA',now:'NT$ 1,980',ori:'NT$ 4,800',badge:'cb-fund',badgeTxt:'即將開課',fundPct:null,countdown:null,students:null,hours:null},
-      {icon:'🦴',bg:'g2',title:'Blender 角色綁定 Rigging 實戰',teacher:'陳 TA · IK/FK 專家',now:'NT$ 2,480',ori:'NT$ 6,000',badge:'cb-fund',badgeTxt:'募資中',fundPct:'募資達標 312%',countdown:'優惠倒數 3 天',students:null,hours:null},
+      {icon:'🔧',title:'Blender 程序化建築生成完整課程',teacher:'查克特工 · 資深 TA',now:'NT$ 1,980',ori:'NT$ 4,800',badge:'cb-fund',badgeTxt:'PRE-ORDER',time:'23'},
+      {icon:'🦴',title:'角色綁定 Rigging 實戰課程',teacher:'陳特工 · IK/FK',now:'NT$ 2,480',ori:'NT$ 6,000',badge:'cb-fund',badgeTxt:'FUNDED',fundPct:'312%',countdown:'72H LEFT',time:'47'},
     ],
     sale:[
-      {icon:'🏠',bg:'g1',title:'Blender 建模入門：從零到遊戲資產',teacher:'查克 · 3D 藝術家',now:'NT$ 1,480',ori:'NT$ 3,600',badge:'cb-sale',badgeTxt:'限時優惠',students:'2,054',hours:'12hr',countdown:null,link:'blender-hub.html'},
-      {icon:'💎',bg:'g2',title:'Geometry Nodes 程序化完全指南',teacher:'小偉 · Houdini TA',now:'NT$ 1,680',ori:'NT$ 4,200',badge:'cb-sale',badgeTxt:'限時優惠',students:'1,328',hours:'10hr',countdown:null},
-      {icon:'🎭',bg:'g3',title:'三渲二風格化流程：Blender to UE5',teacher:'米亞 · 風格化TA',now:'NT$ 2,280',ori:'NT$ 5,500',badge:'cb-sale',badgeTxt:'限時優惠',students:'987',hours:'14hr',countdown:null},
-      {icon:'🪨',bg:'g4',title:'Blender 材質與 PBR 貼圖製作',teacher:'Kevin · 材質藝術家',now:'NT$ 1,280',ori:'NT$ 3,000',badge:'cb-sale',badgeTxt:'限時優惠',students:'1,541',hours:'8hr',countdown:null},
+      {icon:'🏠',title:'Blender 建模入門：從零到遊戲資產',teacher:'查克特工 · 3D 藝術家',now:'NT$ 1,480',ori:'NT$ 3,600',badge:'cb-sale',badgeTxt:'ON SALE',students:'2,054',hours:'12HR',link:'blender-hub.html',time:'08'},
+      {icon:'💎',title:'Geometry Nodes 程序化完全指南',teacher:'小偉特工 · Houdini',now:'NT$ 1,680',ori:'NT$ 4,200',badge:'cb-sale',badgeTxt:'ON SALE',students:'1,320',hours:'18HR',time:'31'},
+      {icon:'🦾',title:'硬表面建模：機器人道具設計',teacher:'Kai 特工 · 道具組',now:'NT$ 1,280',ori:'NT$ 3,200',badge:'cb-sale',badgeTxt:'ON SALE',students:'987',hours:'10HR',time:'55'},
     ],
-    hot:[
-      {icon:'🌀',bg:'g6',title:'Geometry Nodes 程序化城市生成',teacher:'小偉 · Houdini TA',price:'NT$ 3,600',badge:'cb-hot',badgeTxt:'熱門',students:'3,208',hours:'16hr'},
-      {icon:'🦊',bg:'g3',title:'Blender 毛發模擬全流程',teacher:'阿倫 · 角色TA',price:'NT$ 2,800',badge:'cb-hot',badgeTxt:'熱門',students:'2,466',hours:'11hr'},
-      {icon:'💡',bg:'g1',title:'Blender Cycles 光照渲染精通',teacher:'Alex · 渲染專家',price:'NT$ 3,200',badge:'cb-hot',badgeTxt:'熱門',students:'1,892',hours:'9hr'},
-    ],
-    news_strip:[
-      {tag:'更新','text':'Blender 4.3 正式發布：Bone Collections 全面升級'},
-      {tag:'教學','text':'Geometry Nodes 程序化道路生成新教學上線'},
-      {tag:'社群','text':'ArtStation 2024 年度 Blender 精選作品集公開'},
-    ]
-  },
-  substance:{
-    fund:[
-      {icon:'🧪',bg:'g3',title:'Substance Designer 程序材質從零到精通',teacher:'Ada · PBR 材質師',now:'NT$ 2,180',ori:'NT$ 5,400',badge:'cb-fund',badgeTxt:'募資中',fundPct:'募資達標 188%',countdown:'優惠倒數 5 天'},
-    ],
-    sale:[
-      {icon:'🎨',bg:'g3',title:'Substance Painter 完整入門課',teacher:'Ada · PBR 材質師',now:'NT$ 1,380',ori:'NT$ 3,600',badge:'cb-sale',badgeTxt:'限時優惠',students:'1,623',hours:'10hr'},
-      {icon:'⚙️',bg:'g2',title:'Smart Material 實戰：金屬磨損效果',teacher:'Ray · 技術美術',now:'NT$ 980',ori:'NT$ 2,400',badge:'cb-sale',badgeTxt:'限時優惠',students:'892',hours:'6hr'},
-      {icon:'🗺️',bg:'g4',title:'貼圖烘焙完整指南：Normal / AO / ID Map',teacher:'Mei · 遊戲TA',now:'NT$ 1,480',ori:'NT$ 3,600',badge:'cb-sale',badgeTxt:'限時優惠',students:'1,124',hours:'8hr'},
-    ],
-    hot:[
-      {icon:'🧬',bg:'g6',title:'Substance 3D 到 UE5 完整材質管線',teacher:'Ivan · 管線TA',price:'NT$ 4,200',badge:'cb-hot',badgeTxt:'熱門',students:'2,341',hours:'14hr'},
-      {icon:'🔬',bg:'g5',title:'程序材質與 Mask 進階技法',teacher:'Ada · PBR 材質師',price:'NT$ 3,200',badge:'cb-hot',badgeTxt:'熱門',students:'1,780',hours:'11hr'},
-    ],
-    news_strip:[
-      {tag:'更新','text':'Substance 3D Painter 10.1 新增 AI 貼圖輔助功能'},
-      {tag:'教學','text':'Adobe 官方 Smart Material 進階教學系列更新'},
-    ]
-  },
-  ue5:{
-    fund:[
-      {icon:'⬡',bg:'g2',title:'UE5 大型開放世界：Nanite + Lumen + PCG 完整專案',teacher:'Bryan · Epic TA',now:'NT$ 3,480',ori:'NT$ 8,800',badge:'cb-fund',badgeTxt:'募資中',fundPct:'募資達標 541%',countdown:'優惠倒數 1 天'},
-      {icon:'💥',bg:'g4',title:'Niagara GPU 特效實戰：火焰 / 煙霧 / 魔法',teacher:'Tina · VFX TA',now:'NT$ 2,880',ori:'NT$ 6,600',badge:'cb-fund',badgeTxt:'即將開課',fundPct:null,countdown:null},
-    ],
-    sale:[
-      {icon:'🌊',bg:'g2',title:'UE5 Lumen 全域光照完整調校',teacher:'Bryan · Epic TA',now:'NT$ 1,980',ori:'NT$ 4,800',badge:'cb-sale',badgeTxt:'限時優惠',students:'2,108',hours:'9hr'},
-      {icon:'🔮',bg:'g4',title:'UE5 材質 Graph 深度解析',teacher:'Karen · 材質TA',now:'NT$ 1,480',ori:'NT$ 3,600',badge:'cb-sale',badgeTxt:'限時優惠',students:'1,654',hours:'8hr'},
-      {icon:'🛠️',bg:'g6',title:'UE5 TA 工具開發：Python + 藍圖',teacher:'Samuel · 工具TA',now:'NT$ 2,480',ori:'NT$ 5,800',badge:'cb-sale',badgeTxt:'限時優惠',students:'832',hours:'12hr'},
-      {icon:'🌿',bg:'g1',title:'PCG 程序化城市生成完整實作',teacher:'May · 場景TA',now:'NT$ 1,680',ori:'NT$ 4,200',badge:'cb-sale',badgeTxt:'限時優惠',students:'1,023',hours:'10hr'},
-    ],
-    hot:[
-      {icon:'⬡',bg:'g2',title:'UE5 Nanite 入門：視覺化 Mesh 管線',teacher:'Bryan · Epic TA',price:'NT$ 4,800',badge:'cb-hot',badgeTxt:'熱門',students:'3,812',hours:'11hr'},
-      {icon:'🎮',bg:'g3',title:'UE5 遊戲 Shader 實戰：溶解 / 描邊 / 幽靈',teacher:'Karen · 材質TA',price:'NT$ 3,600',badge:'cb-hot',badgeTxt:'熱門',students:'2,987',hours:'9hr'},
-    ],
-    news_strip:[
-      {tag:'更新','text':'UE5.4 Path Tracing 正式進入 Production Ready'},
-      {tag:'GDC','text':'Epic 公開 UE5 Nanite Tessellation 技術細節'},
-      {tag:'教學','text':'Niagara GPU Simulation 官方深度教學發布'},
-    ]
-  },
-  houdini:{
-    fund:[
-      {icon:'🌊',bg:'g2',title:'Houdini 水體模擬：從 FLIP 到遊戲資產匯出',teacher:'老蔡 · FX TA',now:'NT$ 2,980',ori:'NT$ 7,200',badge:'cb-fund',badgeTxt:'募資中',fundPct:'募資達標 276%',countdown:'優惠倒數 4 天'},
-    ],
-    sale:[
-      {icon:'🌀',bg:'g6',title:'Houdini SOP 程序化建模完整入門',teacher:'老蔡 · FX TA',now:'NT$ 1,980',ori:'NT$ 4,800',badge:'cb-sale',badgeTxt:'限時優惠',students:'1,241',hours:'14hr'},
-      {icon:'💻',bg:'g4',title:'VEX 速成：TA 必學 30 個常用節點',teacher:'阿瑋 · Houdini TD',now:'NT$ 1,280',ori:'NT$ 3,000',badge:'cb-sale',badgeTxt:'限時優惠',students:'978',hours:'8hr'},
-      {icon:'🎮',bg:'g1',title:'Houdini 遊戲資產管線：到 UE5 實戰',teacher:'May · 場景TA',now:'NT$ 2,180',ori:'NT$ 5,400',badge:'cb-sale',badgeTxt:'限時優惠',students:'634',hours:'12hr'},
-    ],
-    hot:[
-      {icon:'💥',bg:'g3',title:'Houdini 爆炸特效：RBD 剛體模擬精通',teacher:'老蔡 · FX TA',price:'NT$ 5,200',badge:'cb-hot',badgeTxt:'熱門',students:'2,156',hours:'16hr'},
-      {icon:'🌪️',bg:'g2',title:'Houdini 煙霧流體：Pyro FX 實戰',teacher:'Lily · 煙霧TA',price:'NT$ 4,800',badge:'cb-hot',badgeTxt:'熱門',students:'1,678',hours:'13hr'},
-    ],
-    news_strip:[
-      {tag:'更新','text':'Houdini 20.5 發布：Vellum Cloth 布料模擬大升級'},
-      {tag:'社群','text':'Rebelway 2024 年度 Houdini 特效精選公開'},
-    ]
+    hot:[{icon:'🌿',title:'自然場景建模：植物與地形',teacher:'林特工 · 環境組',now:'NT$ 1,380',badge:'cb-new',badgeTxt:'NEW',students:'432',hours:'8HR',time:'12'}]
   },
   opengl:{
-    fund:[
-      {icon:'🌌',bg:'g4',title:'OpenGL PBR 光照：從 Lambert 到 Cook-Torrance',teacher:'Kai · 圖學 TA',now:'NT$ 1,480',ori:'NT$ 3,600',badge:'cb-fund',badgeTxt:'即將開課',fundPct:null,countdown:null},
-    ],
     sale:[
-      {icon:'🌱',bg:'g1',title:'像素王國 — OpenGL 入門闖關課',teacher:'像素騎士 · TA',now:'免費',ori:null,badge:'cb-new',badgeTxt:'免費入門',students:'2,631',hours:'10關',countdown:null,link:'opengl-seed.html'},
-      {icon:'🏰',bg:'g2',title:'進階城堡 — OpenGL 著色器深度解析',teacher:'城堡守護者 · TA',now:'NT$ 1,980',ori:'NT$ 4,800',badge:'cb-sale',badgeTxt:'限時優惠',students:'1,248',hours:'9關',link:'opengl-map.html'},
-      {icon:'💡',bg:'g3',title:'光照模型實戰：Phong 到 PBR',teacher:'Kai · 圖學 TA',now:'NT$ 1,480',ori:'NT$ 3,600',badge:'cb-sale',badgeTxt:'限時優惠',students:'876',hours:'8hr'},
-    ],
-    hot:[
-      {icon:'🎮',bg:'g6',title:'GLSL Compute Shader：GPU 並行入門',teacher:'Sam · 圖學工程師',price:'NT$ 3,200',badge:'cb-hot',badgeTxt:'熱門',students:'1,432',hours:'9hr'},
-      {icon:'✨',bg:'g4',title:'後處理效果串接：Bloom / SSAO / HDR',teacher:'Nico · 渲染TA',price:'NT$ 2,800',badge:'cb-hot',badgeTxt:'熱門',students:'987',hours:'7hr'},
-    ],
-    news_strip:[
-      {tag:'更新','text':'OpenGL 4.6 Direct State Access 完整教學上線'},
-      {tag:'教學','text':'LearnOpenGL 中文版全站翻譯計畫啟動'},
-      {tag:'資源','text':'Khronos 發布最新 GLSL 規格文件'},
+      {icon:'📺',title:'像素王國 — OpenGL 入門闖關課',teacher:'像素騎士特工',now:'FREE',badge:'cb-new',badgeTxt:'FREE',students:'2,631',hours:'10 LVL',link:'opengl-seed.html',time:'00'},
+      {icon:'🏰',title:'進階城堡 — OpenGL 著色器解析',teacher:'城堡守護者特工',now:'NT$ 1,980',ori:'NT$ 4,800',badge:'cb-sale',badgeTxt:'ON SALE',students:'1,248',hours:'9 LVL',link:'opengl-map.html',time:'19'},
     ]
   },
   directx:{
-    fund:[
-      {icon:'⚡',bg:'g4',title:'DirectX 12 Work Graphs 實戰：GPU 驅動渲染',teacher:'NVIDIA TA · 高階',now:'NT$ 3,480',ori:'NT$ 8,800',badge:'cb-fund',badgeTxt:'募資中',fundPct:'募資達標 167%',countdown:'優惠倒數 7 天'},
-    ],
-    sale:[
-      {icon:'⚔️',bg:'g3',title:'DirectX 11 要塞系列：完整入門課',teacher:'劍士TA · DX 專家',now:'NT$ 1,480',ori:'NT$ 3,600',badge:'cb-sale',badgeTxt:'限時優惠',students:'1,872',hours:'9關',link:'dx-level1.html'},
-      {icon:'🔷',bg:'g2',title:'DirectX 12 命令佇列與多執行緒渲染',teacher:'Mark · 進階DX',now:'NT$ 2,480',ori:'NT$ 5,800',badge:'cb-sale',badgeTxt:'限時優惠',students:'623',hours:'10hr'},
-      {icon:'✨',bg:'g6',title:'HLSL 著色語言完整進階指南',teacher:'劍士TA · DX 專家',now:'NT$ 1,280',ori:'NT$ 3,200',badge:'cb-sale',badgeTxt:'限時優惠',students:'934',hours:'8hr'},
-    ],
-    hot:[
-      {icon:'🔺',bg:'g3',title:'DXR 光線追蹤實作：從 BVH 到 Shader Table',teacher:'Eric · RTX 工程師',price:'NT$ 5,800',badge:'cb-hot',badgeTxt:'熱門',students:'1,204',hours:'14hr'},
-      {icon:'💻',bg:'g4',title:'DX12 資源管理與 Descriptor Heap',teacher:'Mark · 進階DX',price:'NT$ 3,600',badge:'cb-hot',badgeTxt:'熱門',students:'856',hours:'10hr'},
-    ],
-    news_strip:[
-      {tag:'更新','text':'DirectX 12 Work Graphs 正式發布：改變 GPU 驅動'},
-      {tag:'教學','text':'HLSL 6.6 Dynamic Resources 語法完整解析'},
-      {tag:'社群','text':'NVIDIA 發布 DXR 2.0 光線追蹤實作指南'},
-    ]
+    fund:[{icon:'⚔️',title:'DirectX 12 Work Graphs 實戰',teacher:'NVIDIA 特工',now:'NT$ 3,480',ori:'NT$ 8,800',badge:'cb-fund',badgeTxt:'FUNDED',fundPct:'167%',countdown:'7D LEFT',time:'33'}],
+    sale:[{icon:'🔫',title:'DirectX 11 要塞系列完整入門',teacher:'劍士特工 · DX 組',now:'NT$ 1,480',ori:'NT$ 3,600',badge:'cb-sale',badgeTxt:'ON SALE',students:'1,872',hours:'9 LVL',link:'dx-level1.html',time:'41'}]
   },
-  news:{
-    fund:[],
-    sale:[],
-    hot:[],
-    news_strip:[
-      {tag:'GDC','text':'GDC 2025 Technical Artist Summit 議程正式公開'},
-      {tag:'更新','text':'Blender 4.3 / Substance 10.1 / UE5.4 同日發布'},
-      {tag:'論文','text':'Siggraph 2024 論文精選：即時 3D Gaussian Splatting'},
-      {tag:'社群','text':'ArtStation 2024 年度 TA 精選作品集公開'},
-      {tag:'行業','text':'Epic Games：UE5.4 全平台 Nanite 支援確認'},
-    ]
-  }
+  substance:{sale:[{icon:'🎨',title:'Substance Painter 材質繪製全攻略',teacher:'美術特工',now:'NT$ 1,580',ori:'NT$ 3,800',badge:'cb-sale',badgeTxt:'HOT',students:'1,540',hours:'14HR',time:'27'}]},
+  ue5:{sale:[{icon:'🏝',title:'UE5 Nanite + Lumen 實戰指南',teacher:'引擎特工',now:'NT$ 2,180',ori:'NT$ 5,200',badge:'cb-sale',badgeTxt:'HOT',students:'2,100',hours:'20HR',time:'06'}]},
+  houdini:{sale:[{icon:'💡',title:'Houdini 程序化特效入門',teacher:'特效特工',now:'NT$ 1,880',ori:'NT$ 4,600',badge:'cb-sale',badgeTxt:'HOT',students:'890',hours:'16HR',time:'44'}]},
+  news:{fund:[],sale:[],hot:[]}
 };
 
-// ── Renderer ──────────────────────────────────────────────────
-let activePill=null;
+const PILLS={
+  blender:['ALL','建模','雕刻','材質','渲染','動畫','程序化'],
+  opengl:['ALL','像素王國','進階城堡','著色器'],
+  directx:['ALL','DX11','DX12','HLSL'],
+  substance:['ALL','PBR','材質繪製'],
+  ue5:['ALL','Nanite','Lumen'],
+  houdini:['ALL','程序化','特效'],
+  news:[]
+};
 
-function cardHTML(c,wide){
-  const cls = wide ? 'c-card-wide' : 'c-card';
-  const linkOpen  = c.link ? `<a href="${c.link}" style="text-decoration:none;display:block;color:inherit;">` : '';
-  const linkClose = c.link ? '</a>' : '';
-  const priceHTML = c.now==='免費'
-    ? `<div class="c-price"><span class="c-price-now" style="color:var(--teal)">🌱 免費入門</span></div>`
+const ENTRIES={
+  opengl:[{icon:'📺',name:'像素王國',meta:'OPENGL · 10 LEVELS',link:'opengl-seed.html',free:true},{icon:'🏰',name:'OPENGL 城堡',meta:'ADVANCED · 9 LVL',link:'opengl-map.html'}],
+  directx:[{icon:'⚔️',name:'DIRECTX 要塞',meta:'DX11 · 9 LEVELS',link:'dx-level1.html'},{icon:'🗺️',name:'DX 地圖',meta:'OVERVIEW',link:'dx-map.html'}],
+  blender:[{icon:'🔧',name:'BLENDER HUB',meta:'TRAINING · 6 MOD',link:'blender-hub.html'},{icon:'▶',name:'LEVEL 1 START',meta:'FREE ACCESS',link:'blender-ui-lv1.html',free:true}],
+};
+
+let activePill = null;
+
+function cardHTML(c, wide){
+  const lo = c.link ? `<a href="${c.link}" style="text-decoration:none;display:block;color:inherit;">` : '';
+  const lc = c.link ? '</a>' : '';
+  const isFree = c.now === 'FREE' || c.now === '免費';
+  const priceHTML = isFree
+    ? `<div class="c-price"><span class="c-price-free">▶ FREE ACCESS</span></div>`
     : `<div class="c-price"><span class="c-price-now">${c.now}</span>${c.ori?`<span class="c-price-ori">${c.ori}</span>`:''}</div>`;
   const footerHTML = c.students
-    ? `<div class="c-footer"><span>👥 ${c.students}</span><div class="c-dot"></div><span>⏱ ${c.hours}</span></div>`
-    : c.countdown
-      ? `<div class="c-footer" style="color:var(--acc)">${c.countdown}</div>`
-      : c.fundPct
-        ? `<div class="c-footer"><span class="fund-reached">✦ ${c.fundPct}</span></div>`
-        : '';
-  return linkOpen+`<div class="${cls}"
-    <div class="c-thumb ${c.bg}">
-      ${c.icon}
-      <div class="c-badge ${c.badge}">${c.badgeTxt}</div>
-      ${c.fundPct?`<div class="fund-bar"><div class="fund-fill" style="width:${Math.min(100,parseInt(c.fundPct))}%"></div></div>`:''}
+    ? `<div class="c-footer"><span>📡 ${c.students}</span><span class="c-dot"></span><span>${c.hours}</span></div>`
+    : c.countdown ? `<div class="c-footer c-countdown">⚠ ${c.countdown}</div>`
+    : c.fundPct ? `<div class="fund-bar"><div class="fund-fill" style="width:${Math.min(100,parseInt(c.fundPct))}%"></div></div><div class="fund-pct">FUNDED: ${c.fundPct}</div>`
+    : '';
+  const t = c.time || '00';
+  return lo + `<div class="c-card${wide?' c-card-wide':''}">
+    <div class="c-thumb" data-time="${t}">
+      <span class="c-icon">${c.icon}</span>
     </div>
     <div class="c-body">
+      <span class="c-badge ${c.badge}">${c.badgeTxt}</span>
       <div class="c-title">${c.title}</div>
       <div class="c-teacher">${c.teacher}</div>
-      ${priceHTML}
-      ${footerHTML}
+      ${priceHTML}${footerHTML}
     </div>
-  </div>`+linkClose;
+    <div class="c-marker">#${Math.floor(Math.random()*900+100)}</div>
+  </div>` + lc;
 }
 
-function sectionHTML(title, items, wide=false){
-  if(!items||items.length===0) return '';
-  return `<div class="section">
+function sectionHTML(title, filenum, items, wide=false){
+  if(!items?.length) return '';
+  return `<div class="section reveal">
     <div class="sec-hdr">
-      <span class="sec-title">${title}</span>
-      <span class="sec-meta">${items.length} 個課程</span>
-      <a class="sec-more" href="#">全部查看 →</a>
+      <span class="sec-title">${title} <span class="sec-file-num">FILE-${filenum}</span></span>
+      <a href="#" class="sec-more">VIEW ALL FILES ›</a>
     </div>
-    <div class="card-row">${items.map(c=>cardHTML(c,wide)).join('')}</div>
-  </div>`;
-}
-
-function newsStripHTML(items){
-  if(!items||items.length===0) return '';
-  return `<div class="news-strip">
-    <div class="news-label">📡 最新消息</div>
-    <div class="news-items">${items.map(n=>`<div class="news-item"><span>[${n.tag}]</span>${n.text}</div>`).join('')}</div>
+    <div class="card-row">${items.map(c => cardHTML(c, wide)).join('')}</div>
   </div>`;
 }
 
 function renderCat(cat){
-  const d=DB[cat];
-  let html='';
-
-  // ── Course entry shortcuts per category ──
-  const ENTRIES = {
-    opengl:[
-      {icon:'🌱',name:'像素王國',meta:'OpenGL 入門 · 10 關',link:'opengl-seed.html',free:true},
-      {icon:'🏰',name:'OpenGL 城堡',meta:'進階版 · 9 關',link:'opengl-map.html',free:false},
-    ],
-    directx:[
-      {icon:'⚔️',name:'DirectX 要塞',meta:'DX11 入門 · 9 關',link:'dx-level1.html',free:false},
-      {icon:'🗺️',name:'DX 關卡地圖',meta:'全覽 · 9 城',link:'dx-map.html',free:false},
-    ],
-    blender:[
-      {icon:'🏗️',name:'Blender 關卡地圖',meta:'建模入門 · 6 關',link:'blender-hub.html',free:false},
-      {icon:'🟠',name:'關卡 1 直接開始',meta:'介面 · 視角 · Cube',link:'blender-level1.html',free:true},
-    ],
-  };
+  const d = DB[cat];
+  let html = '';
   if(ENTRIES[cat]){
-    html+=`<div class="course-entry-strip">
+    html += `<div class="entry-strip reveal">
       ${ENTRIES[cat].map(e=>`
         <a href="${e.link}" class="entry-pill${e.free?' free':''}">
-          <span class="entry-pill-icon">${e.icon}</span>
-          <span class="entry-pill-text">
-            <span class="entry-pill-name">${e.name}</span>
-            <span class="entry-pill-meta">${e.meta}</span>
+          <span class="ep-icon">${e.icon}</span>
+          <span class="ep-text">
+            <span class="ep-name">${e.name}</span>
+            <span class="ep-meta">${e.meta}</span>
           </span>
-          <span class="entry-pill-badge">${e.free?'免費':'▶ 進入'}</span>
+          <span class="ep-badge">${e.free?'▶ FREE':'ENTER'}</span>
         </a>`).join('')}
     </div>`;
   }
-
-  if(d.news_strip?.length) html+=newsStripHTML(d.news_strip);
-  if(d.fund?.length)  html+=sectionHTML('🚀 募資課程',d.fund,true);
-  if(d.sale?.length)  html+=sectionHTML('⏰ 限時優惠',d.sale);
-  if(d.hot?.length)   html+=sectionHTML('🔥 熱門課程',d.hot);
-  if(!d.fund?.length&&!d.sale?.length&&!d.hot?.length){
-    html+=`<div class="section"><div class="empty-state">— 此分類最新消息詳見上方快訊 —</div></div>`;
+  if(d?.fund?.length) html += sectionHTML('📁 PRE-ORDER OPS', '001', d.fund, true);
+  if(d?.sale?.length) html += sectionHTML('🔧 ACTIVE MISSIONS', '002', d.sale);
+  if(d?.hot?.length)  html += sectionHTML('📡 HIGH VALUE INTEL', '003', d.hot);
+  if(!d?.fund?.length&&!d?.sale?.length&&!d?.hot?.length){
+    html += `<div class="empty reveal">// NO FILES FOUND — CONTACT HQ //</div>`;
   }
-  document.getElementById('page-body').innerHTML=html;
+  document.getElementById('page-body').innerHTML = html;
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.reveal').forEach((el,i) => {
+      setTimeout(() => el.classList.add('in'), i*70);
+    });
+    // Re-attach redacted hover
+    document.querySelectorAll('.df-val.redacted').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        el.style.background='transparent';el.style.color='var(--typed)';el.textContent='塔渥特勤局局長';
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.background='var(--typed)';el.style.color='var(--typed)';el.textContent='███████████';
+      });
+    });
+  });
 }
 
 function renderPills(cat){
-  const bar=document.getElementById('sub-bar');
-  bar.innerHTML=(PILLS[cat]||[]).map((p,i)=>
-    `<button class="pill${i===0?' on':''}" onclick="selPill(this)">${p}</button>`
+  const pills = PILLS[cat] || [];
+  const sb = document.getElementById('sub-bar');
+  if(!pills.length){ sb.classList.remove('open'); sb.innerHTML=''; return; }
+  sb.innerHTML = pills.map((p,i) =>
+    `<div class="pill${i===0?' on':''}" onclick="selPill(this)">${p}</div>`
   ).join('');
-  bar.classList.add('open');
-  activePill=bar.querySelector('.pill.on');
+  sb.classList.add('open');
+  activePill = sb.querySelector('.pill');
 }
 
-function setCat(tabEl,cat){
-  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
-  tabEl.classList.add('active');
-  renderPills(cat);
-  renderCat(cat);
+function setCat(el, cat){
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el?.classList?.add('active');
+  renderPills(cat); renderCat(cat);
 }
 
 function selPill(el){
-  if(activePill)activePill.classList.remove('on');
-  el.classList.add('on');activePill=el;
+  if(activePill) activePill.classList.remove('on');
+  el.classList.add('on'); activePill = el;
 }
 
-// init
-renderPills('blender');
-renderCat('blender');
+// Init
+renderPills('blender'); renderCat('blender');
 
-// ── Index Mobile Adjustments ──
-if(DEV.isMobile){
-  // Add a mobile bottom nav bar
-  const mobileNav = document.createElement('div');
-  mobileNav.style.cssText='position:fixed;bottom:0;left:0;right:0;height:56px;background:#2e4228;border-top:1px solid #3d5a3a;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)';
-  const navItems=[
-    {icon:'🏠',label:'首頁',href:'#'},
-    {icon:'🌱',label:'像素王國',href:'opengl-seed.html'},
-    {icon:'🏰',label:'OpenGL',href:'opengl-map.html'},
-    {icon:'⚔️',label:'DirectX',href:'dx-map.html'},
-    {icon:'🟠',label:'Blender',href:'blender-hub.html'},
-  ];
-  navItems.forEach(item=>{
-    const a=document.createElement('a');
-    a.href=item.href;
-    a.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:rgba(216,240,216,.6);font-family:Fredoka One,sans-serif;';
-    a.innerHTML=`<span style="font-size:1.1rem">${item.icon}</span><span style="font-size:.52rem;letter-spacing:.03em">${item.label}</span>`;
-    mobileNav.appendChild(a);
+setTimeout(() => {
+  document.querySelectorAll('.reveal').forEach((el,i) => {
+    setTimeout(() => el.classList.add('in'), i*80);
   });
-  document.body.appendChild(mobileNav);
-  // Add padding so content isn't hidden behind nav
-  document.body.style.paddingBottom='56px';
-}
+}, 300);
 
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+}, {threshold:.1});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 </script>
 </body>
 </html>

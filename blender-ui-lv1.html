@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Lv1 介面認識 — Blender 課程 | TA HUB</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700;900&family=Noto+Sans+TC:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ══ RESET ══ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;user-select:none}
+
+/* ══ BLENDER 5.0 THEME TOKENS ══ */
+:root{
+  --b-bg:     #1d1d1d;
+  --b-panel:  #252525;
+  --b-panel2: #2d2d2d;
+  --b-hdr:    #1a1a1a;
+  --b-active: #3a3a3a;
+  --b-border: #141414;
+  --b-bdr2:   #383838;
+  --b-text:   #c8c8c8;
+  --b-dim:    #7a7a7a;
+  --b-orange: #ff8832;
+  --b-orange2:#ffaa50;
+  --b-blue:   #4d90fe;
+  --b-green:  #5a9e5a;
+  --b-gold:   #ffc040;
+  /* Layout */
+  --tb:  22px;
+  --mb:  28px;
+  --vh:  28px;
+  --tl:  56px;
+  --lt:  30px;
+  --rt:  264px;
+}
+@media(max-width:1024px){ :root{ --rt:220px; --lt:0px } }
+@media(max-width:600px){  :root{ --rt:0px;   --lt:0px } }
+
+body{ background:var(--b-bg); color:var(--b-text);
+  font-family:'Noto Sans TC',system-ui,sans-serif; font-size:12px; }
+
+/* ══ THREE.JS CANVAS ══ */
+#three-canvas{
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  z-index:0; display:block; pointer-events:none;
+}
+
+/* ══ BLENDER UI SHELL ══ */
+#ui{
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  z-index:10; pointer-events:none;
+  display:flex; flex-direction:column;
+}
+
+/* ── Title bar ── */
+#tb{
+  height:var(--tb); min-height:var(--tb);
+  background:#111; border-bottom:1px solid #0a0a0a;
+  display:flex; align-items:center; padding:0 10px; gap:6px;
+  pointer-events:auto; flex-shrink:0;
+}
+.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;cursor:pointer}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+.tb-txt{font-size:11px;color:#666;font-family:'Space Mono',monospace;margin-left:6px;white-space:nowrap}
+.tb-txt b{color:#888}
+
+/* ── Menu + Workspace bar ── */
+#mb{
+  height:var(--mb); min-height:var(--mb);
+  background:var(--b-hdr); border-bottom:1px solid var(--b-border);
+  display:flex; align-items:center; pointer-events:auto; flex-shrink:0;
+}
+.mn{
+  padding:0 10px; height:100%; display:flex; align-items:center;
+  font-size:12px; color:var(--b-text); cursor:pointer; white-space:nowrap;
+}
+.mn:hover{background:#2a2a2a}
+.sep-v{width:1px;height:16px;background:var(--b-bdr2);margin:0 3px;flex-shrink:0}
+.ws-row{display:flex;align-items:stretch;height:100%;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.ws-row::-webkit-scrollbar{display:none}
+.ws-tab{
+  padding:0 11px; height:100%; display:flex; align-items:center;
+  font-size:11.5px; color:var(--b-dim); cursor:pointer; white-space:nowrap;
+  border-top:2px solid transparent;
+}
+.ws-tab:hover{color:var(--b-text);background:#222}
+.ws-tab.on{color:var(--b-text);background:var(--b-panel);border-top-color:var(--b-orange)}
+
+/* ── Main area ── */
+#main{flex:1;display:flex;overflow:hidden;min-height:0}
+
+/* ── Left toolbar ── */
+#lt{
+  width:var(--lt); min-width:var(--lt);
+  background:var(--b-panel); border-right:1px solid var(--b-border);
+  display:flex; flex-direction:column; align-items:center;
+  padding:4px 0; gap:2px; pointer-events:auto; flex-shrink:0; overflow:hidden;
+}
+@media(max-width:1024px){#lt{display:none}}
+.lt-btn{
+  width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;cursor:pointer;color:var(--b-dim);font-size:12px;transition:all .15s;
+}
+.lt-btn:hover,.lt-btn.on{background:var(--b-active);color:var(--b-text)}
+.lt-sep{width:18px;height:1px;background:var(--b-bdr2);margin:3px 0}
+
+/* ── Viewport column ── */
+#vp-col{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+
+/* Viewport header */
+#vp-hdr{
+  height:var(--vh); min-height:var(--vh);
+  background:rgba(26,26,26,0.85); backdrop-filter:blur(4px);
+  border-bottom:1px solid var(--b-border);
+  display:flex; align-items:center; padding:0 8px; gap:0;
+  pointer-events:auto; flex-shrink:0; z-index:2;
+}
+.vh-mode{
+  background:var(--b-panel2); border:1px solid var(--b-bdr2);
+  border-radius:3px; padding:0 8px; height:20px;
+  display:flex; align-items:center; gap:4px; font-size:11px; cursor:pointer;
+}
+.vh-sep{width:1px;height:14px;background:var(--b-bdr2);margin:0 4px}
+.vh-btn{padding:0 7px;height:20px;display:flex;align-items:center;font-size:11px;cursor:pointer;border-radius:3px}
+.vh-btn:hover{background:var(--b-active)}
+.vh-r{margin-left:auto;display:flex;align-items:center;gap:3px}
+.vh-ic{width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--b-dim);cursor:pointer;border-radius:3px}
+.vh-ic:hover{background:var(--b-active);color:var(--b-text)}
+.vh-shade{
+  display:flex;gap:1px;margin-left:4px;
+}
+.sh-btn{
+  padding:0 5px;height:20px;display:flex;align-items:center;
+  font-size:10px;color:var(--b-dim);cursor:pointer;border-radius:2px;
+}
+.sh-btn.on{background:var(--b-active);color:var(--b-text)}
+.sh-btn:hover{background:var(--b-active)}
+
+/* Viewport content (transparent → Three.js shows through) */
+#vp-body{flex:1;position:relative;pointer-events:auto}
+
+/* Gizmo */
+#gizmo{position:absolute;top:10px;right:10px;width:68px;height:68px;pointer-events:none}
+
+/* Viewport overlay labels */
+#vp-info{
+  position:absolute;top:8px;left:8px;
+  font-family:'Space Mono',monospace;font-size:10px;
+  color:rgba(200,200,200,0.30);line-height:1.8;pointer-events:none;
+}
+
+/* ── Right panels ── */
+#rt{
+  width:var(--rt); min-width:var(--rt);
+  display:flex; flex-direction:column;
+  border-left:1px solid var(--b-border);
+  pointer-events:auto; flex-shrink:0; overflow:hidden;
+}
+@media(max-width:600px){#rt{display:none}}
+
+.pnl-hdr{
+  height:22px; background:var(--b-panel2);
+  border-bottom:1px solid var(--b-border);
+  display:flex;align-items:center;padding:0 8px;gap:8px;flex-shrink:0;
+}
+.pnl-tab{font-size:11px;color:var(--b-dim);cursor:pointer;padding:2px 4px;border-radius:2px}
+.pnl-tab.on{color:var(--b-text)}
+.pnl-srch{
+  height:20px;background:var(--b-panel);border-bottom:1px solid var(--b-border);
+  display:flex;align-items:center;padding:0 8px;gap:5px;font-size:11px;color:var(--b-dim);flex-shrink:0;
+}
+
+/* Outliner */
+#outliner{flex:0 0 auto;border-bottom:1px solid var(--b-border);display:flex;flex-direction:column;height:38%}
+#ol-body{flex:1;overflow-y:auto;background:var(--b-panel)}
+#ol-body::-webkit-scrollbar{width:3px}
+#ol-body::-webkit-scrollbar-thumb{background:var(--b-bdr2)}
+.ol-row{
+  height:22px;display:flex;align-items:center;padding:0 6px;cursor:pointer;gap:4px;
+  transition:background .1s;
+}
+.ol-row:hover{background:#2a2a2a}
+.ol-row.sel{background:#1a2a3a}
+.ol-exp{font-size:9px;color:var(--b-dim);width:10px;flex-shrink:0;text-align:center}
+.ol-ic{font-size:11px;flex-shrink:0;width:14px;text-align:center}
+.ol-nm{font-size:11px;color:var(--b-text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Properties */
+#props{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--b-panel)}
+#props-body{flex:1;overflow-y:auto;padding:10px 10px 6px}
+#props-body::-webkit-scrollbar{width:3px}
+#props-body::-webkit-scrollbar-thumb{background:var(--b-bdr2)}
+
+.ps-sect{margin-bottom:10px}
+.ps-hdr{
+  height:20px;display:flex;align-items:center;padding:0 6px;
+  background:var(--b-panel2);border-bottom:1px solid var(--b-border);
+  font-size:11px;color:var(--b-text);cursor:pointer;gap:6px;
+  border-radius:2px;margin-bottom:2px;
+}
+.ps-row{display:flex;align-items:center;height:20px;margin-bottom:1px;gap:4px;padding:0 2px}
+.ps-lbl{font-size:11px;color:var(--b-dim);width:56px;flex-shrink:0}
+.ps-val{
+  font-size:11px;color:var(--b-text);flex:1;
+  background:#1d1d1d;border:1px solid var(--b-bdr2);
+  border-radius:3px;padding:1px 6px;font-family:'Space Mono',monospace;
+}
+.ps-val.blue{border-color:#2a5080;color:#88bbff}
+.ps-val.green{border-color:#1a4020;color:#88cc88}
+
+/* ── Timeline ── */
+#tl{
+  height:var(--tl);min-height:var(--tl);
+  background:var(--b-panel);border-top:1px solid var(--b-border);
+  pointer-events:auto;flex-shrink:0;display:flex;flex-direction:column;
+}
+#tl-hdr{
+  height:22px;background:var(--b-panel2);border-bottom:1px solid var(--b-border);
+  display:flex;align-items:center;padding:0 10px;gap:10px;flex-shrink:0;
+}
+.tl-c{font-size:13px;color:var(--b-dim);cursor:pointer;padding:0 3px}
+.tl-c:hover{color:var(--b-text)}
+.tl-fn{font-family:'Space Mono',monospace;font-size:10px;color:var(--b-dim)}
+#tl-body{flex:1;display:flex;align-items:center;padding:0 14px;gap:10px;position:relative}
+.tl-lbl{font-size:10px;color:var(--b-orange);font-family:'Space Mono',monospace;flex-shrink:0;white-space:nowrap}
+.tl-trk{flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden;position:relative}
+.tl-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#3a8a3a,var(--b-orange));transition:width .6s ease}
+.tl-pct{font-size:10px;color:var(--b-dim);font-family:'Space Mono',monospace;flex-shrink:0}
+
+/* ══ LESSON OVERLAY ══ */
+/* Floats inside vp-body */
+#lesson{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  z-index:5;pointer-events:none;
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:10px;
+}
+/* Lesson card */
+#lcard{
+  background:rgba(10,18,30,0.96);backdrop-filter:blur(20px);
+  border:1.5px solid rgba(255,255,255,0.09);border-radius:18px;
+  padding:18px 20px 16px;width:100%;max-width:580px;
+  pointer-events:auto;box-shadow:0 16px 64px rgba(0,0,0,0.6);
+  transition:opacity .3s ease;
+}
+.lcard-step{
+  font-family:'Space Mono',monospace;font-size:10px;color:var(--b-orange);
+  letter-spacing:2px;margin-bottom:6px;
+}
+.lcard-title{
+  font-family:'Josefin Sans',sans-serif;font-weight:700;
+  font-size:clamp(16px,2.5vw,20px);color:#fff;margin-bottom:6px;
+}
+.lcard-body{
+  font-size:12px;color:rgba(255,255,255,0.58);line-height:1.7;margin-bottom:14px;
+}
+.lcard-body b{color:rgba(255,255,255,0.85)}
+.lcard-body code{
+  background:rgba(255,136,50,0.14);color:var(--b-orange);
+  border-radius:3px;padding:0 4px;font-family:'Space Mono',monospace;font-size:11px;
+}
+/* Navigation buttons */
+.lcard-nav{display:flex;gap:8px;align-items:center}
+.btn-next{
+  flex:1;padding:11px;border:none;border-radius:10px;
+  background:var(--b-orange);color:#fff;cursor:pointer;
+  font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:14px;
+  letter-spacing:1.5px;transition:all .18s;
+}
+.btn-next:hover{background:var(--b-orange2);transform:translateY(-1px)}
+.btn-next:active{transform:scale(0.97)}
+.btn-back{
+  padding:11px 18px;border:1px solid var(--b-bdr2);border-radius:10px;
+  background:transparent;color:var(--b-dim);cursor:pointer;
+  font-family:'Josefin Sans',sans-serif;font-size:13px;transition:all .18s;
+}
+.btn-back:hover{color:var(--b-text);border-color:var(--b-text)}
+/* Step dots */
+.step-dots{display:flex;gap:5px;align-items:center;margin-right:auto}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--b-bdr2);transition:all .3s}
+.sdot.on{background:var(--b-orange);width:18px;border-radius:3px}
+
+/* ── Quiz styles ── */
+.quiz-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.quiz-opt{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border:1.5px solid rgba(255,255,255,0.09);border-radius:10px;
+  cursor:pointer;transition:all .18s;background:rgba(255,255,255,0.03);
+}
+.quiz-opt:hover{border-color:var(--b-orange);background:rgba(255,136,50,0.07)}
+.quiz-opt.correct{border-color:var(--b-green)!important;background:rgba(90,158,90,0.12)!important}
+.quiz-opt.wrong{border-color:#cc4444!important;background:rgba(200,68,68,0.10)!important}
+.quiz-opt.disabled{pointer-events:none;opacity:0.7}
+.qo-letter{
+  width:26px;height:26px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.20);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:12px;color:var(--b-dim);
+  flex-shrink:0;
+}
+.quiz-opt.correct .qo-letter{border-color:var(--b-green);color:var(--b-green)}
+.quiz-opt.wrong .qo-letter{border-color:#cc4444;color:#cc4444}
+.qo-txt{font-size:12px;color:rgba(255,255,255,0.72)}
+.quiz-result{
+  font-size:12px;padding:8px 12px;border-radius:8px;margin-bottom:10px;
+  display:none;line-height:1.6;
+}
+.quiz-result.ok{background:rgba(90,158,90,0.15);color:#88dd88;border:1px solid rgba(90,158,90,0.25)}
+.quiz-result.fail{background:rgba(200,68,68,0.12);color:#ff8888;border:1px solid rgba(200,68,68,0.20)}
+
+/* ── Zone highlight overlay (canvas pointer hit) ── */
+.zone-hl{
+  position:absolute;border-radius:3px;pointer-events:none;
+  border:2px solid transparent;transition:all .3s ease;
+  display:flex;align-items:center;justify-content:center;
+}
+.zone-hl.show{border-color:var(--b-orange);background:rgba(255,136,50,0.10)}
+.zone-lbl{
+  background:rgba(255,136,50,0.90);color:#fff;border-radius:5px;
+  padding:3px 8px;font-size:10px;font-weight:700;
+  font-family:'Josefin Sans',sans-serif;letter-spacing:1px;white-space:nowrap;
+  box-shadow:0 2px 10px rgba(0,0,0,0.4);
+}
+
+/* ── XP POPUP ── */
+#xp-popup{
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;opacity:0;transition:opacity .4s;
+}
+#xp-popup.show{opacity:1;pointer-events:auto}
+#xp-box{
+  background:rgba(8,18,36,0.97);backdrop-filter:blur(24px);
+  border:1.5px solid rgba(255,255,255,0.12);border-radius:24px;
+  padding:36px 40px;text-align:center;
+  box-shadow:0 24px 80px rgba(0,0,0,0.7);
+  max-width:340px;width:90%;
+}
+.xp-star{font-size:52px;animation:spinIn .5s ease;display:block;margin-bottom:10px}
+@keyframes spinIn{from{transform:rotate(-30deg) scale(0.5);opacity:0}to{transform:none;opacity:1}}
+.xp-ttl{font-family:'Josefin Sans',sans-serif;font-weight:900;font-size:26px;color:#fff;margin-bottom:4px}
+.xp-sub{font-size:13px;color:rgba(255,255,255,0.42);margin-bottom:18px}
+.xp-val{
+  font-family:'Space Mono',monospace;font-weight:700;font-size:32px;
+  color:var(--b-gold);margin-bottom:18px;display:block;
+  animation:popUp .4s .3s both ease;
+}
+@keyframes popUp{from{transform:scale(0.6);opacity:0}to{transform:none;opacity:1}}
+.xp-btns{display:flex;gap:8px}
+.xp-btn{
+  flex:1;padding:12px;border:none;border-radius:11px;cursor:pointer;
+  font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:14px;
+  letter-spacing:1.5px;transition:all .18s;
+}
+.xp-btn.main{background:var(--b-orange);color:#fff}
+.xp-btn.main:hover{background:var(--b-orange2)}
+.xp-btn.sec{background:rgba(255,255,255,0.07);color:var(--b-dim);border:1px solid var(--b-bdr2)}
+.xp-btn.sec:hover{color:var(--b-text)}
+</style>
+</head>
+<body>
+
+<!-- ══ THREE.JS CANVAS — MUST BE FIRST ══ -->
+<canvas id="three-canvas"></canvas>
+
+<!-- ══ BLENDER 5.0 UI SHELL ══ -->
+<div id="ui">
+
+  <!-- ■ Title bar -->
+  <div id="tb">
+    <div class="dot r" onclick="window.location.href='blender-hub.html'"></div>
+    <div class="dot y"></div>
+    <div class="dot g"></div>
+    <div class="tb-txt">[TA HUB] — Blender 課程 Lv1 <b>介面認識</b></div>
+  </div>
+
+  <!-- ■ Menu + Workspace -->
+  <div id="mb">
+    <div class="mn">File</div>
+    <div class="mn">Edit</div>
+    <div class="mn">Render</div>
+    <div class="mn">Window</div>
+    <div class="mn">Help</div>
+    <div class="sep-v"></div>
+    <div class="ws-row">
+      <div class="ws-tab on">Layout</div>
+      <div class="ws-tab">Modeling</div>
+      <div class="ws-tab">Sculpting</div>
+      <div class="ws-tab">UV Editing</div>
+      <div class="ws-tab">Texture Paint</div>
+      <div class="ws-tab">Shading</div>
+      <div class="ws-tab">Animation</div>
+      <div class="ws-tab">Rendering</div>
+      <div class="ws-tab">Compositing</div>
+      <div class="ws-tab">Geometry Nodes</div>
+      <div class="ws-tab">Scripting</div>
+    </div>
+  </div>
+
+  <!-- ■ Main area -->
+  <div id="main">
+
+    <!-- Left toolbar -->
+    <div id="lt">
+      <div class="lt-btn on" title="Select Box">⬛</div>
+      <div class="lt-btn" title="Cursor">◎</div>
+      <div class="lt-sep"></div>
+      <div class="lt-btn" title="Move">↔</div>
+      <div class="lt-btn" title="Rotate">↻</div>
+      <div class="lt-btn" title="Scale">⤡</div>
+      <div class="lt-btn" title="Transform">✛</div>
+      <div class="lt-sep"></div>
+      <div class="lt-btn" title="Annotate">✏</div>
+      <div class="lt-btn" title="Measure">📐</div>
+      <div class="lt-sep"></div>
+      <div class="lt-btn" title="Add">⊕</div>
+    </div>
+
+    <!-- Viewport column -->
+    <div id="vp-col">
+
+      <!-- Viewport header -->
+      <div id="vp-hdr">
+        <div class="vh-mode">
+          <span>⬡</span><span style="font-size:11px">Object Mode</span><span style="font-size:9px;margin-left:2px;color:var(--b-dim)">▾</span>
+        </div>
+        <div class="vh-sep"></div>
+        <div class="vh-btn">View</div>
+        <div class="vh-btn">Select</div>
+        <div class="vh-btn">Add</div>
+        <div class="vh-btn">Object</div>
+        <div class="vh-r">
+          <div class="vh-sep"></div>
+          <div class="vh-shade">
+            <div class="sh-btn" title="Wireframe">□</div>
+            <div class="sh-btn on" title="Solid">⬡</div>
+            <div class="sh-btn" title="Material">◉</div>
+            <div class="sh-btn" title="Rendered">●</div>
+          </div>
+          <div class="vh-sep"></div>
+          <div class="vh-ic" title="Gizmos">✦</div>
+          <div class="vh-ic" title="Overlays">⊙</div>
+          <div class="vh-ic" title="XRay">◈</div>
+          <div class="vh-ic" title="Snapping">🔲</div>
+        </div>
+      </div>
+
+      <!-- Viewport body (Three.js shows through) -->
+      <div id="vp-body">
+        <!-- Perspective info -->
+        <div id="vp-info">
+          User Perspective<br>
+          (1) Collection | Cube
+        </div>
+        <!-- Gizmo canvas -->
+        <canvas id="gizmo" width="68" height="68"></canvas>
+
+        <!-- Zone highlight overlays (positioned by JS) -->
+        <div class="zone-hl" id="zh-viewport" style="top:0;left:0;right:0;bottom:0">
+          <div class="zone-lbl" id="zl-viewport" style="display:none">① 3D 視圖 Viewport</div>
+        </div>
+
+        <!-- Lesson card -->
+        <div id="lesson">
+          <div id="lcard"><!-- Filled by JS --></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ■ Right panels -->
+    <div id="rt">
+
+      <!-- Outliner panel -->
+      <div id="outliner">
+        <div class="pnl-hdr" id="hl-outliner">
+          <span class="pnl-tab on">Scene</span>
+          <span class="pnl-tab">ViewLayer</span>
+          <div id="zl-outliner" style="margin-left:auto;display:none;font-size:10px;color:var(--b-orange);font-family:'Josefin Sans',sans-serif;font-weight:700">② 大綱 Outliner</div>
+        </div>
+        <div class="pnl-srch"><span style="font-size:9px;opacity:.45">🔍</span><span>Search…</span></div>
+        <div id="ol-body">
+          <div class="ol-row"><span class="ol-exp">▼</span><span class="ol-ic">📁</span><span class="ol-nm">Scene Collection</span></div>
+          <div class="ol-row" style="padding-left:20px"><span class="ol-exp">▼</span><span class="ol-ic">📁</span><span class="ol-nm">Collection</span></div>
+          <div class="ol-row sel" id="ol-cube" style="padding-left:36px"><span class="ol-exp"></span><span class="ol-ic">⬡</span><span class="ol-nm">Cube</span></div>
+          <div class="ol-row" style="padding-left:36px"><span class="ol-exp"></span><span class="ol-ic">💡</span><span class="ol-nm">Light</span></div>
+          <div class="ol-row" style="padding-left:36px"><span class="ol-exp"></span><span class="ol-ic">📷</span><span class="ol-nm">Camera</span></div>
+        </div>
+      </div>
+
+      <!-- Properties panel -->
+      <div id="props">
+        <div class="pnl-hdr" id="hl-props">
+          <span class="pnl-tab on">▼ Transform</span>
+          <div id="zl-props" style="margin-left:auto;display:none;font-size:10px;color:var(--b-orange);font-family:'Josefin Sans',sans-serif;font-weight:700">③ 屬性 Properties</div>
+        </div>
+        <div id="props-body">
+          <div style="font-size:11px;color:var(--b-dim);margin-bottom:4px;padding:0 2px">Cube</div>
+          <div class="ps-sect">
+            <div class="ps-hdr"><span style="font-size:9px">▼</span> Transform</div>
+            <div class="ps-row"><span class="ps-lbl">Location X</span><span class="ps-val blue">0.000</span></div>
+            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val blue" style="margin-left:0">Y &nbsp;0.000</span></div>
+            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val blue">Z &nbsp;0.000</span></div>
+            <div style="height:4px"></div>
+            <div class="ps-row"><span class="ps-lbl">Rotation X</span><span class="ps-val">0°</span></div>
+            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val">Y &nbsp;0°</span></div>
+            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val">Z &nbsp;0°</span></div>
+            <div style="height:4px"></div>
+            <div class="ps-row"><span class="ps-lbl">Scale X</span><span class="ps-val green">1.000</span></div>
+            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val green">Y &nbsp;1.000</span></div>
+            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val green">Z &nbsp;1.000</span></div>
+          </div>
+          <div class="ps-sect">
+            <div class="ps-hdr" style="cursor:pointer"><span style="font-size:9px">▶</span> Delta Transform</div>
+          </div>
+          <div class="ps-sect">
+            <div class="ps-hdr" style="cursor:pointer"><span style="font-size:9px">▶</span> Relations</div>
+          </div>
+          <div class="ps-sect">
+            <div class="ps-hdr" style="cursor:pointer"><span style="font-size:9px">▶</span> Collections</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- ■ Timeline -->
+  <div id="tl">
+    <div id="tl-hdr">
+      <span class="tl-c">⏮</span>
+      <span class="tl-c">⏪</span>
+      <span class="tl-c" id="tl-play">▶</span>
+      <span class="tl-c">⏩</span>
+      <span class="tl-c">⏭</span>
+      <span class="tl-fn">Frame <b id="tl-frm">1</b></span>
+      <span style="margin-left:auto;font-size:10px;color:var(--b-dim);font-family:'Space Mono',monospace">Playback · Keying · View · Marker</span>
+    </div>
+    <div id="tl-body">
+      <div class="tl-lbl" id="tl-xp">XP 0 / 350</div>
+      <div class="tl-trk"><div class="tl-fill" id="tl-fill" style="width:0%"></div></div>
+      <div class="tl-pct" id="tl-pct">0%</div>
+      <div id="zl-timeline" style="margin-left:8px;display:none;font-size:10px;color:var(--b-orange);font-family:'Josefin Sans',sans-serif;font-weight:700">⑤ 時間軸 Timeline</div>
+    </div>
+  </div>
+
+</div><!-- /ui -->
+
+<!-- ══ XP POPUP ══ -->
+<div id="xp-popup">
+  <div id="xp-box">
+    <span class="xp-star">⭐</span>
+    <div class="xp-ttl">關卡完成！</div>
+    <div class="xp-sub">Lv1 介面認識 · Blender 5.0</div>
+    <span class="xp-val">+350 XP</span>
+    <div class="xp-btns">
+      <button class="xp-btn sec" onclick="window.location.href='blender-hub.html'">← 地圖</button>
+      <button class="xp-btn main" onclick="window.location.href='blender-ui-lv2.html'">下一關 →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  GLOBAL VARS  (before onload)
+// ══════════════════════════════════════
+var camera, scene, renderer, clock;
+var cube, cubeEdges, gridH;
+var rafId;
+var gCtx;
+var STEP = 0;
+var TOTAL_STEPS = 6;
+var quizDone = false;
+var quizScore = 0;
+var answered1 = false, answered2 = false;
+var SAVE_KEY = 'blender_ui_lv1';
+
+// Zone highlight elements
+var ZH = {};
+
+// ══════════════════════════════════════
+//  LESSON CONTENT (6 steps)
+// ══════════════════════════════════════
+var STEPS = [
+  // Step 0: Welcome
+  {
+    tag: 'STEP 01 / 06',
+    title: '歡迎來到 Blender 5.0！',
+    body: [
+      'Blender 是業界主流的 <b>免費開源 3D 軟體</b>，支援建模、動畫、渲染、合成等功能。',
+      '這個關卡將帶你認識 Blender 的 <b>五大介面區域</b>，這是操作一切功能的基礎。',
+      '你現在看到的就是 Blender 5.0 的真實介面！'
+    ].join('<br>'),
+    highlight: null,
+    next: '開始學習 →'
+  },
+  // Step 1: Viewport
+  {
+    tag: 'STEP 02 / 06 · ① 3D 視圖',
+    title: '3D 視圖 (Viewport)',
+    body: [
+      '最大的中央區域就是 <b>3D 視圖（Viewport）</b>，你在這裡：',
+      '• 觀看並操作 3D 物件',
+      '• 使用 <code>滾輪</code> 縮放 · <code>中鍵拖曳</code> 旋轉',
+      '• 用 <code>Shift+中鍵</code> 移動視角',
+      '<br>左邊的垂直工具列是 <b>Tool Shelf（工具架）</b>——這是整個介面最重要的工作區。'
+    ].join(''),
+    highlight: 'viewport',
+    next: '下一區域 →'
+  },
+  // Step 2: Outliner
+  {
+    tag: 'STEP 03 / 06 · ② 大綱',
+    title: '大綱 (Outliner)',
+    body: [
+      '右上角是 <b>大綱（Outliner）</b>，顯示場景中所有物件的層級結構：',
+      '• 📁 <b>Collection</b>（集合）可以管理物件群組',
+      '• 點擊物件名稱可以選取、隱藏 <code>👁</code> 或排除渲染',
+      '• <code>⬡ Cube</code> 就是預設場景的正方體',
+      '<br>這裡的結構和遊戲引擎的 Hierarchy 概念相同！'
+    ].join(''),
+    highlight: 'outliner',
+    next: '下一區域 →'
+  },
+  // Step 3: Properties
+  {
+    tag: 'STEP 04 / 06 · ③ 屬性',
+    title: '屬性面板 (Properties)',
+    body: [
+      '右下角是 <b>屬性面板（Properties）</b>，顯示選取物件的詳細參數：',
+      '• <b>Location</b>（位置）: X / Y / Z 坐標',
+      '• <b>Rotation</b>（旋轉）: 三軸角度',
+      '• <b>Scale</b>（縮放）: 三軸比例',
+      '• 快捷鍵 <code>N</code> 可在 Viewport 中快速開啟簡易版屬性欄'
+    ].join('<br>'),
+    highlight: 'props',
+    next: '下一區域 →'
+  },
+  // Step 4: Timeline
+  {
+    tag: 'STEP 05 / 06 · ⑤ 時間軸',
+    title: '時間軸 (Timeline)',
+    body: [
+      '底部是 <b>時間軸（Timeline）</b>，用於動畫製作：',
+      '• 顯示 <b>幀（Frame）</b>的進度，預設 1 ~ 250 幀',
+      '• 用 <code>▶</code> 播放動畫，<code>Space</code> 也可以',
+      '• <b>關鍵影格（Keyframe）</b>用 <code>I</code> 鍵設定',
+      '<br>即使不做動畫，Timeline 也是了解 Blender 工作流程的重要視窗。'
+    ].join(''),
+    highlight: 'timeline',
+    next: '前往測驗 →'
+  },
+  // Step 5: Quiz
+  {
+    tag: 'STEP 06 / 06 · 測驗',
+    title: '理解測驗',
+    body: '',
+    highlight: null,
+    next: '完成關卡 ✓',
+    quiz: true
+  }
+];
+
+// ══════════════════════════════════════
+//  QUIZ DATA
+// ══════════════════════════════════════
+var QUIZ = [
+  {
+    q: '在 Blender 的大綱（Outliner）中，哪個圖示代表「物件集合（Collection）」？',
+    opts: ['📁 資料夾圖示', '⬡ 六角形圖示', '💡 燈泡圖示', '📷 相機圖示'],
+    ans: 0,
+    explain: '正確！📁 資料夾代表 Collection（集合），你可以用它來分組管理場景中的物件，就像遊戲引擎的 Group 概念。'
+  },
+  {
+    q: '在 Viewport 中，哪個快捷鍵可以快速開啟物件的 N-Panel（屬性欄）？',
+    opts: ['Tab 鍵', 'N 鍵', 'G 鍵', 'Ctrl + P'],
+    ans: 1,
+    explain: '正確！按 N 鍵（或 N-Panel）可以在 Viewport 右側展開側邊屬性欄，快速查看和修改 Location / Rotation / Scale。'
+  }
+];
+
+// ══════════════════════════════════════
+//  RENDER STEP
+// ══════════════════════════════════════
+function renderStep() {
+  var s = STEPS[STEP];
+  var lcard = document.getElementById('lcard');
+
+  // Clear quiz state
+  answered1 = false; answered2 = false;
+  quizDone = false;
+
+  if (s.quiz) {
+    lcard.innerHTML = buildQuizHTML();
+  } else {
+    lcard.innerHTML = buildLearnHTML(s);
+  }
+
+  // Update zone highlights
+  clearHighlights();
+  if (s.highlight) showHighlight(s.highlight);
+
+  // Update timeline progress
+  updateTimeline();
+}
+
+function buildLearnHTML(s) {
+  var back = STEP > 0 ? '<button class="btn-back" onclick="goStep(-1)">← 上一步</button>' : '';
+  var dots = '';
+  for (var i = 0; i < TOTAL_STEPS; i++) {
+    dots += '<div class="sdot' + (i === STEP ? ' on' : '') + '"></div>';
+  }
+  return '<div class="lcard-step">' + s.tag + '</div>'
+    + '<div class="lcard-title">' + s.title + '</div>'
+    + '<div class="lcard-body">' + s.body + '</div>'
+    + '<div class="lcard-nav">'
+    + '<div class="step-dots">' + dots + '</div>'
+    + (back)
+    + '<button class="btn-next" onclick="goStep(1)">' + s.next + '</button>'
+    + '</div>';
+}
+
+function buildQuizHTML() {
+  var dots = '';
+  for (var i = 0; i < TOTAL_STEPS; i++) {
+    dots += '<div class="sdot' + (i === STEP ? ' on' : '') + '"></div>';
+  }
+  var html = '<div class="lcard-step">STEP 06 / 06 · 測驗</div>'
+    + '<div class="lcard-title">理解測驗 — 五大介面區域</div>';
+
+  // Q1
+  html += '<div class="lcard-body" style="margin-bottom:8px"><b>Q1.</b> ' + QUIZ[0].q + '</div>';
+  html += '<div class="quiz-opts" id="qopts0">';
+  var letters = ['A','B','C','D'];
+  for (var i = 0; i < QUIZ[0].opts.length; i++) {
+    html += '<div class="quiz-opt" id="qo0_'+i+'" onclick="pickQ(0,'+i+')">'
+      + '<div class="qo-letter">' + letters[i] + '</div>'
+      + '<div class="qo-txt">' + QUIZ[0].opts[i] + '</div>'
+      + '</div>';
+  }
+  html += '</div><div class="quiz-result" id="qr0"></div>';
+
+  // Q2
+  html += '<div class="lcard-body" style="margin-bottom:8px"><b>Q2.</b> ' + QUIZ[1].q + '</div>';
+  html += '<div class="quiz-opts" id="qopts1">';
+  for (var j = 0; j < QUIZ[1].opts.length; j++) {
+    html += '<div class="quiz-opt" id="qo1_'+j+'" onclick="pickQ(1,'+j+')">'
+      + '<div class="qo-letter">' + letters[j] + '</div>'
+      + '<div class="qo-txt">' + QUIZ[1].opts[j] + '</div>'
+      + '</div>';
+  }
+  html += '</div><div class="quiz-result" id="qr1"></div>';
+
+  html += '<div class="lcard-nav">'
+    + '<div class="step-dots">' + dots + '</div>'
+    + '<button class="btn-back" onclick="goStep(-1)">← 上一步</button>'
+    + '<button class="btn-next" id="q-submit" onclick="submitQuiz()" style="opacity:0.4;pointer-events:none">完成關卡 ✓</button>'
+    + '</div>';
+  return html;
+}
+
+// ══════════════════════════════════════
+//  QUIZ LOGIC
+// ══════════════════════════════════════
+function pickQ(qIdx, optIdx) {
+  var already = (qIdx === 0 ? answered1 : answered2);
+  if (already) return;
+  var q = QUIZ[qIdx];
+  var correct = (optIdx === q.ans);
+  // Mark all options
+  var opts = document.querySelectorAll('#qopts' + qIdx + ' .quiz-opt');
+  for (var i = 0; i < opts.length; i++) {
+    opts[i].classList.add('disabled');
+    if (i === q.ans) opts[i].classList.add('correct');
+    else if (i === optIdx && !correct) opts[i].classList.add('wrong');
+  }
+  var res = document.getElementById('qr' + qIdx);
+  res.style.display = 'block';
+  if (correct) {
+    res.className = 'quiz-result ok';
+    res.textContent = '✓ ' + q.explain;
+    quizScore++;
+  } else {
+    res.className = 'quiz-result fail';
+    res.textContent = '✗ 答案是 ' + ['A','B','C','D'][q.ans] + '。' + q.explain;
+  }
+  if (qIdx === 0) answered1 = true;
+  else answered2 = true;
+  // Enable submit when both answered
+  if (answered1 && answered2) {
+    var btn = document.getElementById('q-submit');
+    if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+  }
+}
+
+function submitQuiz() {
+  if (!answered1 || !answered2) return;
+  quizDone = true;
+  // Save progress
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({done: true, xp: 350, score: quizScore}));
+  } catch(e) {}
+  // Show XP popup
+  document.getElementById('xp-popup').classList.add('show');
+  updateTimeline(true);
+}
+
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
+function goStep(dir) {
+  STEP = Math.max(0, Math.min(TOTAL_STEPS - 1, STEP + dir));
+  renderStep();
+}
+
+// ══════════════════════════════════════
+//  ZONE HIGHLIGHTS
+// ══════════════════════════════════════
+function showHighlight(zone) {
+  if (zone === 'viewport') {
+    var vb = document.getElementById('vp-body');
+    vb.style.outline = '2px solid var(--b-orange)';
+    vb.style.outlineOffset = '-2px';
+    var lbl = document.getElementById('zl-viewport');
+    if (lbl) lbl.style.display = 'inline-block';
+  } else if (zone === 'outliner') {
+    var ol = document.getElementById('hl-outliner');
+    ol.style.background = 'rgba(255,136,50,0.18)';
+    var zl = document.getElementById('zl-outliner');
+    if (zl) zl.style.display = 'inline-block';
+  } else if (zone === 'props') {
+    var ph = document.getElementById('hl-props');
+    ph.style.background = 'rgba(255,136,50,0.18)';
+    var zp = document.getElementById('zl-props');
+    if (zp) zp.style.display = 'inline-block';
+  } else if (zone === 'timeline') {
+    var tl = document.getElementById('tl');
+    tl.style.outline = '2px solid var(--b-orange)';
+    tl.style.outlineOffset = '-2px';
+    var zt = document.getElementById('zl-timeline');
+    if (zt) zt.style.display = 'inline-block';
+  }
+}
+
+function clearHighlights() {
+  var vb = document.getElementById('vp-body');
+  vb.style.outline = 'none';
+  var zv = document.getElementById('zl-viewport');
+  if (zv) zv.style.display = 'none';
+  var ol = document.getElementById('hl-outliner');
+  ol.style.background = '';
+  var zo = document.getElementById('zl-outliner');
+  if (zo) zo.style.display = 'none';
+  var ph = document.getElementById('hl-props');
+  ph.style.background = '';
+  var zpp = document.getElementById('zl-props');
+  if (zpp) zpp.style.display = 'none';
+  var tl = document.getElementById('tl');
+  tl.style.outline = 'none';
+  var zt = document.getElementById('zl-timeline');
+  if (zt) zt.style.display = 'none';
+}
+
+// ══════════════════════════════════════
+//  TIMELINE / PROGRESS
+// ══════════════════════════════════════
+function updateTimeline(done) {
+  var pct = done ? 100 : Math.round((STEP / (TOTAL_STEPS - 1)) * 85);
+  document.getElementById('tl-fill').style.width = pct + '%';
+  document.getElementById('tl-pct').textContent = pct + '%';
+  var xp = done ? 350 : Math.round(350 * pct / 100);
+  document.getElementById('tl-xp').textContent = 'XP ' + xp + ' / 350';
+  document.getElementById('tl-frm').textContent = Math.round(pct * 2.5);
+}
+
+// ══════════════════════════════════════
+//  GIZMO DRAWING
+// ══════════════════════════════════════
+function drawGizmo() {
+  var g = document.getElementById('gizmo');
+  if (!g || !camera) return;
+  var ctx2 = g.getContext('2d');
+  var sz = g.width, cx = sz / 2, cy = sz / 2, r = 22;
+  ctx2.clearRect(0, 0, sz, sz);
+  // BG
+  ctx2.beginPath(); ctx2.arc(cx, cy, r + 4, 0, Math.PI * 2);
+  ctx2.fillStyle = 'rgba(26,26,26,0.60)'; ctx2.fill();
+
+  var camR = new THREE.Vector3(), camU = new THREE.Vector3(), camF = new THREE.Vector3();
+  camera.matrix.extractBasis(camR, camU, camF);
+  var axes = [
+    {n:'X', v:new THREE.Vector3(1,0,0),  c:'#dd4444'},
+    {n:'Y', v:new THREE.Vector3(0,1,0),  c:'#44aa44'},
+    {n:'Z', v:new THREE.Vector3(0,0,-1), c:'#4466cc'},
+  ];
+  var items = [];
+  for (var i = 0; i < axes.length; i++) {
+    var ax = axes[i];
+    var sv = {x: cx + ax.v.dot(camR)*r, y: cy - ax.v.dot(camU)*r};
+    var nv = {x: cx - ax.v.dot(camR)*r, y: cy + ax.v.dot(camU)*r};
+    items.push({s:nv, c:ax.c+'55', d:-ax.v.dot(camF), lbl:'', neg:true});
+    items.push({s:sv, c:ax.c,      d: ax.v.dot(camF), lbl:ax.n, neg:false});
+  }
+  items.sort(function(a,b){return a.d-b.d;});
+  for (var j = 0; j < items.length; j++) {
+    var it = items[j];
+    ctx2.beginPath(); ctx2.moveTo(cx,cy); ctx2.lineTo(it.s.x,it.s.y);
+    ctx2.strokeStyle = it.c; ctx2.lineWidth = it.neg ? 1.5 : 2.5; ctx2.stroke();
+    if (!it.neg) {
+      ctx2.beginPath(); ctx2.arc(it.s.x,it.s.y,5.5,0,Math.PI*2);
+      ctx2.fillStyle = it.c; ctx2.fill();
+      ctx2.fillStyle = '#fff'; ctx2.font = 'bold 7px monospace';
+      ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
+      ctx2.fillText(it.lbl, it.s.x, it.s.y);
+    }
+  }
+}
+
+// ══════════════════════════════════════
+//  WINDOW.ONLOAD — THREE.JS SETUP
+// ══════════════════════════════════════
+window.onload = function() {
+
+  // — Renderer —
+  var canvas = document.getElementById('three-canvas');
+  renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x1d1d1d, 1);
+
+  // — Scene —
+  scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x1d1d1d, 20, 40);
+  clock = new THREE.Clock();
+
+  // — Camera (MUST use window dims) —
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(4.5, 3.5, 5.5);
+  camera.lookAt(0, 0, 0);
+
+  // — Lights —
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  var sun = new THREE.DirectionalLight(0xffd0a0, 0.90);
+  sun.position.set(5, 8, 5); scene.add(sun);
+  var fill = new THREE.DirectionalLight(0x4488ff, 0.30);
+  fill.position.set(-5, 2, -3); scene.add(fill);
+
+  // — Grid (Blender style: dark) —
+  var grid = new THREE.GridHelper(20, 20, 0x2a2a2a, 0x222222);
+  scene.add(grid);
+  var fineGrid = new THREE.GridHelper(20, 40, 0x222222, 0x1e1e1e);
+  fineGrid.material.transparent = true; fineGrid.material.opacity = 0.45;
+  scene.add(fineGrid);
+
+  // — Axis lines —
+  var addLine = function(from, to, color) {
+    var g = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(from[0],from[1],from[2]),
+      new THREE.Vector3(to[0],to[1],to[2])
+    ]);
+    scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({color:color,transparent:true,opacity:0.7})));
+  };
+  addLine([-12,0.002,0],[12,0.002,0],0x7a0000);  // X red
+  addLine([0,0.002,-12],[0,0.002,12],0x007a00);  // Y green
+
+  // — Default Cube (matches Blender's default scene) —
+  var cubeGeo = new THREE.BoxGeometry(2, 2, 2);
+  var cubeMat = new THREE.MeshStandardMaterial({
+    color: 0x888888, roughness: 0.85, metalness: 0.05
+  });
+  cube = new THREE.Mesh(cubeGeo, cubeMat);
+  cube.position.set(0, 1, 0);
+  scene.add(cube);
+  // Wireframe edges (Blender shows edge overlay by default)
+  var edgeGeo = new THREE.EdgesGeometry(cubeGeo);
+  cubeEdges = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({color:0x000000, linewidth:1}));
+  cubeEdges.position.copy(cube.position);
+  scene.add(cubeEdges);
+
+  // Cube selection highlight (orange outline)
+  var selEdge = new THREE.EdgesGeometry(new THREE.BoxGeometry(2.02, 2.02, 2.02));
+  var selLine = new THREE.LineSegments(selEdge, new THREE.LineBasicMaterial({
+    color: 0xff8832, linewidth: 2, transparent: true, opacity: 0.9
+  }));
+  selLine.position.copy(cube.position);
+  scene.add(selLine);
+
+  // — Camera object (3D Camera like Blender's) —
+  var camVis = new THREE.Group();
+  var camBody = new THREE.BoxGeometry(0.4, 0.3, 0.5);
+  var camM = new THREE.MeshStandardMaterial({color:0x303030, roughness:0.8});
+  camVis.add(new THREE.Mesh(camBody, camM));
+  var camLens = new THREE.CylinderGeometry(0.08, 0.10, 0.20, 8);
+  var lens = new THREE.Mesh(camLens, new THREE.MeshStandardMaterial({color:0x111111}));
+  lens.rotation.x = Math.PI/2; lens.position.z = -0.32;
+  camVis.add(lens);
+  camVis.position.set(4.4, 1.7, -3.8);
+  camVis.rotation.y = Math.PI * 0.6;
+  scene.add(camVis);
+
+  // — Point light (represents Blender's default "Light") —
+  var pLight = new THREE.PointLight(0xffffff, 0.6, 15);
+  pLight.position.set(4, 6, 4);
+  scene.add(pLight);
+  var lightVis = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.12),
+    new THREE.MeshBasicMaterial({color:0xffffcc})
+  );
+  lightVis.position.copy(pLight.position);
+  scene.add(lightVis);
+
+  // — Check existing progress —
+  try {
+    var saved = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
+    if (saved.done) updateTimeline(true);
+  } catch(e) {}
+
+  // — First render —
+  renderStep();
+
+  // — Resize —
+  window.addEventListener('resize', function() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // — Render loop —
+  (function loop() {
+    rafId = requestAnimationFrame(loop);
+    var t = clock.getElapsedTime();
+    // Very slow auto-rotate (like Blender's default turntable view)
+    camera.position.x = Math.cos(t * 0.08) * 6.5;
+    camera.position.z = Math.sin(t * 0.08) * 6.5;
+    camera.position.y = 3.5;
+    camera.lookAt(0, 1, 0);
+
+    // Cube edge tracks cube
+    cubeEdges.position.copy(cube.position);
+    selLine.position.copy(cube.position);
+
+    drawGizmo();
+    renderer.render(scene, camera);
+  })();
+
+}; // end onload
+</script>
+</body>
+</html>

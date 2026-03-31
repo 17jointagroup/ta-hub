@@ -1,968 +1,863 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-
-<script>
-// ── Device Detection (runs before page renders) ──
-(function(){
-  var ua=navigator.userAgent;
-  var w=window.innerWidth||screen.width;
-  var isMobile=/iPhone|iPad|iPod|Android|Mobile/i.test(ua)||w<=768;
-  var isIOS=/iPhone|iPad|iPod/i.test(ua);
-  var size=w<=390?'xs':w<=430?'sm':w<=768?'md':'lg';
-  document.documentElement.setAttribute('data-device',isMobile?'mobile':'desktop');
-  document.documentElement.setAttribute('data-size',size);
-  if(isIOS)document.documentElement.classList.add('ios');
-  window.DEV={isMobile:isMobile,isIOS:isIOS,size:size,W:w};
-})();
-</script>
-
-<style id="device-css">
-/* ── Desktop defaults (no change) ── */
-[data-device="desktop"] {}
-
-/* ── Mobile: hide desktop-only elements ── */
-[data-device="mobile"] .desktop-only { display:none !important; }
-[data-device="desktop"] .mobile-only { display:none !important; }
-
-/* ── Mobile layout switches ── */
-[data-device="mobile"] .main {
-  flex-direction: column !important;
-}
-/* Left panel → bottom drawer on mobile */
-[data-device="mobile"] .lp,
-[data-device="mobile"] .lpanel,
-[data-device="mobile"] .instr-panel {
-  width: 100% !important;
-  max-height: 44vh !important;
-  min-height: 44vh !important;
-  border-right: none !important;
-  border-top: 2px solid var(--border, #333) !important;
-  order: 2 !important;
-  flex-shrink: 0 !important;
-  overflow: hidden !important;
-}
-/* Right panel → hidden on mobile */
-[data-device="mobile"] .rp,
-[data-device="mobile"] .rpanel,
-[data-device="mobile"] .right-panel { display: none !important; }
-
-/* Viewport → top half on mobile */
-[data-device="mobile"] .viewport {
-  flex: 1 !important;
-  order: 1 !important;
-  min-height: 0 !important;
-}
-
-/* Topbar compact */
-[data-device="mobile"] .tb-crumb { display: none !important; }
-[data-device="mobile"] .topbar { height: 38px !important; }
-[data-device="mobile"] .tb-logo { font-size: .85rem !important; padding: 0 10px !important; }
-
-/* Chapter tabs */
-[data-device="mobile"] .chtabs,
-[data-device="mobile"] .chapter-tabs { height: 30px !important; }
-[data-device="mobile"] .cht,
-[data-device="mobile"] .ch-tab { font-size: .55rem !important; }
-
-/* Step content */
-[data-device="mobile"] .stit,
-[data-device="mobile"] .step-title { font-size: .95rem !important; }
-[data-device="mobile"] .desc,
-[data-device="mobile"] .step-desc { font-size: .76rem !important; line-height: 1.6 !important; }
-[data-device="mobile"] .lbody,
-[data-device="mobile"] .instr-body { padding: 10px 12px !important; }
-
-/* Buttons */
-[data-device="mobile"] .abtn { padding: 10px !important; font-size: .9rem !important; }
-[data-device="mobile"] .kh { padding: 6px 9px !important; margin-bottom: 6px !important; }
-[data-device="mobile"] .ck { padding: 6px 8px !important; font-size: .74rem !important; }
-[data-device="mobile"] .sdesc,
-[data-device="mobile"] .desc { margin-bottom: 10px !important; }
-
-/* Hint bar */
-[data-device="mobile"] .vp-hint { font-size: .58rem !important; padding: 5px 12px !important; }
-
-/* Sliders */
-[data-device="mobile"] input[type=range] { width: 100% !important; }
-
-/* Index page */
-[data-device="mobile"] .nav-links { display: none !important; }
-[data-device="mobile"] .hero { flex-direction: column !important; padding: 18px 14px !important; gap: 12px !important; min-height: auto !important; }
-[data-device="mobile"] .hero-stats { display: none !important; }
-[data-device="mobile"] .hero-title { font-size: 1.35rem !important; }
-[data-device="mobile"] .hero-sub { font-size: .78rem !important; }
-[data-device="mobile"] .cat-tab { font-size: .72rem !important; padding: 10px 9px !important; }
-[data-device="mobile"] .c-card { min-width: 165px !important; max-width: 165px !important; }
-[data-device="mobile"] .c-card-wide { min-width: 220px !important; max-width: 220px !important; }
-[data-device="mobile"] .c-thumb { height: 105px !important; }
-[data-device="mobile"] .c-title { font-size: .78rem !important; }
-[data-device="mobile"] .course-entry-strip { gap: 8px !important; }
-[data-device="mobile"] .entry-pill { min-width: 130px !important; padding: 9px 11px !important; }
-
-/* Blender hub */
-[data-device="mobile"] .hero { flex-direction: column !important; padding: 18px 14px 20px !important; }
-[data-device="mobile"] .hero-progress { margin-left: 0 !important; width: 100% !important; text-align: center !important; }
-[data-device="mobile"] .lc-desc,
-[data-device="mobile"] .lc-skills { display: none !important; }
-[data-device="mobile"] .play-btn { font-size: .75rem !important; padding: 6px 12px !important; }
-
-/* World map */
-[data-device="mobile"] .tech-strip { padding: 5px 8px !important; gap: 4px !important; flex-wrap: wrap !important; }
-[data-device="mobile"] .tech-badge { font-size: .5rem !important; padding: 2px 5px !important; }
-[data-device="mobile"] .progress-strip { right: 8px !important; }
-[data-device="mobile"] .prog-name { font-size: .7rem !important; }
-[data-device="mobile"] .prog-xp { display: none !important; }
-[data-device="mobile"] .popup { width: 95vw !important; }
-[data-device="mobile"] .popup.show { bottom: 12px !important; }
-[data-device="mobile"] .hint-bar { bottom: 90px !important; font-size: .58rem !important; }
-
-/* Build progress (level6) */
-[data-device="mobile"] .build-progress { height: 36px !important; padding: 0 6px !important; }
-[data-device="mobile"] .bp-step { padding: 0 5px !important; font-size: .52rem !important; }
-[data-device="mobile"] .bp-step::after { display: none !important; }
-
-/* iOS safe area */
-.ios body { padding-bottom: env(safe-area-inset-bottom) !important; }
-</style>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>🌍 TA HUB — 3D 世界地圖</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>TA HUB — 技術美術世界地圖</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700;900&family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-:root{
-  --sky1:#3d7a96;--sky2:#4a8fa8;
-  --acc:#ff6b35;--acc2:#ffd166;--acc3:#06d6a0;
-  --txt:#1a1a2e;
-  --fredoka:'Fredoka One',sans-serif;
-  --mono:'Space Mono',monospace;
-}
-html,body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);width:100%;height:100%;overflow:hidden;background:var(--sky1);}
-canvas#world{display:block;width:100%;height:100%;cursor:grab;}
-canvas#world:active{cursor:grabbing;}
-
-/* ── TECH BADGE ── */
-.tech-strip{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:8px 16px;
-  background:rgba(10,10,20,.7);backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(255,255,255,.1);
-}
-.tech-badge{
-  font-family:var(--mono);font-size:.58rem;letter-spacing:.06em;
-  padding:3px 9px;border-radius:4px;cursor:default;
-  transition:.2s;white-space:nowrap;
-}
-.tb-webgpu{background:rgba(255,107,53,.2);border:1px solid rgba(255,107,53,.5);color:#ff9f7a;}
-.tb-spline{background:rgba(6,214,160,.2);border:1px solid rgba(6,214,160,.5);color:#06d6a0;}
-.tb-playcanvas{background:rgba(255,209,102,.2);border:1px solid rgba(255,209,102,.5);color:#ffd166;}
-.tb-babylon{background:rgba(180,120,255,.2);border:1px solid rgba(180,120,255,.5);color:#c084fc;}
-.tb-threejs{background:rgba(100,200,255,.2);border:1px solid rgba(100,200,255,.5);color:#7ec8e3;}
-.tech-badge:hover{transform:translateY(-1px);filter:brightness(1.2);}
-
-/* ── LOGO ── */
-.logo{
-  position:fixed;top:52px;left:24px;z-index:90;
-  font-family:var(--fredoka);font-size:1.6rem;
-  color:#fff;letter-spacing:.06em;
-  text-shadow:0 2px 12px rgba(0,0,0,.3);
-  display:flex;align-items:center;gap:10px;
-}
-.logo-leaf{
-  width:40px;height:40px;background:#06d6a0;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.2rem;box-shadow:0 4px 14px rgba(6,214,160,.5);
-  animation:logoBounce 2s ease-in-out infinite;
-}
-@keyframes logoBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-
-/* ── COURSE POPUP ── */
-.popup{
-  position:fixed;bottom:-300px;left:50%;transform:translateX(-50%);
-  z-index:200;width:340px;max-width:92vw;
-  background:rgba(15,12,30,.92);backdrop-filter:blur(20px);
-  border:2px solid rgba(255,255,255,.15);
-  border-radius:24px;padding:24px;
-  transition:bottom .5s cubic-bezier(.34,1.56,.64,1);
-  box-shadow:0 -4px 40px rgba(0,0,0,.4);
-}
-.popup.show{bottom:24px;}
-.popup-emoji{font-size:2.8rem;margin-bottom:10px;display:block;animation:iconPop .5s cubic-bezier(.34,1.56,.64,1);}
-@keyframes iconPop{0%{transform:scale(0) rotate(-20deg)}100%{transform:scale(1) rotate(0deg)}}
-.popup-tag{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;}
-.popup-title{font-family:var(--fredoka);font-size:1.5rem;color:#fff;letter-spacing:.03em;margin-bottom:6px;line-height:1.2;}
-.popup-desc{font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.65;margin-bottom:16px;}
-.popup-meta{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
-.popup-chip{
-  font-family:var(--mono);font-size:.62rem;letter-spacing:.04em;
-  padding:3px 9px;border-radius:100px;
-  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
-  color:rgba(255,255,255,.6);
-}
-.popup-btns{display:flex;gap:8px;}
-.popup-btn{
-  flex:1;padding:11px;border-radius:12px;
-  font-family:var(--fredoka);font-size:.95rem;letter-spacing:.03em;
-  cursor:pointer;border:none;transition:.2s;text-decoration:none;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-}
-.popup-btn.primary{background:var(--acc);color:#fff;}
-.popup-btn.primary:hover{background:#ff8855;transform:translateY(-1px);}
-.popup-btn.secondary{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);}
-.popup-btn.secondary:hover{background:rgba(255,255,255,.18);}
-.popup-close{
-  position:absolute;top:14px;right:14px;
-  width:28px;height:28px;border-radius:50%;
-  background:rgba(255,255,255,.1);border:none;cursor:pointer;
-  color:rgba(255,255,255,.5);font-size:1rem;
-  display:flex;align-items:center;justify-content:center;
-  transition:.15s;
-}
-.popup-close:hover{background:rgba(255,255,255,.2);color:#fff;}
-
-/* ── PROGRESS BADGES ── */
-.progress-strip{
-  position:fixed;top:52px;right:20px;z-index:90;
-  display:flex;flex-direction:column;gap:6px;
-  padding-top:12px;
-}
-.prog-item{
-  display:flex;align-items:center;gap:8px;
-  background:rgba(10,10,20,.65);backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:100px;padding:5px 12px 5px 8px;
-  cursor:pointer;transition:.2s;
-}
-.prog-item:hover{background:rgba(30,30,50,.8);transform:translateX(-3px);}
-.prog-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
-.prog-name{font-family:var(--fredoka);font-size:.82rem;color:rgba(255,255,255,.8);letter-spacing:.03em;}
-.prog-xp{font-family:var(--mono);font-size:.6rem;color:rgba(255,255,255,.4);margin-left:2px;}
-
-/* ── INSTRUCTIONS ── */
-.hint-bar{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  z-index:80;
-  font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;
-  color:rgba(255,255,255,.5);
-  background:rgba(10,10,20,.6);backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:100px;padding:8px 20px;
-  white-space:nowrap;
-  transition:opacity .4s;
-}
-
-/* ── XP POP ── */
-.xp-pop{
-  position:fixed;font-family:var(--fredoka);font-size:1.8rem;
-  color:#ffd166;pointer-events:none;z-index:9999;
-  text-shadow:0 0 20px rgba(255,209,102,.8);
-  animation:xpFloat 1.6s ease forwards;
-}
-@keyframes xpFloat{0%{opacity:1;transform:translateY(0) scale(.7)}15%{transform:translateY(-12px) scale(1.2)}100%{opacity:0;transform:translateY(-90px) scale(.9)}}
-
-/* ── LOADING ── */
-#loading{
-  position:fixed;inset:0;z-index:999;
-  background:linear-gradient(135deg,#0a0818,#1a0a28);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-  transition:opacity .8s ease;
-}
-#loading .load-logo{font-family:var(--fredoka);font-size:2.5rem;color:#fff;letter-spacing:.1em;}
-#loading .load-sub{font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;}
-.load-bar{width:200px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
-.load-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:2px;animation:loadAnim 1.8s ease-in-out infinite;}
-@keyframes loadAnim{0%{width:0%;opacity:1}80%{width:100%;opacity:1}100%{width:100%;opacity:0}}
-
-
-  .tech-badge { font-size:.5rem !important; padding:2px 6px !important; }
-  .logo { font-size:1rem !important; top:44px !important; left:12px !important; }
-  .logo-leaf { width:30px !important; height:30px !important; font-size:.85rem !important; }
-  .progress-strip { top:44px !important; right:8px !important; gap:4px !important; padding-top:8px !important; }
-  .prog-item { padding:4px 8px 4px 6px !important; }
-  .prog-dot { width:20px !important; height:20px !important; font-size:.72rem !important; }
-  .prog-name { font-size:.72rem !important; }
-  .prog-xp { display:none !important; }
-  .hint-bar { font-size:.58rem !important; padding:6px 12px !important; bottom:100px !important; }
-  .popup { width:95vw !important; bottom:-400px !important; }
-  .popup.show { bottom:12px !important; }
-  .popup-title { font-size:1.2rem !important; }
-  .popup-desc { font-size:.78rem !important; }
-  .popup-btn { padding:9px !important; font-size:.82rem !important; }
-}
-
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a2a50}
+#cvs{position:fixed;top:0;left:0;display:block;cursor:default}
+/* ── HUD ── */
+#hud{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;
+  display:flex;align-items:flex-start;padding:12px 14px;gap:10px}
+.pill{background:rgba(0,0,0,0.48);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,0.12);border-radius:14px;
+  padding:8px 14px;pointer-events:auto}
+#logo-txt{font-family:'Josefin Sans',sans-serif;font-weight:900;
+  font-size:clamp(14px,2.0vw,20px);color:#fff;letter-spacing:3px}
+#logo-sub{font-size:9px;color:rgba(255,255,255,0.42);letter-spacing:2px;
+  font-family:'Josefin Sans',sans-serif;margin-top:1px}
+#xp-pill{margin-left:auto;display:flex;align-items:center;gap:6px;
+  border-color:rgba(255,200,50,0.30)!important}
+#xp-n{font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:13px;color:#ffc040}
+/* ── Info Card ── */
+#card{position:fixed;bottom:0;left:0;right:0;z-index:30;
+  background:rgba(4,14,30,0.96);backdrop-filter:blur(24px);
+  border-top:1.5px solid rgba(255,255,255,0.09);
+  padding:18px 18px 24px;
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.22,1,.36,1);
+  max-width:480px;margin:0 auto;border-radius:28px 28px 0 0}
+#card.on{transform:translateY(0)}
+#cx{position:absolute;top:14px;right:16px;font-size:17px;
+  color:rgba(255,255,255,0.22);cursor:pointer;padding:4px;z-index:1}
+.ct{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+#ci{font-size:42px;line-height:1;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4))}
+#cn{font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:20px;color:#fff}
+#cs{font-size:12px;color:rgba(255,255,255,0.40);margin-top:4px;line-height:1.5}
+.cst{font-size:24px;letter-spacing:3px;margin-bottom:10px}
+.cbr{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.cbb{flex:1;height:5px;background:rgba(255,255,255,0.09);border-radius:3px;overflow:hidden}
+#cbf{height:100%;border-radius:3px;transition:width .6s ease}
+.cbp{font-size:11px;color:rgba(255,255,255,0.32);font-family:monospace;white-space:nowrap}
+#cbtn{width:100%;padding:14px;border:none;border-radius:13px;cursor:pointer;
+  font-family:'Josefin Sans',sans-serif;font-weight:900;
+  font-size:16px;letter-spacing:2px;transition:all .18s}
+#cbtn.go{color:#fff;box-shadow:0 6px 24px rgba(0,0,0,0.35)}
+#cbtn.go:active{transform:scale(0.97)}
+#cbtn.no{background:#1a1a1a;color:#333;cursor:default}
 </style>
 </head>
 <body>
-
-<!-- LOADING -->
-<div id="loading">
-  <div class="load-logo">🌿 TA HUB</div>
-  <div class="load-sub">Loading 3D World...</div>
-  <div class="load-bar"><div class="load-fill"></div></div>
-</div>
-
-<!-- TECH STRIP -->
-<div class="tech-strip">
-  <span class="tech-badge tb-webgpu" title="下一代 GPU API，取代 WebGL">⚡ WebGPU</span>
-  <span class="tech-badge tb-spline" title="可視化 3D 互動工具">✦ Spline</span>
-  <span class="tech-badge tb-playcanvas" title="完整 Web 遊戲引擎">🎮 PlayCanvas</span>
-  <span class="tech-badge tb-babylon" title="Microsoft 的 Web 3D 框架">🔷 Babylon.js</span>
-  <span class="tech-badge tb-threejs" title="目前使用 Three.js r128 WebGL">▲ Three.js</span>
-</div>
-
-<!-- LOGO -->
-<div class="logo"><div class="logo-leaf">🌿</div>TA HUB</div>
-
-<!-- CANVAS -->
-<canvas id="world"></canvas>
-
-<!-- PROGRESS STRIP -->
-<div class="progress-strip" id="prog-strip"></div>
-
-<!-- POPUP -->
-<div class="popup" id="popup">
-  <button class="popup-close" onclick="closePopup()">✕</button>
-  <span class="popup-emoji" id="pop-emoji">🟠</span>
-  <div class="popup-tag" id="pop-tag">課程</div>
-  <div class="popup-title" id="pop-title">Blender</div>
-  <div class="popup-desc" id="pop-desc"></div>
-  <div class="popup-meta" id="pop-meta"></div>
-  <div class="popup-btns">
-    <a href="#" class="popup-btn primary" id="pop-go">▶ 進入課程</a>
-    <button class="popup-btn secondary" onclick="closePopup()">繼續探索</button>
+<canvas id="cvs"></canvas>
+<div id="hud">
+  <div class="pill">
+    <div id="logo-txt">⬡ TA HUB</div>
+    <div id="logo-sub">TECHNICAL ART WORLD</div>
+  </div>
+  <div class="pill" style="padding:6px 12px;cursor:pointer;pointer-events:auto;display:flex;align-items:center;gap:5px" onclick="window.location.href='index.html'">
+    <span style="font-size:14px">🏠</span><span style="font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:12px;color:#fff;letter-spacing:1px">HQ</span>
+  </div>
+  <div class="pill" id="xp-pill">
+    <span>⭐</span><span id="xp-n">XP 0</span>
   </div>
 </div>
-
-<!-- HINT -->
-<div class="hint-bar" id="hint-bar">🖱 拖動旋轉 · 滾輪縮放 · 點擊島嶼進入課程</div>
+<div id="card">
+  <span id="cx" onclick="closeCard()">✕</span>
+  <div class="ct">
+    <span id="ci">⬡</span>
+    <div><div id="cn">—</div><div id="cs">—</div></div>
+  </div>
+  <div class="cst" id="cst">☆☆☆</div>
+  <div class="cbr">
+    <div class="cbb"><div id="cbf" style="width:0"></div></div>
+    <span class="cbp" id="cbp">0%</span>
+  </div>
+  <button id="cbtn" class="go" onclick="goHub()">進入學習 →</button>
+</div>
 
 <script>
-// ════════════════════════════════════════════════
-//  COURSE DATA
-// ════════════════════════════════════════════════
-const COURSES = [
-  {
-    id:'blender', icon:'🟠', name:'Blender',
-    tag:'3D 建模 · 動畫 · 渲染',
-    desc:'從零開始學 3D 建模：視角操控、Extrude、Loop Cut、Bevel、Boolean、Subdivision⋯ 全互動關卡！',
-    color:0xe8780a, light:0xffa040,
-    chips:['6 關卡','2,250 XP','Three.js 互動'],
-    hub:'blender-hub.html',
-    pos:{x:-4.5, z:-2}, level:0,
-    unlocked:true
+// ════════════════════════════════════════════
+//  GLOBALS
+// ════════════════════════════════════════════
+var cvs, ctx, W, H, dpr, T=0;
+var hovSW=null, selSW=null;
+
+// Pre-computed island polygon cache
+var isoCache={};
+
+// Clouds array
+var CLOUDS=[];
+
+// ════════════════════════════════════════════
+//  SOFTWARE DATA
+// ════════════════════════════════════════════
+var SW=[
+  { id:'blender',
+    name:'Blender',         icon:'⬡',
+    sub:'3D 建模・動畫・渲染', hub:'blender-hub.html',
+    avail:true, totalLv:12, pfx:'blender_ui_lv',
+    fx:0.13, fy:0.60, rw:0.115, rh:0.165,
+    seed:1.40,
+    water:'#1a6030', sand:'#b5a060', shore:'#7ab840',
+    grass:'#3a9228', hill:'#246018', peak:'#122e08',
+    accent:'#ff8832', aura:'rgba(255,136,50,0.20)',
+    landmarks:['cube','tower','forest'],
+    label:'#ffd090'
   },
-  {
-    id:'substance', icon:'💠', name:'Substance',
-    tag:'PBR 材質 · 貼圖烘焙',
-    desc:'Substance Painter 完整課程：PBR 材質、Smart Material、貼圖烘焙、匯出到 UE5。',
-    color:0x4a90d9, light:0x88c0ff,
-    chips:['5 關卡','1,800 XP','即將上線'],
-    hub:'#',
-    pos:{x:4.5, z:-3}, level:1,
-    unlocked:false
+  { id:'substance',
+    name:'Substance Painter', icon:'🎨',
+    sub:'材質・貼圖・PBR 繪製', hub:'substance-hub.html',
+    avail:false, totalLv:10, pfx:'substance_lv',
+    fx:0.37, fy:0.25, rw:0.098, rh:0.148,
+    seed:2.10,
+    water:'#5a1880', sand:'#d0a0c8', shore:'#9060a8',
+    grass:'#7a3898', hill:'#521870', peak:'#340848',
+    accent:'#ff66cc', aura:'rgba(255,100,200,0.18)',
+    landmarks:['palette','spire','forest'],
+    label:'#ffc0f0'
   },
-  {
-    id:'ue5', icon:'⬡', name:'UE5',
-    tag:'Nanite · Lumen · Niagara',
-    desc:'Unreal Engine 5 完整 TA 課程：Nanite 虛擬幾何、Lumen 全域光照、Niagara 特效、PCG 程序化。',
-    color:0x0891b2, light:0x40d0ff,
-    chips:['8 關卡','3,200 XP','即將上線'],
-    hub:'#',
-    pos:{x:0, z:5}, level:2,
-    unlocked:false
+  { id:'ue5',
+    name:'Unreal Engine 5', icon:'⚡',
+    sub:'遊戲引擎・Lumen・Nanite', hub:'ue5-hub.html',
+    avail:false, totalLv:15, pfx:'ue5_lv',
+    fx:0.60, fy:0.16, rw:0.108, rh:0.158,
+    seed:0.82,
+    water:'#0a1850', sand:'#708090', shore:'#304878',
+    grass:'#1a3870', hill:'#0e2050', peak:'#08102a',
+    accent:'#4488ff', aura:'rgba(60,120,255,0.18)',
+    landmarks:['skyscraper','tower','forest'],
+    label:'#a0c8ff'
   },
-  {
-    id:'houdini', icon:'🌀', name:'Houdini',
-    tag:'VEX · 特效模擬 · PDG',
-    desc:'Houdini 程序化建模與特效：SOP 節點、VEX 程式化、爆炸模擬、Karma 渲染。',
-    color:0xd97706, light:0xffb840,
-    chips:['7 關卡','2,800 XP','即將上線'],
-    hub:'#',
-    pos:{x:-5.5, z:3.5}, level:3,
-    unlocked:false
+  { id:'houdini',
+    name:'Houdini', icon:'🌀',
+    sub:'程序化・VFX・模擬', hub:'houdini-hub.html',
+    avail:false, totalLv:10, pfx:'houdini_lv',
+    fx:0.78, fy:0.42, rw:0.092, rh:0.142,
+    seed:3.20,
+    water:'#4a3000', sand:'#d0b070', shore:'#a88030',
+    grass:'#806020', hill:'#584010', peak:'#38280a',
+    accent:'#ffcc00', aura:'rgba(255,200,0,0.18)',
+    landmarks:['vortex','temple','forest'],
+    label:'#ffe090'
   },
-  {
-    id:'opengl', icon:'💎', name:'OpenGL',
-    tag:'GLSL · 著色器 · 圖學',
-    desc:'OpenGL 完整圖學課程：像素王國入門關卡、GLSL 著色器、光照模型、後處理效果。',
-    color:0x7c3aed, light:0xb080ff,
-    chips:['9 關卡','2,250 XP','已上線'],
-    hub:'opengl-map.html',
-    pos:{x:5.5, z:3}, level:4,
-    unlocked:true
+  { id:'opengl',
+    name:'OpenGL', icon:'🔷',
+    sub:'渲染管線・Shader 程式', hub:'opengl-hub.html',
+    avail:false, totalLv:9, pfx:'opengl_lv',
+    fx:0.48, fy:0.70, rw:0.088, rh:0.135,
+    seed:1.95,
+    water:'#004858', sand:'#80c8c8', shore:'#208888',
+    grass:'#1a6878', hill:'#0a4858', peak:'#052838',
+    accent:'#00d8ff', aura:'rgba(0,200,255,0.18)',
+    landmarks:['crystal','tower','forest'],
+    label:'#80f0ff'
   },
-  {
-    id:'directx', icon:'⚔️', name:'DirectX',
-    tag:'HLSL · DX11/12 · GPU',
-    desc:'DirectX 11/12 完整課程：HLSL 著色語言、Command Queue、光線追蹤、Compute Shader。',
-    color:0xe84545, light:0xff8888,
-    chips:['9 關卡','2,250 XP','已上線'],
-    hub:'dx-map.html',
-    pos:{x:1.5, z:-5.5}, level:5,
-    unlocked:true
-  },
+  { id:'directx',
+    name:'DirectX', icon:'🎮',
+    sub:'Windows 渲染・DX12・HLSL', hub:'directx-hub.html',
+    avail:false, totalLv:9, pfx:'directx_lv',
+    fx:0.86, fy:0.74, rw:0.085, rh:0.128,
+    seed:2.80,
+    water:'#200848', sand:'#807090', shore:'#482878',
+    grass:'#281850', hill:'#180a38', peak:'#0c0620',
+    accent:'#9944ff', aura:'rgba(140,60,255,0.18)',
+    landmarks:['castle','tower','forest'],
+    label:'#cc88ff'
+  }
 ];
 
-// ════════════════════════════════════════════════
-//  THREE.JS SETUP
-// ════════════════════════════════════════════════
-const canvas = document.getElementById('world');
-const renderer = new THREE.WebGLRenderer({
-  canvas, antialias:true,
-  powerPreference:'high-performance'
-});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
+var PATH_ORDER=[0,1,2,3,4,5];
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x2e6880);
-scene.fog = new THREE.FogExp2(0x3d7a96, 0.022);
-
-const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
-camera.position.set(0, 14, 18);
-camera.lookAt(0, 0, 0);
-
-// ── Lights ──
-const sun = new THREE.DirectionalLight(0xfffaee, 1.8);
-sun.position.set(8, 20, 10);
-sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-sun.shadow.camera.left = -25; sun.shadow.camera.right = 25;
-sun.shadow.camera.top = 25; sun.shadow.camera.bottom = -25;
-sun.shadow.bias = -0.001;
-scene.add(sun);
-
-scene.add(new THREE.AmbientLight(0xc8e8ff, 0.7));
-
-const fillLight = new THREE.DirectionalLight(0xffd4a0, 0.4);
-fillLight.position.set(-8, 5, -10);
-scene.add(fillLight);
-
-// ════════════════════════════════════════════════
-//  GEOMETRY BUILDERS (low-poly cartoon style)
-// ════════════════════════════════════════════════
-function flatShade(geo){
-  geo.computeVertexNormals();
-  return geo;
-}
-
-// Ocean base
-function makeOcean(){
-  const geo = new THREE.CylinderGeometry(28, 28, 0.6, 6);
-  flatShade(geo);
-  const mat = new THREE.MeshPhongMaterial({
-    color:0x1a6080, specular:0x2a90b0, shininess:60,
-    flatShading:true
-  });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.y = -0.8;
-  mesh.receiveShadow = true;
-  scene.add(mesh);
-
-  // Ocean shimmer plane
-  const shimGeo = new THREE.PlaneGeometry(56, 56, 1, 1);
-  const shimMat = new THREE.MeshBasicMaterial({
-    color:0x1a5570, transparent:true, opacity:.25
-  });
-  const shim = new THREE.Mesh(shimGeo, shimMat);
-  shim.rotation.x = -Math.PI/2;
-  shim.position.y = -0.45;
-  scene.add(shim);
-
-  return mesh;
-}
-
-// Island base
-function makeIsland(x, z, colorHex, radius=2.2){
-  const group = new THREE.Group();
-  group.position.set(x, 0, z);
-
-  // Main island body (low-poly cone shape)
-  const pts = [];
-  pts.push(new THREE.Vector2(0, 0));
-  pts.push(new THREE.Vector2(radius*0.3, 0.25));
-  pts.push(new THREE.Vector2(radius*0.85, 0.5));
-  pts.push(new THREE.Vector2(radius, 0));
-  pts.push(new THREE.Vector2(radius*1.05, -0.3));
-  pts.push(new THREE.Vector2(radius*0.6, -0.8));
-  pts.push(new THREE.Vector2(0, -0.8));
-
-  const geo = new THREE.LatheGeometry(pts, 7);
-  flatShade(geo);
-  const mat = new THREE.MeshPhongMaterial({
-    color:colorHex, flatShading:true,
-    specular:0x224411, shininess:20
-  });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  group.add(mesh);
-
-  // Grass top
-  const grassGeo = new THREE.CylinderGeometry(radius*0.65, radius*0.88, 0.35, 7);
-  flatShade(grassGeo);
-  const grassMat = new THREE.MeshPhongMaterial({
-    color:0x5aab30, flatShading:true
-  });
-  const grass = new THREE.Mesh(grassGeo, grassMat);
-  grass.position.y = 0.5;
-  grass.castShadow = true;
-  group.add(grass);
-
-  // Sand ring
-  const sandGeo = new THREE.RingGeometry(radius*0.88, radius*1.0, 7);
-  const sandMat = new THREE.MeshPhongMaterial({color:0xf0d080,side:THREE.DoubleSide,flatShading:true});
-  const sand = new THREE.Mesh(sandGeo, sandMat);
-  sand.rotation.x = -Math.PI/2;
-  sand.position.y = 0.18;
-  group.add(sand);
-
-  return group;
-}
-
-// Low-poly tree
-function makeTree(x, y, z, scale=1, colorHex=0x3a8a20){
-  const g = new THREE.Group();
-  g.position.set(x,y,z);
-  g.scale.setScalar(scale);
-
-  // trunk
-  const trunkGeo = new THREE.CylinderGeometry(.08,.12,.6,5);
-  flatShade(trunkGeo);
-  g.add(new THREE.Mesh(trunkGeo, new THREE.MeshPhongMaterial({color:0x8B5e3c,flatShading:true})));
-
-  // foliage layers
-  [[0.55,0.55,0.5],[0.78,0.42,0.42],[0.48,0.32,0.32]].forEach(([h,r,y2])=>{
-    const fGeo = new THREE.ConeGeometry(r,h,6);
-    flatShade(fGeo);
-    const fMesh = new THREE.Mesh(fGeo, new THREE.MeshPhongMaterial({color:colorHex,flatShading:true}));
-    fMesh.position.y = y2 + .3;
-    fMesh.castShadow = true;
-    g.add(fMesh);
-  });
-  return g;
-}
-
-// Low-poly rock
-function makeRock(x,y,z,scale=1){
-  const geo = new THREE.DodecahedronGeometry(0.3, 0);
-  flatShade(geo);
-  const mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({color:0x9a9a9a,flatShading:true}));
-  mesh.position.set(x,y,z);
-  mesh.scale.set(scale,scale*0.7,scale*0.8);
-  mesh.rotation.y = Math.random()*Math.PI*2;
-  mesh.castShadow=true;
-  return mesh;
-}
-
-// Course island node (floating platform + sign)
-function makeCourseNode(course){
-  const group = new THREE.Group();
-  group.userData = {courseId: course.id, course};
-
-  // Island
-  const island = makeIsland(0, 0, course.color);
-  group.add(island);
-
-  // Floating crystal / icon tower
-  const towerGeo = new THREE.OctahedronGeometry(0.45, 0);
-  flatShade(towerGeo);
-  const towerMat = new THREE.MeshPhongMaterial({
-    color:course.light, flatShading:true,
-    specular:0xffffff, shininess:120,
-    transparent:true, opacity: course.unlocked ? .95 : .45,
-    emissive: course.unlocked ? new THREE.Color(course.color).multiplyScalar(.3) : new THREE.Color(0)
-  });
-  const tower = new THREE.Mesh(towerGeo, towerMat);
-  tower.position.y = 2.2;
-  tower.castShadow = true;
-  tower.userData.rotates = true;
-  group.add(tower);
-
-  // Tower pole
-  const poleGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.8, 5);
-  group.add(new THREE.Mesh(poleGeo, new THREE.MeshPhongMaterial({color:0x8888aa, flatShading:true})));
-
-  // Glow ring (point light)
-  if(course.unlocked){
-    const pl = new THREE.PointLight(course.light, 1.2, 4.5);
-    pl.position.y = 2.2;
-    group.add(pl);
+// ════════════════════════════════════════════
+//  ORGANIC ISLAND SHAPE (polar perturbation)
+// ════════════════════════════════════════════
+function buildIslandPts(cx,cy,rw,rh,seed,scale,n){
+  n=n||28;
+  var pts=[];
+  for(var i=0;i<n;i++){
+    var ang=(i/n)*Math.PI*2 - Math.PI*0.5;
+    var pert=1
+      + 0.20*Math.sin(ang*3 + seed*1.2)
+      + 0.12*Math.sin(ang*5 + seed*2.1)
+      + 0.07*Math.sin(ang*7 + seed*0.8)
+      + 0.04*Math.sin(ang*11+ seed*1.6);
+    var r=pert*scale;
+    pts.push({x:cx+Math.cos(ang)*rw*r, y:cy+Math.sin(ang)*rh*r});
   }
-
-  // Lock overlay
-  if(!course.unlocked){
-    const lockGeo = new THREE.BoxGeometry(.5,.6,.5);
-    const lock = new THREE.Mesh(lockGeo, new THREE.MeshPhongMaterial({color:0x444466,transparent:true,opacity:.7,flatShading:true}));
-    lock.position.y = 2.2;
-    lock.castShadow = true;
-    group.add(lock);
-  }
-
-  // Trees around island
-  const treeColors = [0x3a8a20,0x4aaa28,0x2a7018];
-  const treeCount = course.unlocked ? 5 : 2;
-  for(let i=0;i<treeCount;i++){
-    const a = (i/treeCount)*Math.PI*2 + .3;
-    const r = 1.5 + Math.random()*.4;
-    const tree = makeTree(Math.cos(a)*r, .65, Math.sin(a)*r, .7+Math.random()*.4, treeColors[i%3]);
-    group.add(tree);
-  }
-
-  // Rocks
-  for(let i=0;i<3;i++){
-    const a = Math.random()*Math.PI*2;
-    const r = 1.0+Math.random()*.8;
-    group.add(makeRock(Math.cos(a)*r, .55, Math.sin(a)*r, .4+Math.random()*.4));
-  }
-
-  group.position.set(course.pos.x, 0, course.pos.z);
-  return group;
+  return pts;
 }
 
-// Clouds
-function makeCloud(x,y,z,scale=1){
-  const g = new THREE.Group();
-  g.position.set(x,y,z);
-  const parts = [
-    {ox:0,oy:0,oz:0,s:1},
-    {ox:.8,oy:-.1,oz:.1,s:.75},
-    {ox:-.7,oy:-.15,oz:.05,s:.7},
-    {ox:.2,oy:.25,oz:0,s:.6},
-  ];
-  parts.forEach(p=>{
-    const geo = new THREE.SphereGeometry(.7,5,4);
-    flatShade(geo);
-    const mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
-      color:0xffffff,flatShading:true,
-      transparent:true,opacity:.88
-    }));
-    mesh.position.set(p.ox,p.oy,p.oz);
-    mesh.scale.setScalar(p.s*scale);
-    g.add(mesh);
-  });
-  return g;
-}
-
-// Path/bridge between islands
-function makePath(from, to, color=0xd4b896){
-  const start = new THREE.Vector3(from.pos.x, 0.2, from.pos.z);
-  const end = new THREE.Vector3(to.pos.x, 0.2, to.pos.z);
-  const mid = start.clone().add(end).multiplyScalar(.5);
-  mid.y = 0.8;
-  const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
-  const pts = curve.getPoints(20);
-  const geo = new THREE.BufferGeometry().setFromPoints(pts);
-  const mat = new THREE.LineDashedMaterial({
-    color, dashSize:.3, gapSize:.2, linewidth:2
-  });
-  const line = new THREE.Line(geo, mat);
-  line.computeLineDistances();
-  return line;
-}
-
-// ════════════════════════════════════════════════
-//  BUILD THE WORLD
-// ════════════════════════════════════════════════
-const courseNodes = [];
-const clouds = [];
-const oceanMesh = makeOcean();
-
-// Build course islands
-COURSES.forEach(course=>{
-  const node = makeCourseNode(course);
-  scene.add(node);
-  courseNodes.push(node);
-});
-
-// Paths between unlocked courses
-scene.add(makePath(COURSES[0], COURSES[4]));
-scene.add(makePath(COURSES[0], COURSES[5]));
-
-// Decorative mini islands
-[
-  {x:-8,z:1,c:0x6ab840,r:1.2},
-  {x:8,z:0,c:0x5aaa30,r:1.0},
-  {x:2,z:9,c:0x7ac850,r:1.4},
-  {x:-2,z:-8,c:0x5aa028,r:1.1},
-  {x:-10,z:-4,c:0x4a9820,r:0.9},
-  {x:10,z:5,c:0x60b038,r:0.8},
-].forEach(({x,z,c,r})=>{
-  const island = makeIsland(x,z,c,r);
-  // Add trees
-  for(let i=0;i<3;i++){
-    const a=i/3*Math.PI*2;
-    island.add(makeTree(Math.cos(a)*r*.6,.6,Math.sin(a)*r*.6,.6+Math.random()*.3));
-  }
-  scene.add(island);
-});
-
-// Clouds
-const cloudPositions = [
-  [-6,8,-4],[4,9,-2],[10,7,4],[-3,10,6],[8,8,8],[-9,7,6],[0,9,-7],[5,10,-6]
-];
-cloudPositions.forEach(([x,y,z])=>{
-  const c = makeCloud(x,y,z,.9+Math.random()*.4);
-  c.userData.speed = (.5+Math.random())*(Math.random()>.5?1:-1)*.003;
-  c.userData.baseX = x;
-  scene.add(c);
-  clouds.push(c);
-});
-
-// Underwater rocks/coral
-for(let i=0;i<20;i++){
-  const a=Math.random()*Math.PI*2;
-  const r=8+Math.random()*16;
-  const rockGeo = new THREE.ConeGeometry(.2+Math.random()*.5, .8+Math.random()*1.2, 4+Math.floor(Math.random()*3));
-  flatShade(rockGeo);
-  const colors=[0x2a7098,0x2a9888,0x1a6080];
-  const rock = new THREE.Mesh(rockGeo, new THREE.MeshPhongMaterial({color:colors[i%3],flatShading:true}));
-  rock.position.set(Math.cos(a)*r, -1.1, Math.sin(a)*r);
-  rock.rotation.y = Math.random()*Math.PI;
-  scene.add(rock);
-}
-
-// ════════════════════════════════════════════════
-//  ORBIT CONTROLS (custom - Bruno Simon style)
-// ════════════════════════════════════════════════
-const orb = {
-  isDown:false, prevX:0, prevY:0,
-  theta: .4, phi: .85,
-  targetTheta:.4, targetPhi:.85,
-  radius:20, targetRadius:20,
-  targetX:0, targetZ:0, currentX:0, currentZ:0,
-};
-
-function getEv(e){return e.touches?{x:e.touches[0].clientX,y:e.touches[0].clientY}:{x:e.clientX,y:e.clientY};}
-
-canvas.addEventListener('mousedown',e=>{orb.isDown=true;const p=getEv(e);orb.prevX=p.x;orb.prevY=p.y;});
-canvas.addEventListener('touchstart',e=>{
-  e.preventDefault();
-  if(e.touches.length===2){
-    orb._pinchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-  } else {
-    orb.isDown=true;const p=getEv(e);orb.prevX=p.x;orb.prevY=p.y;
-  }
-},{passive:false});
-window.addEventListener('mouseup',()=>orb.isDown=false);
-window.addEventListener('touchend',()=>orb.isDown=false);
-
-let lastDrag=0;
-window.addEventListener('mousemove',e=>{
-  if(!orb.isDown)return;
-  const p=getEv(e);
-  const dx=p.x-orb.prevX,dy=p.y-orb.prevY;
-  orb.targetTheta-=dx*.007;
-  orb.targetPhi=Math.max(.35,Math.min(1.35,orb.targetPhi+dy*.006));
-  orb.prevX=p.x;orb.prevY=p.y;
-  lastDrag=Date.now();
-});
-window.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  if(!orb.isDown)return;
-  const p=getEv(e);
-  const dx=p.x-orb.prevX,dy=p.y-orb.prevY;
-  orb.targetTheta-=dx*.007;
-  orb.targetPhi=Math.max(.35,Math.min(1.35,orb.targetPhi+dy*.006));
-  orb.prevX=p.x;orb.prevY=p.y;
-  lastDrag=Date.now();
-},{passive:false});
-
-canvas.addEventListener('wheel',e=>{
-  orb.targetRadius=Math.max(8,Math.min(35,orb.targetRadius+e.deltaY*.04));
-});
-
-// ── Raycasting for clicks ──
-const raycaster = new THREE.Raycaster();
-const mouse2 = new THREE.Vector2();
-
-canvas.addEventListener('click',e=>{
-  if(Date.now()-lastDrag < 200) return; // ignore after drag
-  const rect=canvas.getBoundingClientRect();
-  mouse2.set(
-    ((e.clientX-rect.left)/rect.width)*2-1,
-    -((e.clientY-rect.top)/rect.height)*2+1
-  );
-  raycaster.setFromCamera(mouse2,camera);
-  const hits=raycaster.intersectObjects(scene.children,true);
-  for(const hit of hits){
-    let obj=hit.object;
-    while(obj.parent && !obj.userData.courseId) obj=obj.parent;
-    if(obj.userData.courseId){
-      showPopup(obj.userData.course, obj);
-      break;
-    }
-  }
-});
-
-// ════════════════════════════════════════════════
-//  POPUP
-// ════════════════════════════════════════════════
-let activeNode = null;
-
-function showPopup(course, node){
-  if(activeNode) resetNode(activeNode);
-  activeNode = node;
-
-  // Focus camera on island
-  orb.targetX = course.pos.x;
-  orb.targetZ = course.pos.z;
-  orb.targetRadius = 12;
-
-  // Bounce island
-  node.userData.bouncing = true;
-  setTimeout(()=>{if(node.userData)node.userData.bouncing=false;},600);
-
-  document.getElementById('pop-emoji').textContent = course.icon;
-  document.getElementById('pop-tag').textContent = course.tag;
-  document.getElementById('pop-title').textContent = course.name;
-  document.getElementById('pop-desc').textContent = course.desc;
-
-  const meta = document.getElementById('pop-meta');
-  meta.innerHTML = course.chips.map(c=>`<span class="popup-chip">${c}</span>`).join('');
-
-  const goBtn = document.getElementById('pop-go');
-  if(course.unlocked){
-    goBtn.href = course.hub;
-    goBtn.textContent = '▶ 進入課程';
-    goBtn.style.background='var(--acc)';
-    goBtn.style.pointerEvents='all';
-  } else {
-    goBtn.href = '#';
-    goBtn.textContent = '🔒 尚未解鎖';
-    goBtn.style.background='rgba(100,100,120,.5)';
-    goBtn.style.pointerEvents='none';
-  }
-
-  document.getElementById('popup').classList.add('show');
-  document.getElementById('hint-bar').style.opacity='0';
-
-  // XP pop
-  if(course.unlocked){
-    const pop = document.createElement('div');
-    pop.className='xp-pop';pop.textContent='點擊探索！';
-    pop.style.cssText=`left:${window.innerWidth*.45}px;top:${window.innerHeight*.5}px`;
-    document.body.appendChild(pop);
-    setTimeout(()=>pop.remove(),1600);
+// Catmull-Rom through polygon points (closed)
+function drawIslandPoly(pts){
+  var n=pts.length;
+  ctx.moveTo((pts[n-1].x+pts[0].x)/2,(pts[n-1].y+pts[0].y)/2);
+  for(var i=0;i<n;i++){
+    var p1=pts[i], p2=pts[(i+1)%n];
+    ctx.quadraticCurveTo(p1.x,p1.y,(p1.x+p2.x)/2,(p1.y+p2.y)/2);
   }
 }
 
-function closePopup(){
-  document.getElementById('popup').classList.remove('show');
-  document.getElementById('hint-bar').style.opacity='1';
-  orb.targetX=0;orb.targetZ=0;orb.targetRadius=20;
-  activeNode=null;
-}
-
-function resetNode(node){}
-
-// ════════════════════════════════════════════════
-//  PROGRESS SIDEBAR
-// ════════════════════════════════════════════════
-function buildProgressStrip(){
-  const strip = document.getElementById('prog-strip');
-  strip.innerHTML = COURSES.map(c=>{
-    const xp = 0;
-    return `<div class="prog-item" onclick="focusCourse('${c.id}')">
-      <div class="prog-dot" style="background:${c.unlocked?'#'+c.color.toString(16).padStart(6,'0'):'#444'}">${c.icon}</div>
-      <span class="prog-name">${c.name}</span>
-      <span class="prog-xp">${c.unlocked?'開放':'🔒'}</span>
-    </div>`;
-  }).join('');
-}
-
-function focusCourse(id){
-  const c=COURSES.find(c=>c.id===id);
-  const node=courseNodes.find(n=>n.userData.courseId===id);
-  if(c && node) showPopup(c, node);
-}
-
-buildProgressStrip();
-
-// ════════════════════════════════════════════════
-//  RENDER LOOP
-// ════════════════════════════════════════════════
-function resize(){
-  const w=canvas.clientWidth,h=canvas.clientHeight;
-  if(canvas.width!==w||canvas.height!==h){
-    renderer.setSize(w,h,false);
-    camera.aspect=w/h;camera.updateProjectionMatrix();
+// Cache island polygon sets per SW
+function getIsoPoly(sw,scale,n){
+  var key=sw.id+'_'+scale+'_'+n;
+  if(!isoCache[key]){
+    isoCache[key]=buildIslandPts(
+      sw.fx*W, sw.fy*H, sw.rw*W, sw.rh*H, sw.seed, scale||1, n||28
+    );
   }
+  return isoCache[key];
 }
 
-let time=0;
-const LERP = .06;
-
-function animate(){
-  requestAnimationFrame(animate);
+// ════════════════════════════════════════════
+//  SETUP
+// ════════════════════════════════════════════
+function setup(){
+  cvs=document.getElementById('cvs');
+  ctx=cvs.getContext('2d');
   resize();
-  time+=.016;
-
-  // Smooth camera
-  orb.theta += (orb.targetTheta-orb.theta)*LERP;
-  orb.phi   += (orb.targetPhi  -orb.phi  )*LERP;
-  orb.radius+= (orb.targetRadius-orb.radius)*LERP;
-  orb.currentX+=(orb.targetX-orb.currentX)*LERP;
-  orb.currentZ+=(orb.targetZ-orb.currentZ)*LERP;
-
-  const cx=orb.currentX+orb.radius*Math.sin(orb.phi)*Math.sin(orb.theta);
-  const cy=orb.radius*Math.cos(orb.phi);
-  const cz=orb.currentZ+orb.radius*Math.sin(orb.phi)*Math.cos(orb.theta);
-  camera.position.set(cx,cy,cz);
-  camera.lookAt(orb.currentX,0,orb.currentZ);
-
-  // Animate course nodes
-  courseNodes.forEach((node,i)=>{
-    const course=COURSES[i];
-    // Float up/down
-    node.position.y = Math.sin(time*.8+i*1.2)*.15;
-
-    // Bounce on click
-    if(node.userData.bouncing){
-      node.scale.setScalar(1+Math.sin(time*12)*.08);
-    } else {
-      node.scale.lerp(new THREE.Vector3(1,1,1),.1);
-    }
-
-    // Rotate crystal tower
-    node.children.forEach(child=>{
-      if(child.userData.rotates){
-        child.rotation.y += course.unlocked ? .02 : .005;
-        child.position.y = 2.2 + Math.sin(time*1.5+i)*.12;
-      }
-    });
+  buildClouds();
+  cvs.addEventListener('click',     onClick);
+  cvs.addEventListener('mousemove', onMove);
+  cvs.addEventListener('touchend',  onTouch,{passive:true});
+  window.addEventListener('resize', function(){
+    ctx.setTransform(1,0,0,1,0,0);
+    isoCache={};
+    resize();
+    buildClouds();
   });
-
-  // Animate clouds
-  clouds.forEach(c=>{
-    c.position.x += c.userData.speed;
-    if(c.position.x > 15) c.position.x = -15;
-    if(c.position.x < -15) c.position.x = 15;
-  });
-
-  // Ocean shimmer
-  oceanMesh.rotation.y += .0008;
-
-  renderer.render(scene,camera);
 }
 
-// ════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════
-setTimeout(()=>{
-  const loading=document.getElementById('loading');
-  loading.style.opacity='0';
-  setTimeout(()=>loading.style.display='none',800);
-},1200);
+function resize(){
+  dpr=Math.min(window.devicePixelRatio||1,2.5);
+  W=window.innerWidth; H=window.innerHeight;
+  cvs.width=W*dpr; cvs.height=H*dpr;
+  cvs.style.width=W+'px'; cvs.style.height=H+'px';
+  ctx.scale(dpr,dpr);
+  isoCache={};
+}
 
-animate();
+// ════════════════════════════════════════════
+//  CLOUDS
+// ════════════════════════════════════════════
+function buildClouds(){
+  CLOUDS=[];
+  var n=Math.round(W/150)+5;
+  for(var i=0;i<n;i++){
+    CLOUDS.push({
+      x:(i/n)*W*1.1+W*0.05,
+      y:H*(0.015+(i%5)*0.045),
+      w:W*(0.06+((i*7)%5)*0.014),
+      spd:0.40+((i*3)%5)*0.11,
+      a:0.70+((i*2)%4)*0.07,
+      puff:1.0+((i*4)%3)*0.15
+    });
+  }
+}
+
+function drawCloud(cl){
+  var x=cl.x,y=cl.y,w=cl.w,r=w*0.38*cl.puff;
+  ctx.save();
+  ctx.globalAlpha=cl.a;
+  // Shadow
+  ctx.shadowColor='rgba(100,160,220,0.30)'; ctx.shadowBlur=16;
+  ctx.fillStyle='rgba(255,255,255,0.92)';
+  ctx.beginPath();
+  ctx.arc(x,       y,       r*0.92,0,Math.PI*2);
+  ctx.arc(x+w*0.28,y-r*0.20,r*1.05,0,Math.PI*2);
+  ctx.arc(x+w*0.54,y+r*0.05,r*0.85,0,Math.PI*2);
+  ctx.arc(x+w*0.74,y+r*0.12,r*0.68,0,Math.PI*2);
+  ctx.arc(x+w*0.22,y+r*0.28,r*0.72,0,Math.PI*2);
+  ctx.arc(x-w*0.05,y+r*0.22,r*0.65,0,Math.PI*2);
+  ctx.fill();
+  // Bottom shadow on cloud
+  ctx.globalAlpha=cl.a*0.10;
+  ctx.fillStyle='#7090c0';
+  ctx.beginPath();
+  ctx.ellipse(x+w*0.35, y+r*0.40, w*0.52, r*0.20, 0,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════
+//  OCEAN  (layered gradient + caustics + waves)
+// ════════════════════════════════════════════
+function drawOcean(){
+  // Main gradient
+  var g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0.00,'#8ad8f0');
+  g.addColorStop(0.12,'#3ab0e0');
+  g.addColorStop(0.35,'#1880c0');
+  g.addColorStop(0.65,'#0c58a0');
+  g.addColorStop(1.00,'#082050');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  // Caustic shimmer (animated sin grid)
+  ctx.save(); ctx.globalAlpha=0.04;
+  var cs=W/8;
+  for(var gy=0;gy<H;gy+=cs){
+    for(var gx=0;gx<W;gx+=cs){
+      var v=Math.sin(gx*0.04+T*1.2)*Math.cos(gy*0.04+T*0.9);
+      if(v>0.3){
+        ctx.fillStyle='rgba(255,255,255,'+(v*0.5)+')';
+        ctx.beginPath();
+        ctx.ellipse(gx+cs/2,gy+cs/2,cs*0.4*v,cs*0.25*v,-0.4,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+  }
+  ctx.restore();
+
+  // Wave stripes
+  for(var i=0;i<9;i++){
+    var wy=H*(0.15+i*0.10);
+    var wlen=W*0.016;
+    ctx.beginPath(); ctx.moveTo(0,wy);
+    for(var x=0;x<=W;x+=16)
+      ctx.lineTo(x, wy+Math.sin(x*wlen+T*0.7+i*1.1)*3.5);
+    ctx.strokeStyle='rgba(255,255,255,'+(0.025+i*0.006)+')';
+    ctx.lineWidth=1+i*0.08; ctx.stroke();
+  }
+
+  // Sparkle dots (fixed positions)
+  var sparks=[[0.05,0.30],[0.18,0.48],[0.30,0.35],[0.45,0.62],[0.58,0.28],
+              [0.70,0.52],[0.85,0.38],[0.92,0.58],[0.35,0.75],[0.65,0.78]];
+  for(var s=0;s<sparks.length;s++){
+    var sv=Math.sin(T*2.8+s*1.7)*0.5+0.5;
+    ctx.globalAlpha=sv*0.35;
+    ctx.fillStyle='#fff';
+    ctx.font=Math.round(9+sv*4)+'px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('✦', sparks[s][0]*W, sparks[s][1]*H);
+  }
+  ctx.globalAlpha=1;
+}
+
+// ════════════════════════════════════════════
+//  CONNECTING PATH  (Catmull-Rom dashes)
+// ════════════════════════════════════════════
+function drawPath(){
+  var pts=PATH_ORDER.map(function(i){
+    var sw=SW[i];
+    return{x:sw.fx*W, y:sw.fy*H};
+  });
+  function crDraw(){
+    ctx.moveTo(pts[0].x,pts[0].y);
+    for(var i=0;i<pts.length-1;i++){
+      var p0=pts[Math.max(i-1,0)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(i+2,pts.length-1)];
+      var cp1x=p1.x+(p2.x-p0.x)/6, cp1y=p1.y+(p2.y-p0.y)/6;
+      var cp2x=p2.x-(p3.x-p1.x)/6, cp2y=p2.y-(p3.y-p1.y)/6;
+      ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,p2.x,p2.y);
+    }
+  }
+  // Glow halo
+  ctx.save(); ctx.globalAlpha=0.08; ctx.lineWidth=28;
+  ctx.strokeStyle='#ffffff'; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); crDraw(); ctx.stroke(); ctx.restore();
+  // Outer glow
+  ctx.save(); ctx.globalAlpha=0.18; ctx.lineWidth=12;
+  ctx.strokeStyle='#c8e8ff'; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); crDraw(); ctx.stroke(); ctx.restore();
+  // Dashes
+  var off=(T*14)%26;
+  ctx.save(); ctx.setLineDash([13,13]); ctx.lineDashOffset=-off;
+  ctx.lineWidth=3.5; ctx.strokeStyle='rgba(255,255,255,0.88)';
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); crDraw(); ctx.stroke();
+  ctx.setLineDash([]); ctx.restore();
+}
+
+// ════════════════════════════════════════════
+//  ISLAND  (main drawing routine)
+// ════════════════════════════════════════════
+function drawIsland(sw){
+  var cx=sw.fx*W, cy=sw.fy*H;
+  var rw=sw.rw*W,  rh=sw.rh*H;
+  var active=(hovSW===sw||selSW===sw);
+  var bob=Math.sin(T*1.2+sw.seed)*0.005;
+  var sc=1+(active?0.028:0)+bob;
+
+  ctx.save();
+  ctx.translate(cx,cy); ctx.scale(sc,sc); ctx.translate(-cx,-cy);
+
+  // — Aura / sea glow —
+  var aG=ctx.createRadialGradient(cx,cy,rw*0.3,cx,cy,rw*2.5);
+  aG.addColorStop(0,sw.avail?sw.aura:'rgba(0,0,0,0.04)');
+  aG.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=aG;
+  ctx.beginPath(); ctx.ellipse(cx,cy,rw*2.5,rh*2.0,0,0,Math.PI*2); ctx.fill();
+
+  // — Ocean ring around island (tinted water) —
+  var wG=ctx.createRadialGradient(cx,cy,rw*0.7,cx,cy,rw*1.55);
+  wG.addColorStop(0,sw.water+'aa');
+  wG.addColorStop(0.6,sw.water+'44');
+  wG.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=wG;
+  ctx.beginPath(); ctx.ellipse(cx,cy,rw*1.55,rh*1.30,0,0,Math.PI*2); ctx.fill();
+
+  // — Drop shadow —
+  var sPts=getIsoPoly(sw,1.05,20);
+  ctx.save(); ctx.translate(rw*0.06,rh*0.18);
+  ctx.beginPath(); drawIslandPoly(sPts); ctx.closePath();
+  ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fill(); ctx.restore();
+
+  // — Shore foam ring (offset polygon) —
+  var foamPts=getIsoPoly(sw,1.04,24);
+  ctx.beginPath(); drawIslandPoly(foamPts); ctx.closePath();
+  ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.fill();
+  // Animated foam dots
+  var fOff=(T*0.5)%1;
+  for(var fi=0;fi<foamPts.length;fi++){
+    var fp=foamPts[fi];
+    var fv=Math.sin(T*2.5+fi*0.7)*0.5+0.5;
+    ctx.beginPath();
+    ctx.arc(fp.x,fp.y,(rw*0.020)*fv+rw*0.010,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,'+(0.4+fv*0.5)+')'; ctx.fill();
+  }
+
+  // — Sand shore —
+  var sandPts=getIsoPoly(sw,1.00,26);
+  ctx.beginPath(); drawIslandPoly(sandPts); ctx.closePath();
+  ctx.fillStyle=sw.sand; ctx.fill();
+
+  // — Grass body —
+  var grassPts=getIsoPoly(sw,0.88,26);
+  ctx.beginPath(); drawIslandPoly(grassPts); ctx.closePath();
+  var gG=ctx.createRadialGradient(cx,cy-rh*0.10,rw*0.05,cx,cy+rh*0.20,rw*0.95);
+  gG.addColorStop(0,sw.grass); gG.addColorStop(0.5,sw.grass+'dd'); gG.addColorStop(1,sw.shore);
+  ctx.fillStyle=gG; ctx.fill();
+
+  // — Hill center —
+  var hillPts=getIsoPoly(sw,0.58,20);
+  ctx.beginPath(); drawIslandPoly(hillPts); ctx.closePath();
+  ctx.fillStyle=sw.hill; ctx.fill();
+
+  // — Mountains (3 peaks) —
+  drawMtn(ctx, cx-rw*0.26, cy-rh*0.55, rw*0.26, rh*0.42, sw.peak);
+  drawMtn(ctx, cx+rw*0.12, cy-rh*0.64, rw*0.20, rh*0.36, sw.peak);
+  drawMtn(ctx, cx-rw*0.52, cy-rh*0.28, rw*0.14, rh*0.22, sw.hill);
+
+  // — Trees —
+  drawTrees(cx,cy,rw,rh,sw);
+
+  // — Landmark / building —
+  drawLandmark(cx,cy,rw,rh,sw,active);
+
+  // — Central badge —
+  drawBadge(cx,cy,rw,rh,sw,active);
+
+  // — Name label —
+  drawLabel(cx, cy+rh*0.70, sw, active);
+
+  ctx.restore();
+}
+
+// ─── Mountain peak ───
+function drawMtn(ctx,x,y,w,h,dark){
+  // Body
+  ctx.beginPath();
+  ctx.moveTo(x-w,y+h*0.5); ctx.lineTo(x,y-h*0.5); ctx.lineTo(x+w,y+h*0.5);
+  ctx.closePath(); ctx.fillStyle=dark; ctx.fill();
+  // Shading (left face slightly lighter)
+  ctx.beginPath();
+  ctx.moveTo(x,y-h*0.5); ctx.lineTo(x+w,y+h*0.5); ctx.lineTo(x,y+h*0.5);
+  ctx.closePath(); ctx.fillStyle='rgba(0,0,0,0.20)'; ctx.fill();
+  // Snow cap
+  ctx.beginPath();
+  ctx.moveTo(x-w*0.24,y-h*0.10); ctx.lineTo(x,y-h*0.50); ctx.lineTo(x+w*0.24,y-h*0.10);
+  ctx.closePath(); ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.fill();
+}
+
+// ─── Fixed tree positions ───
+var TPOS=[
+  [-0.68, 0.14],[-0.56,-0.02],[-0.76,-0.02],
+  [ 0.65, 0.12],[ 0.74,-0.04],[ 0.80, 0.07],
+  [-0.12, 0.46],[ 0.22, 0.44],[-0.32, 0.42],[ 0.04, 0.36],
+  [ 0.44, 0.28],[-0.46, 0.26],[0.30,0.30],[-0.18,0.30],
+];
+function drawTrees(cx,cy,rw,rh,sw){
+  for(var i=0;i<TPOS.length;i++){
+    var tx=cx+TPOS[i][0]*rw, ty=cy+TPOS[i][1]*rh;
+    var sz=rh*0.165*(0.88+(i%3)*0.08);
+    // Only draw if within island bounds
+    var dx=(tx-cx)/rw, dy=(ty-cy)/rh;
+    if(dx*dx+dy*dy>0.72) continue;
+    // Trunk
+    ctx.fillStyle='#4a2e10';
+    ctx.fillRect(tx-sz*0.06, ty, sz*0.12, sz*0.34);
+    // 3 foliage tiers
+    var fColors=[sw.peak, sw.hill, sw.grass];
+    for(var l=0;l<3;l++){
+      var hw=sz*(0.48-l*0.06), ht=sz*(0.90+l*0.30);
+      ctx.beginPath();
+      ctx.moveTo(tx, ty-ht);
+      ctx.lineTo(tx-hw, ty-sz*(0.10+l*0.25));
+      ctx.lineTo(tx+hw, ty-sz*(0.10+l*0.25));
+      ctx.closePath(); ctx.fillStyle=fColors[l]; ctx.fill();
+    }
+  }
+}
+
+// ─── Landmark buildings (per software theme) ───
+function drawLandmark(cx,cy,rw,rh,sw,active){
+  var bx=cx+rw*0.35, by=cy-rh*0.15;
+  var sz=rh*0.28;
+  var ac=sw.accent;
+  ctx.save();
+  ctx.globalAlpha=active?0.95:0.80;
+  switch(sw.landmarks[0]){
+    case 'cube':      drawCube(bx,by,sz,ac);       break;
+    case 'palette':   drawPalette(bx,by,sz,ac);    break;
+    case 'skyscraper':drawSkyscraper(bx,by,sz,ac); break;
+    case 'vortex':    drawVortex(bx,by,sz,ac);     break;
+    case 'crystal':   drawCrystal(bx,by,sz,ac);    break;
+    case 'castle':    drawCastle(bx,by,sz,ac);     break;
+  }
+  ctx.restore();
+}
+
+function drawCube(bx,by,sz,ac){
+  // Isometric cube (Blender icon feel)
+  var w=sz*0.55, h=sz*0.48, d=sz*0.26;
+  // Top face
+  ctx.beginPath();
+  ctx.moveTo(bx,by-h/2);
+  ctx.lineTo(bx+w,by-h/2+d);
+  ctx.lineTo(bx,by+d/2);
+  ctx.lineTo(bx-w,by-h/2+d);
+  ctx.closePath(); ctx.fillStyle=ac; ctx.fill();
+  // Left face
+  ctx.beginPath();
+  ctx.moveTo(bx-w,by-h/2+d);
+  ctx.lineTo(bx,by+d/2);
+  ctx.lineTo(bx,by+h/2);
+  ctx.lineTo(bx-w,by+d/2);
+  ctx.closePath(); ctx.fillStyle='rgba(0,0,0,0.30)'; ctx.fill();
+  ctx.fillStyle=ac+'88'; ctx.fill();
+  // Right face
+  ctx.beginPath();
+  ctx.moveTo(bx,by+d/2);
+  ctx.lineTo(bx+w,by-h/2+d);
+  ctx.lineTo(bx+w,by+d/2);
+  ctx.lineTo(bx,by+h/2);
+  ctx.closePath(); ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.fill();
+  ctx.fillStyle=ac+'aa'; ctx.fill();
+  // Edge highlight
+  ctx.strokeStyle='rgba(255,255,255,0.40)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(bx,by-h/2); ctx.lineTo(bx+w,by-h/2+d); ctx.stroke();
+}
+
+function drawPalette(bx,by,sz,ac){
+  // Paint palette shape
+  ctx.beginPath();
+  ctx.ellipse(bx,by,sz*0.48,sz*0.42,0.2,0,Math.PI*2);
+  ctx.fillStyle=ac+'88'; ctx.fill();
+  ctx.strokeStyle=ac; ctx.lineWidth=2.5; ctx.stroke();
+  // Color dots
+  var dots=['#ff4466','#44aaff','#44ff88','#ffcc00'];
+  for(var d=0;d<4;d++){
+    var da=(d/4)*Math.PI*1.5-0.4;
+    ctx.beginPath();
+    ctx.arc(bx+Math.cos(da)*sz*0.28, by+Math.sin(da)*sz*0.26, sz*0.08,0,Math.PI*2);
+    ctx.fillStyle=dots[d]; ctx.fill();
+  }
+  // Brush
+  ctx.beginPath();
+  ctx.moveTo(bx+sz*0.30,by-sz*0.50);
+  ctx.lineTo(bx+sz*0.55,by-sz*0.10);
+  ctx.lineTo(bx+sz*0.50,by-sz*0.06);
+  ctx.lineTo(bx+sz*0.25,by-sz*0.46);
+  ctx.closePath(); ctx.fillStyle='#c0a080'; ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(bx+sz*0.50,by-sz*0.06); ctx.lineTo(bx+sz*0.62,by+sz*0.06);
+  ctx.lineTo(bx+sz*0.52,by+sz*0.08); ctx.lineTo(bx+sz*0.45,by-sz*0.02);
+  ctx.closePath(); ctx.fillStyle=ac; ctx.fill();
+}
+
+function drawSkyscraper(bx,by,sz,ac){
+  // Main tower
+  ctx.fillStyle=ac+'66';
+  ctx.fillRect(bx-sz*0.15,by-sz*0.70,sz*0.30,sz*0.72);
+  ctx.fillStyle=ac;
+  ctx.fillRect(bx-sz*0.12,by-sz*0.70,sz*0.24,sz*0.68);
+  // Windows
+  ctx.fillStyle='rgba(255,255,255,0.55)';
+  for(var wr=0;wr<5;wr++){
+    for(var wc=0;wc<2;wc++){
+      ctx.fillRect(bx-sz*0.08+wc*sz*0.12, by-sz*0.62+wr*sz*0.12, sz*0.06, sz*0.06);
+    }
+  }
+  // Spire
+  ctx.beginPath();
+  ctx.moveTo(bx-sz*0.04,by-sz*0.70);
+  ctx.lineTo(bx,by-sz*1.0);
+  ctx.lineTo(bx+sz*0.04,by-sz*0.70);
+  ctx.closePath(); ctx.fillStyle='rgba(255,255,255,0.80)'; ctx.fill();
+  // Lightning bolt
+  ctx.font=(sz*0.38)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('⚡',bx+sz*0.45,by-sz*0.30);
+}
+
+function drawVortex(bx,by,sz,ac){
+  // Spiral arms
+  for(var arm=0;arm<3;arm++){
+    var aOff=(arm/3)*Math.PI*2+T*0.5;
+    ctx.beginPath();
+    for(var sp=0;sp<=24;sp++){
+      var ang=aOff+sp*0.25;
+      var r=sz*(0.06+sp*0.018);
+      var px=bx+Math.cos(ang)*r, py=by+Math.sin(ang)*r;
+      if(sp===0)ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.strokeStyle=ac+(arm===0?'ff':'99');
+    ctx.lineWidth=sz*0.06; ctx.lineCap='round'; ctx.stroke();
+  }
+  // Center gem
+  ctx.beginPath(); ctx.arc(bx,by,sz*0.14,0,Math.PI*2);
+  ctx.fillStyle=ac; ctx.fill();
+  ctx.beginPath(); ctx.arc(bx,by,sz*0.08,0,Math.PI*2);
+  ctx.fillStyle='#fff'; ctx.fill();
+}
+
+function drawCrystal(bx,by,sz,ac){
+  // Multi-faceted crystal
+  ctx.save();
+  // Main gem
+  ctx.beginPath();
+  ctx.moveTo(bx,by-sz*0.72);
+  ctx.lineTo(bx+sz*0.32,by-sz*0.16);
+  ctx.lineTo(bx+sz*0.22,by+sz*0.30);
+  ctx.lineTo(bx,by+sz*0.42);
+  ctx.lineTo(bx-sz*0.22,by+sz*0.30);
+  ctx.lineTo(bx-sz*0.32,by-sz*0.16);
+  ctx.closePath(); ctx.fillStyle=ac+'99'; ctx.fill();
+  ctx.strokeStyle=ac; ctx.lineWidth=2; ctx.stroke();
+  // Inner shine
+  ctx.beginPath();
+  ctx.moveTo(bx,by-sz*0.72);
+  ctx.lineTo(bx+sz*0.10,by-sz*0.10);
+  ctx.lineTo(bx,by-sz*0.05);
+  ctx.lineTo(bx-sz*0.10,by-sz*0.10);
+  ctx.closePath(); ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fill();
+  // Glow
+  ctx.globalAlpha=0.35+Math.sin(T*3)*0.15;
+  var cg=ctx.createRadialGradient(bx,by,0,bx,by,sz*0.6);
+  cg.addColorStop(0,ac); cg.addColorStop(1,'transparent');
+  ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(bx,by,sz*0.6,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawCastle(bx,by,sz,ac){
+  // Wall base
+  ctx.fillStyle=ac+'55';
+  ctx.fillRect(bx-sz*0.40,by-sz*0.35,sz*0.80,sz*0.38);
+  // Battlements
+  for(var b=0;b<5;b++){
+    ctx.fillStyle=ac+'88';
+    ctx.fillRect(bx-sz*0.38+b*sz*0.18,by-sz*0.52,sz*0.12,sz*0.18);
+  }
+  // Tower left
+  ctx.fillStyle=ac+'99';
+  ctx.fillRect(bx-sz*0.50,by-sz*0.62,sz*0.22,sz*0.65);
+  // Tower right
+  ctx.fillRect(bx+sz*0.28,by-sz*0.55,sz*0.22,sz*0.58);
+  // Tower roofs (triangles)
+  ctx.beginPath(); ctx.moveTo(bx-sz*0.50,by-sz*0.62); ctx.lineTo(bx-sz*0.39,by-sz*0.86); ctx.lineTo(bx-sz*0.28,by-sz*0.62); ctx.closePath();
+  ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(bx+sz*0.28,by-sz*0.55); ctx.lineTo(bx+sz*0.39,by-sz*0.80); ctx.lineTo(bx+sz*0.50,by-sz*0.55); ctx.closePath();
+  ctx.fill();
+  // Gate
+  ctx.beginPath();
+  ctx.arc(bx,by,sz*0.16,Math.PI,0,true); ctx.lineTo(bx+sz*0.16,by+sz*0.03); ctx.lineTo(bx-sz*0.16,by+sz*0.03); ctx.closePath();
+  ctx.fillStyle='rgba(0,0,0,0.60)'; ctx.fill();
+}
+
+// ─── Badge circle ───
+function drawBadge(cx,cy,rw,rh,sw,active){
+  var r=rw*0.285;
+  // Outer shadow
+  ctx.beginPath(); ctx.arc(cx,cy+r*0.16,r*1.08,0,Math.PI*2);
+  ctx.fillStyle='rgba(0,0,0,0.32)'; ctx.fill();
+  // Animated outer pulse ring
+  if(sw.avail||active){
+    var pr=r*(1.40+Math.sin(T*3)*0.08);
+    ctx.beginPath(); ctx.arc(cx,cy,pr,0,Math.PI*2);
+    ctx.strokeStyle=sw.avail?sw.accent+'44':'rgba(255,255,255,0.15)';
+    ctx.lineWidth=4; ctx.stroke();
+  }
+  // Ring border
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+  var rb=ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
+  if(sw.avail){
+    rb.addColorStop(0,sw.accent);
+    rb.addColorStop(1,'#c07010');
+  } else {
+    rb.addColorStop(0,'#444'); rb.addColorStop(1,'#222');
+  }
+  ctx.fillStyle=rb; ctx.fill();
+  // Inner radial
+  var ig=ctx.createRadialGradient(cx-r*0.20,cy-r*0.25,0,cx,cy,r*0.92);
+  if(sw.avail){
+    ig.addColorStop(0,'#fffef0');
+    ig.addColorStop(0.55,'#f0d870');
+    ig.addColorStop(1,'#c09020');
+  } else {
+    ig.addColorStop(0,'#606060'); ig.addColorStop(1,'#282828');
+  }
+  ctx.beginPath(); ctx.arc(cx,cy,r*0.87,0,Math.PI*2);
+  ctx.fillStyle=ig; ctx.fill();
+  // Shine
+  ctx.beginPath(); ctx.arc(cx-r*0.24,cy-r*0.28,r*0.28,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.22)'; ctx.fill();
+  // Icon
+  ctx.font=(r*1.05)+'px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle=sw.avail?sw.accent:'#666';
+  ctx.fillText(sw.icon, cx, cy+r*0.07);
+  // Lock overlay
+  if(!sw.avail){
+    var lr=r*0.30;
+    ctx.beginPath(); ctx.arc(cx+r*0.56,cy-r*0.56,lr,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,0,0,0.72)'; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.14)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.font=(lr*1.1)+'px sans-serif';
+    ctx.fillText('🔒',cx+r*0.56,cy-r*0.56);
+  }
+}
+
+// ─── Name label (pill below island) ───
+function drawLabel(lx,ly,sw,active){
+  var lines=sw.name.length>14?sw.name.split(' '):([sw.name]);
+  var fs=Math.max(10,Math.min(W*0.012,16));
+  ctx.font='bold '+fs+'px "Josefin Sans",sans-serif';
+  var mw=0;
+  lines.forEach(function(l){mw=Math.max(mw,ctx.measureText(l).width);});
+  var lh=fs*1.32, bw=mw+fs*1.1, bh=lines.length*lh+fs*0.55;
+  var bx=lx-bw/2, by=ly-bh/2;
+  var ri=fs*0.42;
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,0.35)';
+  rrect(ctx,bx+3,by+3,bw,bh,ri); ctx.fill();
+  // Background
+  ctx.fillStyle=active?'rgba(0,0,0,0.92)':'rgba(0,0,0,0.70)';
+  rrect(ctx,bx,by,bw,bh,ri); ctx.fill();
+  // Border
+  if(active){
+    ctx.strokeStyle=sw.accent+'99'; ctx.lineWidth=1.8;
+    rrect(ctx,bx,by,bw,bh,ri); ctx.stroke();
+  }
+  // Text
+  ctx.fillStyle=sw.avail?sw.label:'#666';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  lines.forEach(function(l,j){
+    ctx.fillText(l, lx, ly+(j-(lines.length-1)*0.5)*lh);
+  });
+  // Coming soon tag
+  if(!sw.avail){
+    ctx.font=(fs*0.66)+'px "Josefin Sans",sans-serif';
+    ctx.fillStyle='rgba(180,150,70,0.75)';
+    ctx.fillText('即將推出',lx,ly+bh*0.5+fs*0.80);
+  }
+}
+
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+// ════════════════════════════════════════════
+//  HIT TEST
+// ════════════════════════════════════════════
+function hitTest(mx,my){
+  for(var i=SW.length-1;i>=0;i--){
+    var sw=SW[i];
+    var dx=(mx-sw.fx*W)/(sw.rw*W*1.15);
+    var dy=(my-sw.fy*H)/(sw.rh*H*1.15);
+    if(dx*dx+dy*dy<1.25)return sw;
+  }
+  return null;
+}
+function onClick(e){var sw=hitTest(e.clientX,e.clientY);sw?(selSW=sw,showCard(sw)):(selSW=null,closeCard());}
+function onMove(e){hovSW=hitTest(e.clientX,e.clientY);cvs.style.cursor=hovSW?'pointer':'default';}
+function onTouch(e){var t=e.changedTouches[0];if(!t)return;var sw=hitTest(t.clientX,t.clientY);if(sw){selSW=sw;showCard(sw);}}
+
+// ════════════════════════════════════════════
+//  CARD
+// ════════════════════════════════════════════
+function showCard(sw){
+  document.getElementById('ci').textContent=sw.icon;
+  document.getElementById('cn').textContent=sw.name;
+  document.getElementById('cs').textContent=sw.sub;
+  var done=0;
+  for(var i=1;i<=sw.totalLv;i++){
+    try{var d=JSON.parse(localStorage.getItem(sw.pfx+i)||'{}');if(d.done)done++;}catch(e){}
+  }
+  var pct=sw.totalLv?Math.round(done/sw.totalLv*100):0;
+  document.getElementById('cbf').style.width=pct+'%';
+  document.getElementById('cbf').style.background=sw.accent;
+  document.getElementById('cbp').textContent=pct+'%';
+  document.getElementById('cst').textContent=
+    done===sw.totalLv&&done>0?'★★★':done>sw.totalLv/2?'★★☆':done>0?'★☆☆':'☆☆☆';
+  var btn=document.getElementById('cbtn');
+  if(sw.avail){
+    btn.className='go'; btn.style.background=sw.accent;
+    btn.textContent=done>0?'繼續學習 →':'進入學習 →';
+    btn.onclick=function(){window.location.href=sw.hub;};
+  }else{
+    btn.className='no'; btn.textContent='🔒 即將推出'; btn.onclick=null;
+  }
+  document.getElementById('card').classList.add('on');
+}
+function closeCard(){document.getElementById('card').classList.remove('on');selSW=null;}
+function goHub(){if(selSW&&selSW.avail)window.location.href=selSW.hub;}
+
+// ════════════════════════════════════════════
+//  XP
+// ════════════════════════════════════════════
+function calcXP(){
+  var xp=0;
+  SW.forEach(function(sw){
+    for(var i=1;i<=sw.totalLv;i++){
+      try{var d=JSON.parse(localStorage.getItem(sw.pfx+i)||'{}');if(d.done)xp+=(d.xp||300);}catch(e){}
+    }
+  });
+  document.getElementById('xp-n').textContent='XP '+xp;
+}
+
+// ════════════════════════════════════════════
+//  MAIN DRAW LOOP
+// ════════════════════════════════════════════
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  drawOcean();
+  drawPath();
+  // Sort islands back to front by fy
+  var sorted=SW.slice().sort(function(a,b){return a.fy-b.fy;});
+  sorted.forEach(drawIsland);
+  // Clouds on top
+  CLOUDS.forEach(function(cl){
+    cl.x+=cl.spd*0.28;
+    if(cl.x>W+cl.w*2)cl.x=-cl.w*2;
+    drawCloud(cl);
+  });
+}
+
+function loop(){
+  requestAnimationFrame(loop);
+  T+=0.016;
+  draw();
+}
+
+window.onload=function(){
+  setup();
+  calcXP();
+  loop();
+};
 </script>
 </body>
 </html>

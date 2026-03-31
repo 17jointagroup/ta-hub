@@ -1,560 +1,477 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-
-<script>
-// ── Device Detection (runs before page renders) ──
-(function(){
-  var ua=navigator.userAgent;
-  var w=window.innerWidth||screen.width;
-  var isMobile=/iPhone|iPad|iPod|Android|Mobile/i.test(ua)||w<=768;
-  var isIOS=/iPhone|iPad|iPod/i.test(ua);
-  var size=w<=390?'xs':w<=430?'sm':w<=768?'md':'lg';
-  document.documentElement.setAttribute('data-device',isMobile?'mobile':'desktop');
-  document.documentElement.setAttribute('data-size',size);
-  if(isIOS)document.documentElement.classList.add('ios');
-  window.DEV={isMobile:isMobile,isIOS:isIOS,size:size,W:w};
-})();
-</script>
-
-<style id="device-css">
-/* ── Desktop defaults (no change) ── */
-[data-device="desktop"] {}
-
-/* ── Mobile: hide desktop-only elements ── */
-[data-device="mobile"] .desktop-only { display:none !important; }
-[data-device="desktop"] .mobile-only { display:none !important; }
-
-/* ── Mobile layout switches ── */
-[data-device="mobile"] .main {
-  flex-direction: column !important;
-}
-/* Left panel → bottom drawer on mobile */
-[data-device="mobile"] .lp,
-[data-device="mobile"] .lpanel,
-[data-device="mobile"] .instr-panel {
-  width: 100% !important;
-  max-height: 44vh !important;
-  min-height: 44vh !important;
-  border-right: none !important;
-  border-top: 2px solid var(--border, #333) !important;
-  order: 2 !important;
-  flex-shrink: 0 !important;
-  overflow: hidden !important;
-}
-/* Right panel → hidden on mobile */
-[data-device="mobile"] .rp,
-[data-device="mobile"] .rpanel,
-[data-device="mobile"] .right-panel { display: none !important; }
-
-/* Viewport → top half on mobile */
-[data-device="mobile"] .viewport {
-  flex: 1 !important;
-  order: 1 !important;
-  min-height: 0 !important;
-}
-
-/* Topbar compact */
-[data-device="mobile"] .tb-crumb { display: none !important; }
-[data-device="mobile"] .topbar { height: 38px !important; }
-[data-device="mobile"] .tb-logo { font-size: .85rem !important; padding: 0 10px !important; }
-
-/* Chapter tabs */
-[data-device="mobile"] .chtabs,
-[data-device="mobile"] .chapter-tabs { height: 30px !important; }
-[data-device="mobile"] .cht,
-[data-device="mobile"] .ch-tab { font-size: .55rem !important; }
-
-/* Step content */
-[data-device="mobile"] .stit,
-[data-device="mobile"] .step-title { font-size: .95rem !important; }
-[data-device="mobile"] .desc,
-[data-device="mobile"] .step-desc { font-size: .76rem !important; line-height: 1.6 !important; }
-[data-device="mobile"] .lbody,
-[data-device="mobile"] .instr-body { padding: 10px 12px !important; }
-
-/* Buttons */
-[data-device="mobile"] .abtn { padding: 10px !important; font-size: .9rem !important; }
-[data-device="mobile"] .kh { padding: 6px 9px !important; margin-bottom: 6px !important; }
-[data-device="mobile"] .ck { padding: 6px 8px !important; font-size: .74rem !important; }
-[data-device="mobile"] .sdesc,
-[data-device="mobile"] .desc { margin-bottom: 10px !important; }
-
-/* Hint bar */
-[data-device="mobile"] .vp-hint { font-size: .58rem !important; padding: 5px 12px !important; }
-
-/* Sliders */
-[data-device="mobile"] input[type=range] { width: 100% !important; }
-
-/* Index page */
-[data-device="mobile"] .nav-links { display: none !important; }
-[data-device="mobile"] .hero { flex-direction: column !important; padding: 18px 14px !important; gap: 12px !important; min-height: auto !important; }
-[data-device="mobile"] .hero-stats { display: none !important; }
-[data-device="mobile"] .hero-title { font-size: 1.35rem !important; }
-[data-device="mobile"] .hero-sub { font-size: .78rem !important; }
-[data-device="mobile"] .cat-tab { font-size: .72rem !important; padding: 10px 9px !important; }
-[data-device="mobile"] .c-card { min-width: 165px !important; max-width: 165px !important; }
-[data-device="mobile"] .c-card-wide { min-width: 220px !important; max-width: 220px !important; }
-[data-device="mobile"] .c-thumb { height: 105px !important; }
-[data-device="mobile"] .c-title { font-size: .78rem !important; }
-[data-device="mobile"] .course-entry-strip { gap: 8px !important; }
-[data-device="mobile"] .entry-pill { min-width: 130px !important; padding: 9px 11px !important; }
-
-/* Blender hub */
-[data-device="mobile"] .hero { flex-direction: column !important; padding: 18px 14px 20px !important; }
-[data-device="mobile"] .hero-progress { margin-left: 0 !important; width: 100% !important; text-align: center !important; }
-[data-device="mobile"] .lc-desc,
-[data-device="mobile"] .lc-skills { display: none !important; }
-[data-device="mobile"] .play-btn { font-size: .75rem !important; padding: 6px 12px !important; }
-
-/* World map */
-[data-device="mobile"] .tech-strip { padding: 5px 8px !important; gap: 4px !important; flex-wrap: wrap !important; }
-[data-device="mobile"] .tech-badge { font-size: .5rem !important; padding: 2px 5px !important; }
-[data-device="mobile"] .progress-strip { right: 8px !important; }
-[data-device="mobile"] .prog-name { font-size: .7rem !important; }
-[data-device="mobile"] .prog-xp { display: none !important; }
-[data-device="mobile"] .popup { width: 95vw !important; }
-[data-device="mobile"] .popup.show { bottom: 12px !important; }
-[data-device="mobile"] .hint-bar { bottom: 90px !important; font-size: .58rem !important; }
-
-/* Build progress (level6) */
-[data-device="mobile"] .build-progress { height: 36px !important; padding: 0 6px !important; }
-[data-device="mobile"] .bp-step { padding: 0 5px !important; font-size: .52rem !important; }
-[data-device="mobile"] .bp-step::after { display: none !important; }
-
-/* iOS safe area */
-.ios body { padding-bottom: env(safe-area-inset-bottom) !important; }
-</style>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>🟠 Blender 建模入門 — 關卡地圖</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Blender 課程地圖 — TA HUB</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700;900&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-:root{
-  --bg:#141414;--panel:#1e1e1e;--panel2:#252525;--border:#303030;
-  --acc:#e8780a;--acc2:#ff9f40;--acc3:#ffd080;
-  --green:#8bc34a;--green2:#c8f0a0;
-  --txt:#e8e8e8;--txt2:#909090;--txt3:#505050;
-  --mono:'Space Mono',monospace;--title:'Fredoka One',sans-serif;
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#1a5a10;touch-action:manipulation}
+#cvs{position:fixed;top:0;left:0;display:block}
+/* ── Header ── */
+#hdr{
+  position:fixed;top:0;left:0;right:0;height:54px;z-index:20;
+  background:rgba(5,22,5,0.45);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  display:flex;align-items:center;padding:0 12px;gap:10px;
 }
-html,body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);min-height:100vh;background:var(--bg);color:var(--txt);font-family:'Noto Sans TC',sans-serif;}
-
-/* ── HEADER ── */
-header{
-  background:var(--panel);border-bottom:1px solid var(--border);
-  padding:0 32px;height:56px;
-  display:flex;align-items:center;gap:16px;
-  position:sticky;top:0;z-index:50;
-}
-.hdr-back{
-  font-family:var(--mono);font-size:.7rem;color:var(--txt3);
-  text-decoration:none;display:flex;align-items:center;gap:6px;
-  padding:5px 10px;border-radius:6px;border:1px solid var(--border);
-  transition:.15s;
-}
-.hdr-back:hover{color:var(--txt2);border-color:var(--txt3);}
-.hdr-title{font-family:var(--title);font-size:1.1rem;color:var(--acc2);letter-spacing:.04em;}
-.hdr-sub{font-family:var(--mono);font-size:.65rem;color:var(--txt3);letter-spacing:.06em;}
-.hdr-xp{
-  margin-left:auto;display:flex;align-items:center;gap:10px;
-  font-family:var(--mono);font-size:.72rem;
-}
-.hdr-xp-label{color:var(--txt3);}
-.hdr-xp-val{color:var(--acc3);font-weight:700;}
-.xp-track{width:100px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
-.xp-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:3px;transition:width .8s cubic-bezier(.34,1.56,.64,1);}
-
-/* ── HERO ── */
-.hero{
-  background:linear-gradient(135deg,#1a1008 0%,#2a1808 50%,#1a1408 100%);
-  border-bottom:1px solid var(--border);
-  padding:36px 40px;
-  display:flex;align-items:center;gap:32px;
-  position:relative;overflow:hidden;
-}
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background-image:radial-gradient(circle at 70% 50%,rgba(232,120,10,.07) 0%,transparent 60%),
-    linear-gradient(rgba(232,120,10,.03) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(232,120,10,.03) 1px,transparent 1px);
-  background-size:auto,36px 36px,36px 36px;
-}
-.hero-icon{font-size:4rem;position:relative;z-index:1;animation:float 3s ease-in-out infinite;}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.hero-text{position:relative;z-index:1;}
-.hero-eyebrow{font-family:var(--mono);font-size:.62rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
-.hero-title{font-family:var(--title);font-size:1.9rem;color:var(--acc2);letter-spacing:.02em;line-height:1.2;margin-bottom:8px;}
-.hero-desc{font-size:.85rem;color:var(--txt2);line-height:1.8;max-width:42ch;}
-.hero-tags{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
-.hero-tag{
-  font-family:var(--mono);font-size:.62rem;letter-spacing:.05em;
-  padding:3px 9px;border-radius:4px;
-  background:rgba(232,120,10,.1);border:1px solid rgba(232,120,10,.25);color:var(--acc2);
-}
-.hero-progress{
-  margin-left:auto;flex-shrink:0;position:relative;z-index:1;
-  background:rgba(255,255,255,.04);border:1px solid var(--border);
-  border-radius:16px;padding:20px 24px;min-width:160px;text-align:center;
-}
-.hp-ring{
-  width:80px;height:80px;margin:0 auto 12px;
-  position:relative;
-}
-.hp-ring svg{width:80px;height:80px;transform:rotate(-90deg);}
-.hp-ring circle{fill:none;stroke-width:6;stroke-linecap:round;}
-.hp-ring .bg{stroke:var(--border);}
-.hp-ring .fg{stroke:var(--acc2);stroke-dasharray:220;stroke-dashoffset:220;transition:stroke-dashoffset 1s ease;}
-.hp-center{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-family:var(--title);font-size:1.1rem;color:var(--acc2);
-}
-.hp-label{font-family:var(--mono);font-size:.62rem;color:var(--txt3);letter-spacing:.06em;}
-
-/* ── SKILLS TRACK ── */
-.page{max-width:900px;margin:0 auto;padding:32px 24px 60px;}
-
-.track-header{
-  display:flex;align-items:center;gap:10px;margin-bottom:24px;
-}
-.track-title{font-family:var(--title);font-size:1rem;color:var(--txt);letter-spacing:.03em;}
-.track-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
-
-/* ── LEVEL CARD ── */
-.level-list{display:flex;flex-direction:column;gap:0;}
-
-.connector{
-  width:2px;height:20px;
-  background:linear-gradient(var(--border),var(--border));
-  margin:0 auto;
-}
-.connector.done{background:linear-gradient(var(--acc),var(--acc2));}
-
-.level-card{
-  background:var(--panel);border:1.5px solid var(--border);
-  border-radius:16px;overflow:hidden;
-  transition:all .2s;cursor:pointer;
-  position:relative;
-}
-.level-card:hover:not(.locked){
-  border-color:var(--acc);
-  box-shadow:0 0 0 1px var(--acc),0 8px 32px rgba(232,120,10,.15);
-  transform:translateY(-2px);
-}
-.level-card.done{border-color:rgba(139,195,74,.35);}
-.level-card.done:hover{border-color:var(--green);box-shadow:0 0 0 1px var(--green),0 8px 32px rgba(139,195,74,.15);}
-.level-card.locked{opacity:.45;cursor:not-allowed;}
-.level-card.active-next{
-  border-color:var(--acc2);
-  box-shadow:0 0 0 1px var(--acc2),0 0 24px rgba(255,159,64,.2);
-}
-
-/* done stripe */
-.level-card.done::before{
-  content:'';position:absolute;top:0;left:0;width:4px;height:100%;
-  background:linear-gradient(var(--green),var(--green2));
-}
-
-.lc-inner{display:flex;align-items:center;gap:16px;padding:18px 20px;}
-.lc-num{
-  width:52px;height:52px;border-radius:12px;flex-shrink:0;
+#back{
+  width:40px;height:40px;background:rgba(255,255,255,0.10);
+  border:1.5px solid rgba(255,255,255,0.18);border-radius:10px;
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--title);font-size:1.2rem;
-  position:relative;
+  font-size:20px;cursor:pointer;color:#fff;transition:all .18s;flex-shrink:0;
 }
-.lc-num.done-num{background:rgba(139,195,74,.15);border:1.5px solid rgba(139,195,74,.4);color:var(--green2);}
-.lc-num.active-num{background:rgba(232,120,10,.15);border:1.5px solid rgba(232,120,10,.5);color:var(--acc2);}
-.lc-num.locked-num{background:var(--panel2);border:1.5px solid var(--border);color:var(--txt3);}
-
-.lc-info{flex:1;min-width:0;}
-.lc-tag{font-family:var(--mono);font-size:.6rem;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
-.lc-title{font-family:var(--title);font-size:1rem;color:var(--txt);letter-spacing:.02em;margin-bottom:4px;}
-.lc-desc{font-size:.78rem;color:var(--txt2);line-height:1.5;}
-.lc-skills{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
-.skill-pill{
-  font-family:var(--mono);font-size:.6rem;letter-spacing:.04em;
-  padding:2px 8px;border-radius:4px;
-  background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--txt3);
+#back:hover{background:rgba(255,255,255,0.20);}
+#hinfo{flex:1;min-width:0}
+#htitle{font-family:'Josefin Sans',sans-serif;font-weight:700;
+  font-size:clamp(13px,2vw,17px);color:#fff;letter-spacing:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#hsub{font-size:10px;color:rgba(255,255,255,0.40);letter-spacing:1px}
+#hxp{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(0,0,0,0.38);padding:5px 10px;
+  border-radius:14px;border:1px solid rgba(255,200,50,0.25);flex-shrink:0;
 }
-.skill-pill.done{background:rgba(139,195,74,.1);border-color:rgba(139,195,74,.3);color:var(--green2);}
-
-.lc-meta{flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-.xp-badge{
-  font-family:var(--mono);font-size:.75rem;font-weight:700;
-  padding:4px 10px;border-radius:6px;
-  background:rgba(232,120,10,.1);border:1px solid rgba(232,120,10,.25);color:var(--acc2);
+#hxpv{font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:12px;color:#ffc040}
+/* ── Bottom Panel ── */
+#panel{
+  position:fixed;bottom:0;left:0;right:0;z-index:20;
+  background:rgba(5,18,5,0.94);backdrop-filter:blur(16px);
+  border-top:1.5px solid rgba(255,255,255,0.08);
+  padding:14px 16px 18px;
+  transform:translateY(100%);transition:transform .28s cubic-bezier(.22,1,.36,1);
 }
-.xp-badge.done{background:rgba(139,195,74,.1);border-color:rgba(139,195,74,.3);color:var(--green2);}
-.lc-status{font-family:var(--mono);font-size:.62rem;color:var(--txt3);letter-spacing:.04em;}
-.lc-status.done{color:var(--green2);}
-.lc-status.active{color:var(--acc2);}
-.play-btn{
-  background:var(--acc);border:none;color:#fff;
-  font-family:var(--title);font-size:.82rem;
-  padding:7px 16px;border-radius:8px;cursor:pointer;
-  transition:.15s;white-space:nowrap;
-  text-decoration:none;display:inline-flex;align-items:center;gap:5px;
+#panel.on{transform:translateY(0)}
+#pcx{position:absolute;top:10px;right:13px;font-size:15px;color:rgba(255,255,255,0.25);cursor:pointer;padding:4px}
+.p-top{display:flex;align-items:center;gap:12px;margin-bottom:11px}
+#p-num{
+  width:48px;height:48px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Josefin Sans',sans-serif;font-weight:900;font-size:21px;
+  border:2.5px solid rgba(255,255,255,0.14);
 }
-.play-btn:hover{background:var(--acc2);}
-.play-btn.replay{background:rgba(139,195,74,.2);color:var(--green2);border:1px solid rgba(139,195,74,.3);}
-.play-btn.replay:hover{background:rgba(139,195,74,.3);}
-
-/* ── FINAL REWARD ── */
-.reward-card{
-  background:linear-gradient(135deg,#1a1008,#2a1808);
-  border:1.5px solid rgba(232,120,10,.3);
-  border-radius:16px;padding:24px;text-align:center;
-  margin-top:8px;
+.p-meta{flex:1;min-width:0}
+#p-title{font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:16px;color:#fff}
+#p-sub{font-size:11px;color:rgba(255,255,255,0.42);margin-top:3px;line-height:1.4}
+#p-stars{font-size:22px;letter-spacing:2px;margin-left:auto;flex-shrink:0}
+.p-xprow{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.p-xplbl{font-size:10px;color:rgba(255,255,255,0.35);font-family:monospace;white-space:nowrap}
+.p-bar{flex:1;height:4px;background:rgba(255,255,255,0.10);border-radius:2px;overflow:hidden}
+#p-bar-fill{height:100%;border-radius:2px;transition:width .5s}
+#pbtn{
+  width:100%;padding:14px;border:none;border-radius:13px;
+  font-family:'Josefin Sans',sans-serif;font-weight:900;
+  font-size:16px;letter-spacing:2px;cursor:pointer;transition:all .18s;
 }
-.reward-icon{font-size:3rem;margin-bottom:10px;}
-.reward-title{font-family:var(--title);font-size:1.3rem;color:var(--acc2);margin-bottom:6px;}
-.reward-desc{font-size:.82rem;color:var(--txt2);}
-
-/* ── TOAST ── */
-.toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
-  background:var(--panel);border:1px solid var(--green);border-radius:100px;
-  padding:10px 24px;font-family:var(--mono);font-size:.75rem;color:var(--green2);
-  z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);
-  box-shadow:0 4px 20px rgba(139,195,74,.2);
-}
-.toast.show{transform:translateX(-50%) translateY(0);}
-
-
-  .hero-progress { margin-left:0 !important; width:100% !important; }
-  .hp-ring { width:64px !important; height:64px !important; }
-  .hp-ring svg { width:64px !important; height:64px !important; }
-  .page { padding:16px 12px 40px !important; }
-  .lc-inner { padding:12px 14px !important; gap:10px !important; }
-  .lc-title { font-size:.88rem !important; }
-  .lc-desc { font-size:.72rem !important; display:none !important; }
-  .lc-skills { display:none !important; }
-  .lc-meta { gap:4px !important; }
-  .play-btn { padding:6px 12px !important; font-size:.75rem !important; }
-  .xp-badge { font-size:.65rem !important; padding:2px 7px !important; }
-  header { padding:0 12px !important; }
-  .hdr { gap:8px !important; }
-  .hdr-title { font-size:.88rem !important; }
-  .hdr-back { font-size:.6rem !important; padding:0 8px !important; }
-  .hero-title { font-size:1.4rem !important; }
-  .hero-desc { font-size:.78rem !important; max-width:100% !important; }
-  .hero-tags { gap:4px !important; }
-  .hero-tag { font-size:.55rem !important; padding:2px 6px !important; }
-}
-
+#pbtn.play{background:#ff8832;color:#fff;box-shadow:0 4px 22px rgba(255,136,50,0.40)}
+#pbtn.play:active{transform:scale(0.97);box-shadow:none}
+#pbtn.boss{background:linear-gradient(135deg,#ff4400,#ff8800);color:#fff;box-shadow:0 4px 22px rgba(255,60,0,0.42)}
+#pbtn.retry{background:#1a4a1a;color:#70ce70;border:1px solid #2a7a2a}
+#pbtn.lock{background:#181818;color:#333;cursor:default}
 </style>
 </head>
 <body>
-
-<header>
-  <a href="index.html" class="hdr-back">← TA HUB</a>
-  <div>
-    <div class="hdr-title">🟠 Blender 建模入門</div>
-    <div class="hdr-sub">BLENDER MODELING FUNDAMENTALS</div>
+<canvas id="cvs"></canvas>
+<div id="hdr">
+  <div id="back" onclick="window.location.href='world-map.html'">←</div>
+  <div id="hinfo">
+    <div id="htitle">⬡ BLENDER 課程地圖</div>
+    <div id="hsub">Micky Lin × TA HUB · 12 關卡</div>
   </div>
-  <div class="hdr-xp">
-    <span class="hdr-xp-label">總 XP</span>
-    <div class="xp-track"><div class="xp-fill" id="total-xp-fill" style="width:0%"></div></div>
-    <span class="hdr-xp-val" id="total-xp-val">0 / 1800</span>
-  </div>
-</header>
-
-<div class="hero">
-  <div class="hero-icon">🏗️</div>
-  <div class="hero-text">
-    <div class="hero-eyebrow">BLENDER · 建模入門 · 6 個關卡</div>
-    <div class="hero-title">從零開始學<br>3D 建模</div>
-    <div class="hero-desc">在捷運上也能學 Blender！透過互動式 3D 關卡，從視角操控到完整建模流程，每個操作都能親手在瀏覽器裡實作。</div>
-    <div class="hero-tags">
-      <span class="hero-tag">Three.js WebGL</span>
-      <span class="hero-tag">互動操作</span>
-      <span class="hero-tag">關卡制學習</span>
-      <span class="hero-tag">行動裝置支援</span>
-    </div>
-  </div>
-  <div class="hero-progress">
-    <div class="hp-ring">
-      <svg viewBox="0 0 80 80">
-        <circle class="bg" cx="40" cy="40" r="35"/>
-        <circle class="fg" id="progress-ring" cx="40" cy="40" r="35"/>
-      </svg>
-      <div class="hp-center" id="progress-pct">0%</div>
-    </div>
-    <div class="hp-label" id="progress-label">0 / 6 完成</div>
-  </div>
+  <div id="hxp"><span>⭐</span><span id="hxpv">0 XP</span></div>
 </div>
-
-<div class="page">
-  <div class="track-header">
-    <span class="track-title">📍 學習路線</span>
-    <div class="track-line"></div>
+<div id="panel">
+  <span id="pcx" onclick="closePanel()">✕</span>
+  <div class="p-top">
+    <div id="p-num">1</div>
+    <div class="p-meta">
+      <div id="p-title">關卡名稱</div>
+      <div id="p-sub">副標題</div>
+    </div>
+    <div id="p-stars">☆☆☆</div>
   </div>
-
-  <div class="level-list" id="level-list"></div>
-
-  <div class="reward-card" id="reward-card" style="opacity:.35;">
-    <div class="reward-icon">🏆</div>
-    <div class="reward-title">Blender 建模師</div>
-    <div class="reward-desc">完成全部 6 關，獲得「Blender 建模入門」認證徽章<br>解鎖下一章：<strong>材質與 PBR 貼圖</strong></div>
+  <div class="p-xprow">
+    <span class="p-xplbl" id="p-xplbl">XP +0</span>
+    <div class="p-bar"><div id="p-bar-fill" style="width:0%;background:#ff8832"></div></div>
   </div>
+  <button id="pbtn" class="play" onclick="enterLv()">PLAY!</button>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-const LEVELS = [
-  {
-    id:1, file:'blender-level1.html',
-    icon:'🏠', tag:'視角 · 基礎操作',
-    title:'你的第一個 3D 物件',
-    desc:'學習視角旋轉、編輯模式切換、面選取、Extrude 擠出、Scale 縮放',
-    skills:['Orbit 視角','Edit Mode','Face Select','Extrude','Scale'],
-    xp:350, totalXP:350,
-    key:'blender_l1'
-  },
-  {
-    id:2, file:'blender-level2.html',
-    icon:'✂️', tag:'Loop Cut · 邊線操作',
-    title:'Loop Cut 切割與滑動',
-    desc:'用 Ctrl+R 加入 Loop Cut，選取中間環狀邊，Scale 做出桶形或腰身',
-    skills:['Loop Cut','Edge Select','Ring Select','Edge Slide'],
-    xp:380, totalXP:730,
-    key:'blender_l2'
-  },
-  {
-    id:3, file:'blender-level3.html',
-    icon:'🔲', tag:'Inset · Bevel · 細節',
-    title:'Inset Face & Bevel',
-    desc:'選取面後用 Inset 縮進、Bevel 倒角讓邊緣圓潤，打造精緻細節',
-    skills:['Inset Faces','Bevel','Crease','Edge Loops'],
-    xp:400, totalXP:1130,
-    key:'blender_l3'
-  },
-  {
-    id:4, file:'blender-level4.html',
-    icon:'🏛️', tag:'Boolean · 挖洞',
-    title:'Boolean 挖洞操作',
-    desc:'用 Boolean Modifier 做差集，挖出門洞、窗框、圓孔等複雜形狀',
-    skills:['Boolean','Modifier','Difference','Apply'],
-    xp:420, totalXP:1550,
-    key:'blender_l4'
-  },
-  {
-    id:5, file:'blender-level5.html',
-    icon:'🔄', tag:'Subdivision · 曲面',
-    title:'Subdivision Surface 平滑',
-    desc:'加入 Subdivision 修改器讓模型平滑，搭配 Crease 控制邊緣銳利度',
-    skills:['Subdivision','Crease','Smooth Shading','Modifier Stack'],
-    xp:280, totalXP:1830,
-    key:'blender_l5'
-  },
-  {
-    id:6, file:'blender-level6.html',
-    icon:'🏡', tag:'綜合專題',
-    title:'Boss 關：建一棟小房子',
-    desc:'綜合運用所有技巧，從一個立方體建出完整的低多邊形小屋',
-    skills:['綜合應用','Low Poly','Scene Layout','Camera'],
-    xp:420, totalXP:2250,
-    key:'blender_l6',
-    isBoss:true
-  },
+// ─── GLOBALS ───
+var cvs,ctx,W,H,dpr,T=0,RAF,selIdx=-1;
+
+// ─── LEVEL DATA ───
+var LVS=[
+  {n:1, title:'介面認識',       sub:'Blender 5.0 UI 五大區域',       xp:350, key:'blender_ui_lv1',  file:'blender-ui-lv1.html',  boss:false},
+  {n:2, title:'偏好設定',       sub:'Preferences & 單位設定',         xp:380, key:'blender_ui_lv2',  file:'blender-ui-lv2.html',  boss:false},
+  {n:3, title:'視角控制',       sub:'Move / Rotate / Zoom 三鍵',     xp:400, key:'blender_ui_lv3',  file:'blender-ui-lv3.html',  boss:false},
+  {n:4, title:'物件控制 GRS',   sub:'G移動・R旋轉・S縮放',            xp:420, key:'blender_ui_lv4',  file:'blender-ui-lv4.html',  boss:false},
+  {n:5, title:'Cursor & 物件', sub:'Shift+A 新增 / 合併 / 刪除',     xp:440, key:'blender_ui_lv5',  file:'blender-ui-lv5.html',  boss:false},
+  {n:6, title:'建模 — 點',     sub:'Connect・Merge・Snap・Slider',   xp:480, key:'blender_ui_lv6',  file:'blender-ui-lv6.html',  boss:false},
+  {n:7, title:'建模 — 邊',     sub:'Loop・Bevel・Bridge・Ring',      xp:500, key:'blender_ui_lv7',  file:'blender-ui-lv7.html',  boss:false},
+  {n:8, title:'建模 — 面',     sub:'Extrude・Inset・Flip Normal',    xp:520, key:'blender_ui_lv8',  file:'blender-ui-lv8.html',  boss:false},
+  {n:9, title:'管狀物建模',     sub:'Bezier Curve → Mesh',            xp:540, key:'blender_ui_lv9',  file:'blender-ui-lv9.html',  boss:false},
+  {n:10,title:'Modifier 指令', sub:'Array・Mirror・Solidify・SubSurf',xp:560, key:'blender_ui_lv10', file:'blender-ui-lv10.html', boss:false},
+  {n:11,title:'UV 拆UV',        sub:'Mark Seam・Unwrap・Pack Islands', xp:580, key:'blender_ui_lv11', file:'blender-ui-lv11.html', boss:false},
+  {n:12,title:'Boss 關',        sub:'Export FBX 完整流程總複習',       xp:700, key:'blender_ui_lv12', file:'blender-ui-lv12.html', boss:true},
 ];
 
-const TOTAL_XP = LEVELS.reduce((s,l)=>s+l.xp,0);
+// ─── NODE POSITIONS (S-curve winding bottom-left → top-right) ───
+var NPOS=[
+  {fx:0.10,fy:0.80},  // 1
+  {fx:0.22,fy:0.70},  // 2
+  {fx:0.17,fy:0.58},  // 3
+  {fx:0.31,fy:0.50},  // 4
+  {fx:0.44,fy:0.57},  // 5
+  {fx:0.53,fy:0.46},  // 6
+  {fx:0.46,fy:0.34},  // 7
+  {fx:0.60,fy:0.28},  // 8
+  {fx:0.71,fy:0.37},  // 9
+  {fx:0.73,fy:0.23},  // 10
+  {fx:0.84,fy:0.15},  // 11
+  {fx:0.92,fy:0.09},  // 12 BOSS
+];
 
-function getLevelDone(key){ try{return JSON.parse(localStorage.getItem(key)||'[]').includes('done');}catch{return false;} }
+// ─── PROGRESS ───
+function isDone(lv){try{var d=JSON.parse(localStorage.getItem(lv.key)||'{}');return!!d.done;}catch(e){return false;}}
+function isLocked(i){return i>0&&!isDone(LVS[i-1]);}
+function totalXP(){var x=0;LVS.forEach(function(lv){if(isDone(lv))x+=lv.xp;});return x;}
 
-function renderLevels(){
-  const list = document.getElementById('level-list');
-  let totalEarned = 0;
-  let completedCount = 0;
-
-  list.innerHTML = LEVELS.map((lv,i)=>{
-    const done = getLevelDone(lv.key);
-    if(done){totalEarned+=lv.xp;completedCount++;}
-    const prev = i===0 || getLevelDone(LEVELS[i-1].key);
-    const locked = !prev && !done;
-    const isNext = prev && !done && !locked;
-
-    let cls = 'level-card';
-    if(done) cls+=' done';
-    else if(locked) cls+=' locked';
-    else if(isNext) cls+=' active-next';
-
-    const numCls = done?'done-num':locked?'locked-num':'active-num';
-    const numIcon = done?'✓':locked?'🔒':lv.icon;
-    const xpCls = done?'xp-badge done':'xp-badge';
-    const statusTxt = done?'✦ 已完成':locked?'🔒 未解鎖':isNext?'▶ 可開始':'－';
-    const statusCls = done?'done':isNext?'active':'';
-
-    const btn = done
-      ? `<a href="${lv.file}" class="play-btn replay">🔄 再練一次</a>`
-      : locked
-        ? `<span style="font-family:var(--mono);font-size:.62rem;color:var(--txt3);">完成上一關解鎖</span>`
-        : `<a href="${lv.file}" class="play-btn">▶ 開始關卡</a>`;
-
-    const connector = i < LEVELS.length-1
-      ? `<div class="connector${done?' done':''}"></div>`
-      : '';
-
-    return `
-      <div class="${cls}" id="lc-${lv.id}">
-        <div class="lc-inner">
-          <div class="lc-num ${numCls}">${numIcon}</div>
-          <div class="lc-info">
-            <div class="lc-tag">關卡 ${lv.id} · ${lv.tag}${lv.isBoss?' · 👑 BOSS':''}</div>
-            <div class="lc-title">${lv.title}</div>
-            <div class="lc-desc">${lv.desc}</div>
-            <div class="lc-skills">
-              ${lv.skills.map(s=>`<span class="skill-pill${done?' done':''}">${s}</span>`).join('')}
-            </div>
-          </div>
-          <div class="lc-meta">
-            <div class="${xpCls}">+${lv.xp} XP</div>
-            <div class="lc-status ${statusCls}">${statusTxt}</div>
-            ${btn}
-          </div>
-        </div>
-      </div>
-      ${connector}`;
-  }).join('');
-
-  // Update progress UI
-  const pct = Math.round(completedCount/LEVELS.length*100);
-  document.getElementById('progress-pct').textContent = pct+'%';
-  document.getElementById('progress-label').textContent = completedCount+' / '+LEVELS.length+' 完成';
-  const dash = 220;
-  document.getElementById('progress-ring').style.strokeDashoffset = dash - (dash * pct/100);
-  document.getElementById('total-xp-val').textContent = totalEarned+' / '+TOTAL_XP;
-  document.getElementById('total-xp-fill').style.width = (totalEarned/TOTAL_XP*100)+'%';
-  if(completedCount===LEVELS.length) document.getElementById('reward-card').style.opacity='1';
+// ─── SETUP ───
+function setup(){
+  cvs=document.getElementById('cvs'); ctx=cvs.getContext('2d');
+  resize();
+  cvs.addEventListener('click',    onClick);
+  cvs.addEventListener('touchend', onTouch,{passive:true});
+  window.addEventListener('resize',function(){ctx.setTransform(1,0,0,1,0,0);resize();});
+  document.getElementById('hxpv').textContent=totalXP()+' XP';
+}
+function resize(){
+  dpr=Math.min(window.devicePixelRatio||1,2.5);
+  W=window.innerWidth; H=window.innerHeight;
+  cvs.width=W*dpr; cvs.height=H*dpr;
+  cvs.style.width=W+'px'; cvs.style.height=H+'px';
+  ctx.scale(dpr,dpr);
 }
 
-// Listen for completion messages from level pages
-window.addEventListener('storage', e=>{
-  if(e.key && e.key.startsWith('blender_l')) renderLevels();
-});
+// ─── BACKGROUND ───
+// Deterministic hill profile (no Math.random)
+function hY(seed,xFrac){
+  return Math.sin(xFrac*7.1*seed+1.2)*0.50
+        +Math.sin(xFrac*4.2*seed+0.7)*0.30
+        +Math.sin(xFrac*12.5*seed+2.5)*0.20;
+}
 
-// DEV: reset button (remove in prod)
-// localStorage.clear();
+// Fixed tree x positions per hill band
+var HILL_TREES=[
+  [0.04,0.11,0.19,0.28,0.38,0.50,0.60,0.70,0.80,0.88,0.96],
+  [0.02,0.09,0.18,0.28,0.38,0.49,0.59,0.69,0.79,0.91,0.99],
+  [0.05,0.14,0.24,0.34,0.44,0.54,0.64,0.74,0.84,0.93],
+  [0.07,0.17,0.27,0.37,0.47,0.57,0.67,0.77,0.87,0.97],
+];
+var HILL_DEFS=[
+  {yb:0.28,amp:0.06,top:'#72b862',bot:'#60a850',seed:1.20,treeSz:0.042},
+  {yb:0.42,amp:0.08,top:'#4a8a3a',bot:'#3a7828',seed:0.85,treeSz:0.052},
+  {yb:0.57,amp:0.09,top:'#2e6a1e',bot:'#1e5810',seed:1.65,treeSz:0.060},
+  {yb:0.72,amp:0.09,top:'#1a5010',bot:'#103808',seed:2.10,treeSz:0.068},
+];
 
-renderLevels();
+function drawBG(){
+  // Sky gradient
+  var sky=ctx.createLinearGradient(0,0,0,H*0.52);
+  sky.addColorStop(0,'#a8e4fc');
+  sky.addColorStop(0.45,'#78caf0');
+  sky.addColorStop(1,'#50b0e0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*0.52);
 
-// ── Blender Hub Mobile ──
-if(DEV.isMobile){
-  const mNav=document.createElement('div');
-  mNav.style.cssText='position:fixed;bottom:0;left:0;right:0;height:52px;background:#1a1a1a;border-top:1px solid #333;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)';
-  [['🏠','首頁','index.html'],['🗺️','地圖','blender-hub.html'],['🟠','關卡1','blender-level1.html'],['🌍','世界','world-map.html']].forEach(([ic,lb,hr])=>{
-    const a=document.createElement('a');a.href=hr;
-    a.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-decoration:none;color:rgba(255,200,100,.6);font-family:Fredoka One,sans-serif;';
-    a.innerHTML=`<span style="font-size:1rem">${ic}</span><span style="font-size:.5rem">${lb}</span>`;
-    mNav.appendChild(a);
+  // 5 Clouds (fixed relative positions, drifting with T)
+  var cdef=[
+    {bx:0.04,y:0.04,w:0.10,a:0.80},
+    {bx:0.26,y:0.02,w:0.09,a:0.72},
+    {bx:0.50,y:0.05,w:0.12,a:0.78},
+    {bx:0.73,y:0.03,w:0.08,a:0.70},
+    {bx:0.89,y:0.07,w:0.09,a:0.65},
+  ];
+  cdef.forEach(function(c,i){
+    var x=((c.bx+T*0.008*(0.5+i*0.1))%1.1)*W;
+    drawCloud(x, c.y*H, c.w*W, c.a);
   });
-  document.body.appendChild(mNav);
-  document.body.style.paddingBottom='52px';
+
+  // Hill bands (far → near)
+  HILL_DEFS.forEach(function(hd,li){
+    var ybase=hd.yb*H, amp=hd.amp*H;
+    // Hill shape
+    ctx.beginPath(); ctx.moveTo(0,H);
+    var steps=100;
+    for(var xi=0;xi<=steps;xi++){
+      var xf=xi/steps;
+      var y=ybase+hY(hd.seed,xf)*amp;
+      if(xi===0) ctx.lineTo(0,y);
+      else ctx.lineTo(xf*W,y);
+    }
+    ctx.lineTo(W,H); ctx.closePath();
+    var g=ctx.createLinearGradient(0,ybase-amp,0,ybase+amp*2.5);
+    g.addColorStop(0,hd.top); g.addColorStop(1,hd.bot);
+    ctx.fillStyle=g; ctx.fill();
+
+    // Trees along hill top
+    if(li>=1){
+      var cols=HILL_TREES[li]||HILL_TREES[0];
+      for(var ti=0;ti<cols.length;ti++){
+        var xf2=cols[ti];
+        var tx=xf2*W;
+        var ty=ybase+hY(hd.seed,xf2)*amp;
+        var sz=hd.treeSz*Math.min(W,H)*(0.9+(ti%3)*0.07);
+        drawTree(tx,ty,sz,hd.bot,hd.top);
+      }
+    }
+  });
+
+  // Ground base
+  ctx.fillStyle='#0c3208';
+  ctx.fillRect(0,H*0.88,W,H*0.12);
+
+  // Rocks (decorative, fixed positions)
+  var rocks=[[0.30,0.82],[0.52,0.76],[0.65,0.68],[0.20,0.72],[0.78,0.72]];
+  rocks.forEach(function(r,i){
+    var rx=r[0]*W, ry=r[1]*H;
+    var rs=H*(0.022+i*0.004);
+    ctx.beginPath();
+    ctx.ellipse(rx,ry,rs*1.5,rs*0.9,0,0,Math.PI*2);
+    ctx.fillStyle='#5a6048'; ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(rx-rs*0.3,ry-rs*0.25,rs*0.6,rs*0.45,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.14)'; ctx.fill();
+  });
 }
 
+function drawCloud(cx,cy,cw,alpha){
+  var r=cw*0.36;
+  ctx.save(); ctx.globalAlpha=alpha;
+  ctx.shadowColor='rgba(160,210,240,0.4)'; ctx.shadowBlur=8;
+  ctx.fillStyle='#fff';
+  ctx.beginPath();
+  ctx.arc(cx,       cy,       r*0.88,0,Math.PI*2);
+  ctx.arc(cx+cw*0.23,cy-r*0.14,r*0.98,0,Math.PI*2);
+  ctx.arc(cx+cw*0.46,cy+r*0.05,r*0.80,0,Math.PI*2);
+  ctx.arc(cx+cw*0.19,cy+r*0.22,r*0.68,0,Math.PI*2);
+  ctx.arc(cx-cw*0.04,cy+r*0.18,r*0.63,0,Math.PI*2);
+  ctx.fill(); ctx.restore();
+}
+
+function drawTree(tx,ty,sz,dark,light){
+  ctx.fillStyle='#4a2e10';
+  ctx.fillRect(tx-sz*0.07,ty,sz*0.14,sz*0.36);
+  var clrs=[dark,light,'#5aba3a'];
+  for(var l=0;l<3;l++){
+    ctx.beginPath();
+    ctx.moveTo(tx,   ty-sz*(0.88+l*0.28));
+    ctx.lineTo(tx-sz*(0.46-l*0.06), ty-sz*(0.12+l*0.26));
+    ctx.lineTo(tx+sz*(0.46-l*0.06), ty-sz*(0.12+l*0.26));
+    ctx.closePath(); ctx.fillStyle=clrs[l]; ctx.fill();
+  }
+}
+
+// ─── PATH ───
+function pts(){return NPOS.map(function(p){return{x:p.fx*W,y:p.fy*H};});}
+function drawSmooth(pts){
+  ctx.moveTo(pts[0].x,pts[0].y);
+  for(var i=1;i<pts.length;i++){
+    var a=pts[i-1],b=pts[i];
+    ctx.quadraticCurveTo(a.x,a.y,(a.x+b.x)/2,(a.y+b.y)/2);
+  }
+  ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);
+}
+
+function drawPath(){
+  var p=pts();
+  // Dark shadow offset
+  ctx.save(); ctx.translate(0,9); ctx.globalAlpha=0.25;
+  ctx.lineWidth=34; ctx.strokeStyle='#000';
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); drawSmooth(p); ctx.stroke(); ctx.restore();
+  // Outline
+  ctx.save(); ctx.lineWidth=34; ctx.strokeStyle='#a03e08';
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); drawSmooth(p); ctx.stroke(); ctx.restore();
+  // Gold outer
+  ctx.save(); ctx.lineWidth=26; ctx.strokeStyle='#d09818';
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); drawSmooth(p); ctx.stroke(); ctx.restore();
+  // Bright yellow
+  ctx.save(); ctx.lineWidth=16; ctx.strokeStyle='#ffdc40';
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); drawSmooth(p); ctx.stroke(); ctx.restore();
+  // Shine
+  ctx.save(); ctx.lineWidth=5.5; ctx.strokeStyle='rgba(255,255,255,0.44)';
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); drawSmooth(p); ctx.stroke(); ctx.restore();
+  // Center animated dashes
+  ctx.save();
+  ctx.setLineDash([9,15]); ctx.lineDashOffset=-(T*18)%24;
+  ctx.lineWidth=2.5; ctx.strokeStyle='rgba(255,255,255,0.36)';
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); drawSmooth(p); ctx.stroke();
+  ctx.setLineDash([]); ctx.restore();
+}
+
+// ─── NODE ───
+function NR(i){return Math.min(W,H)*(LVS[i].boss?0.058:0.046);}
+
+function drawNode(i){
+  var lv=LVS[i], p=NPOS[i];
+  var x=p.fx*W, y=p.fy*H;
+  var done=isDone(lv), lock=isLocked(i), isSel=(selIdx===i);
+  var r=NR(i);
+
+  // Pulse for current
+  if(!done&&!lock) r*=(1+Math.sin(T*3.0+i*0.9)*0.055);
+
+  // Colors
+  var borderC,fillA,fillB,numC;
+  if(done)      {borderC='#b09010';fillA='#ffdc50';fillB='#a08010';numC='#6a4000';}
+  else if(lock) {borderC='#333';   fillA='#444';   fillB='#1e1e1e';numC='#555';  }
+  else if(lv.boss){borderC='#e04800';fillA='#ff8000';fillB='#c03800';numC='#fff';}
+  else          {borderC='#dd3800';fillA='#ff6818';fillB='#be2c00';numC='#fff';  }
+
+  // Selection glow ring
+  if(isSel){
+    ctx.save();
+    ctx.beginPath(); ctx.arc(x,y,r*1.6,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,'+(0.36+Math.sin(T*4)*0.18)+')';
+    ctx.lineWidth=3.5; ctx.stroke(); ctx.restore();
+  }
+  // Ambient glow for unlocked
+  if(!done&&!lock){
+    var gl=ctx.createRadialGradient(x,y,0,x,y,r*2.6);
+    gl.addColorStop(0,lv.boss?'rgba(255,80,0,0.30)':'rgba(255,80,0,0.22)');
+    gl.addColorStop(1,'transparent');
+    ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(x,y,r*2.6,0,Math.PI*2); ctx.fill();
+  }
+  // Drop shadow
+  ctx.beginPath(); ctx.arc(x,y+r*0.24,r*1.05,0,Math.PI*2);
+  ctx.fillStyle='rgba(0,0,0,0.34)'; ctx.fill();
+  // Border
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=borderC; ctx.fill();
+  // Main fill
+  var fg=ctx.createRadialGradient(x,y-r*0.32,r*0.05,x,y,r*0.88);
+  fg.addColorStop(0,fillA); fg.addColorStop(1,fillB);
+  ctx.beginPath(); ctx.arc(x,y,r*0.86,0,Math.PI*2);
+  ctx.fillStyle=fg; ctx.fill();
+  // Shine spot
+  ctx.beginPath(); ctx.arc(x-r*0.22,y-r*0.28,r*0.26,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.20)'; ctx.fill();
+
+  // Inner content
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  if(lock){
+    ctx.font=(r*0.90)+'px sans-serif';
+    ctx.fillText('🔒',x,y+r*0.06);
+  } else {
+    ctx.font='bold '+(r*0.84)+'px "Josefin Sans",sans-serif';
+    ctx.fillStyle=numC;
+    ctx.fillText(lv.boss?'★':lv.n, x, y+r*0.07);
+  }
+
+  // Stars above (if done)
+  if(done){
+    var sz=r*0.64;
+    for(var s=0;s<3;s++){
+      var sx=x+(s-1)*sz*0.90, sy=y-r*1.54+Math.abs(s-1)*sz*0.18;
+      ctx.font=sz+'px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle=s<2?'#ffd820':'rgba(200,158,0,0.45)';
+      ctx.fillText('★',sx,sy);
+    }
+  }
+
+  // Lv label below
+  if(!lock){
+    var fs=Math.max(8,r*0.40);
+    ctx.font='bold '+fs+'px "Josefin Sans",sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    var lbl=lv.boss?'BOSS':'Lv'+lv.n;
+    var tw=ctx.measureText(lbl).width+fs*0.8;
+    var lx=x-tw/2, ly=y+r*1.40;
+    ctx.fillStyle='rgba(0,0,0,0.52)';
+    var bh=fs*1.5;
+    ctx.beginPath();
+    ctx.moveTo(lx+bh*0.3,ly);ctx.lineTo(lx+tw-bh*0.3,ly);
+    ctx.quadraticCurveTo(lx+tw,ly,lx+tw,ly+bh*0.3);
+    ctx.lineTo(lx+tw,ly+bh*0.7);ctx.quadraticCurveTo(lx+tw,ly+bh,lx+tw-bh*0.3,ly+bh);
+    ctx.lineTo(lx+bh*0.3,ly+bh);ctx.quadraticCurveTo(lx,ly+bh,lx,ly+bh*0.7);
+    ctx.lineTo(lx,ly+bh*0.3);ctx.quadraticCurveTo(lx,ly,lx+bh*0.3,ly);ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle=done?'#ffd820':lock?'#444':'#fff';
+    ctx.fillText(lbl,x,ly+bh*0.12);
+  }
+
+  // Boss crown decoration
+  if(lv.boss&&!lock){
+    var crownY=y-r*1.10;
+    ctx.font=(r*0.70)+'px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('👑',x,crownY);
+  }
+}
+
+// ─── HIT TEST ───
+function getNode(mx,my){
+  for(var i=LVS.length-1;i>=0;i--){
+    var p=NPOS[i];
+    var r=NR(i)*1.6;
+    var dx=mx-p.fx*W, dy=my-p.fy*H;
+    if(dx*dx+dy*dy<r*r)return i;
+  }
+  return -1;
+}
+function onClick(e){if(e.clientY<58)return;var i=getNode(e.clientX,e.clientY);if(i>=0){selIdx=i;showPanel(i);}else closePanel();}
+function onTouch(e){var t=e.changedTouches[0];if(!t||t.clientY<58)return;var i=getNode(t.clientX,t.clientY);if(i>=0){selIdx=i;showPanel(i);}}
+
+// ─── PANEL ───
+function showPanel(i){
+  var lv=LVS[i];
+  var done=isDone(lv), lock=isLocked(i);
+  document.getElementById('p-title').textContent=(lv.boss?'⭐ ':'')+lv.title;
+  document.getElementById('p-sub').textContent=lv.sub;
+  document.getElementById('p-xplbl').textContent='XP +'+lv.xp;
+  document.getElementById('p-bar-fill').style.width=(done?100:0)+'%';
+  document.getElementById('p-stars').textContent=done?'★★★':'☆☆☆';
+  var num=document.getElementById('p-num');
+  num.textContent=lv.boss?'★':lv.n;
+  if(done)       {num.style.background='#b09010';num.style.color='#6a4000';}
+  else if(lock)  {num.style.background='#1e1e1e';num.style.color='#3a3a3a';}
+  else if(lv.boss){num.style.background='#e04800';num.style.color='#fff';}
+  else           {num.style.background='#dd3800';num.style.color='#fff';}
+  var btn=document.getElementById('pbtn');
+  if(lock)       {btn.className='lock'; btn.textContent='🔒 完成上一關解鎖';}
+  else if(done)  {btn.className='retry';btn.textContent='再次挑戰 ↩';}
+  else if(lv.boss){btn.className='boss';btn.textContent='挑戰 BOSS ★';}
+  else           {btn.className='play';btn.textContent='PLAY!';}
+  document.getElementById('panel').classList.add('on');
+}
+function closePanel(){document.getElementById('panel').classList.remove('on');selIdx=-1;}
+function enterLv(){
+  if(selIdx<0)return;
+  var lv=LVS[selIdx];
+  if(isLocked(selIdx))return;
+  window.location.href=lv.file;
+}
+
+// ─── DRAW LOOP ───
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  drawBG();
+  drawPath();
+  // Sort nodes back-to-front (higher fy = nearer = draw last)
+  var order=LVS.map(function(lv,i){return i;});
+  order.sort(function(a,b){return NPOS[a].fy-NPOS[b].fy;});
+  order.forEach(drawNode);
+}
+function loop(){RAF=requestAnimationFrame(loop);T+=0.016;draw();}
+window.onload=function(){setup();loop();};
 </script>
 </body>
 </html>
