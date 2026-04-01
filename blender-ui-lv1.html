@@ -3,1047 +3,2537 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Lv1 介面認識 — Blender 課程 | TA HUB</title>
+<title>[Unsaved] - Blender 5.0.1</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700;900&family=Noto+Sans+TC:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700;900&family=Noto+Sans+TC:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ══ RESET ══ */
+/* ════════════ BLENDER 5.0 EXACT PIXEL MATCH ════════════ */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;user-select:none}
-
-/* ══ BLENDER 5.0 THEME TOKENS ══ */
+html,body{width:100%;height:100%;overflow:hidden;background:#1d1d1d;
+  font-family:"Noto Sans TC","Inter",system-ui,sans-serif;font-size:12px;color:#d4d4d4}
 :root{
-  --b-bg:     #1d1d1d;
-  --b-panel:  #252525;
-  --b-panel2: #2d2d2d;
-  --b-hdr:    #1a1a1a;
-  --b-active: #3a3a3a;
-  --b-border: #141414;
-  --b-bdr2:   #383838;
-  --b-text:   #c8c8c8;
-  --b-dim:    #7a7a7a;
-  --b-orange: #ff8832;
-  --b-orange2:#ffaa50;
-  --b-blue:   #4d90fe;
-  --b-green:  #5a9e5a;
-  --b-gold:   #ffc040;
+  --bg:#393939;      /* Blender viewport background (exact) */
+  --panel:#1d1d1d;   /* side panels (exact Blender) */
+  --panel2:#202020;  /* panel sub-headers */
+  --panel3:#2a2a2a;  /* hover state */
+  --dark:#111111;    /* topbar */
+  --border:#101010;  /* panel borders */
+  --bdr2:#3a3a3a;
+  --bdr3:#545454;
+  --txt:#c8c8c8;     /* Blender default text */
+  --txt2:#808080;    /* dim text */
+  --txt3:#545454;    /* very dim */
+  --orange:#e87d0d;  /* Blender orange (exact) */
+  --orange2:#ff9b40;
+  --blue:#4272b5;    /* Blender blue (exact) */
+  --blue2:#7ab4f5;
+  --green:#5a9e5a;
+  --red:#b04040;
+  --sel:#ff6600;
   /* Layout */
-  --tb:  22px;
-  --mb:  28px;
-  --vh:  28px;
-  --tl:  56px;
-  --lt:  30px;
-  --rt:  264px;
-}
-@media(max-width:1024px){ :root{ --rt:220px; --lt:0px } }
-@media(max-width:600px){  :root{ --rt:0px;   --lt:0px } }
-
-body{ background:var(--b-bg); color:var(--b-text);
-  font-family:'Noto Sans TC',system-ui,sans-serif; font-size:12px; }
-
-/* ══ THREE.JS CANVAS ══ */
-#three-canvas{
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  z-index:0; display:block; pointer-events:none;
+  --TOP:26px;        /* title bar */
+  --MB:26px;         /* menu/workspace bar */
+  --VH:26px;         /* viewport header */
+  --LT:28px;         /* left toolbar width */
+  --RP:260px;        /* right panel (outliner+props) */
+  --TL:56px;         /* timeline height */
 }
 
-/* ══ BLENDER UI SHELL ══ */
-#ui{
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  z-index:10; pointer-events:none;
-  display:flex; flex-direction:column;
-}
+/* ─── THREE.JS CANVAS (always behind UI) ─── */
+#cvs{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;display:block;
+  cursor:default;background:var(--bg)}
 
-/* ── Title bar ── */
-#tb{
-  height:var(--tb); min-height:var(--tb);
-  background:#111; border-bottom:1px solid #0a0a0a;
-  display:flex; align-items:center; padding:0 10px; gap:6px;
-  pointer-events:auto; flex-shrink:0;
+/* ─── TITLE BAR (Windows style like screenshot) ─── */
+#titlebar{
+  position:fixed;top:0;left:0;right:0;height:var(--TOP);z-index:500;
+  background:#111111;border-bottom:1px solid #0a0a0a;
+  display:flex;align-items:center;
+  font-size:11px;color:#808080;font-family:"Space Mono",monospace;
 }
-.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;cursor:pointer}
-.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
-.tb-txt{font-size:11px;color:#666;font-family:'Space Mono',monospace;margin-left:6px;white-space:nowrap}
-.tb-txt b{color:#888}
+#titlebar .tbar-left{display:flex;align-items:center;gap:0;height:100%}
+.tbar-icon{width:28px;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;border-right:1px solid #1a1a1a}
+.tbar-tabs{display:flex;align-items:stretch;height:100%}
+.tbar-tab{height:100%;padding:0 14px;display:flex;align-items:center;gap:5px;
+  font-size:11px;color:var(--txt3);cursor:pointer;border-right:1px solid #1a1a1a;
+  white-space:nowrap;position:relative}
+.tbar-tab:hover{background:#1a1a1a;color:var(--txt2)}
+.tbar-tab .tab-dot{width:6px;height:6px;border-radius:50%}
+.tbar-tab .tab-dot.scene{background:#888}
+.tbar-tab .tab-dot.vl{background:#555}
+.tbar-menu{flex:1;display:flex;align-items:center;padding:0 8px;
+  font-size:11px;color:var(--txt2);gap:0}
+.tbar-title{font-size:11px;color:#808080;flex:1;text-align:center}
+.tbar-winctrl{display:flex;height:100%}
+.wc{width:46px;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:11px;cursor:pointer;color:#808080}
+.wc:hover{background:#333}
+.wc.close:hover{background:#c42b1c;color:#fff}
 
-/* ── Menu + Workspace bar ── */
-#mb{
-  height:var(--mb); min-height:var(--mb);
-  background:var(--b-hdr); border-bottom:1px solid var(--b-border);
-  display:flex; align-items:center; pointer-events:auto; flex-shrink:0;
+/* ─── MENUBAR + WORKSPACE TABS ─── */
+#menubar{
+  position:fixed;top:var(--TOP);left:0;right:var(--RP);height:var(--MB);z-index:400;
+  background:#1d1d1d;border-bottom:1px solid #101010;
+  display:flex;align-items:stretch;
 }
-.mn{
-  padding:0 10px; height:100%; display:flex; align-items:center;
-  font-size:12px; color:var(--b-text); cursor:pointer; white-space:nowrap;
-}
-.mn:hover{background:#2a2a2a}
-.sep-v{width:1px;height:16px;background:var(--b-bdr2);margin:0 3px;flex-shrink:0}
-.ws-row{display:flex;align-items:stretch;height:100%;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
-.ws-row::-webkit-scrollbar{display:none}
-.ws-tab{
-  padding:0 11px; height:100%; display:flex; align-items:center;
-  font-size:11.5px; color:var(--b-dim); cursor:pointer; white-space:nowrap;
-  border-top:2px solid transparent;
-}
-.ws-tab:hover{color:var(--b-text);background:#222}
-.ws-tab.on{color:var(--b-text);background:var(--b-panel);border-top-color:var(--b-orange)}
+.mb-icon{width:28px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--txt3);cursor:pointer;border-right:1px solid var(--border);flex-shrink:0}
+.mb-icon:hover{background:var(--panel3)}
+.mb-menus{display:flex;align-items:stretch;border-right:1px solid var(--border)}
+.mb-menu{padding:0 8px;display:flex;align-items:center;font-size:12px;color:#c8c8c8;
+  cursor:pointer;height:100%}
+.mb-menu:hover{background:#2d2d2d;color:#c8c8c8}
+.ws-tabs{display:flex;align-items:stretch;flex:1;overflow-x:auto;scrollbar-width:none}
+.ws-tabs::-webkit-scrollbar{display:none}
+.ws-tab{padding:0 12px;display:flex;align-items:center;font-size:12px;color:#808080;
+  cursor:pointer;white-space:nowrap;border-right:1px solid #111;
+  border-top:2px solid transparent;height:100%;flex-shrink:0}
+.ws-tab:hover{color:#c8c8c8;background:rgba(255,255,255,.04)}
+.ws-tab.on{color:#c8c8c8;background:#393939;border-top-color:#e87d0d;border-top-width:2px}
+.ws-plus{width:26px;display:flex;align-items:center;justify-content:center;
+  color:var(--txt3);cursor:pointer;flex-shrink:0}
 
-/* ── Main area ── */
-#main{flex:1;display:flex;overflow:hidden;min-height:0}
+/* ─── VIEWPORT HEADER (under menubar, starts at LT width) ─── */
+#vphdr{
+  position:fixed;left:var(--LT);right:var(--RP);
+  top:calc(var(--TOP) + var(--MB));height:var(--VH);z-index:300;
+  background:#1d1d1d;
+  border-bottom:1px solid #101010;
+  display:flex;align-items:center;padding:0 6px;gap:4px;
+  font-size:11px;
+}
+.vph-mode{
+  background:#383838;border:1px solid #535353;border-radius:3px;
+  padding:1px 8px;height:20px;display:flex;align-items:center;gap:4px;
+  cursor:pointer;font-size:11px;white-space:nowrap;color:#c8c8c8;
+}
+.vph-mode:hover{border-color:var(--bdr3)}
+.vph-sep{width:1px;height:16px;background:var(--bdr2);margin:0 2px}
+.vph-btn{height:20px;padding:0 6px;display:flex;align-items:center;color:#c8c8c8;
+  cursor:pointer;border-radius:3px;font-size:11px}
+.vph-btn:hover{background:var(--panel3);color:var(--txt)}
+/* Header icon row */
+.vph-icons{margin-left:auto;display:flex;align-items:center;gap:2px}
+.vi{width:22px;height:20px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;cursor:pointer;color:#808080;font-size:11px;border:1px solid transparent}
+.vi:hover{background:#383838;color:#c8c8c8;border-color:#535353}
+.vi.on{background:#2a3d5a;border-color:#4272b5;color:#7ab4f5}
+.vph-shade{display:flex;gap:1px;margin:0 2px}
+.vs{width:22px;height:20px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;cursor:pointer;color:var(--txt3);font-size:12px;
+  border:1px solid var(--border)}
+.vs:hover{color:#c8c8c8}
+.vs.on{background:#383838;border-color:#535353;color:#c8c8c8}
 
-/* ── Left toolbar ── */
+/* ─── LEFT TOOLBAR (Blender style vertical tool icons) ─── */
 #lt{
-  width:var(--lt); min-width:var(--lt);
-  background:var(--b-panel); border-right:1px solid var(--b-border);
-  display:flex; flex-direction:column; align-items:center;
-  padding:4px 0; gap:2px; pointer-events:auto; flex-shrink:0; overflow:hidden;
+  position:fixed;left:0;
+  top:calc(var(--TOP) + var(--MB));
+  bottom:var(--TL);
+  width:var(--LT);z-index:300;
+  background:#1d1d1d;border-right:1px solid #101010;
+  display:flex;flex-direction:column;align-items:center;
+  padding:4px 0;gap:1px;overflow:hidden;
 }
-@media(max-width:1024px){#lt{display:none}}
-.lt-btn{
-  width:22px;height:22px;display:flex;align-items:center;justify-content:center;
-  border-radius:3px;cursor:pointer;color:var(--b-dim);font-size:12px;transition:all .15s;
-}
-.lt-btn:hover,.lt-btn.on{background:var(--b-active);color:var(--b-text)}
-.lt-sep{width:18px;height:1px;background:var(--b-bdr2);margin:3px 0}
+.lt-btn{width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;cursor:pointer;color:#808080;font-size:13px;transition:.15s;
+  border:1px solid transparent}
+.lt-btn:hover{background:#2d2d2d;color:#c8c8c8}
+.lt-btn.on{background:#2d2d2d;color:#c8c8c8;border-color:#454545}
+.lt-sep{width:20px;height:1px;background:var(--bdr2);margin:2px 0}
+/* Icons */
+.lt-group{display:flex;flex-direction:column;align-items:center;gap:1px;width:100%}
 
-/* ── Viewport column ── */
-#vp-col{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
-
-/* Viewport header */
-#vp-hdr{
-  height:var(--vh); min-height:var(--vh);
-  background:rgba(26,26,26,0.85); backdrop-filter:blur(4px);
-  border-bottom:1px solid var(--b-border);
-  display:flex; align-items:center; padding:0 8px; gap:0;
-  pointer-events:auto; flex-shrink:0; z-index:2;
-}
-.vh-mode{
-  background:var(--b-panel2); border:1px solid var(--b-bdr2);
-  border-radius:3px; padding:0 8px; height:20px;
-  display:flex; align-items:center; gap:4px; font-size:11px; cursor:pointer;
-}
-.vh-sep{width:1px;height:14px;background:var(--b-bdr2);margin:0 4px}
-.vh-btn{padding:0 7px;height:20px;display:flex;align-items:center;font-size:11px;cursor:pointer;border-radius:3px}
-.vh-btn:hover{background:var(--b-active)}
-.vh-r{margin-left:auto;display:flex;align-items:center;gap:3px}
-.vh-ic{width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--b-dim);cursor:pointer;border-radius:3px}
-.vh-ic:hover{background:var(--b-active);color:var(--b-text)}
-.vh-shade{
-  display:flex;gap:1px;margin-left:4px;
-}
-.sh-btn{
-  padding:0 5px;height:20px;display:flex;align-items:center;
-  font-size:10px;color:var(--b-dim);cursor:pointer;border-radius:2px;
-}
-.sh-btn.on{background:var(--b-active);color:var(--b-text)}
-.sh-btn:hover{background:var(--b-active)}
-
-/* Viewport content (transparent → Three.js shows through) */
-#vp-body{flex:1;position:relative;pointer-events:auto}
-
-/* Gizmo */
-#gizmo{position:absolute;top:10px;right:10px;width:68px;height:68px;pointer-events:none}
-
-/* Viewport overlay labels */
+/* ─── VIEWPORT OVERLAYS (top-left info text) ─── */
 #vp-info{
-  position:absolute;top:8px;left:8px;
-  font-family:'Space Mono',monospace;font-size:10px;
-  color:rgba(200,200,200,0.30);line-height:1.8;pointer-events:none;
+  position:fixed;z-index:50;pointer-events:none;
+  font-family:"Space Mono",monospace;font-size:10.5px;color:rgba(255,255,255,.32);
+  line-height:1.85;
+}
+/* ─── GIZMO (top-right of viewport, Blender's XYZ ball gizmo) ─── */
+#gizmo-area{
+  position:fixed;z-index:50;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+#gizmo-cvs{pointer-events:none}
+.gizmo-icons{display:flex;flex-direction:column;gap:3px}
+.gz-ic{width:18px;height:18px;display:flex;align-items:center;justify-content:center;
+  color:var(--txt3);font-size:11px;cursor:pointer;pointer-events:auto;
+  border-radius:3px}
+.gz-ic:hover{background:var(--panel3);color:var(--txt)}
+
+/* ─── HINT BAR (bottom of viewport) ─── */
+#vp-hint{
+  position:fixed;z-index:50;pointer-events:none;
+  left:50%;transform:translateX(-50%);
+  background:rgba(12,12,12,.85);border:1px solid var(--bdr2);
+  border-radius:100px;padding:4px 16px;
+  font-family:"Space Mono",monospace;font-size:11px;color:var(--txt2);
+  white-space:nowrap;
 }
 
-/* ── Right panels ── */
-#rt{
-  width:var(--rt); min-width:var(--rt);
-  display:flex; flex-direction:column;
-  border-left:1px solid var(--b-border);
-  pointer-events:auto; flex-shrink:0; overflow:hidden;
+/* ─── KEY FLASH ─── */
+#kflash{
+  position:fixed;z-index:200;pointer-events:none;
+  left:50%;transform:translateX(-50%);
+  background:rgba(12,18,28,.94);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.10);border-radius:12px;
+  padding:12px 20px;min-width:200px;opacity:0;transition:opacity .18s;
 }
-@media(max-width:600px){#rt{display:none}}
+#kflash.show{opacity:1}
+#kf-title{font-family:"Space Mono",monospace;font-size:10px;color:var(--orange2);
+  letter-spacing:2px;text-align:center;margin-bottom:8px}
+#kf-row{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap}
+.kk{min-width:32px;height:32px;padding:0 8px;
+  background:#2a2a2a;border:1.5px solid #4a4a4a;border-bottom:3px solid #1a1a1a;
+  border-radius:5px;display:flex;align-items:center;justify-content:center;
+  font-family:"Space Mono",monospace;font-size:12px;font-weight:700;color:var(--txt3);
+  transition:.12s;white-space:nowrap}
+.kk.lit{background:var(--orange);border-color:var(--orange2);border-bottom-width:1px;
+  transform:translateY(2px);color:#fff}
+.kk.ok{background:#1a3a1a;border-color:var(--green);color:#80c080}
+.kk.wait{border-color:var(--orange);color:var(--orange);
+  animation:kpulse 1.1s ease-in-out infinite}
+.kk-plus{color:var(--txt3);font-size:13px}
+@keyframes kpulse{0%,100%{box-shadow:0 0 0 0 rgba(232,125,13,.4)}
+  50%{box-shadow:0 0 0 5px rgba(232,125,13,0)}}
+#kf-status{font-family:"Space Mono",monospace;font-size:10px;color:var(--txt3);
+  text-align:center;margin-top:8px;min-height:14px}
 
-.pnl-hdr{
-  height:22px; background:var(--b-panel2);
-  border-bottom:1px solid var(--b-border);
-  display:flex;align-items:center;padding:0 8px;gap:8px;flex-shrink:0;
+/* ─── MODE FLASH (center screen) ─── */
+#modeflash{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:400;
+  font-family:"Space Mono",monospace;font-size:15px;font-weight:700;
+  color:#fff;background:rgba(0,0,0,.78);border:1.5px solid var(--blue2);
+  border-radius:6px;padding:7px 18px;display:none;pointer-events:none;
 }
-.pnl-tab{font-size:11px;color:var(--b-dim);cursor:pointer;padding:2px 4px;border-radius:2px}
-.pnl-tab.on{color:var(--b-text)}
-.pnl-srch{
-  height:20px;background:var(--b-panel);border-bottom:1px solid var(--b-border);
-  display:flex;align-items:center;padding:0 8px;gap:5px;font-size:11px;color:var(--b-dim);flex-shrink:0;
+/* ─── EDIT MODE SUBMODE BAR ─── */
+#edit-mode-bar{
+  position:fixed;z-index:350;pointer-events:none;display:none;
+  background:rgba(20,30,50,.90);border:1px solid #4272b5;border-radius:4px;
+  padding:4px 14px;font-family:"Space Mono",monospace;font-size:11px;
+  color:#c8c8c8;gap:14px;
 }
+#edit-mode-bar.show{display:flex;align-items:center}
+.emb-key{
+  background:#1a2a3a;border:1px solid #3a5a7a;border-radius:3px;
+  padding:1px 7px;color:#7ab4f5;cursor:pointer;font-family:"Space Mono",monospace;
+  font-size:11px;margin:0 2px;
+}
+.emb-key.active-k{background:#2a4a6a;border-color:#4d90fe;color:#fff;}
+.emb-sep{color:#3a4a5a;margin:0 4px;}
+
+/* ─── RIGHT PANEL (OUTLINER + PROPERTIES) ─── */
+#rp{
+  position:fixed;right:0;top:var(--TOP);bottom:0;
+  width:var(--RP);z-index:200;
+  background:#1d1d1d;border-left:1px solid #101010;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+/* Ensure no gap at top of rp */
+#rp > *:first-child { flex-shrink:0;margin-top:0; }
+/* Header flush at top */
+#outliner { margin-top:0; }
 
 /* Outliner */
-#outliner{flex:0 0 auto;border-bottom:1px solid var(--b-border);display:flex;flex-direction:column;height:38%}
-#ol-body{flex:1;overflow-y:auto;background:var(--b-panel)}
-#ol-body::-webkit-scrollbar{width:3px}
-#ol-body::-webkit-scrollbar-thumb{background:var(--b-bdr2)}
-.ol-row{
-  height:22px;display:flex;align-items:center;padding:0 6px;cursor:pointer;gap:4px;
-  transition:background .1s;
+#outliner{
+  flex:0 0 auto;border-bottom:1px solid #101010;
+  display:flex;flex-direction:column;
+  height:clamp(160px,32%,260px);
 }
-.ol-row:hover{background:#2a2a2a}
-.ol-row.sel{background:#1a2a3a}
-.ol-exp{font-size:9px;color:var(--b-dim);width:10px;flex-shrink:0;text-align:center}
-.ol-ic{font-size:11px;flex-shrink:0;width:14px;text-align:center}
-.ol-nm{font-size:11px;color:var(--b-text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* Properties */
-#props{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--b-panel)}
-#props-body{flex:1;overflow-y:auto;padding:10px 10px 6px}
-#props-body::-webkit-scrollbar{width:3px}
-#props-body::-webkit-scrollbar-thumb{background:var(--b-bdr2)}
-
-.ps-sect{margin-bottom:10px}
-.ps-hdr{
-  height:20px;display:flex;align-items:center;padding:0 6px;
-  background:var(--b-panel2);border-bottom:1px solid var(--b-border);
-  font-size:11px;color:var(--b-text);cursor:pointer;gap:6px;
-  border-radius:2px;margin-bottom:2px;
+.pnl-hdr{
+  height:22px;background:#252525;border-bottom:1px solid #101010;
+  display:flex;align-items:center;padding:0 4px;gap:0;flex-shrink:0;
+  font-size:11px;
 }
-.ps-row{display:flex;align-items:center;height:20px;margin-bottom:1px;gap:4px;padding:0 2px}
-.ps-lbl{font-size:11px;color:var(--b-dim);width:56px;flex-shrink:0}
-.ps-val{
-  font-size:11px;color:var(--b-text);flex:1;
-  background:#1d1d1d;border:1px solid var(--b-bdr2);
-  border-radius:3px;padding:1px 6px;font-family:'Space Mono',monospace;
+.pnl-tab{
+  color:#545454;cursor:pointer;padding:0 10px;height:100%;
+  display:flex;align-items:center;border-radius:0;font-size:11px;
+  border-bottom:2px solid transparent;
 }
-.ps-val.blue{border-color:#2a5080;color:#88bbff}
-.ps-val.green{border-color:#1a4020;color:#88cc88}
-
-/* ── Timeline ── */
-#tl{
-  height:var(--tl);min-height:var(--tl);
-  background:var(--b-panel);border-top:1px solid var(--b-border);
-  pointer-events:auto;flex-shrink:0;display:flex;flex-direction:column;
-}
-#tl-hdr{
-  height:22px;background:var(--b-panel2);border-bottom:1px solid var(--b-border);
-  display:flex;align-items:center;padding:0 10px;gap:10px;flex-shrink:0;
-}
-.tl-c{font-size:13px;color:var(--b-dim);cursor:pointer;padding:0 3px}
-.tl-c:hover{color:var(--b-text)}
-.tl-fn{font-family:'Space Mono',monospace;font-size:10px;color:var(--b-dim)}
-#tl-body{flex:1;display:flex;align-items:center;padding:0 14px;gap:10px;position:relative}
-.tl-lbl{font-size:10px;color:var(--b-orange);font-family:'Space Mono',monospace;flex-shrink:0;white-space:nowrap}
-.tl-trk{flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden;position:relative}
-.tl-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#3a8a3a,var(--b-orange));transition:width .6s ease}
-.tl-pct{font-size:10px;color:var(--b-dim);font-family:'Space Mono',monospace;flex-shrink:0}
-
-/* ══ LESSON OVERLAY ══ */
-/* Floats inside vp-body */
-#lesson{
-  position:absolute;top:0;left:0;right:0;bottom:0;
-  z-index:5;pointer-events:none;
-  display:flex;align-items:flex-end;justify-content:center;
-  padding:10px;
-}
-/* Lesson card */
-#lcard{
-  background:rgba(10,18,30,0.96);backdrop-filter:blur(20px);
-  border:1.5px solid rgba(255,255,255,0.09);border-radius:18px;
-  padding:18px 20px 16px;width:100%;max-width:580px;
-  pointer-events:auto;box-shadow:0 16px 64px rgba(0,0,0,0.6);
-  transition:opacity .3s ease;
-}
-.lcard-step{
-  font-family:'Space Mono',monospace;font-size:10px;color:var(--b-orange);
-  letter-spacing:2px;margin-bottom:6px;
-}
-.lcard-title{
-  font-family:'Josefin Sans',sans-serif;font-weight:700;
-  font-size:clamp(16px,2.5vw,20px);color:#fff;margin-bottom:6px;
-}
-.lcard-body{
-  font-size:12px;color:rgba(255,255,255,0.58);line-height:1.7;margin-bottom:14px;
-}
-.lcard-body b{color:rgba(255,255,255,0.85)}
-.lcard-body code{
-  background:rgba(255,136,50,0.14);color:var(--b-orange);
-  border-radius:3px;padding:0 4px;font-family:'Space Mono',monospace;font-size:11px;
-}
-/* Navigation buttons */
-.lcard-nav{display:flex;gap:8px;align-items:center}
-.btn-next{
-  flex:1;padding:11px;border:none;border-radius:10px;
-  background:var(--b-orange);color:#fff;cursor:pointer;
-  font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:14px;
-  letter-spacing:1.5px;transition:all .18s;
-}
-.btn-next:hover{background:var(--b-orange2);transform:translateY(-1px)}
-.btn-next:active{transform:scale(0.97)}
-.btn-back{
-  padding:11px 18px;border:1px solid var(--b-bdr2);border-radius:10px;
-  background:transparent;color:var(--b-dim);cursor:pointer;
-  font-family:'Josefin Sans',sans-serif;font-size:13px;transition:all .18s;
-}
-.btn-back:hover{color:var(--b-text);border-color:var(--b-text)}
-/* Step dots */
-.step-dots{display:flex;gap:5px;align-items:center;margin-right:auto}
-.sdot{width:6px;height:6px;border-radius:50%;background:var(--b-bdr2);transition:all .3s}
-.sdot.on{background:var(--b-orange);width:18px;border-radius:3px}
-
-/* ── Quiz styles ── */
-.quiz-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
-.quiz-opt{
-  display:flex;align-items:center;gap:10px;padding:10px 12px;
-  border:1.5px solid rgba(255,255,255,0.09);border-radius:10px;
-  cursor:pointer;transition:all .18s;background:rgba(255,255,255,0.03);
-}
-.quiz-opt:hover{border-color:var(--b-orange);background:rgba(255,136,50,0.07)}
-.quiz-opt.correct{border-color:var(--b-green)!important;background:rgba(90,158,90,0.12)!important}
-.quiz-opt.wrong{border-color:#cc4444!important;background:rgba(200,68,68,0.10)!important}
-.quiz-opt.disabled{pointer-events:none;opacity:0.7}
-.qo-letter{
-  width:26px;height:26px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.20);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:12px;color:var(--b-dim);
+.pnl-tab:hover{color:#c8c8c8;background:rgba(255,255,255,.04)}
+.pnl-tab.on{color:#c8c8c8;border-bottom-color:var(--orange)}
+.pnl-hdr-icons{margin-left:auto;display:flex;gap:2px}
+.phi{width:18px;height:18px;display:flex;align-items:center;justify-content:center;
+  color:#545454;font-size:11px;cursor:pointer;border-radius:2px}
+.phi:hover{background:rgba(255,255,255,.08);color:#c8c8c8}
+.phi:hover{background:var(--panel3);color:var(--txt)}
+.ol-search{
+  height:20px;background:#1d1d1d;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 6px;gap:4px;font-size:11px;color:var(--txt3);
   flex-shrink:0;
 }
-.quiz-opt.correct .qo-letter{border-color:var(--b-green);color:var(--b-green)}
-.quiz-opt.wrong .qo-letter{border-color:#cc4444;color:#cc4444}
-.qo-txt{font-size:12px;color:rgba(255,255,255,0.72)}
-.quiz-result{
-  font-size:12px;padding:8px 12px;border-radius:8px;margin-bottom:10px;
-  display:none;line-height:1.6;
+.ol-search-icon{font-size:9px;opacity:.5}
+#ol-body{flex:1;overflow-y:auto;background:#1d1d1d}
+#ol-body::-webkit-scrollbar{width:3px}
+#ol-body::-webkit-scrollbar-thumb{background:var(--bdr2)}
+.ol-row{
+  height:20px;display:flex;align-items:center;padding:0 2px;gap:1px;
+  font-size:11px;white-space:nowrap;user-select:none;
 }
-.quiz-result.ok{background:rgba(90,158,90,0.15);color:#88dd88;border:1px solid rgba(90,158,90,0.25)}
-.quiz-result.fail{background:rgba(200,68,68,0.12);color:#ff8888;border:1px solid rgba(200,68,68,0.20)}
+.ol-row:hover{background:#282828}
+.ol-row.sel{background:#205080}
+.ol-row.sel .ol-nm{color:#e8e8e8}
+.ol-tri{width:14px;text-align:center;font-size:8px;color:#404040;flex-shrink:0}
+.ol-folder{font-size:12px;width:16px;text-align:center;flex-shrink:0;color:#808060}
+.ol-obj-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+.ol-nm{flex:1;color:#a0a0a0;font-size:11px;font-family:"Space Mono",monospace;padding-left:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ol-row.sel .ol-nm{color:#e8e8e8}
+.ol-vis{margin-left:auto;display:flex;gap:0}
+.ol-v{font-size:10px;color:#404040;width:16px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.ol-v:hover{color:#c8c8c8;background:rgba(255,255,255,.06)}
+.ol-v{font-size:9px;color:var(--txt3);width:14px;text-align:center;cursor:pointer;opacity:.5}
+.ol-v:hover{opacity:1}
+.ol-row.sel .ol-nm{color:#fff}
 
-/* ── Zone highlight overlay (canvas pointer hit) ── */
-.zone-hl{
-  position:absolute;border-radius:3px;pointer-events:none;
-  border:2px solid transparent;transition:all .3s ease;
-  display:flex;align-items:center;justify-content:center;
+/* Properties panel */
+#props{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.prop-sidebar{
+  width:100%;height:32px;background:#1d1d1d;border-bottom:1px solid #101010;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 4px;gap:1px;flex-shrink:0;overflow-x:auto;
+  scrollbar-width:none;
 }
-.zone-hl.show{border-color:var(--b-orange);background:rgba(255,136,50,0.10)}
-.zone-lbl{
-  background:rgba(255,136,50,0.90);color:#fff;border-radius:5px;
-  padding:3px 8px;font-size:10px;font-weight:700;
-  font-family:'Josefin Sans',sans-serif;letter-spacing:1px;white-space:nowrap;
-  box-shadow:0 2px 10px rgba(0,0,0,0.4);
+.prop-sidebar::-webkit-scrollbar{display:none}
+.pi{width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;cursor:pointer;font-size:13px;color:#545454;flex-shrink:0;
+  border:1px solid transparent}
+.pi:hover{background:#333;color:#c8c8c8}
+.pi.on{background:#2a4a7a;border-color:#3a5a8a;color:#c8c8c8}
+.pi-sep{width:1px;height:18px;background:var(--bdr2);margin:0 1px;flex-shrink:0}
+#prop-body{flex:1;overflow-y:auto;padding:0 0 8px;background:#1d1d1d;font-family:"Space Mono",monospace}
+#prop-body::-webkit-scrollbar{width:3px}
+#prop-body::-webkit-scrollbar-thumb{background:var(--bdr2)}
+/* Property header */
+.ph{
+  display:flex;align-items:center;gap:4px;cursor:pointer;
+  padding:3px 8px;font-size:12px;color:var(--txt);
+  border-bottom:1px solid var(--border);background:var(--panel2);margin-bottom:0;
+}
+.ph:hover{background:var(--panel3)}
+.ph-arrow{font-size:9px;color:var(--txt3);transition:transform .15s}
+.ph.open .ph-arrow{transform:rotate(90deg)}
+.ph-title{font-weight:600}
+.ph-obj{font-size:11px;color:#c8c8c8;padding:3px 8px;border-bottom:1px solid #101010;
+  font-family:"Space Mono",monospace;font-weight:600}
+/* Transform fields */
+.prop-section{padding:4px 0}
+.pf-label{
+  font-size:10px;color:var(--txt3);letter-spacing:.08em;
+  padding:3px 8px 1px;text-transform:uppercase;
+}
+.pf-row{display:flex;align-items:center;height:20px;padding:0 6px;gap:3px;margin-bottom:1px}
+.pf-key{font-size:11px;color:#808080;width:68px;flex-shrink:0}
+.pf-val{
+  flex:1;height:18px;background:#3c3c3c;border:1px solid #1a1a1a;border-radius:3px;
+  padding:0 5px;font-size:11px;font-family:"Space Mono",monospace;color:#c8c8c8;
+  display:flex;align-items:center;cursor:text;
+}
+.pf-val.blue{background:#173447;border-color:#2b5278;color:#c8c8c8}
+.pf-val.green{background:#203520;border-color:#2a4a2a;color:#c8c8c8}
+.pf-lock{font-size:9px;color:#545454;cursor:pointer;flex-shrink:0;margin-left:2px}
+.pf-lock:hover{color:var(--txt)}
+.prop-collapse{
+  display:flex;align-items:center;gap:4px;cursor:pointer;
+  padding:3px 8px;font-size:11px;color:#808080;
+  border-bottom:1px solid #101010;
+}
+.prop-collapse:hover{background:#2a2a2a;color:#c8c8c8}
+
+/* ─── LEFT PANEL (lesson steps) ─── */
+#lp{
+  position:fixed;
+  left:10px;
+  bottom:calc(var(--TL) + 10px);
+  width:clamp(240px,28vw,300px);
+  max-height:calc(100vh - var(--TOP) - var(--MB) - var(--VH) - var(--TL) - 20px);
+  z-index:600;
+  background:rgba(18,18,18,0.97);
+  border:1px solid #3a3a3a;
+  border-radius:8px;
+  display:flex;flex-direction:column;
+  box-shadow:0 8px 32px rgba(0,0,0,0.8);
+  backdrop-filter:blur(8px);
+  overflow:hidden;
+}
+/* Lesson panel collapse toggle button */
+#lp-toggle{
+  position:fixed;
+  left:10px;
+  bottom:calc(var(--TL) + 10px);
+  z-index:601;
+  background:rgba(18,18,18,0.97);
+  border:1px solid #3a3a3a;
+  border-radius:8px;
+  padding:6px 14px;
+  font-size:11px;color:#c8c8c8;cursor:pointer;
+  display:none;
+  font-family:"Space Mono",monospace;
 }
 
-/* ── XP POPUP ── */
-#xp-popup{
-  position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;
-  display:flex;align-items:center;justify-content:center;
-  pointer-events:none;opacity:0;transition:opacity .4s;
+#lp-hdr{
+  height:28px;background:#252525;border-bottom:1px solid #101010;
+  display:flex;align-items:center;padding:0 8px;gap:6px;flex-shrink:0;
+  cursor:move; border-radius:8px 8px 0 0;
 }
-#xp-popup.show{opacity:1;pointer-events:auto}
-#xp-box{
-  background:rgba(8,18,36,0.97);backdrop-filter:blur(24px);
-  border:1.5px solid rgba(255,255,255,0.12);border-radius:24px;
-  padding:36px 40px;text-align:center;
-  box-shadow:0 24px 80px rgba(0,0,0,0.7);
-  max-width:340px;width:90%;
+#lp-collapse{
+  margin-left:auto;cursor:pointer;color:#545454;font-size:13px;
+  width:18px;height:18px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;
 }
-.xp-star{font-size:52px;animation:spinIn .5s ease;display:block;margin-bottom:10px}
-@keyframes spinIn{from{transform:rotate(-30deg) scale(0.5);opacity:0}to{transform:none;opacity:1}}
-.xp-ttl{font-family:'Josefin Sans',sans-serif;font-weight:900;font-size:26px;color:#fff;margin-bottom:4px}
-.xp-sub{font-size:13px;color:rgba(255,255,255,0.42);margin-bottom:18px}
-.xp-val{
-  font-family:'Space Mono',monospace;font-weight:700;font-size:32px;
-  color:var(--b-gold);margin-bottom:18px;display:block;
-  animation:popUp .4s .3s both ease;
+#lp-collapse:hover{background:#333;color:#c8c8c8}
+#sdots{display:flex;gap:3px;align-items:center}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--bdr2);
+  transition:all .25s;flex-shrink:0}
+.sdot.ic{background:#2a4a7a}
+.sdot.done{background:var(--green)!important}
+.sdot.act{width:14px;border-radius:4px;background:var(--orange2)!important}
+.sdot.ic.act{background:var(--blue)!important}
+#slbl{font-family:"Space Mono",monospace;font-size:10px;color:var(--txt3);margin-left:auto}
+#lbody{flex:1;overflow-y:auto;padding:13px;max-height:55vh}
+#lbody::-webkit-scrollbar{width:3px}
+#lbody::-webkit-scrollbar-thumb{background:#3a3a3a}
+.s-tag{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--txt3);margin-bottom:4px}
+.s-title{font-family:"Josefin Sans",sans-serif;font-weight:700;font-size:15px;
+  color:#7ab4f5;margin-bottom:10px;line-height:1.3}
+.s-title.ic{color:#ff9b40}
+.s-body{font-size:13px;color:#b0b0b0;line-height:1.85;margin-bottom:12px}
+.s-body b,.s-body strong{color:#e8e8e8;font-weight:700}
+.s-body code{display:inline-block;background:rgba(232,125,13,.15);border:1px solid rgba(232,125,13,.3);
+  border-radius:4px;padding:1px 8px;font-family:"Space Mono",monospace;font-size:12px;
+  color:#ffb060;margin:1px}
+/* Interactive badge */
+.ic-badge{display:inline-flex;align-items:center;gap:5px;
+  background:rgba(77,144,254,.13);border:1px solid rgba(77,144,254,.25);
+  border-radius:5px;padding:3px 9px;font-size:10px;font-family:"Josefin Sans",sans-serif;
+  font-weight:700;letter-spacing:1px;color:#5599ff;margin-bottom:9px}
+/* Checklist */
+.ck{
+  display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:5px;
+  font-size:12px;color:#a0a0a0;margin-bottom:4px;
+  background:rgba(255,255,255,.02);border:1px solid transparent;transition:.2s;
 }
-@keyframes popUp{from{transform:scale(0.6);opacity:0}to{transform:none;opacity:1}}
-.xp-btns{display:flex;gap:8px}
-.xp-btn{
-  flex:1;padding:12px;border:none;border-radius:11px;cursor:pointer;
-  font-family:'Josefin Sans',sans-serif;font-weight:700;font-size:14px;
-  letter-spacing:1.5px;transition:all .18s;
+.ck.done{color:#80cc80;background:rgba(80,160,80,.08);border-color:rgba(80,160,80,.18)}
+.ck.active{color:#e8e8e8;border-color:rgba(255,136,50,.4);background:rgba(255,136,50,.06)}
+.ck-ic{font-size:14px;flex-shrink:0}
+/* OK banner */
+.ic-ok{
+  display:none;background:rgba(80,160,80,.12);border:1px solid rgba(80,160,80,.25);
+  border-radius:7px;padding:7px 11px;font-size:12px;color:#80cc80;
+  margin-bottom:9px;align-items:center;gap:7px;
 }
-.xp-btn.main{background:var(--b-orange);color:#fff}
-.xp-btn.main:hover{background:var(--b-orange2)}
-.xp-btn.sec{background:rgba(255,255,255,0.07);color:var(--b-dim);border:1px solid var(--b-bdr2)}
-.xp-btn.sec:hover{color:var(--b-text)}
+.ic-ok.show{display:flex}
+/* Buttons */
+.abtn{
+  width:100%;padding:10px;border-radius:6px;border:none;cursor:pointer;
+  font-family:"Josefin Sans",sans-serif;font-weight:700;font-size:14px;
+  letter-spacing:1.5px;transition:all .18s;margin-top:0;
+}
+.back-btn-sm{
+  flex-shrink:0;width:32px;height:40px;background:#252525;
+  border:1px solid #3a3a3a;border-radius:6px;color:#606060;
+  cursor:pointer;font-size:15px;display:flex;align-items:center;
+  justify-content:center;transition:.15s;
+}
+.back-btn-sm:hover{color:#c8c8c8;background:#2d2d2d;border-color:#505050}
+.abtn.blue{background:linear-gradient(135deg,var(--blue),#3068c0);color:#fff}
+.abtn.blue:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.abtn.orange{background:var(--orange);color:#fff}
+.abtn.orange:hover{background:var(--orange2)}
+.abtn.green{background:linear-gradient(135deg,#3a8a3a,#206020);color:#fff}
+.abtn.green:hover{filter:brightness(1.1)}
+.abtn:disabled{opacity:.32;cursor:not-allowed;transform:none!important;filter:none!important}
+
+/* ─── TIMELINE ─── */
+#tl{
+  position:fixed;bottom:0;left:0;right:var(--RP);z-index:200;
+  height:var(--TL);background:#1d1d1d;border-top:1px solid #101010;
+  display:flex;flex-direction:column;
+}
+#tl-top{
+  height:22px;background:#202020;border-bottom:1px solid #101010;
+  display:flex;align-items:center;padding:0 8px;gap:6px;flex-shrink:0;font-size:11px;
+}
+.tl-btn{font-size:13px;color:var(--txt3);cursor:pointer;padding:0 2px}
+.tl-btn:hover{color:var(--txt)}
+.tl-frame{font-family:"Space Mono",monospace;font-size:10px;color:var(--txt3)}
+.tl-frinfo{display:flex;align-items:center;gap:12px;margin-left:auto;font-size:10px;color:var(--txt3);font-family:"Space Mono",monospace}
+.tl-frbox{background:#1a1a1a;border:1px solid var(--bdr2);border-radius:3px;
+  padding:1px 6px;font-family:"Space Mono",monospace;font-size:10px;color:var(--txt)}
+#tl-body{flex:1;display:flex;align-items:center;padding:0 12px;gap:10px}
+.tl-xplbl{font-family:"Space Mono",monospace;font-size:10px;color:var(--orange2);flex-shrink:0;white-space:nowrap}
+.tl-trk{flex:1;height:5px;background:#111;border-radius:3px;overflow:hidden;cursor:pointer}
+.tl-fill{height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--green),var(--orange));transition:width .5s}
+.tl-pct{font-family:"Space Mono",monospace;font-size:10px;color:var(--txt3);flex-shrink:0}
+/* Timeline ruler ticks */
+#tl-ruler{
+  position:absolute;bottom:0;left:0;right:0;height:18px;
+  pointer-events:none;overflow:hidden;
+}
+
+/* ─── RIGHT-SIDE PROPERTIES BOTTOM ─── */
+#rp-bottom-tl{
+  position:fixed;right:0;bottom:0;width:var(--RP);z-index:200;
+  height:var(--TL);background:#1d1d1d;border-left:1px solid #101010;
+  border-top:1px solid #101010;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;padding:0 8px;
+  font-family:"Space Mono",monospace;font-size:10px;color:var(--txt3);
+}
+
+/* ─── COMPLETION SCREEN ─── */
+#comp{display:none;position:fixed;inset:0;z-index:900;
+  background:rgba(6,6,6,.96);backdrop-filter:blur(14px);
+  flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:32px}
+#comp.on{display:flex}
+.co-icon{font-size:56px;margin-bottom:10px;animation:bob .8s ease infinite alternate}
+@keyframes bob{from{transform:scale(1)}to{transform:scale(1.08)}}
+.co-stars{font-size:30px;letter-spacing:6px;margin-bottom:12px}
+.co-title{font-family:"Josefin Sans",sans-serif;font-weight:900;font-size:26px;
+  color:var(--blue2);margin-bottom:6px}
+.co-sub{font-size:13px;color:var(--txt2);line-height:1.7;margin-bottom:12px;max-width:36ch}
+.co-xp{font-family:"Josefin Sans",sans-serif;font-size:17px;color:var(--orange2);
+  background:rgba(232,125,13,.12);border:1px solid rgba(232,125,13,.22);
+  border-radius:100px;padding:6px 22px;margin-bottom:22px}
+.co-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.co-btn{padding:10px 22px;border-radius:100px;border:none;cursor:pointer;
+  font-family:"Josefin Sans",sans-serif;font-weight:700;font-size:14px;
+  letter-spacing:1.5px;transition:.18s;text-decoration:none;display:inline-block}
+.co-btn.p{background:var(--orange);color:#fff}
+.co-btn.p:hover{filter:brightness(1.12)}
+.co-btn.s{background:rgba(255,255,255,.07);border:1px solid var(--bdr2);color:var(--txt2)}
+
+/* ─── ZONE HIGHLIGHT ─── */
+.zh{position:fixed;pointer-events:none;border:2px solid transparent;border-radius:3px;
+  transition:all .25s;z-index:600}
+
+/* ─── BOX SELECT ─── */
+#box-select{
+  position:fixed;z-index:650;pointer-events:none;display:none;
+  border:1px solid #7ab4f5;background:rgba(122,180,245,0.07);
+}
+.zh.on{border-color:var(--orange);box-shadow:0 0 0 1px rgba(232,125,13,.15),
+  inset 0 0 0 9999px rgba(232,125,13,.04)}
+.zh-tip{position:fixed;z-index:700;background:rgba(232,125,13,.92);color:#fff;
+  border-radius:5px;padding:3px 9px;font-size:11px;font-family:"Josefin Sans",sans-serif;
+  font-weight:700;letter-spacing:1px;pointer-events:none;white-space:nowrap;display:none}
+
+/* ─── FAKE PREFS ─── */
+#fpwin{display:none;position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-54%);z-index:800;
+  width:min(580px,88%);background:var(--panel2);
+  border:1px solid var(--bdr3);border-radius:5px;
+  box-shadow:0 24px 80px rgba(0,0,0,.9);overflow:hidden}
+.fp-bar{height:28px;background:#111;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 10px;gap:8px;
+  font-family:"Space Mono",monospace;font-size:11px;color:var(--txt2)}
+.fp-close{margin-left:auto;cursor:pointer;opacity:.35;font-size:14px;padding:2px 6px}
+.fp-close:hover{opacity:.8}
+.fp-body{display:flex;height:290px}
+.fp-side{width:128px;background:#1a1a1a;border-right:1px solid var(--border);
+  padding:5px 0;flex-shrink:0}
+.fp-cat{padding:6px 13px;font-size:11px;color:#666;cursor:pointer;
+  border-left:2px solid transparent;transition:.13s;white-space:nowrap}
+.fp-cat:hover{background:#222;color:var(--txt2)}
+.fp-cat.on{color:var(--orange2);border-left-color:var(--orange);background:#222}
+.fp-main{flex:1;padding:12px;overflow-y:auto;font-size:11px}
+.fp-sec{font-size:10px;color:#444;letter-spacing:1.5px;text-transform:uppercase;
+  font-family:"Space Mono",monospace;margin:11px 0 5px}
+.fp-sec:first-child{margin-top:0}
+.fp-row{display:flex;align-items:center;height:26px;gap:8px;padding:0 5px;
+  border-radius:4px;cursor:pointer;border:1px solid transparent;margin-bottom:1px;transition:.13s}
+.fp-row:hover{background:rgba(232,125,13,.06)}
+.fp-row.target{border-color:rgba(232,125,13,.35);background:rgba(232,125,13,.04)}
+.fp-row.done-r{border-color:rgba(80,160,80,.28);background:rgba(80,160,80,.05)}
+.fp-lbl{flex:1;color:var(--txt);font-family:"Space Mono",monospace;font-size:11px}
+.fp-tog{width:32px;height:16px;background:#333;border-radius:8px;position:relative;
+  flex-shrink:0;transition:background .18s;cursor:pointer}
+.fp-tog::after{content:"";position:absolute;width:12px;height:12px;background:#fff;
+  border-radius:50%;top:2px;left:2px;transition:left .18s}
+.fp-tog.on{background:var(--orange)}
+.fp-tog.on::after{left:18px}
+.fp-tog.done{background:var(--green)}
+.fp-tog.done::after{left:18px}
+.fp-sel{background:#1d1d1d;border:1px solid var(--bdr2);border-radius:3px;
+  padding:1px 5px;height:18px;font-size:11px;color:var(--txt);cursor:pointer;
+  font-family:"Space Mono",monospace;max-width:120px}
+.fp-sel.done{border-color:var(--green);color:#80c880}
+.fp-sel.target-s{border-color:var(--orange)}
+
+/* ─── ADD MENU ─── */
+#addmenu{display:none;position:fixed;z-index:750;
+  background:var(--panel2);border:1px solid var(--bdr3);border-radius:5px;
+  padding:4px 0;min-width:170px;box-shadow:0 8px 28px rgba(0,0,0,.75);
+  font-size:11px}
+.am-section{padding:3px 10px;font-size:10px;color:var(--txt3);letter-spacing:1px;
+  font-family:"Space Mono",monospace;text-transform:uppercase;
+  border-top:1px solid var(--border);margin-top:2px}
+.am-section:first-child{border-top:none;margin-top:0}
+.am-item{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 20px;
+  color:var(--txt2);cursor:pointer}
+.am-item:hover{background:var(--blue);color:#fff}
+.am-item-arrow{margin-left:auto;color:var(--txt3);font-size:10px}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:1024px){
+  :root{--RP:220px}
+}
+@media(max-width:768px){
+  :root{--RP:0px}
+  #rp,#rp-bottom-tl{display:none}
+}
+@media(max-width:600px){
+  :root{--LT:0px}
+  #lt{display:none}
+}
+@media(max-width:600px){
+  #lt{display:none}
+  :root{--LT:0px}
+}
 </style>
 </head>
 <body>
 
-<!-- ══ THREE.JS CANVAS — MUST BE FIRST ══ -->
-<canvas id="three-canvas"></canvas>
+<!-- THREE.JS CANVAS -->
+<canvas id="cvs"></canvas>
 
-<!-- ══ BLENDER 5.0 UI SHELL ══ -->
-<div id="ui">
-
-  <!-- ■ Title bar -->
-  <div id="tb">
-    <div class="dot r" onclick="window.location.href='blender-hub.html'"></div>
-    <div class="dot y"></div>
-    <div class="dot g"></div>
-    <div class="tb-txt">[TA HUB] — Blender 課程 Lv1 <b>介面認識</b></div>
-  </div>
-
-  <!-- ■ Menu + Workspace -->
-  <div id="mb">
-    <div class="mn">File</div>
-    <div class="mn">Edit</div>
-    <div class="mn">Render</div>
-    <div class="mn">Window</div>
-    <div class="mn">Help</div>
-    <div class="sep-v"></div>
-    <div class="ws-row">
-      <div class="ws-tab on">Layout</div>
-      <div class="ws-tab">Modeling</div>
-      <div class="ws-tab">Sculpting</div>
-      <div class="ws-tab">UV Editing</div>
-      <div class="ws-tab">Texture Paint</div>
-      <div class="ws-tab">Shading</div>
-      <div class="ws-tab">Animation</div>
-      <div class="ws-tab">Rendering</div>
-      <div class="ws-tab">Compositing</div>
-      <div class="ws-tab">Geometry Nodes</div>
-      <div class="ws-tab">Scripting</div>
+<!-- TITLE BAR (exact Blender Windows style) -->
+<div id="titlebar">
+  <div class="tbar-left">
+    <div class="tbar-icon" style="color:#e87d0d;font-size:16px">&#11035;</div>
+    <div class="tbar-tabs">
+      <div class="tbar-tab">
+        <div class="tab-dot scene"></div>Scene
+      </div>
+      <div class="tbar-tab">
+        <div class="tab-dot vl"></div>ViewLayer
+      </div>
     </div>
   </div>
+  <div class="tbar-title">[Unsaved] - Blender 5.0.1</div>
+  <div class="tbar-winctrl">
+    <div class="wc">&#8212;</div>
+    <div class="wc">&#9723;</div>
+    <div class="wc close">&#x2715;</div>
+  </div>
+</div>
 
-  <!-- ■ Main area -->
-  <div id="main">
+<!-- MENUBAR + WORKSPACE TABS -->
+<div id="menubar">
+  <div class="mb-icon">&#9783;</div>
+  <div class="mb-menus">
+    <div class="mb-menu" id="mn-file">File</div>
+    <div class="mb-menu" id="mn-edit" onclick="openPrefs()">Edit</div>
+    <div class="mb-menu">Render</div>
+    <div class="mb-menu">Window</div>
+    <div class="mb-menu">Help</div>
+  </div>
+  <div class="ws-tabs">
+    <div class="ws-tab on">Layout</div>
+    <div class="ws-tab">Modeling</div>
+    <div class="ws-tab">Sculpting</div>
+    <div class="ws-tab">UV Editing</div>
+    <div class="ws-tab">Texture Paint</div>
+    <div class="ws-tab">Shading</div>
+    <div class="ws-tab">Animation</div>
+    <div class="ws-tab">Rendering</div>
+    <div class="ws-tab">Compositing</div>
+    <div class="ws-tab">Geometry Nodes</div>
+    <div class="ws-tab">Scripting</div>
+  </div>
+  <div class="ws-plus">+</div>
+</div>
 
-    <!-- Left toolbar -->
-    <div id="lt">
-      <div class="lt-btn on" title="Select Box">⬛</div>
-      <div class="lt-btn" title="Cursor">◎</div>
-      <div class="lt-sep"></div>
-      <div class="lt-btn" title="Move">↔</div>
-      <div class="lt-btn" title="Rotate">↻</div>
-      <div class="lt-btn" title="Scale">⤡</div>
-      <div class="lt-btn" title="Transform">✛</div>
-      <div class="lt-sep"></div>
-      <div class="lt-btn" title="Annotate">✏</div>
-      <div class="lt-btn" title="Measure">📐</div>
-      <div class="lt-sep"></div>
-      <div class="lt-btn" title="Add">⊕</div>
+<!-- VIEWPORT HEADER -->
+<div id="vphdr">
+  <div class="vph-mode" id="modebtn" onclick="toggleMode()">
+    <span id="mode-icon" style="font-size:10px">&#9633;</span>
+    <span id="mode-txt">Object Mode</span>
+    <span style="font-size:9px;color:var(--txt3);margin-left:2px">&#9660;</span>
+  </div>
+  <div class="vph-sep"></div>
+  <div class="vph-btn">Global</div>
+  <div class="vph-sep"></div>
+  <div class="vi" title="Pivot">&#8859;</div>
+  <div class="vi" title="Snap">&#9864;</div>
+  <div class="vi" title="Proportional">&#9673;</div>
+  <div class="vph-icons">
+    <div class="vph-sep"></div>
+    <div class="vi" title="Overlays" id="overlay-btn">&#8857;</div>
+    <div class="vi" title="Gizmos">&#10022;</div>
+    <div class="vph-sep"></div>
+    <div class="vph-shade">
+      <div class="vs" id="sh-wire" onclick="setShade('wire')" title="Wireframe">&#9723;</div>
+      <div class="vs on" id="sh-solid" onclick="setShade('solid')" title="Solid">&#11053;</div>
+      <div class="vs" id="sh-mat" onclick="setShade('mat')" title="Material Preview">&#9675;</div>
+      <div class="vs" id="sh-render" onclick="setShade('render')" title="Rendered">&#9679;</div>
     </div>
+    <div class="vph-sep"></div>
+    <div class="vi on" id="xray-btn" onclick="toggleXray()" title="Toggle X-Ray (Alt+Z)">&#9681;</div>
+  </div>
+</div>
 
-    <!-- Viewport column -->
-    <div id="vp-col">
+<!-- LEFT TOOLBAR -->
+<div id="lt">
+  <div class="lt-btn on" title="Select Box (W)">&#9635;</div>
+  <div class="lt-btn" title="Select Circle">&#9675;</div>
+  <div class="lt-sep"></div>
+  <div class="lt-btn" title="Cursor">&#8982;</div>
+  <div class="lt-sep"></div>
+  <div class="lt-btn" title="Move (G)">&#8597;</div>
+  <div class="lt-btn" title="Rotate (R)">&#8635;</div>
+  <div class="lt-btn" title="Scale (S)">&#10561;</div>
+  <div class="lt-btn" title="Transform">&#10010;</div>
+  <div class="lt-sep"></div>
+  <div class="lt-btn" title="Annotate">&#9998;</div>
+  <div class="lt-btn" title="Measure">&#9123;</div>
+  <div class="lt-sep"></div>
+  <div class="lt-btn" title="Add (Shift+A)">&#8853;</div>
+</div>
 
-      <!-- Viewport header -->
-      <div id="vp-hdr">
-        <div class="vh-mode">
-          <span>⬡</span><span style="font-size:11px">Object Mode</span><span style="font-size:9px;margin-left:2px;color:var(--b-dim)">▾</span>
-        </div>
-        <div class="vh-sep"></div>
-        <div class="vh-btn">View</div>
-        <div class="vh-btn">Select</div>
-        <div class="vh-btn">Add</div>
-        <div class="vh-btn">Object</div>
-        <div class="vh-r">
-          <div class="vh-sep"></div>
-          <div class="vh-shade">
-            <div class="sh-btn" title="Wireframe">□</div>
-            <div class="sh-btn on" title="Solid">⬡</div>
-            <div class="sh-btn" title="Material">◉</div>
-            <div class="sh-btn" title="Rendered">●</div>
-          </div>
-          <div class="vh-sep"></div>
-          <div class="vh-ic" title="Gizmos">✦</div>
-          <div class="vh-ic" title="Overlays">⊙</div>
-          <div class="vh-ic" title="XRay">◈</div>
-          <div class="vh-ic" title="Snapping">🔲</div>
+<!-- HUD OVERLAYS -->
+<div id="vp-info"></div>
+<div id="gizmo-area">
+  <canvas id="gizmo-cvs" width="68" height="68"></canvas>
+  <div class="gizmo-icons">
+    <div class="gz-ic" title="Zoom In">&#43;</div>
+    <div class="gz-ic" title="Zoom Out">&#8722;</div>
+    <div class="gz-ic" title="Pan">&#9002;</div>
+    <div class="gz-ic" title="Toggle Camera">&#128247;</div>
+  </div>
+</div>
+<div id="vp-hint">MMB 旋轉 &#x7c; 滾輪縮放 &#x7c; Shift+MMB 平移 &#x7c; LMB 選擇</div>
+
+<!-- KEY FLASH -->
+<div id="kflash">
+  <div id="kf-title">SHORTCUT</div>
+  <div id="kf-row"></div>
+  <div id="kf-status"></div>
+</div>
+
+<!-- MODE FLASH -->
+<div id="modeflash"></div>
+<div id="edit-mode-bar">
+  <span style="color:#7ab4f5;font-weight:700">&#9679; Edit Mode</span>
+  <span class="emb-sep">|</span>
+  <span id="emb-v" class="emb-key" onclick="enterEditMode(1)" title="Vertex (1)">1 Vertex</span>
+  <span id="emb-e" class="emb-key" onclick="enterEditMode(2)" title="Edge (2)">2 Edge</span>
+  <span id="emb-f" class="emb-key" onclick="enterEditMode(3)" title="Face (3)">3 Face</span>
+  <span class="emb-sep">|</span>
+  <span style="color:#808080;font-size:10px">Tab=離開</span>
+</div>
+
+<!-- ZONE HIGHLIGHTS -->
+<div class="zh" id="zh-vp"></div>
+<div class="zh" id="zh-ol"></div>
+<div class="zh" id="zh-pr"></div>
+<div class="zh" id="zh-tl"></div>
+<div class="zh" id="zh-lt"></div>
+<div class="zh-tip" id="zh-tip"></div>
+
+<!-- LEFT PANEL (Lesson) -->
+<div id="lp">
+  <div id="lp-hdr">
+    <span style="font-family:'Josefin Sans',sans-serif;font-size:10px;font-weight:700;color:#4272b5;letter-spacing:1px;flex-shrink:0">TA HUB</span>
+    <div id="sdots"></div>
+    <span id="slbl">步驟 1/8</span>
+    <div id="lp-collapse" onclick="toggleLP()" title="收合">&#8722;</div>
+  </div>
+  <div id="lbody"></div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div id="rp">
+  <!-- Outliner — exact Blender style -->
+  <div id="outliner">
+    <!-- Outliner header: exact BL 5.0 -->
+    <div id="ol-header" style="height:22px;background:#1d1d1d;border-bottom:1px solid #101010;display:flex;align-items:stretch;flex-shrink:0;font-size:11px;margin-top:0">
+      <div style="padding:0 10px;display:flex;align-items:center;color:#c8c8c8;border-bottom:2px solid #e87d0d;cursor:pointer;gap:4px">
+        <span style="font-size:9px">&#9643;</span>Scene
+      </div>
+      <div style="padding:0 10px;display:flex;align-items:center;color:#545454;cursor:pointer">ViewLayer</div>
+      <div style="margin-left:auto;display:flex;align-items:center;padding:0 4px;gap:1px">
+        <div class="phi" title="&#127759; Filter">&#9679;</div>
+        <div class="phi" title="&#43; New">&#43;</div>
+        <div class="phi" title="&#8943; Options">&#8943;</div>
+      </div>
+    </div>
+    <!-- Search bar -->
+    <div style="height:20px;background:#1d1d1d;border-bottom:1px solid #101010;display:flex;align-items:center;padding:0 6px;gap:4px;flex-shrink:0">
+      <span style="font-size:10px;color:#404040">&#128269;</span>
+      <span style="font-size:11px;color:#404040;font-family:Space Mono,monospace">Search...</span>
+    </div>
+    <!-- Tree body -->
+    <div id="ol-body">
+      <!-- Scene Collection -->
+      <div class="ol-row" style="padding-left:2px">
+        <span class="ol-tri">&#9660;</span>
+        <span class="ol-folder">&#128193;</span>
+        <span class="ol-nm" style="color:#c8c8c8">Scene Collection</span>
+      </div>
+      <!-- Collection (indented) -->
+      <div class="ol-row" style="padding-left:14px">
+        <span class="ol-tri">&#9660;</span>
+        <span class="ol-folder" style="color:#e8a040">&#128193;</span>
+        <span class="ol-nm" style="color:#c8c8c8">Collection</span>
+      </div>
+      <!-- Camera -->
+      <div class="ol-row" id="ol-camera" style="padding-left:26px;cursor:pointer" onclick="olClick('camera')">
+        <span class="ol-tri"></span>
+        <span class="ol-obj-ic" style="color:#5588cc" title="Camera">&#9636;</span>
+        <span class="ol-nm">Camera</span>
+        <div class="ol-vis">
+          <span class="ol-v" id="eye-camera" title="Toggle Visibility">&#128065;</span>
+          <span class="ol-v" title="Restrict Render">&#9728;</span>
         </div>
       </div>
-
-      <!-- Viewport body (Three.js shows through) -->
-      <div id="vp-body">
-        <!-- Perspective info -->
-        <div id="vp-info">
-          User Perspective<br>
-          (1) Collection | Cube
-        </div>
-        <!-- Gizmo canvas -->
-        <canvas id="gizmo" width="68" height="68"></canvas>
-
-        <!-- Zone highlight overlays (positioned by JS) -->
-        <div class="zone-hl" id="zh-viewport" style="top:0;left:0;right:0;bottom:0">
-          <div class="zone-lbl" id="zl-viewport" style="display:none">① 3D 視圖 Viewport</div>
-        </div>
-
-        <!-- Lesson card -->
-        <div id="lesson">
-          <div id="lcard"><!-- Filled by JS --></div>
+      <!-- Cube (selected) -->
+      <div class="ol-row sel" id="ol-cube" style="padding-left:26px;cursor:pointer" onclick="olClick('cube')">
+        <span class="ol-tri"></span>
+        <span class="ol-obj-ic" style="color:#7ab4f5" title="Mesh">&#9651;</span>
+        <span class="ol-nm">Cube</span>
+        <div class="ol-vis">
+          <span class="ol-v" id="eye-cube" title="Toggle Visibility">&#128065;</span>
+          <span class="ol-v" title="Restrict Render">&#9728;</span>
         </div>
       </div>
-    </div>
-
-    <!-- ■ Right panels -->
-    <div id="rt">
-
-      <!-- Outliner panel -->
-      <div id="outliner">
-        <div class="pnl-hdr" id="hl-outliner">
-          <span class="pnl-tab on">Scene</span>
-          <span class="pnl-tab">ViewLayer</span>
-          <div id="zl-outliner" style="margin-left:auto;display:none;font-size:10px;color:var(--b-orange);font-family:'Josefin Sans',sans-serif;font-weight:700">② 大綱 Outliner</div>
-        </div>
-        <div class="pnl-srch"><span style="font-size:9px;opacity:.45">🔍</span><span>Search…</span></div>
-        <div id="ol-body">
-          <div class="ol-row"><span class="ol-exp">▼</span><span class="ol-ic">📁</span><span class="ol-nm">Scene Collection</span></div>
-          <div class="ol-row" style="padding-left:20px"><span class="ol-exp">▼</span><span class="ol-ic">📁</span><span class="ol-nm">Collection</span></div>
-          <div class="ol-row sel" id="ol-cube" style="padding-left:36px"><span class="ol-exp"></span><span class="ol-ic">⬡</span><span class="ol-nm">Cube</span></div>
-          <div class="ol-row" style="padding-left:36px"><span class="ol-exp"></span><span class="ol-ic">💡</span><span class="ol-nm">Light</span></div>
-          <div class="ol-row" style="padding-left:36px"><span class="ol-exp"></span><span class="ol-ic">📷</span><span class="ol-nm">Camera</span></div>
+      <!-- Light -->
+      <div class="ol-row" id="ol-light" style="padding-left:26px;cursor:pointer" onclick="olClick('light')">
+        <span class="ol-tri"></span>
+        <span class="ol-obj-ic" style="color:#e8d060" title="Light">&#9788;</span>
+        <span class="ol-nm">Light</span>
+        <div class="ol-vis">
+          <span class="ol-v" id="eye-light" title="Toggle Visibility">&#128065;</span>
+          <span class="ol-v" title="Restrict Render">&#9728;</span>
         </div>
       </div>
-
-      <!-- Properties panel -->
-      <div id="props">
-        <div class="pnl-hdr" id="hl-props">
-          <span class="pnl-tab on">▼ Transform</span>
-          <div id="zl-props" style="margin-left:auto;display:none;font-size:10px;color:var(--b-orange);font-family:'Josefin Sans',sans-serif;font-weight:700">③ 屬性 Properties</div>
-        </div>
-        <div id="props-body">
-          <div style="font-size:11px;color:var(--b-dim);margin-bottom:4px;padding:0 2px">Cube</div>
-          <div class="ps-sect">
-            <div class="ps-hdr"><span style="font-size:9px">▼</span> Transform</div>
-            <div class="ps-row"><span class="ps-lbl">Location X</span><span class="ps-val blue">0.000</span></div>
-            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val blue" style="margin-left:0">Y &nbsp;0.000</span></div>
-            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val blue">Z &nbsp;0.000</span></div>
-            <div style="height:4px"></div>
-            <div class="ps-row"><span class="ps-lbl">Rotation X</span><span class="ps-val">0°</span></div>
-            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val">Y &nbsp;0°</span></div>
-            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val">Z &nbsp;0°</span></div>
-            <div style="height:4px"></div>
-            <div class="ps-row"><span class="ps-lbl">Scale X</span><span class="ps-val green">1.000</span></div>
-            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val green">Y &nbsp;1.000</span></div>
-            <div class="ps-row"><span class="ps-lbl" style="color:transparent">·</span><span class="ps-val green">Z &nbsp;1.000</span></div>
-          </div>
-          <div class="ps-sect">
-            <div class="ps-hdr" style="cursor:pointer"><span style="font-size:9px">▶</span> Delta Transform</div>
-          </div>
-          <div class="ps-sect">
-            <div class="ps-hdr" style="cursor:pointer"><span style="font-size:9px">▶</span> Relations</div>
-          </div>
-          <div class="ps-sect">
-            <div class="ps-hdr" style="cursor:pointer"><span style="font-size:9px">▶</span> Collections</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /main -->
-
-  <!-- ■ Timeline -->
-  <div id="tl">
-    <div id="tl-hdr">
-      <span class="tl-c">⏮</span>
-      <span class="tl-c">⏪</span>
-      <span class="tl-c" id="tl-play">▶</span>
-      <span class="tl-c">⏩</span>
-      <span class="tl-c">⏭</span>
-      <span class="tl-fn">Frame <b id="tl-frm">1</b></span>
-      <span style="margin-left:auto;font-size:10px;color:var(--b-dim);font-family:'Space Mono',monospace">Playback · Keying · View · Marker</span>
-    </div>
-    <div id="tl-body">
-      <div class="tl-lbl" id="tl-xp">XP 0 / 350</div>
-      <div class="tl-trk"><div class="tl-fill" id="tl-fill" style="width:0%"></div></div>
-      <div class="tl-pct" id="tl-pct">0%</div>
-      <div id="zl-timeline" style="margin-left:8px;display:none;font-size:10px;color:var(--b-orange);font-family:'Josefin Sans',sans-serif;font-weight:700">⑤ 時間軸 Timeline</div>
     </div>
   </div>
 
-</div><!-- /ui -->
-
-<!-- ══ XP POPUP ══ -->
-<div id="xp-popup">
-  <div id="xp-box">
-    <span class="xp-star">⭐</span>
-    <div class="xp-ttl">關卡完成！</div>
-    <div class="xp-sub">Lv1 介面認識 · Blender 5.0</div>
-    <span class="xp-val">+350 XP</span>
-    <div class="xp-btns">
-      <button class="xp-btn sec" onclick="window.location.href='blender-hub.html'">← 地圖</button>
-      <button class="xp-btn main" onclick="window.location.href='blender-ui-lv2.html'">下一關 →</button>
+  <!-- Properties -->
+  <div id="props">
+    <div class="prop-sidebar">
+      <div class="pi" title="Active Tool">&#9998;</div>
+      <div class="pi-sep"></div>
+      <div class="pi on" title="Object" id="pi-obj">&#11053;</div>
+      <div class="pi" title="Modifier">&#128295;</div>
+      <div class="pi" title="Particles">&#10024;</div>
+      <div class="pi" title="Physics">&#9889;</div>
+      <div class="pi" title="Constraints">&#9874;</div>
+      <div class="pi-sep"></div>
+      <div class="pi" title="Object Data">&#11053;</div>
+      <div class="pi" title="Material">&#9679;</div>
+      <div class="pi" title="World">&#127760;</div>
+      <div class="pi" title="Scene">&#127916;</div>
+      <div class="pi" title="Render">&#128247;</div>
+    </div>
+    <div id="prop-body">
+      <div class="ph-obj" id="prop-obj-name">Cube</div>
+      <!-- Transform section -->
+      <div class="ph open" style="background:#1d1d1d;padding:5px 8px 3px">
+        <span class="ph-arrow" style="color:#c8c8c8">&#9660;</span>
+        <span class="ph-title" style="font-weight:700;color:#c8c8c8;font-size:12px">Transform</span>
+      </div>
+      <div class="prop-section">
+        <div class="pf-row">
+          <span class="pf-key">Location X</span>
+          <div class="pf-val blue" id="pf-lx">0 m</div>
+          <span class="pf-lock">&#128274;</span>
+        </div>
+        <div class="pf-row">
+          <span class="pf-key" style="color:transparent">.</span>
+          <div class="pf-val blue" id="pf-ly">Y 1.000 m</div>
+          <span class="pf-lock">&#128274;</span>
+        </div>
+        <div class="pf-row">
+          <span class="pf-key" style="color:transparent">.</span>
+          <div class="pf-val blue" id="pf-lz">Z 0 m</div>
+          <span class="pf-lock">&#128274;</span>
+        </div>
+        <div class="pf-row" style="margin-top:3px">
+          <span class="pf-key">Rotation X</span>
+          <div class="pf-val" id="pf-rx">0&#176;</div>
+          <span class="pf-lock">&#128274;</span>
+        </div>
+        <div class="pf-row">
+          <span class="pf-key" style="color:transparent">.</span>
+          <div class="pf-val" id="pf-ry">Y 0&#176;</div>
+          <span class="pf-lock">&#128274;</span>
+        </div>
+        <div class="pf-row">
+          <span class="pf-key" style="color:transparent">.</span>
+          <div class="pf-val" id="pf-rz">Z 0&#176;</div>
+          <span class="pf-lock">&#128274;</span>
+        </div>
+        <div class="pf-row" style="margin-top:3px">
+          <span class="pf-key">Mode</span>
+          <div class="pf-val" style="color:var(--txt2)">XYZ Euler</div>
+          <span class="pf-lock" style="opacity:0">&#128274;</span>
+        </div>
+        <div class="pf-row">
+          <span class="pf-key">Scale X</span>
+          <div class="pf-val green" id="pf-sx">1.000</div>
+          <span class="pf-lock">&#128274;</span>
+        </div>
+        <div class="pf-row">
+          <span class="pf-key" style="color:transparent">.</span>
+          <div class="pf-val green" id="pf-sy">Y 1.000</div>
+          <span class="pf-lock">&#128274;</span>
+        </div>
+        <div class="pf-row">
+          <span class="pf-key" style="color:transparent">.</span>
+          <div class="pf-val green" id="pf-sz">Z 1.000</div>
+          <span class="pf-lock">&#128274;</span>
+        </div>
+      </div>
+      <!-- Collapsed sections -->
+      <div class="prop-collapse">&#9658; Delta Transform</div>
+      <div class="prop-collapse">&#9658; Relations</div>
+      <div class="prop-collapse">&#9658; Collections</div>
+      <div class="prop-collapse">&#9658; Instancing</div>
+      <div class="prop-collapse">&#9658; Motion Paths</div>
+      <div class="prop-collapse">&#9658; Shading</div>
+      <div class="prop-collapse">&#9658; Visibility</div>
+      <div class="prop-collapse">&#9658; Viewport Display</div>
+      <div class="prop-collapse">&#9658; Line Art</div>
+      <div class="prop-collapse">&#9658; Animation</div>
+      <div class="prop-collapse">&#9658; Custom Properties</div>
     </div>
   </div>
 </div>
 
+<!-- TIMELINE -->
+<div id="tl">
+  <div id="tl-top">
+    <div class="tl-btn">&#9646;&#9664;</div>
+    <div class="tl-btn">&#9664;&#9664;</div>
+    <div class="tl-btn" style="font-size:15px">&#9654;</div>
+    <div class="tl-btn">&#9654;&#9654;</div>
+    <div class="tl-btn">&#9654;&#9646;</div>
+    <span class="tl-frame">Frame <b id="tl-frm">1</b></span>
+    <div class="tl-frinfo">
+      <span>Start <span class="tl-frbox">1</span></span>
+      <span>End <span class="tl-frbox">250</span></span>
+    </div>
+  </div>
+  <div id="tl-body">
+    <div class="tl-xplbl">XP <span id="tl-xpv">0</span>/350</div>
+    <div class="tl-trk">
+      <div class="tl-fill" id="tl-fill" style="width:0%"></div>
+    </div>
+    <div class="tl-pct" id="tl-pct">0%</div>
+  </div>
+</div>
+<div id="rp-bottom-tl">Playback &nbsp;|&nbsp; Keying &nbsp;|&nbsp; View &nbsp;|&nbsp; Marker</div>
+
+<!-- FAKE PREFS WINDOW -->
+<div id="fpwin">
+  <div class="fp-bar">&#11035; Blender Preferences
+    <span class="fp-close" onclick="closePrefs()">&#x2715;</span>
+  </div>
+  <div class="fp-body">
+    <div class="fp-side">
+      <div class="fp-cat on" data-cat="interface" onclick="fpSwitch(this)">Interface</div>
+      <div class="fp-cat" data-cat="viewport" onclick="fpSwitch(this)">Viewport</div>
+      <div class="fp-cat" data-cat="editing" onclick="fpSwitch(this)">Editing</div>
+      <div class="fp-cat" data-cat="animation" onclick="fpSwitch(this)">Animation</div>
+      <div class="fp-cat" data-cat="addons" onclick="fpSwitch(this)">Add-ons</div>
+      <div class="fp-cat" data-cat="input" onclick="fpSwitch(this)">Input</div>
+      <div class="fp-cat" data-cat="keymap" onclick="fpSwitch(this)">Keymap</div>
+      <div class="fp-cat" data-cat="themes" onclick="fpSwitch(this)">Themes</div>
+      <div class="fp-cat" data-cat="save" onclick="fpSwitch(this)">Save &amp; Load</div>
+      <div class="fp-cat" data-cat="paths" onclick="fpSwitch(this)">File Paths</div>
+    </div>
+    <div class="fp-main" id="fp-content"></div>
+  </div>
+</div>
+
+<!-- ADD MENU -->
+<div id="addmenu">
+  <div class="am-section">Mesh</div>
+  <div class="am-item" onclick="spawnMesh('plane');closeAddMenu()">&#11053; Plane</div>
+  <div class="am-item" onclick="spawnMesh('cube');closeAddMenu()">&#11053; Cube</div>
+  <div class="am-item" onclick="spawnMesh('sphere');closeAddMenu()">&#9679; UV Sphere</div>
+  <div class="am-item" onclick="spawnMesh('sphere');closeAddMenu()">&#9679; Ico Sphere</div>
+  <div class="am-item" onclick="spawnMesh('cone');closeAddMenu()">&#9650; Cone</div>
+  <div class="am-item" onclick="spawnMesh('cylinder');closeAddMenu()">&#9675; Cylinder</div>
+  <div class="am-item" onclick="spawnMesh('torus');closeAddMenu()">&#9900; Torus</div>
+  <div class="am-section">Curve</div>
+  <div class="am-item" style="opacity:.5">&#9900; Bezier</div>
+  <div class="am-section">Light</div>
+  <div class="am-item" style="opacity:.5">&#128161; Point</div>
+  <div class="am-section">Camera</div>
+  <div class="am-item" style="opacity:.5">&#128247; Camera</div>
+</div>
+
+<!-- COMPLETION -->
+<div id="comp">
+  <div class="co-icon">&#11053;</div>
+  <div class="co-stars">&#9733;&#9733;&#9733;</div>
+  <div class="co-title">Lv1 介面認識 完成！</div>
+  <div class="co-sub">你認識了 Blender 5.0 的五大介面區域，<br>並完成了 5 項實際操作挑戰！</div>
+  <div class="co-xp">+350 XP &#11088;</div>
+  <div class="co-btns">
+    <a href="blender-hub.html" class="co-btn s">&#8592; 地圖</a>
+    <a href="blender-ui-lv2.html" class="co-btn p">Lv2 偏好設定 &#8594;</a>
+  </div>
+</div>
+
 <script>
-// ══════════════════════════════════════
-//  GLOBAL VARS  (before onload)
-// ══════════════════════════════════════
+// ══════════════════════════════════════════════
+//  GLOBALS (all var, before onload)
+// ══════════════════════════════════════════════
 var camera, scene, renderer, clock;
-var cube, cubeEdges, gridH;
-var rafId;
-var gCtx;
-var STEP = 0;
-var TOTAL_STEPS = 6;
-var quizDone = false;
-var quizScore = 0;
-var answered1 = false, answered2 = false;
-var SAVE_KEY = 'blender_ui_lv1';
+var cube, cubeEdges, selRing, lightMesh, camVis, cGrp, lightSelRing, camSelRing;
+var isXray=false, shadeMode='solid', isEditMode=false;
+var meshEditMode=0; // 0=none, 1=vertex, 2=edge, 3=face
+var editTargetMesh=null; // mesh currently in edit mode
+var editTargetEdgeOverlay=null; // the bright wireframe on edit mesh
+var vertexDots=[], edgeLines=[], faceMesh=null;
+var spawnedMeshes=[];
+var cubeVisible=true;
+var STEP=0, totalXP=0, questDone={};
+var addMenuOpen=false;
+var kfTimer=null;
+// GRS state machine
+var grsMode=null, numBuf='', grsAxis='';
+var tabPressCount=0;
+// Camera spherical coords
+var camTheta=0.6, camPhi=1.1, camRadius=9.0;
+// Panoramic target (for pan)
+var camTarget=new THREE.Vector3(0,1,0);
+// Mouse / touch state
+var MMB_down=false;
+var RMB_down=false;
+var LMB_pressing=false;
+var LMB_startX=0, LMB_startY=0;
+var boxEl=null, boxStart={x:0,y:0}, boxActive=false;
+var shiftHeld=false;
+var lastMX=0, lastMY=0;
+var touchIds={};
+var touchPrev={};
+// Orbit delta tracking (for task completion)
+var orbitAccum=0, zoomAccum=0, panAccum=0;
 
-// Zone highlight elements
-var ZH = {};
+// ══════════════════════════════════════════════
+//  STEP DATA
+// ══════════════════════════════════════════════
+var STEPS=[
+  {type:'learn', tag:'STEP 01 / 08', title:'歡迎來到 Blender 5.0！',
+   body:'你現在看到的就是 <b>真實的 Blender 5.0 介面</b>！<br><br>这個關卡你将认识 <b>五大介面區域</b>，並且在每個區域進行<b>真實操作</b>。<br><br>&#128433; 先試試：按住 <b>MMB（滑鼠中鍵）</b> 拖曳旋轉 3D 視角，感受一下！',
+   btn:{l:'開始學習 &#8594;',cl:'blue'}},
 
-// ══════════════════════════════════════
-//  LESSON CONTENT (6 steps)
-// ══════════════════════════════════════
-var STEPS = [
-  // Step 0: Welcome
-  {
-    tag: 'STEP 01 / 06',
-    title: '歡迎來到 Blender 5.0！',
-    body: [
-      'Blender 是業界主流的 <b>免費開源 3D 軟體</b>，支援建模、動畫、渲染、合成等功能。',
-      '這個關卡將帶你認識 Blender 的 <b>五大介面區域</b>，這是操作一切功能的基礎。',
-      '你現在看到的就是 Blender 5.0 的真實介面！'
-    ].join('<br>'),
-    highlight: null,
-    next: '開始學習 →'
-  },
-  // Step 1: Viewport
-  {
-    tag: 'STEP 02 / 06 · ① 3D 視圖',
-    title: '3D 視圖 (Viewport)',
-    body: [
-      '最大的中央區域就是 <b>3D 視圖（Viewport）</b>，你在這裡：',
-      '• 觀看並操作 3D 物件',
-      '• 使用 <code>滾輪</code> 縮放 · <code>中鍵拖曳</code> 旋轉',
-      '• 用 <code>Shift+中鍵</code> 移動視角',
-      '<br>左邊的垂直工具列是 <b>Tool Shelf（工具架）</b>——這是整個介面最重要的工作區。'
-    ].join(''),
-    highlight: 'viewport',
-    next: '下一區域 →'
-  },
-  // Step 2: Outliner
-  {
-    tag: 'STEP 03 / 06 · ② 大綱',
-    title: '大綱 (Outliner)',
-    body: [
-      '右上角是 <b>大綱（Outliner）</b>，顯示場景中所有物件的層級結構：',
-      '• 📁 <b>Collection</b>（集合）可以管理物件群組',
-      '• 點擊物件名稱可以選取、隱藏 <code>👁</code> 或排除渲染',
-      '• <code>⬡ Cube</code> 就是預設場景的正方體',
-      '<br>這裡的結構和遊戲引擎的 Hierarchy 概念相同！'
-    ].join(''),
-    highlight: 'outliner',
-    next: '下一區域 →'
-  },
-  // Step 3: Properties
-  {
-    tag: 'STEP 04 / 06 · ③ 屬性',
-    title: '屬性面板 (Properties)',
-    body: [
-      '右下角是 <b>屬性面板（Properties）</b>，顯示選取物件的詳細參數：',
-      '• <b>Location</b>（位置）: X / Y / Z 坐標',
-      '• <b>Rotation</b>（旋轉）: 三軸角度',
-      '• <b>Scale</b>（縮放）: 三軸比例',
-      '• 快捷鍵 <code>N</code> 可在 Viewport 中快速開啟簡易版屬性欄'
-    ].join('<br>'),
-    highlight: 'props',
-    next: '下一區域 →'
-  },
-  // Step 4: Timeline
-  {
-    tag: 'STEP 05 / 06 · ⑤ 時間軸',
-    title: '時間軸 (Timeline)',
-    body: [
-      '底部是 <b>時間軸（Timeline）</b>，用於動畫製作：',
-      '• 顯示 <b>幀（Frame）</b>的進度，預設 1 ~ 250 幀',
-      '• 用 <code>▶</code> 播放動畫，<code>Space</code> 也可以',
-      '• <b>關鍵影格（Keyframe）</b>用 <code>I</code> 鍵設定',
-      '<br>即使不做動畫，Timeline 也是了解 Blender 工作流程的重要視窗。'
-    ].join(''),
-    highlight: 'timeline',
-    next: '前往測驗 →'
-  },
-  // Step 5: Quiz
-  {
-    tag: 'STEP 06 / 06 · 測驗',
-    title: '理解測驗',
-    body: '',
-    highlight: null,
-    next: '完成關卡 ✓',
-    quiz: true
-  }
+  {type:'learn', tag:'STEP 02 / 08', title:'五大介面區域',
+   body:'<b>① Viewport 3D 視圖</b>（中央）<br>操作 3D 物件的主要工作區<br><br><b>② Outliner 大綱</b>（右上）<br>管理場景物件層級結構<br><br><b>③ Properties 屬性</b>（右下）<br>顯示位置、旋轉、縮放等詳細參數<br><br><b>④ Toolbar 工具架</b>（左側）<br>各種建模工具<br><br><b>⑤ Timeline 時間軸</b>（底部）<br>動畫幀控制',
+   btn:{l:'認識五大區域 &#8594;',cl:'blue'}},
+
+  {type:'ic', tag:'互動 01 / 05', title:'① 3D 視圖操作',
+   ic:'viewport_nav',
+   hint:'<b>Blender 視角控制</b>（和真實 Blender 完全相同）：<br>&#x2022; <code>MMB 拖曳</code> &#8594; 旋轉視角<br>&#x2022; <code>滾輪</code> &#8594; 縮放<br>&#x2022; <code>Shift+MMB</code> &#8594; 平移視角<br>&#x2022; <code>LMB</code> &#8594; 選取物件',
+   tasks:[
+     {id:'orbit', l:'MMB 拖曳旋轉視角（360&#176; 轉一圈！）'},
+     {id:'zoom',  l:'滾輪縮放視角'},
+     {id:'pan',   l:'Shift+MMB 平移視角'},
+   ],
+   btn:{l:'完成，繼續 &#8594;',cl:'orange'}},
+
+  {type:'ic', tag:'互動 02 / 05', title:'② Outliner 大綱',
+   ic:'outliner',
+   hint:'點擊右上角 <b>Outliner</b> 中的物件名稱，選取它：',
+   tasks:[
+     {id:'sel_cube',   l:'點選 &#11053; Cube（正方體）'},
+     {id:'sel_camera', l:'點選 &#128247; Camera（攝影機）'},
+     {id:'sel_light',  l:'點選 &#128161; Light（燈光）'},
+   ],
+   btn:{l:'完成，繼續 &#8594;',cl:'orange'}},
+
+  {type:'ic', tag:'互動 03 / 05', title:'③ G / R / S 物件變換',
+   ic:'grs',
+   hint:'<b>操作方法：</b>按快捷鍵 → 選擇軸向 → <b>輸入數字</b> → 按 <code>Enter</code> 確認<br>按 <code>Esc</code> 取消操作',
+   tasks:[
+     {id:'g_done', l:'<b>G</b> → <b>Z</b> → 輸入 <b>2</b> → 按 <b>Enter</b>（沿 Z 軸移動 2）'},
+     {id:'r_done', l:'<b>R</b> → <b>Z</b> → 輸入 <b>45</b> → 按 <b>Enter</b>（旋轉 45°）'},
+     {id:'s_done', l:'<b>S</b> → 輸入 <b>1.5</b> → 按 <b>Enter</b>（放大 1.5 倍）'},
+   ],
+   btn:{l:'完成，繼續 &#8594;',cl:'orange'}},
+
+  {type:'ic', tag:'互動 04 / 05', title:'④ Tab 切換模式',
+   ic:'tab_mode',
+   hint:'<code>Tab</code> → Object &#x2194; Edit Mode<br>Edit Mode 中按 <code>1</code>=點模式  <code>2</code>=邊模式  <code>3</code>=面模式<br><code>Alt+Z</code> → X-Ray 半透明',
+   tasks:[
+     {id:'tab_edit',   l:'Tab &#8594; 進入 Edit Mode（看到頂點框架）'},
+     {id:'tab_object', l:'再按 Tab &#8594; 回到 Object Mode'},
+     {id:'xray_alt_z', l:'Alt+Z &#8594; X-Ray 半透明模式'},
+   ],
+   btn:{l:'完成，繼續 &#8594;',cl:'orange'}},
+
+  {type:'ic', tag:'互動 05 / 05', title:'⑤ 新增與隱藏物件',
+   ic:'add_hide',
+   hint:'直接按下鍵盤快捷鍵（點擊 3D 視窗後再按）：<br><code>Shift+A</code> 開啟新增選單 &bull; <code>H</code> 隱藏物件<br><code>Alt+H</code> 顯示所有物件',
+   tasks:[
+     {id:'shiftA_done', l:'Shift+A &#8594; 開啟新增物件選單'},
+     {id:'h_hide',      l:'H &#8594; 隱藏 Cube'},
+     {id:'alth_show',   l:'Alt+H &#8594; 顯示所有物件'},
+   ],
+   btn:{l:'完成，繼續 &#8594;',cl:'orange'}},
+
+  {type:'learn', tag:'STEP 08 / 08', title:'&#10003; 五大介面全部完成！',
+   body:'你已掌握 Blender 5.0 介面基礎：<br><br>&#9745; <b>Viewport</b> — MMB 旋轉 / 滾輪縮放 / Shift+MMB 平移<br>&#9745; <b>Outliner</b> — 點選物件<br>&#9745; <b>G/R/S</b> — 移動 / 旋轉 / 縮放<br>&#9745; <b>Tab</b> — Object &#x2194; Edit Mode<br>&#9745; <b>Shift+A / H / Alt+H</b> — 新增與隱藏<br><br>下一關：<b>Lv2 偏好設定</b> — 讓 Blender 更順手！',
+   btn:{l:'完成關卡 &#10003;',cl:'green',fn:'finishLevel'}},
 ];
 
-// ══════════════════════════════════════
-//  QUIZ DATA
-// ══════════════════════════════════════
-var QUIZ = [
-  {
-    q: '在 Blender 的大綱（Outliner）中，哪個圖示代表「物件集合（Collection）」？',
-    opts: ['📁 資料夾圖示', '⬡ 六角形圖示', '💡 燈泡圖示', '📷 相機圖示'],
-    ans: 0,
-    explain: '正確！📁 資料夾代表 Collection（集合），你可以用它來分組管理場景中的物件，就像遊戲引擎的 Group 概念。'
-  },
-  {
-    q: '在 Viewport 中，哪個快捷鍵可以快速開啟物件的 N-Panel（屬性欄）？',
-    opts: ['Tab 鍵', 'N 鍵', 'G 鍵', 'Ctrl + P'],
-    ans: 1,
-    explain: '正確！按 N 鍵（或 N-Panel）可以在 Viewport 右側展開側邊屬性欄，快速查看和修改 Location / Rotation / Scale。'
-  }
-];
+// ══════════════════════════════════════════════
+//  XP SYSTEM
+// ══════════════════════════════════════════════
+function addXP(v){
+  totalXP=Math.min(350,totalXP+v);
+  var pct=Math.round(totalXP/350*100);
+  document.getElementById('tl-fill').style.width=pct+'%';
+  document.getElementById('tl-pct').textContent=pct+'%';
+  document.getElementById('tl-xpv').textContent=totalXP;
+  document.getElementById('tl-frm').textContent=Math.round(pct*2.5);
+}
+function markQ(id,xpv){
+  if(questDone[id])return;
+  questDone[id]=true;
+  addXP(xpv||20);
+  refreshTasks();
+  // Update task highlight to next undone task
+  setTimeout(highlightNextTask,300);
+}
+function refreshTasks(){
+  var s=STEPS[STEP];
+  if(!s||s.type!=='ic')return;
+  s.tasks.forEach(function(t){
+    var el=document.getElementById('ck-'+t.id);
+    if(!el)return;
+    var done=!!questDone[t.id];
+    el.className='ck'+(done?' done':'');
+    el.querySelector('.ck-ic').innerHTML=done?'&#10003;':'&#9711;';
+  });
+  var allDone=s.tasks.every(function(t){return !!questDone[t.id];});
+  var btn=document.getElementById('ic-btn');
+  if(btn) btn.disabled=!allDone;
+  var ok=document.getElementById('ic-ok');
+  if(ok&&allDone){ok.classList.add('show');hideTaskHL();}
+}
 
-// ══════════════════════════════════════
+// ══════════════════════════════════════════════
 //  RENDER STEP
-// ══════════════════════════════════════
-function renderStep() {
-  var s = STEPS[STEP];
-  var lcard = document.getElementById('lcard');
+// ══════════════════════════════════════════════
+function renderStep(){
+  var s=STEPS[STEP];
+  clearZH();
+  // Dots
+  var dotsEl=document.getElementById('sdots');
+  dotsEl.innerHTML=STEPS.map(function(st,i){
+    var cls='sdot';
+    if(st.type==='ic') cls+=' ic';
+    if(i<STEP) cls+=' done';
+    if(i===STEP) cls+=' act';
+    return '<div class="'+cls+'"></div>';
+  }).join('');
+  document.getElementById('slbl').textContent='步驟 '+(STEP+1)+'/'+STEPS.length;
 
-  // Clear quiz state
-  answered1 = false; answered2 = false;
-  quizDone = false;
-
-  if (s.quiz) {
-    lcard.innerHTML = buildQuizHTML();
+  var h='';
+  if(s.type==='learn'){
+    h='<div class="s-tag">'+s.tag+'</div>';
+    h+='<div class="s-title">'+s.title+'</div>';
+    h+='<div class="s-body">'+s.body+'</div>';
+    var fn=s.btn.fn?s.btn.fn+'()':'go(1)';
+    h+='<div style="display:flex;align-items:center;gap:6px;margin-top:8px">';
+    if(STEP>0){
+      h+='<button onclick="goBack()" title="&#19978;&#19968;&#27493; (Ctrl+Z)" class="back-btn-sm">&#8592;</button>';
+    }
+    h+='<button class="abtn '+s.btn.cl+'" style="flex:1;margin-top:0" onclick="'+fn+'">'+s.btn.l+'</button>';
+    h+='</div>';
+    if(STEP===1) setTimeout(showZoneSeq,400);
   } else {
-    lcard.innerHTML = buildLearnHTML(s);
+    h='<div class="ic-badge">&#127918; 互動練習</div>';
+    h+='<div class="s-tag">'+s.tag+'</div>';
+    h+='<div class="s-title ic">'+s.title+'</div>';
+    h+='<div class="s-body">'+s.hint+'</div>';
+    h+='<div style="margin-bottom:8px">';
+    s.tasks.forEach(function(t){
+      var done=!!questDone[t.id];
+      h+='<div class="ck'+(done?' done':(t===s.tasks[0]?' active':''))+'" id="ck-'+t.id+'">';
+      h+='<span class="ck-ic">'+(done?'&#10003;':'&#9711;')+'</span>';
+      h+=t.l+'</div>';
+    });
+    h+='</div>';
+    var allDone=s.tasks.every(function(t){return !!questDone[t.id];});
+    h+='<div class="ic-ok'+(allDone?' show':'')+'" id="ic-ok">&#10003; 完成！點下一步繼續。</div>';
+    h+='<div style="display:flex;align-items:center;gap:6px;margin-top:8px">';
+    h+='<button onclick="goBack()" title="&#19978;&#19968;&#27493; (Ctrl+Z)" class="back-btn-sm">&#8592;</button>';
+    h+='<button class="abtn orange" id="ic-btn" style="flex:1;margin-top:0" onclick="go(1)" '+(allDone?'':'disabled')+'>'+s.btn.l+'</button>';
+    h+='</div>';
+    setTimeout(function(){initIC(s.ic);},100);
   }
-
-  // Update zone highlights
-  clearHighlights();
-  if (s.highlight) showHighlight(s.highlight);
-
-  // Update timeline progress
-  updateTimeline();
+  document.getElementById('lbody').innerHTML=h;
 }
-
-function buildLearnHTML(s) {
-  var back = STEP > 0 ? '<button class="btn-back" onclick="goStep(-1)">← 上一步</button>' : '';
-  var dots = '';
-  for (var i = 0; i < TOTAL_STEPS; i++) {
-    dots += '<div class="sdot' + (i === STEP ? ' on' : '') + '"></div>';
-  }
-  return '<div class="lcard-step">' + s.tag + '</div>'
-    + '<div class="lcard-title">' + s.title + '</div>'
-    + '<div class="lcard-body">' + s.body + '</div>'
-    + '<div class="lcard-nav">'
-    + '<div class="step-dots">' + dots + '</div>'
-    + (back)
-    + '<button class="btn-next" onclick="goStep(1)">' + s.next + '</button>'
-    + '</div>';
-}
-
-function buildQuizHTML() {
-  var dots = '';
-  for (var i = 0; i < TOTAL_STEPS; i++) {
-    dots += '<div class="sdot' + (i === STEP ? ' on' : '') + '"></div>';
-  }
-  var html = '<div class="lcard-step">STEP 06 / 06 · 測驗</div>'
-    + '<div class="lcard-title">理解測驗 — 五大介面區域</div>';
-
-  // Q1
-  html += '<div class="lcard-body" style="margin-bottom:8px"><b>Q1.</b> ' + QUIZ[0].q + '</div>';
-  html += '<div class="quiz-opts" id="qopts0">';
-  var letters = ['A','B','C','D'];
-  for (var i = 0; i < QUIZ[0].opts.length; i++) {
-    html += '<div class="quiz-opt" id="qo0_'+i+'" onclick="pickQ(0,'+i+')">'
-      + '<div class="qo-letter">' + letters[i] + '</div>'
-      + '<div class="qo-txt">' + QUIZ[0].opts[i] + '</div>'
-      + '</div>';
-  }
-  html += '</div><div class="quiz-result" id="qr0"></div>';
-
-  // Q2
-  html += '<div class="lcard-body" style="margin-bottom:8px"><b>Q2.</b> ' + QUIZ[1].q + '</div>';
-  html += '<div class="quiz-opts" id="qopts1">';
-  for (var j = 0; j < QUIZ[1].opts.length; j++) {
-    html += '<div class="quiz-opt" id="qo1_'+j+'" onclick="pickQ(1,'+j+')">'
-      + '<div class="qo-letter">' + letters[j] + '</div>'
-      + '<div class="qo-txt">' + QUIZ[1].opts[j] + '</div>'
-      + '</div>';
-  }
-  html += '</div><div class="quiz-result" id="qr1"></div>';
-
-  html += '<div class="lcard-nav">'
-    + '<div class="step-dots">' + dots + '</div>'
-    + '<button class="btn-back" onclick="goStep(-1)">← 上一步</button>'
-    + '<button class="btn-next" id="q-submit" onclick="submitQuiz()" style="opacity:0.4;pointer-events:none">完成關卡 ✓</button>'
-    + '</div>';
-  return html;
-}
-
-// ══════════════════════════════════════
-//  QUIZ LOGIC
-// ══════════════════════════════════════
-function pickQ(qIdx, optIdx) {
-  var already = (qIdx === 0 ? answered1 : answered2);
-  if (already) return;
-  var q = QUIZ[qIdx];
-  var correct = (optIdx === q.ans);
-  // Mark all options
-  var opts = document.querySelectorAll('#qopts' + qIdx + ' .quiz-opt');
-  for (var i = 0; i < opts.length; i++) {
-    opts[i].classList.add('disabled');
-    if (i === q.ans) opts[i].classList.add('correct');
-    else if (i === optIdx && !correct) opts[i].classList.add('wrong');
-  }
-  var res = document.getElementById('qr' + qIdx);
-  res.style.display = 'block';
-  if (correct) {
-    res.className = 'quiz-result ok';
-    res.textContent = '✓ ' + q.explain;
-    quizScore++;
-  } else {
-    res.className = 'quiz-result fail';
-    res.textContent = '✗ 答案是 ' + ['A','B','C','D'][q.ans] + '。' + q.explain;
-  }
-  if (qIdx === 0) answered1 = true;
-  else answered2 = true;
-  // Enable submit when both answered
-  if (answered1 && answered2) {
-    var btn = document.getElementById('q-submit');
-    if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
-  }
-}
-
-function submitQuiz() {
-  if (!answered1 || !answered2) return;
-  quizDone = true;
-  // Save progress
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({done: true, xp: 350, score: quizScore}));
-  } catch(e) {}
-  // Show XP popup
-  document.getElementById('xp-popup').classList.add('show');
-  updateTimeline(true);
-}
-
-// ══════════════════════════════════════
-//  NAVIGATION
-// ══════════════════════════════════════
-function goStep(dir) {
-  STEP = Math.max(0, Math.min(TOTAL_STEPS - 1, STEP + dir));
+function go(d){
+  hideTaskHL();
+  clearZH();
+  if(isEditMode){isEditMode=false;updateModeUI();}
+  document.getElementById('edit-mode-bar').classList.remove('show');
+  STEP=Math.max(0,Math.min(STEPS.length-1,STEP+(d||1)));
   renderStep();
 }
+function goBack(){
+  hideTaskHL();
+  clearZH();
+  if(STEP>0){STEP--;renderStep();}
+}
 
-// ══════════════════════════════════════
-//  ZONE HIGHLIGHTS
-// ══════════════════════════════════════
-function showHighlight(zone) {
-  if (zone === 'viewport') {
-    var vb = document.getElementById('vp-body');
-    vb.style.outline = '2px solid var(--b-orange)';
-    vb.style.outlineOffset = '-2px';
-    var lbl = document.getElementById('zl-viewport');
-    if (lbl) lbl.style.display = 'inline-block';
-  } else if (zone === 'outliner') {
-    var ol = document.getElementById('hl-outliner');
-    ol.style.background = 'rgba(255,136,50,0.18)';
-    var zl = document.getElementById('zl-outliner');
-    if (zl) zl.style.display = 'inline-block';
-  } else if (zone === 'props') {
-    var ph = document.getElementById('hl-props');
-    ph.style.background = 'rgba(255,136,50,0.18)';
-    var zp = document.getElementById('zl-props');
-    if (zp) zp.style.display = 'inline-block';
-  } else if (zone === 'timeline') {
-    var tl = document.getElementById('tl');
-    tl.style.outline = '2px solid var(--b-orange)';
-    tl.style.outlineOffset = '-2px';
-    var zt = document.getElementById('zl-timeline');
-    if (zt) zt.style.display = 'inline-block';
+// Frame Selected: zoom camera to focus on selected object (Blender's Numpad .)
+function frameSelected(){
+  if(!camera)return;
+  // Get position of currently selected object
+  var target=new THREE.Vector3(0,1,0); // default to cube
+  if(selectedObj&&selectables.length){
+    for(var i=0;i<selectables.length;i++){
+      if(selectables[i].id===selectedObj&&selectables[i].mesh){
+        selectables[i].mesh.getWorldPosition(target);
+        break;
+      }
+    }
+  } else if(cube){
+    target.copy(cube.position);
+  }
+  var steps=24, idx=0;
+  var origTarget=camTarget.clone();
+  var origRadius=camRadius;
+  var targetRadius=Math.max(3.5, camRadius*0.6);
+  clearInterval(frameSelected._timer);
+  frameSelected._timer=setInterval(function(){
+    idx++;
+    var t=idx/steps;
+    t=t*t*(3-2*t); // smoothstep easing
+    camTarget.lerpVectors(origTarget,target,t);
+    camRadius=origRadius+(targetRadius-origRadius)*t;
+    updateCamera();
+    if(idx>=steps)clearInterval(frameSelected._timer);
+  },12);
+  showKF('Frame Selected',[{l:'.',s:'ok'}],'已聚焦到: '+(selectedObj||'Scene'));
+  setTimeout(hideKF,1000);
+}
+function finishLevel(){
+  try{localStorage.setItem('blender_ui_lv1',JSON.stringify({done:true,xp:350}));}catch(e){}
+  document.getElementById('comp').classList.add('on');
+}
+
+// ── Lesson Panel Collapse ──
+var lpCollapsed=false;
+function toggleLP(){
+  var lp=document.getElementById('lp');
+  var lb=document.getElementById('lbody');
+  var ic=document.getElementById('lp-collapse');
+  lpCollapsed=!lpCollapsed;
+  if(lpCollapsed){
+    lb.style.display='none';
+    ic.innerHTML='&#43;';
+    lp.style.borderRadius='8px';
+  } else {
+    lb.style.display='';
+    ic.innerHTML='&#8722;';
+    lp.style.borderRadius='8px 8px 0 0';
   }
 }
 
-function clearHighlights() {
-  var vb = document.getElementById('vp-body');
-  vb.style.outline = 'none';
-  var zv = document.getElementById('zl-viewport');
-  if (zv) zv.style.display = 'none';
-  var ol = document.getElementById('hl-outliner');
-  ol.style.background = '';
-  var zo = document.getElementById('zl-outliner');
-  if (zo) zo.style.display = 'none';
-  var ph = document.getElementById('hl-props');
-  ph.style.background = '';
-  var zpp = document.getElementById('zl-props');
-  if (zpp) zpp.style.display = 'none';
-  var tl = document.getElementById('tl');
-  tl.style.outline = 'none';
-  var zt = document.getElementById('zl-timeline');
-  if (zt) zt.style.display = 'none';
+// ── Lesson Panel Drag ──
+(function(){
+  var lp=null,dragging=false,ox=0,oy=0,sx=0,sy=0;
+  document.addEventListener('mousedown',function(e){
+    lp=document.getElementById('lp');
+    var hdr=document.getElementById('lp-hdr');
+    if(hdr&&hdr.contains(e.target)&&e.target.id!=='lp-collapse'){
+      dragging=true;
+      var rect=lp.getBoundingClientRect();
+      ox=e.clientX-rect.left; oy=e.clientY-rect.top;
+      lp.style.right='auto';
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!dragging||!lp)return;
+    var nx=e.clientX-ox, ny=e.clientY-oy;
+    nx=Math.max(0,Math.min(nx,window.innerWidth-lp.offsetWidth));
+    ny=Math.max(0,Math.min(ny,window.innerHeight-lp.offsetHeight));
+    lp.style.left=nx+'px'; lp.style.top=ny+'px';
+    lp.style.bottom='auto';
+  });
+  document.addEventListener('mouseup',function(){dragging=false;});
+})();
+
+// ══════════════════════════════════════════════
+//  INTERACTIVE CHALLENGE INIT
+// ══════════════════════════════════════════════
+// ── Task area highlight ──
+function showTaskHL(x,y,w,h,label){
+  var box=document.getElementById('task-hl-box');
+  var lbl=document.getElementById('task-hl-label');
+  if(!box||!lbl)return;
+  box.style.left=x+'px'; box.style.top=y+'px';
+  box.style.width=w+'px'; box.style.height=h+'px';
+  box.style.display='block';
+  lbl.style.display='block';
+  lbl.innerHTML=label;
+  // Position label above or below the box
+  var lblTop=y-26;
+  if(lblTop<40)lblTop=y+h+4;
+  lbl.style.left=x+'px';
+  lbl.style.top=lblTop+'px';
+}
+function hideTaskHL(){
+  var box=document.getElementById('task-hl-box');
+  var lbl=document.getElementById('task-hl-label');
+  if(box)box.style.display='none';
+  if(lbl)lbl.style.display='none';
 }
 
-// ══════════════════════════════════════
-//  TIMELINE / PROGRESS
-// ══════════════════════════════════════
-function updateTimeline(done) {
-  var pct = done ? 100 : Math.round((STEP / (TOTAL_STEPS - 1)) * 85);
-  document.getElementById('tl-fill').style.width = pct + '%';
-  document.getElementById('tl-pct').textContent = pct + '%';
-  var xp = done ? 350 : Math.round(350 * pct / 100);
-  document.getElementById('tl-xp').textContent = 'XP ' + xp + ' / 350';
-  document.getElementById('tl-frm').textContent = Math.round(pct * 2.5);
-}
-
-// ══════════════════════════════════════
-//  GIZMO DRAWING
-// ══════════════════════════════════════
-function drawGizmo() {
-  var g = document.getElementById('gizmo');
-  if (!g || !camera) return;
-  var ctx2 = g.getContext('2d');
-  var sz = g.width, cx = sz / 2, cy = sz / 2, r = 22;
-  ctx2.clearRect(0, 0, sz, sz);
-  // BG
-  ctx2.beginPath(); ctx2.arc(cx, cy, r + 4, 0, Math.PI * 2);
-  ctx2.fillStyle = 'rgba(26,26,26,0.60)'; ctx2.fill();
-
-  var camR = new THREE.Vector3(), camU = new THREE.Vector3(), camF = new THREE.Vector3();
-  camera.matrix.extractBasis(camR, camU, camF);
-  var axes = [
-    {n:'X', v:new THREE.Vector3(1,0,0),  c:'#dd4444'},
-    {n:'Y', v:new THREE.Vector3(0,1,0),  c:'#44aa44'},
-    {n:'Z', v:new THREE.Vector3(0,0,-1), c:'#4466cc'},
-  ];
-  var items = [];
-  for (var i = 0; i < axes.length; i++) {
-    var ax = axes[i];
-    var sv = {x: cx + ax.v.dot(camR)*r, y: cy - ax.v.dot(camU)*r};
-    var nv = {x: cx - ax.v.dot(camR)*r, y: cy + ax.v.dot(camU)*r};
-    items.push({s:nv, c:ax.c+'55', d:-ax.v.dot(camF), lbl:'', neg:true});
-    items.push({s:sv, c:ax.c,      d: ax.v.dot(camF), lbl:ax.n, neg:false});
+// ── Highlight next undone task in current IC step ──
+function highlightNextTask(){
+  var s=STEPS[STEP];
+  if(!s||s.type!=='ic')return;
+  hideTaskHL();
+  // Find first undone task
+  var nextTask=null;
+  for(var i=0;i<s.tasks.length;i++){
+    if(!questDone[s.tasks[i].id]){nextTask=s.tasks[i];break;}
   }
-  items.sort(function(a,b){return a.d-b.d;});
-  for (var j = 0; j < items.length; j++) {
-    var it = items[j];
-    ctx2.beginPath(); ctx2.moveTo(cx,cy); ctx2.lineTo(it.s.x,it.s.y);
-    ctx2.strokeStyle = it.c; ctx2.lineWidth = it.neg ? 1.5 : 2.5; ctx2.stroke();
-    if (!it.neg) {
-      ctx2.beginPath(); ctx2.arc(it.s.x,it.s.y,5.5,0,Math.PI*2);
-      ctx2.fillStyle = it.c; ctx2.fill();
-      ctx2.fillStyle = '#fff'; ctx2.font = 'bold 7px monospace';
-      ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
-      ctx2.fillText(it.lbl, it.s.x, it.s.y);
+  if(!nextTask)return; // all done
+
+  var ic=s.ic;
+  var rpW=document.getElementById('rp').offsetWidth;
+  var ltW=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--LT'))||28;
+  var tbH=26+26+26; // TOP+MB+VH
+  var tlH=56;
+  var vpX=ltW, vpY=tbH;
+  var vpW=window.innerWidth-ltW-rpW, vpH=window.innerHeight-tbH-tlH;
+  var vpCX=vpX+vpW/2, vpCY=vpY+vpH/2;
+
+  if(ic==='viewport_nav'){
+    // All viewport_nav tasks highlight the whole viewport
+    showTaskHL(vpX+4,vpY+4,vpW-8,vpH-8,'&#128433; 在 3D 視窗中操作');
+  } else if(ic==='outliner'){
+    // Highlight the specific row in outliner
+    var rowId={'sel_cube':'ol-cube','sel_camera':'ol-camera','sel_light':'ol-light'}[nextTask.id];
+    var row=document.getElementById(rowId);
+    if(row){
+      var r=row.getBoundingClientRect();
+      showTaskHL(r.left,r.top,r.width,r.height,'&#128270; 點擊此物件');
+    }
+  } else if(ic==='grs'){
+    // Highlight viewport and show key to press
+    showTaskHL(vpX+4,vpY+4,vpW-8,vpH-8,
+      nextTask.id==='g_done'?'&#9875; 按 G 鍵開始移動':
+      nextTask.id==='r_done'?'&#8635; 按 R 鍵開始旋轉':
+      '&#10561; 按 S 鍵開始縮放');
+  } else if(ic==='tab_mode'){
+    if(nextTask.id==='tab_edit'||nextTask.id==='tab_object'){
+      // Highlight the mode button
+      var mb=document.getElementById('modebtn');
+      if(mb){var r=mb.getBoundingClientRect();showTaskHL(r.left-2,r.top-2,r.width+4,r.height+4,'&#9681; 按 Tab 切換模式');}
+    } else if(nextTask.id==='xray_alt_z'){
+      // Highlight xray button
+      var xb=document.getElementById('xray-btn');
+      if(xb){var r=xb.getBoundingClientRect();showTaskHL(r.left-2,r.top-2,r.width+4,r.height+4,'&#9677; 按 Alt+Z');}
+    }
+  } else if(ic==='add_hide'){
+    if(nextTask.id==='shiftA_done'){
+      showTaskHL(vpX+4,vpY+4,vpW-8,vpH-8,'&#8853; 按 Shift+A 新增物件');
+    } else if(nextTask.id==='h_hide'){
+      var cubeRow=document.getElementById('ol-cube');
+      if(cubeRow){var r=cubeRow.getBoundingClientRect();showTaskHL(r.left,r.top,r.width,r.height,'&#128065; 按 H 隱藏');}
+      else showTaskHL(vpX+4,vpY+4,vpW-8,vpH-8,'按 H 隱藏 Cube');
+    } else if(nextTask.id==='alth_show'){
+      showTaskHL(vpX+4,vpY+4,vpW-8,vpH-8,'&#128065; 按 Alt+H 顯示所有物件');
     }
   }
 }
 
-// ══════════════════════════════════════
-//  WINDOW.ONLOAD — THREE.JS SETUP
-// ══════════════════════════════════════
-window.onload = function() {
+function initIC(ic){
+  grsMode=null; numBuf=''; grsAxis='';
+  clearZH();
+  if(ic==='viewport_nav'){
+    hideKF();
+    setHint('MMB 拖曳旋轉 &#x7c; 滾輪縮放 &#x7c; Shift+MMB 平移 &#x7c; LMB 選取物件');
+    // Highlight entire viewport
+    setTimeout(function(){
+      var ltW=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--LT'))||28;
+      var rpW=document.getElementById('rp').offsetWidth;
+      var tbH=26+26+26;
+      var tlH=56;
+      setZH('vp',ltW,tbH,window.innerWidth-ltW-rpW,window.innerHeight-tbH-tlH,'① 3D Viewport — 在這裡操作！');
+      setTimeout(clearZH,2000);
+    },200);
+  } else if(ic==='outliner'){
+    var ol=document.getElementById('outliner');
+    if(ol){
+      var r=ol.getBoundingClientRect();
+      setZH('ol',r.left,r.top,r.width,r.height,'② 點擊物件名稱選取');
+    }
+    hideKF();
+  } else if(ic==='grs'){
+    showKF('GRS 操作',[{l:'G',s:'wait'},{plus:true},{l:'R'},{plus:true},{l:'S'}],'先按 G → Z → 輸入數字 → Enter');
+    // Highlight viewport (main interaction area)
+    setTimeout(function(){
+      var ltW=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--LT'))||28;
+      var rpW=document.getElementById('rp').offsetWidth;
+      var tbH=26+26+26;var tlH=56;
+      setZH('vp',ltW,tbH,window.innerWidth-ltW-rpW,window.innerHeight-tbH-tlH,'按 G / R / S 開始操作');
+      setTimeout(clearZH,2000);
+    },300);
+  } else if(ic==='tab_mode'){
+    showKF('切換模式',[{l:'Tab',s:'wait'}],'按 Tab 切換 Object ↔ Edit Mode');
+    setTimeout(function(){
+      var el=document.getElementById('modebtn');
+      if(el){var r=el.getBoundingClientRect();setZH('vp',r.left-4,r.top-4,r.width+8,r.height+8,'Object Mode 按鈕');}
+      setTimeout(clearZH,2000);
+    },300);
+  } else if(ic==='add_hide'){
+    showKF('物件操作',[{l:'Shift',s:'wait'},{plus:true},{l:'A'}],'Shift+A 開啟新增選單');
+  }
+  // Highlight the next task area
+  setTimeout(highlightNextTask,350);
+}
 
-  // — Renderer —
-  var canvas = document.getElementById('three-canvas');
-  renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setClearColor(0x1d1d1d, 1);
-
-  // — Scene —
-  scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x1d1d1d, 20, 40);
-  clock = new THREE.Clock();
-
-  // — Camera (MUST use window dims) —
-  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(4.5, 3.5, 5.5);
-  camera.lookAt(0, 0, 0);
-
-  // — Lights —
-  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-  var sun = new THREE.DirectionalLight(0xffd0a0, 0.90);
-  sun.position.set(5, 8, 5); scene.add(sun);
-  var fill = new THREE.DirectionalLight(0x4488ff, 0.30);
-  fill.position.set(-5, 2, -3); scene.add(fill);
-
-  // — Grid (Blender style: dark) —
-  var grid = new THREE.GridHelper(20, 20, 0x2a2a2a, 0x222222);
-  scene.add(grid);
-  var fineGrid = new THREE.GridHelper(20, 40, 0x222222, 0x1e1e1e);
-  fineGrid.material.transparent = true; fineGrid.material.opacity = 0.45;
-  scene.add(fineGrid);
-
-  // — Axis lines —
-  var addLine = function(from, to, color) {
-    var g = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(from[0],from[1],from[2]),
-      new THREE.Vector3(to[0],to[1],to[2])
-    ]);
-    scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({color:color,transparent:true,opacity:0.7})));
-  };
-  addLine([-12,0.002,0],[12,0.002,0],0x7a0000);  // X red
-  addLine([0,0.002,-12],[0,0.002,12],0x007a00);  // Y green
-
-  // — Default Cube (matches Blender's default scene) —
-  var cubeGeo = new THREE.BoxGeometry(2, 2, 2);
-  var cubeMat = new THREE.MeshStandardMaterial({
-    color: 0x888888, roughness: 0.85, metalness: 0.05
+// ══════════════════════════════════════════════
+//  ZONE HIGHLIGHT SYSTEM
+// ══════════════════════════════════════════════
+function clearZH(){
+  ['vp','ol','pr','tl','lt'].forEach(function(id){
+    var el=document.getElementById('zh-'+id);
+    if(el) el.classList.remove('on');
   });
-  cube = new THREE.Mesh(cubeGeo, cubeMat);
-  cube.position.set(0, 1, 0);
-  scene.add(cube);
-  // Wireframe edges (Blender shows edge overlay by default)
-  var edgeGeo = new THREE.EdgesGeometry(cubeGeo);
-  cubeEdges = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({color:0x000000, linewidth:1}));
-  cubeEdges.position.copy(cube.position);
-  scene.add(cubeEdges);
+  document.getElementById('zh-tip').style.display='none';
+}
+function setZH(id,x,y,w,h,tip){
+  var el=document.getElementById('zh-'+id);
+  if(!el)return;
+  el.style.left=x+'px'; el.style.top=y+'px';
+  el.style.width=w+'px'; el.style.height=h+'px';
+  el.classList.add('on');
+  if(tip){
+    var t=document.getElementById('zh-tip');
+    t.innerHTML=tip; t.style.display='block';
+    t.style.left=(x+8)+'px'; t.style.top=(y+6)+'px';
+  }
+}
+var zoneSeqTimer=null;
+function showZoneSeq(){
+  var ltW=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--LT'))||28;
+  var rpW=document.getElementById('rp').offsetWidth;
+  var tbH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--TOP'))||26;
+  var mbH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--MB'))||26;
+  var vhH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--VH'))||26;
+  var tlH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--TL'))||56;
+  var vpX=ltW, vpY=tbH+mbH+vhH;
+  var vpW=window.innerWidth-ltW-rpW, vpH=window.innerHeight-vpY-tlH;
+  var ol=document.getElementById('outliner');
+  var olR=ol?ol.getBoundingClientRect():{left:window.innerWidth-rpW,top:tbH+mbH,width:rpW,height:240};
+  var zones=[
+    {id:'vp', x:vpX,y:vpY,w:vpW,h:vpH,l:'① Viewport 3D 視圖'},
+    {id:'ol', x:olR.left,y:olR.top,w:olR.width,h:olR.height,l:'② Outliner 大綱'},
+    {id:'pr', x:window.innerWidth-rpW,y:tbH+mbH+240,w:rpW,h:window.innerHeight-tbH-mbH-240-tlH,l:'③ Properties 屬性'},
+    {id:'lt', x:0,y:vpY,w:ltW,h:vpH,l:'④ Toolbar 工具架'},
+    {id:'tl', x:0,y:window.innerHeight-tlH,w:window.innerWidth-rpW,h:tlH,l:'⑤ Timeline 時間軸'},
+  ];
+  var i=0;
+  function next(){
+    clearZH();
+    if(i>=zones.length)return;
+    var z=zones[i++];
+    setZH(z.id,z.x,z.y,z.w,z.h,z.l);
+    zoneSeqTimer=setTimeout(next,1300);
+  }
+  next();
+}
 
-  // Cube selection highlight (orange outline)
-  var selEdge = new THREE.EdgesGeometry(new THREE.BoxGeometry(2.02, 2.02, 2.02));
-  var selLine = new THREE.LineSegments(selEdge, new THREE.LineBasicMaterial({
-    color: 0xff8832, linewidth: 2, transparent: true, opacity: 0.9
-  }));
-  selLine.position.copy(cube.position);
-  scene.add(selLine);
+// ══════════════════════════════════════════════
+//  OUTLINER CLICKS
+// ══════════════════════════════════════════════
+function olClick(name){
+  var propName;
+  if(name==='cube')propName='Cube';
+  else if(name==='camera')propName='Camera';
+  else if(name==='light')propName='Light';
+  else propName=name.charAt(0).toUpperCase()+name.slice(1).replace('spawn_','');
+  selectObject(name, name, propName);
+}
 
-  // — Camera object (3D Camera like Blender's) —
-  var camVis = new THREE.Group();
-  var camBody = new THREE.BoxGeometry(0.4, 0.3, 0.5);
-  var camM = new THREE.MeshStandardMaterial({color:0x303030, roughness:0.8});
-  camVis.add(new THREE.Mesh(camBody, camM));
-  var camLens = new THREE.CylinderGeometry(0.08, 0.10, 0.20, 8);
-  var lens = new THREE.Mesh(camLens, new THREE.MeshStandardMaterial({color:0x111111}));
-  lens.rotation.x = Math.PI/2; lens.position.z = -0.32;
-  camVis.add(lens);
-  camVis.position.set(4.4, 1.7, -3.8);
-  camVis.rotation.y = Math.PI * 0.6;
-  scene.add(camVis);
+// ══════════════════════════════════════════════
+//  KEYBOARD HANDLER
+// ══════════════════════════════════════════════
+document.addEventListener('keydown',function(e){
+  var tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA')return;
+  var k=e.key.toUpperCase();
+  var ic=STEPS[STEP]&&STEPS[STEP].ic;
 
-  // — Point light (represents Blender's default "Light") —
-  var pLight = new THREE.PointLight(0xffffff, 0.6, 15);
-  pLight.position.set(4, 6, 4);
-  scene.add(pLight);
-  var lightVis = new THREE.Mesh(
-    new THREE.OctahedronGeometry(0.12),
-    new THREE.MeshBasicMaterial({color:0xffffcc})
+  shiftHeld=e.shiftKey;
+
+  // ── Ctrl+Z = undo / go back ──
+  if(k==='Z'&&e.ctrlKey&&!e.altKey&&!e.shiftKey){e.preventDefault();goBack();return;}
+
+  // ── . (period / numpad.) = Frame Selected ──
+  if(e.key==='.'||e.key==='NumpadDecimal'){
+    e.preventDefault();
+    frameSelected();
+    return;
+  }
+
+  // ── Edit mode sub-mode: 1/2/3 ──
+  if(isEditMode){
+    if(k==='1'&&!e.ctrlKey&&!e.shiftKey){setEditMeshMode(1);updateEditModeBar(1);return;}
+    if(k==='2'&&!e.ctrlKey&&!e.shiftKey){setEditMeshMode(2);updateEditModeBar(2);return;}
+    if(k==='3'&&!e.ctrlKey&&!e.shiftKey){setEditMeshMode(3);updateEditModeBar(3);return;}
+  }
+
+  // ── Global shortcuts ──
+  if(k==='Z'&&e.altKey){e.preventDefault();doXray();}
+
+  // ── GRS ──
+  if(ic==='grs'){
+    if(grsMode===null){
+      if(k==='G'){grsMode='G';numBuf='';grsAxis='';
+        showKF('移動 (Grab)',[{l:'G',s:'ok'},{plus:true},{l:'X/Y/Z',s:'wait'},{plus:true},{l:'#'}],'G 按下！接 X/Y/Z 限制軸，或直接 Enter');
+      } else if(k==='R'){grsMode='R';numBuf='';grsAxis='';
+        showKF('旋轉 (Rotate)',[{l:'R',s:'ok'},{plus:true},{l:'X/Y/Z',s:'wait'},{plus:true},{l:'#'}],'R 按下！接 Z 繞 Z 軸旋轉');
+      } else if(k==='S'){grsMode='S';numBuf='';
+        showKF('縮放 (Scale)',[{l:'S',s:'ok'},{plus:true},{l:'#',s:'wait'}],'S 按下！輸入倍率，Enter 確認');
+      }
+    } else if(grsMode==='G'){
+      if(k==='X'){grsAxis='X';grsMode='GX';showKF('移動→X',[{l:'G',s:'ok'},{plus:true},{l:'X',s:'ok'},{plus:true},{l:'#',s:'wait'}],'鎖定 X 軸，輸入距離');}
+      else if(k==='Y'){grsAxis='Y';grsMode='GY';showKF('移動→Y',[{l:'G',s:'ok'},{plus:true},{l:'Y',s:'ok'},{plus:true},{l:'#',s:'wait'}],'鎖定 Y 軸');}
+      else if(k==='Z'){grsAxis='Z';grsMode='GZ';showKF('移動→Z',[{l:'G',s:'ok'},{plus:true},{l:'Z',s:'ok'},{plus:true},{l:'#',s:'wait'}],'鎖定 Z 軸，輸入距離');}
+      else if(k==='ENTER'){doGMove(null);grsMode=null;}
+      else if(k==='ESCAPE'){grsMode=null;hideKF();}
+    } else if(grsMode==='GX'||grsMode==='GY'||grsMode==='GZ'){
+      if((k>='0'&&k<='9')||k==='.'||k==='-'){numBuf+=e.key;}
+      else if(k==='ENTER'){doGMove(numBuf);grsMode=null;numBuf='';}
+      else if(k==='ESCAPE'){grsMode=null;numBuf='';hideKF();}
+    } else if(grsMode==='R'){
+      if(k==='X'){grsMode='RX';}else if(k==='Y'){grsMode='RY';}
+      else if(k==='Z'){grsMode='RZ';showKF('旋轉→Z',[{l:'R',s:'ok'},{plus:true},{l:'Z',s:'ok'},{plus:true},{l:'#',s:'wait'}],'輸入角度（如 45）');}
+      else if(k==='ENTER'){doRot(null);grsMode=null;}
+      else if(k==='ESCAPE'){grsMode=null;hideKF();}
+    } else if(grsMode==='RX'||grsMode==='RY'||grsMode==='RZ'){
+      if((k>='0'&&k<='9')||k==='.'||k==='-'){numBuf+=e.key;showKF('旋轉→Z',[{l:'R',s:'ok'},{plus:true},{l:'Z',s:'ok'},{plus:true},{l:numBuf,s:'lit'}],'按 Enter 確認...');}
+      else if(k==='ENTER'){doRot(numBuf);grsMode=null;numBuf='';}
+      else if(k==='ESCAPE'){grsMode=null;numBuf='';hideKF();}
+    } else if(grsMode==='S'){
+      if((k>='0'&&k<='9')||k==='.'||k==='-'){numBuf+=e.key;showKF('縮放',[{l:'S',s:'ok'},{plus:true},{l:numBuf,s:'lit'}],'輸入倍率...');}
+      else if(k==='ENTER'){doScale(numBuf);grsMode=null;numBuf='';}
+      else if(k==='ESCAPE'){grsMode=null;numBuf='';hideKF();}
+    }
+  }
+
+  // ── Tab mode ──
+  if(ic==='tab_mode'){
+    if(k==='TAB'){
+      e.preventDefault();
+      isEditMode=!isEditMode;
+      updateModeUI();
+      if(isEditMode){
+        markQ('tab_edit',25);
+        flashMode('EDIT MODE');
+        showKF('Edit Mode',[{l:'Tab',s:'ok'}],'Edit Mode 進入！再按 Tab 切回 Object Mode');
+      } else {
+        markQ('tab_object',25);
+        flashMode('OBJECT MODE');
+        showKF('Object Mode',[{l:'Tab',s:'ok'}],'回到 Object Mode &#10003;');
+        setTimeout(hideKF,1200);
+      }
+    }
+    if(k==='Z'&&e.altKey){e.preventDefault();doXray();if(STEPS[STEP]&&STEPS[STEP].ic==='tab_mode')markQ('xray_alt_z',25);}
+  }
+
+  // ── Add/Hide ──
+  if(ic==='add_hide'){
+    if(k==='A'&&e.shiftKey){
+      e.preventDefault();
+      showAddMenu();
+      markQ('shiftA_done',20);
+      showKF('新增物件',[{l:'Shift',s:'ok'},{plus:true},{l:'A',s:'ok'}],'選擇要新增的物件類型');
+    }
+    if(k==='H'&&!e.altKey&&!e.ctrlKey){
+      cubeVisible=false; cube.visible=false;
+      markQ('h_hide',20);
+      showKF('隱藏',[{l:'H',s:'ok'}],'Cube 已隱藏！按 Alt+H 顯示');
+      var eye=document.getElementById('eye-cube');
+      if(eye)eye.style.opacity='0.2';
+    }
+    if(k==='H'&&e.altKey){
+      cubeVisible=true; cube.visible=true;
+      markQ('alth_show',20);
+      showKF('顯示',[{l:'Alt',s:'ok'},{plus:true},{l:'H',s:'ok'}],'所有物件已顯示 &#10003;');
+      var eye2=document.getElementById('eye-cube');
+      if(eye2)eye2.style.opacity='1';
+      setTimeout(hideKF,1200);
+    }
+    if(k==='ESCAPE'){closeAddMenu();}
+  }
+});
+document.addEventListener('keyup',function(e){shiftHeld=e.shiftKey;});
+
+// ── GRS actions ──
+function doGMove(numStr){
+  var v=parseFloat(numStr)||1.5;
+  if(grsAxis==='X') cube.position.x+=v;
+  else if(grsAxis==='Y') cube.position.y+=v;
+  else if(grsAxis==='Z') cube.position.z+=v;
+  else cube.position.x+=v;
+  updateProps();
+  markQ('g_done',30);
+  showKF('完成！',[{l:'G',s:'ok'},{plus:true},{l:grsAxis||'X',s:'ok'}],'移動完成 &#10003;');
+  setTimeout(function(){if(!questDone['r_done'])showKF('下一個：旋轉',[{l:'R',s:'wait'}],'按 R 進入旋轉模式');},1500);
+}
+function doRot(numStr){
+  var ang=(parseFloat(numStr)||45)*Math.PI/180;
+  if(grsMode==='RX') cube.rotation.x+=ang;
+  else if(grsMode==='RY') cube.rotation.y+=ang;
+  else cube.rotation.z+=ang;
+  updateProps();
+  markQ('r_done',30);
+  showKF('完成！',[{l:'R',s:'ok'},{plus:true},{l:'Z',s:'ok'}],'旋轉完成 &#10003;');
+  setTimeout(function(){if(!questDone['s_done'])showKF('下一個：縮放',[{l:'S',s:'wait'}],'按 S 進入縮放模式');},1500);
+}
+function doScale(numStr){
+  var sc=parseFloat(numStr)||1.5;
+  sc=Math.max(0.1,Math.min(sc,4));
+  cube.scale.multiplyScalar(sc);
+  updateProps();
+  markQ('s_done',30);
+  showKF('完成！',[{l:'S',s:'ok'}],'縮放完成 &#10003;');
+  setTimeout(hideKF,1500);
+}
+function doXray(){
+  isXray=!isXray;
+  cube.material.transparent=isXray;
+  cube.material.opacity=isXray?0.32:1;
+  document.getElementById('xray-btn').classList.toggle('on',isXray);
+}
+
+// ── Mode UI ──
+function updateModeUI(){
+  var modeLabel='Object Mode';
+  if(!isEditMode){
+    clearEditMeshOverlay();
+    meshEditMode=0;
+    editTargetMesh=null;
+    // Remove bright wireframe overlay
+    if(editTargetEdgeOverlay){scene.remove(editTargetEdgeOverlay);editTargetEdgeOverlay=null;}
+    if(cubeEdges)cubeEdges.material.color.setHex(0x000000);
+    // Restore selection ring for whoever is selected
+    selectables.forEach(function(s){
+      if(s.selRingMesh)s.selRingMesh.material.opacity=(s.id===selectedObj)?0.92:0;
+    });
+  } else {
+    // Entering edit mode: find the selected mesh
+    editTargetMesh=null;
+    for(var i=0;i<selectables.length;i++){
+      if(selectables[i].id===selectedObj&&selectables[i].mesh){
+        editTargetMesh=selectables[i].mesh;
+        break;
+      }
+    }
+    // Fallback to cube if nothing selected
+    if(!editTargetMesh)editTargetMesh=cube;
+    // Hide all selection rings in edit mode
+    selectables.forEach(function(s){if(s.selRingMesh)s.selRingMesh.material.opacity=0;});
+    // Bright orange wireframe on edit target
+    if(editTargetEdgeOverlay)scene.remove(editTargetEdgeOverlay);
+    var eGeo=new THREE.EdgesGeometry(editTargetMesh.geometry,5);
+    editTargetEdgeOverlay=new THREE.LineSegments(
+      eGeo,
+      new THREE.LineBasicMaterial({color:0xff8832,depthTest:false})
+    );
+    editTargetEdgeOverlay.position.copy(editTargetMesh.position);
+    editTargetEdgeOverlay.rotation.copy(editTargetMesh.rotation);
+    editTargetEdgeOverlay.scale.copy(editTargetMesh.scale);
+    editTargetEdgeOverlay.renderOrder=9;
+    scene.add(editTargetEdgeOverlay);
+    modeLabel='Edit Mode';
+  }
+  document.getElementById('mode-txt').textContent=modeLabel;
+  document.getElementById('mode-icon').innerHTML=isEditMode?'&#9679;':'&#9633;';
+  document.getElementById('modebtn').style.borderColor=isEditMode?'rgba(77,144,254,.5)':'rgba(232,125,13,.5)';
+  document.getElementById('modebtn').style.color=isEditMode?'var(--blue2)':'var(--orange2)';
+}
+function toggleMode(){isEditMode=!isEditMode;updateModeUI();}
+function enterEditMode(submode){
+  if(!isEditMode)return;
+  setEditMeshMode(submode);
+  updateEditModeBar(submode);
+}
+function updateEditModeBar(sub){
+  document.getElementById('edit-mode-bar').classList.toggle('show',isEditMode);
+  ['v','e','f'].forEach(function(k,i){
+    var el=document.getElementById('emb-'+k);
+    if(el)el.className='emb-key'+(sub===i+1?' active-k':'');
+  });
+  // Position the bar under the viewport header
+  var ltW=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--LT'))||28;
+  var tbH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--TOP'))||26;
+  var mbH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--MB'))||26;
+  var vhH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--VH'))||26;
+  var bar=document.getElementById('edit-mode-bar');
+  bar.style.left=(ltW+8)+'px';
+  bar.style.top=(tbH+mbH+vhH+8)+'px';
+}
+
+// ── Edit sub-mode: 1=Vertex 2=Edge 3=Face ──
+function clearEditMeshOverlay(){
+  vertexDots.forEach(function(d){scene.remove(d);d.geometry.dispose();});
+  vertexDots=[];
+  edgeLines.forEach(function(l){scene.remove(l);l.geometry.dispose();});
+  edgeLines=[];
+  if(faceMesh){scene.remove(faceMesh);faceMesh.geometry.dispose();faceMesh=null;}
+}
+
+function setEditMeshMode(mode){
+  if(!isEditMode||!editTargetMesh)return;
+  meshEditMode=mode;
+  clearEditMeshOverlay();
+
+  var mesh=editTargetMesh;
+  var geo=mesh.geometry;
+  var mat=new THREE.Matrix4();
+  mesh.updateMatrixWorld(true);
+  mat.copy(mesh.matrixWorld);
+
+  // ── Vertex Mode (1) ──
+  if(mode===1){
+    // Get unique vertex positions from the geometry
+    var posAttr=geo.getAttribute('position');
+    if(!posAttr){return;}
+    // Collect unique positions (rounded to 3dp to dedupe)
+    var seen={};
+    var uniqueVerts=[];
+    for(var i=0;i<posAttr.count;i++){
+      var vx=posAttr.getX(i), vy=posAttr.getY(i), vz=posAttr.getZ(i);
+      var key=vx.toFixed(3)+'|'+vy.toFixed(3)+'|'+vz.toFixed(3);
+      if(!seen[key]){
+        seen[key]=true;
+        var wv=new THREE.Vector3(vx,vy,vz).applyMatrix4(mat);
+        uniqueVerts.push(wv);
+      }
+    }
+    // Render dots — max ~200 for performance
+    var step=Math.max(1,Math.floor(uniqueVerts.length/120));
+    var dotGeo=new THREE.SphereGeometry(.055,6,4);
+    var dotMat=new THREE.MeshBasicMaterial({color:0xffffff,depthTest:false});
+    uniqueVerts.forEach(function(pos,idx){
+      if(idx%step!==0&&idx!==0&&idx!==uniqueVerts.length-1)return;
+      var d=new THREE.Mesh(dotGeo,dotMat.clone());
+      d.position.copy(pos);
+      d.renderOrder=10;
+      scene.add(d);
+      vertexDots.push(d);
+    });
+    document.getElementById('mode-txt').textContent='Edit Mode — Vertex (1)';
+    flashMode('VERTEX SELECT');
+
+  // ── Edge Mode (2) ──
+  } else if(mode===2){
+    // Use EdgesGeometry to get non-duplicate edges
+    var edgeGeo=new THREE.EdgesGeometry(geo, 15); // 15° threshold
+    var edgeMat=new THREE.LineBasicMaterial({
+      color:0xff8832, linewidth:2, depthTest:false
+    });
+    var edgeLineSet=new THREE.LineSegments(edgeGeo,edgeMat);
+    // Apply same world transform as the mesh
+    edgeLineSet.position.copy(mesh.position);
+    edgeLineSet.rotation.copy(mesh.rotation);
+    edgeLineSet.scale.copy(mesh.scale);
+    edgeLineSet.renderOrder=9;
+    scene.add(edgeLineSet);
+    edgeLines.push(edgeLineSet);
+    document.getElementById('mode-txt').textContent='Edit Mode — Edge (2)';
+    flashMode('EDGE SELECT');
+
+  // ── Face Mode (3) ──
+  } else if(mode===3){
+    // Clone the geometry, apply face highlight tint
+    var faceGeo2=geo.clone();
+    var faceMat2=new THREE.MeshBasicMaterial({
+      color:0x4d90fe, transparent:true, opacity:.28,
+      side:THREE.DoubleSide, depthWrite:false
+    });
+    faceMesh=new THREE.Mesh(faceGeo2,faceMat2);
+    faceMesh.position.copy(mesh.position);
+    faceMesh.rotation.copy(mesh.rotation);
+    faceMesh.scale.copy(mesh.scale);
+    faceMesh.renderOrder=8;
+    scene.add(faceMesh);
+    document.getElementById('mode-txt').textContent='Edit Mode — Face (3)';
+    flashMode('FACE SELECT');
+  }
+}
+function flashMode(txt){
+  var el=document.getElementById('modeflash');
+  el.innerHTML=txt;el.style.display='block';
+  setTimeout(function(){el.style.display='none';},700);
+}
+
+// ── Shade ──
+function setShade(mode){
+  shadeMode=mode;
+  ['wire','solid','mat','render'].forEach(function(m){
+    document.getElementById('sh-'+m).classList.toggle('on',m===mode);
+  });
+  cube.material.wireframe=(mode==='wire');
+  if(mode!=='wire'){cube.material.transparent=isXray;cube.material.opacity=isXray?0.32:1;}
+}
+function toggleXray(){doXray();}
+
+// ── Prefs ──
+var fpState={trans:false,numpad:false,sv5:false,unit:false};
+function openPrefs(){
+  document.getElementById('fpwin').style.display='block';
+  renderFPCat('interface');
+}
+function closePrefs(){document.getElementById('fpwin').style.display='none';}
+function fpSwitch(el){
+  document.querySelectorAll('.fp-cat').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+  renderFPCat(el.dataset.cat);
+}
+function renderFPCat(cat){
+  var c=document.getElementById('fp-content');
+  if(cat==='interface'){
+    c.innerHTML='<div class="fp-sec">Translation</div>'
+      +'<div class="fp-row'+(fpState.trans?' done-r':' target')+'" onclick="fpTrans()">'
+      +'<span class="fp-lbl">Translation</span>'
+      +'<div class="fp-tog'+(fpState.trans?' done':'on')+'" id="fp-tog-tr"></div></div>'
+      +'<div class="fp-sec">Display</div>'
+      +'<div class="fp-row"><span class="fp-lbl">Line Width</span><span style="font-size:11px;color:var(--txt3)">Thin</span></div>';
+  } else if(cat==='input'){
+    c.innerHTML='<div class="fp-sec">Keyboard</div>'
+      +'<div class="fp-row'+(fpState.numpad?' done-r':' target')+'" onclick="fpNumpad()">'
+      +'<span class="fp-lbl">Emulate Numpad</span>'
+      +'<div class="fp-tog'+(fpState.numpad?' done on':'')+'" id="fp-tog-np"></div></div>'
+      +'<div class="fp-row"><span class="fp-lbl">Emulate 3 Button Mouse</span><div class="fp-tog"></div></div>';
+  } else if(cat==='save'){
+    c.innerHTML='<div class="fp-sec">Save</div>'
+      +'<div class="fp-row"><span class="fp-lbl">Auto Save</span><div class="fp-tog on"></div></div>'
+      +'<div class="fp-sec">Versions</div>'
+      +'<div class="fp-row'+(fpState.sv5?' done-r':' target')+'" onclick="fpSV5()">'
+      +'<span class="fp-lbl">Save Versions</span>'
+      +'<select class="fp-sel'+(fpState.sv5?' done':' target-s')+'" onchange="if(this.value==\'5\'){fpState.sv5=true;renderFPCat(\'save\')}">'
+      +'<option>1</option><option>2</option><option'+(fpState.sv5?' selected':'')+'>5</option><option>10</option></select></div>';
+  } else {
+    c.innerHTML='<div class="fp-sec" style="margin-top:20px;text-align:center;color:#333">— '+cat+' settings —</div>';
+  }
+}
+function fpTrans(){fpState.trans=true;renderFPCat('interface');}
+function fpNumpad(){fpState.numpad=true;renderFPCat('input');}
+function fpSV5(){fpState.sv5=true;renderFPCat('save');}
+
+// ── Add Menu ──
+// Spawn a real 3D mesh at cursor position
+function spawnMesh(type){
+  if(!scene||!cube)return;
+  var mat=new THREE.MeshStandardMaterial({color:0x888888,roughness:.85,metalness:.04});
+  var mesh=null;
+  var geo=null;
+  if(type==='plane'){
+    geo=new THREE.PlaneGeometry(2,2);
+    mesh=new THREE.Mesh(geo,mat); mesh.rotation.x=-Math.PI/2;
+  } else if(type==='cube'){
+    geo=new THREE.BoxGeometry(2,2,2);mesh=new THREE.Mesh(geo,mat);
+  } else if(type==='sphere'){
+    geo=new THREE.SphereGeometry(1,16,12);mesh=new THREE.Mesh(geo,mat);
+  } else if(type==='cylinder'){
+    geo=new THREE.CylinderGeometry(1,1,2,16);mesh=new THREE.Mesh(geo,mat);
+  } else if(type==='cone'){
+    geo=new THREE.ConeGeometry(1,2,16);mesh=new THREE.Mesh(geo,mat);
+  } else if(type==='torus'){
+    geo=new THREE.TorusGeometry(.8,.3,12,32);mesh=new THREE.Mesh(geo,mat);
+  } else {
+    // Default: cube
+    geo=new THREE.BoxGeometry(2,2,2);mesh=new THREE.Mesh(geo,mat);
+  }
+  if(!mesh)return;
+  // Place at 3D cursor (near scene center, slightly offset)
+  var offset=spawnedMeshes.length;
+  mesh.position.set(
+    (Math.random()-.5)*4,
+    1,
+    (Math.random()-.5)*4
   );
-  lightVis.position.copy(pLight.position);
-  scene.add(lightVis);
-
-  // — Check existing progress —
-  try {
-    var saved = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
-    if (saved.done) updateTimeline(true);
-  } catch(e) {}
-
-  // — First render —
-  renderStep();
-
-  // — Resize —
-  window.addEventListener('resize', function() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+  scene.add(mesh);
+  spawnedMeshes.push(mesh);
+  // Add edge overlay
+  var edges=new THREE.LineSegments(
+    new THREE.EdgesGeometry(geo),
+    new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:.6})
+  );
+  edges.position.copy(mesh.position);
+  edges.rotation.copy(mesh.rotation);
+  scene.add(edges);
+  // Auto-select the new mesh
+  selectables.push({
+    id:'spawn_'+spawnedMeshes.length,
+    mesh:mesh,
+    selRingMesh:null,
+    name:type.charAt(0).toUpperCase()+type.slice(1),
+    propName:type.charAt(0).toUpperCase()+type.slice(1)
   });
+  selectObject('spawn_'+spawnedMeshes.length,type,type.charAt(0).toUpperCase()+type.slice(1));
+  // Add to outliner
+  var olBody=document.getElementById('ol-body');
+  if(olBody){
+    var row=document.createElement('div');
+    row.className='ol-row';row.style.paddingLeft='26px';row.style.cursor='pointer';
+    var sid='spawn_'+spawnedMeshes.length;
+    row.id='ol-'+sid;
+    row.innerHTML='<span class="ol-tri"></span>'
+      +'<span class="ol-obj-ic" style="color:#7ab4f5">&#9651;</span>'
+      +'<span class="ol-nm">'+type.charAt(0).toUpperCase()+type.slice(1)+'</span>'
+      +'<div class="ol-vis"><span class="ol-v">&#128065;</span></div>';
+    row.onclick=(function(id,nm){return function(){olClick(id);};})(sid,type);
+    olBody.appendChild(row);
+  }
+  // Flash
+  showKF('新增'+type.charAt(0).toUpperCase()+type.slice(1),[{l:'Shift',s:'ok'},{plus:true},{l:'A',s:'ok'}],type+' 已新增到場景！');
+  setTimeout(hideKF,1400);
+}
 
-  // — Render loop —
-  (function loop() {
-    rafId = requestAnimationFrame(loop);
-    var t = clock.getElapsedTime();
-    // Very slow auto-rotate (like Blender's default turntable view)
-    camera.position.x = Math.cos(t * 0.08) * 6.5;
-    camera.position.z = Math.sin(t * 0.08) * 6.5;
-    camera.position.y = 3.5;
-    camera.lookAt(0, 1, 0);
+function showAddMenu(){
+  var m=document.getElementById('addmenu');
+  m.style.display='block';
+  m.style.top='50%';m.style.left='50%';
+  m.style.transform='translate(-50%,-60%)';
+  addMenuOpen=true;
+  setTimeout(function(){
+    document.addEventListener('click',function rm(){
+      closeAddMenu();document.removeEventListener('click',rm);
+    },{once:true});
+  },50);
+}
+function closeAddMenu(){
+  document.getElementById('addmenu').style.display='none';
+  addMenuOpen=false;
+}
 
-    // Cube edge tracks cube
+// ══════════════════════════════════════════════
+//  KEY FLASH UI
+// ══════════════════════════════════════════════
+function showKF(title,keys,status){
+  clearTimeout(kfTimer);
+  document.getElementById('kf-title').textContent=title;
+  var row=document.getElementById('kf-row');
+  row.innerHTML=keys.map(function(k){
+    if(k.plus) return '<span class="kk-plus">+</span>';
+    var cls='kk';
+    if(k.s==='wait')cls+=' wait';
+    else if(k.s==='lit')cls+=' lit';
+    else if(k.s==='ok')cls+=' ok';
+    return '<div class="'+cls+'">'+k.l+'</div>';
+  }).join('');
+  document.getElementById('kf-status').innerHTML=status||'';
+  document.getElementById('kflash').classList.add('show');
+}
+function hideKF(){
+  clearTimeout(kfTimer);
+  document.getElementById('kflash').classList.remove('show');
+}
+function setHint(html){document.getElementById('vp-hint').innerHTML=html;}
+
+// ══════════════════════════════════════════════
+//  PROPERTIES PANEL UPDATE
+// ══════════════════════════════════════════════
+function updateProps(){
+  if(!cube)return;
+  var deg=function(r){return (r*180/Math.PI).toFixed(2)+'°';};
+  document.getElementById('pf-lx').textContent=cube.position.x.toFixed(3)+' m';
+  document.getElementById('pf-ly').textContent='Y '+cube.position.y.toFixed(3)+' m';
+  document.getElementById('pf-lz').textContent='Z '+cube.position.z.toFixed(3)+' m';
+  document.getElementById('pf-rx').textContent=deg(cube.rotation.x);
+  document.getElementById('pf-ry').textContent='Y '+deg(cube.rotation.y);
+  document.getElementById('pf-rz').textContent='Z '+deg(cube.rotation.z);
+  document.getElementById('pf-sx').textContent=cube.scale.x.toFixed(3);
+  document.getElementById('pf-sy').textContent='Y '+cube.scale.y.toFixed(3);
+  document.getElementById('pf-sz').textContent='Z '+cube.scale.z.toFixed(3);
+}
+
+// ══════════════════════════════════════════════
+//  GIZMO
+// ══════════════════════════════════════════════
+function drawGizmo(){
+  var g=document.getElementById('gizmo-cvs');
+  if(!g||!camera)return;
+  var c=g.getContext('2d'),sz=g.width,cx=sz/2,cy=sz/2,r=24;
+  c.clearRect(0,0,sz,sz);
+  c.beginPath();c.arc(cx,cy,r+5,0,Math.PI*2);
+  c.fillStyle='rgba(57,57,57,.0)';c.fill();
+  var cR=new THREE.Vector3(),cU=new THREE.Vector3(),cF=new THREE.Vector3();
+  camera.matrix.extractBasis(cR,cU,cF);
+  // Blender-style XYZ gizmo: colored spheres
+  var axes=[
+    {n:'X',v:new THREE.Vector3(1,0,0),col:'#b04040',neg:'#5a1a1a'},
+    {n:'Y',v:new THREE.Vector3(0,1,0),col:'#408840',neg:'#1a401a'},
+    {n:'Z',v:new THREE.Vector3(0,0,-1),col:'#4060b0',neg:'#1a2a5a'},
+  ];
+  var items=[];
+  axes.forEach(function(ax){
+    var sv={x:cx+ax.v.dot(cR)*r,y:cy-ax.v.dot(cU)*r};
+    var nv={x:cx-ax.v.dot(cR)*r,y:cy+ax.v.dot(cU)*r};
+    items.push({s:nv,col:ax.neg,d:-ax.v.dot(cF),neg:true,r:4.5});
+    items.push({s:sv,col:ax.col,d:ax.v.dot(cF),lbl:ax.n,neg:false,r:5.5});
+  });
+  items.sort(function(a,b){return a.d-b.d;});
+  items.forEach(function(it){
+    // Line from center
+    c.beginPath();c.moveTo(cx,cy);c.lineTo(it.s.x,it.s.y);
+    c.strokeStyle=it.col+(it.neg?'88':'cc');c.lineWidth=it.neg?1.5:2;c.stroke();
+    // Sphere
+    c.beginPath();c.arc(it.s.x,it.s.y,it.r,0,Math.PI*2);
+    c.fillStyle=it.col;c.fill();
+    if(!it.neg&&it.lbl){
+      c.fillStyle='#fff';c.font='bold 7px monospace';
+      c.textAlign='center';c.textBaseline='middle';
+      c.fillText(it.lbl,it.s.x,it.s.y);
+    }
+  });
+  // Center dot
+  c.beginPath();c.arc(cx,cy,3.5,0,Math.PI*2);
+  c.fillStyle='#aaa';c.fill();
+}
+
+// ══════════════════════════════════════════════
+//  CAMERA UPDATE (spherical → cartesian)
+// ══════════════════════════════════════════════
+function updateCamera(){
+  var x=camRadius*Math.sin(camPhi)*Math.cos(camTheta);
+  var y=camRadius*Math.cos(camPhi);
+  var z=camRadius*Math.sin(camPhi)*Math.sin(camTheta);
+  camera.position.set(
+    camTarget.x+x,
+    camTarget.y+y,
+    camTarget.z+z
+  );
+  camera.lookAt(camTarget);
+}
+
+// ══════════════════════════════════════════════
+//  MOUSE HANDLERS — BLENDER-EXACT CONTROLS
+//  MMB = orbit | Shift+MMB = pan | Scroll = zoom
+//  LMB = select (NOT orbit)
+// ══════════════════════════════════════════════
+var raycaster, rayMouse;
+// Selectable meshes: [mesh, olRowId, olName, propObjName]
+var selectables=[];
+var selectedObj=null;
+
+function initRaycaster(){
+  raycaster=new THREE.Raycaster();
+  rayMouse=new THREE.Vector2();
+}
+
+function doLMBSelect(clientX, clientY){
+  if(!raycaster||!selectables.length)return false;
+  rayMouse.x=(clientX/window.innerWidth)*2-1;
+  rayMouse.y=-(clientY/window.innerHeight)*2+1;
+  raycaster.setFromCamera(rayMouse,camera);
+  var meshes=selectables.map(function(s){return s.mesh;}).filter(Boolean);
+  var hits=raycaster.intersectObjects(meshes,false);
+  if(hits.length>0){
+    var hitMesh=hits[0].object;
+    var found=null;
+    for(var i=0;i<selectables.length;i++){
+      if(selectables[i].mesh===hitMesh){found=selectables[i];break;}
+    }
+    if(found){selectObject(found.id,found.name,found.propName);return true;}
+  }
+  return false;
+}
+
+function selectObject(olId, olName, propName){
+  // If in edit mode and selecting a different object, exit edit mode
+  if(isEditMode&&selectedObj!==olId){
+    isEditMode=false;
+    updateModeUI();
+  }
+  // Update outliner row highlight
+  document.querySelectorAll('.ol-row').forEach(function(r){r.classList.remove('sel');});
+  var olRow=document.getElementById('ol-'+olId);
+  if(olRow){
+    olRow.classList.add('sel');
+    olRow.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+  // Update properties panel heading
+  var pn=document.getElementById('prop-obj-name');
+  if(pn)pn.innerHTML=propName;
+  // Store selected id for frameSelected
+  selectedObj=olId;
+  // Move selection rings — show only for selected object
+  selectables.forEach(function(s){
+    if(!s.selRingMesh)return;
+    var show=(s.id===olId);
+    s.selRingMesh.material.opacity=show?0.92:0;
+    // Sync ring position to actual mesh world position
+    if(show){
+      var wp=new THREE.Vector3();
+      s.mesh.getWorldPosition(wp);
+      s.selRingMesh.position.copy(wp);
+      // Copy rotation too if available
+      if(s.mesh.parent&&s.mesh.parent.rotation){
+        s.selRingMesh.rotation.copy(s.mesh.parent.rotation);
+      } else {
+        s.selRingMesh.rotation.copy(s.mesh.rotation);
+      }
+    }
+  });
+  // Outliner task tracking
+  if(STEPS[STEP]&&STEPS[STEP].ic==='outliner'){
+    markQ('sel_'+olId,22);
+    if(questDone['sel_cube']&&questDone['sel_camera']&&questDone['sel_light']){
+      clearZH();
+    }
+  }
+}
+
+function onMouseDown(e){
+  if(e.button===1){
+    // MMB pressed = orbit
+    MMB_down=true;
+    lastMX=e.clientX; lastMY=e.clientY;
+    e.preventDefault();
+    document.getElementById('cvs').style.cursor='grabbing';
+  }
+  if(e.button===2){
+    RMB_down=true;
+    lastMX=e.clientX; lastMY=e.clientY;
+  }
+  if(e.button===0){
+    var rpEl=document.getElementById('rp');
+    var ltEl=document.getElementById('lt');
+    var ltW2=ltEl?ltEl.offsetWidth:28;
+    var rpW2=rpEl?rpEl.offsetWidth:260;
+    var topH=38+26+26;
+    var tlH=56;
+    var vpBottom=window.innerHeight-tlH;
+    var vpRight=window.innerWidth-rpW2;
+    if(e.clientX>ltW2 && e.clientX<vpRight && e.clientY>topH && e.clientY<vpBottom){
+      // Start box select drag
+      boxStart={x:e.clientX,y:e.clientY};
+      boxActive=false; // only activate after drag threshold
+      LMB_startX=e.clientX; LMB_startY=e.clientY;
+      LMB_pressing=true;
+    }
+  }
+}
+function onMouseMove(e){
+  var dx=e.clientX-lastMX;
+  var dy=e.clientY-lastMY;
+  lastMX=e.clientX; lastMY=e.clientY;
+
+  // Update box select if LMB dragging
+  if(LMB_pressing&&!MMB_down){
+    updateBoxSelect(e.clientX,e.clientY);
+  }
+
+  if(MMB_down){
+    if(e.shiftKey){
+      // Shift+MMB = PAN
+      // Pan perpendicular to view direction
+      var speed=camRadius*0.0015;
+      var right=new THREE.Vector3();
+      var up=new THREE.Vector3();
+      var forward=new THREE.Vector3();
+      camera.matrix.extractBasis(right,up,forward);
+      camTarget.addScaledVector(right,-dx*speed);
+      camTarget.addScaledVector(up,dy*speed);
+      updateCamera();
+      panAccum+=Math.abs(dx)+Math.abs(dy);
+      if(STEPS[STEP]&&STEPS[STEP].ic==='viewport_nav'&&panAccum>40){
+        markQ('pan',25);
+      }
+    } else {
+      // MMB drag = ORBIT (Blender: push up = see top of cube = phi decreases)
+      camTheta+=dx*0.008;
+      camPhi=Math.max(0.06,Math.min(Math.PI-0.06,camPhi-dy*0.008));
+      updateCamera();
+      orbitAccum+=Math.abs(dx)+Math.abs(dy);
+      if(STEPS[STEP]&&STEPS[STEP].ic==='viewport_nav'&&orbitAccum>80){
+        markQ('orbit',25);
+      }
+    }
+  }
+}
+function onMouseUp(e){
+  if(e.button===1){MMB_down=false;document.getElementById('cvs').style.cursor='default';}
+  if(e.button===2){RMB_down=false;}
+  if(e.button===0){
+    LMB_pressing=false;
+    if(boxActive){
+      // Box select: find objects within box
+      doBoxSelect();
+      if(boxEl)boxEl.style.display='none';
+      boxActive=false;
+    } else {
+      // Simple click: point select or deselect
+      var rpEl=document.getElementById('rp');
+      var ltEl=document.getElementById('lt');
+      var ltW2=ltEl?ltEl.offsetWidth:28;
+      var rpW2=rpEl?rpEl.offsetWidth:260;
+      var topH=26+26+26; var tlH=56;
+      if(e.clientX>ltW2&&e.clientX<window.innerWidth-rpW2&&e.clientY>topH&&e.clientY<window.innerHeight-tlH){
+        var hit=doLMBSelect(e.clientX,e.clientY);
+        if(!hit){
+          // Click on empty → deselect all (no rings)
+          selectables.forEach(function(s){
+            if(s.selRingMesh)s.selRingMesh.material.opacity=0;
+          });
+          document.querySelectorAll('.ol-row').forEach(function(r){r.classList.remove('sel');});
+          selectedObj=null;
+        }
+      }
+    }
+  }
+}
+
+function updateBoxSelect(cx,cy){
+  if(!LMB_pressing)return;
+  if(!boxEl)boxEl=document.getElementById('box-select');
+  if(!boxEl)return;
+  var dx=Math.abs(cx-boxStart.x), dy=Math.abs(cy-boxStart.y);
+  if(dx>6||dy>6){
+    boxActive=true;
+    var x=Math.min(cx,boxStart.x), y=Math.min(cy,boxStart.y);
+    var w=Math.abs(cx-boxStart.x), h=Math.abs(cy-boxStart.y);
+    boxEl.style.display='block';
+    boxEl.style.left=x+'px'; boxEl.style.top=y+'px';
+    boxEl.style.width=w+'px'; boxEl.style.height=h+'px';
+  }
+}
+
+function doBoxSelect(){
+  if(!selectables.length||!camera)return;
+  if(!boxEl)boxEl=document.getElementById('box-select');
+  var bx1=Math.min(LMB_startX,lastMX), bx2=Math.max(LMB_startX,lastMX);
+  var by1=Math.min(LMB_startY,lastMY), by2=Math.max(LMB_startY,lastMY);
+  var selected=false;
+  selectables.forEach(function(s){
+    if(!s.mesh)return;
+    var worldPos=new THREE.Vector3();
+    s.mesh.getWorldPosition(worldPos);
+    var projected=worldPos.clone().project(camera);
+    if(projected.z>1)return; // behind camera
+    var sx=(projected.x+1)/2*window.innerWidth;
+    var sy=(-projected.y+1)/2*window.innerHeight;
+    if(sx>=bx1&&sx<=bx2&&sy>=by1&&sy<=by2){
+      selectObject(s.id,s.name,s.propName);
+      selected=true;
+    }
+  });
+}
+function onWheel(e){
+  e.preventDefault();
+  // Scroll UP (negative deltaY) = zoom IN = decrease radius
+  camRadius=Math.max(1.5,Math.min(30,camRadius+e.deltaY*0.012));
+  updateCamera();
+  zoomAccum+=Math.abs(e.deltaY);
+  if(STEPS[STEP]&&STEPS[STEP].ic==='viewport_nav'&&zoomAccum>50){
+    markQ('zoom',25);
+  }
+}
+
+// ── Touch (iPad/mobile) ──
+function onTouchStart(e){
+  e.preventDefault();
+  for(var i=0;i<e.changedTouches.length;i++){
+    var t=e.changedTouches[i];
+    touchIds[t.identifier]={x:t.clientX,y:t.clientY};
+    touchPrev[t.identifier]={x:t.clientX,y:t.clientY};
+  }
+  var ids=Object.keys(touchIds);
+  if(ids.length===1){
+    lastMX=touchIds[ids[0]].x; lastMY=touchIds[ids[0]].y;
+    MMB_down=true;
+  }
+}
+function onTouchMove(e){
+  e.preventDefault();
+  var ids=Object.keys(touchIds);
+  if(ids.length===1){
+    var t=e.changedTouches[0];
+    var dx=t.clientX-lastMX, dy=t.clientY-lastMY;
+    lastMX=t.clientX; lastMY=t.clientY;
+    camTheta+=dx*0.008;
+    camPhi=Math.max(0.06,Math.min(Math.PI-0.06,camPhi-dy*0.008));
+    updateCamera();
+    orbitAccum+=Math.abs(dx)+Math.abs(dy);
+    if(STEPS[STEP]&&STEPS[STEP].ic==='viewport_nav'&&orbitAccum>80) markQ('orbit',25);
+  } else if(ids.length===2){
+    // Two-finger pinch = zoom
+    var t1=e.touches[0],t2=e.touches[1];
+    var id1=t1.identifier.toString(),id2=t2.identifier.toString();
+    var prev1=touchPrev[id1]||{x:t1.clientX,y:t1.clientY};
+    var prev2=touchPrev[id2]||{x:t2.clientX,y:t2.clientY};
+    var prevDist=Math.hypot(prev1.x-prev2.x,prev1.y-prev2.y);
+    var curDist=Math.hypot(t1.clientX-t2.clientX,t1.clientY-t2.clientY);
+    if(prevDist>0) camRadius=Math.max(1.5,Math.min(30,camRadius*(prevDist/curDist)));
+    updateCamera();
+    touchPrev[id1]={x:t1.clientX,y:t1.clientY};
+    touchPrev[id2]={x:t2.clientX,y:t2.clientY};
+  }
+  for(var i=0;i<e.changedTouches.length;i++){
+    var t=e.changedTouches[i];
+    touchPrev[t.identifier]={x:t.clientX,y:t.clientY};
+  }
+}
+function onTouchEnd(e){
+  for(var i=0;i<e.changedTouches.length;i++){
+    delete touchIds[e.changedTouches[i].identifier];
+    delete touchPrev[e.changedTouches[i].identifier];
+  }
+  if(Object.keys(touchIds).length===0) MMB_down=false;
+}
+
+// ══════════════════════════════════════════════
+//  GIZMO & HUD POSITIONING
+// ══════════════════════════════════════════════
+function layoutHUD(){
+  var rpW=document.getElementById('rp').offsetWidth;
+  var ltW=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--LT'))||28;
+  var topH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--TOP'))||26;
+  var mbH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--MB'))||26;
+  var vhH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--VH'))||26;
+  var tlH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--TL'))||56;
+  var vpLeft=ltW; // viewport starts right after toolbar (no lesson panel offset)
+  var vpW=window.innerWidth-vpLeft-rpW;
+  // VPInfo top-left of viewport (Blender style)
+  var vpi=document.getElementById('vp-info');
+  vpi.style.left=(vpLeft+6)+'px';
+  vpi.style.top=(topH+mbH+vhH+6)+'px';
+  // Gizmo top-right corner of viewport
+  var ga=document.getElementById('gizmo-area');
+  ga.style.right=(rpW+14)+'px';
+  ga.style.top=(topH+mbH+vhH+14)+'px';
+  // Hint bottom of viewport (centered)
+  var hint=document.getElementById('vp-hint');
+  hint.style.bottom=(tlH+10)+'px';
+  hint.style.left=(vpLeft+vpW/2)+'px';
+  hint.style.transform='translateX(-50%)';
+  // KFlash top-center of viewport
+  var kf=document.getElementById('kflash');
+  kf.style.top=(topH+mbH+vhH+12)+'px';
+  kf.style.left=(vpLeft+vpW/2)+'px';
+  kf.style.transform='translateX(-50%)';
+}
+
+// ══════════════════════════════════════════════
+//  VPInfo text (Blender's top-left overlay)
+// ══════════════════════════════════════════════
+function updateVPInfo(){
+  var mode=isEditMode?'Edit Mode':'Object Mode';
+  document.getElementById('vp-info').innerHTML=
+    '<div>User Perspective</div>'
+    +'<div>(1) Collection | Cube</div>';
+}
+
+// ══════════════════════════════════════════════
+//  THREE.JS SETUP
+// ══════════════════════════════════════════════
+window.onload=function(){
+  var cvs=document.getElementById('cvs');
+  renderer=new THREE.WebGLRenderer({canvas:cvs,antialias:true});
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setClearColor(0x393939,1);
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+  scene=new THREE.Scene();
+  scene.fog=new THREE.Fog(0x393939,22,40);
+  clock=new THREE.Clock();
+
+  camera=new THREE.PerspectiveCamera(50,window.innerWidth/window.innerHeight,0.1,100);
+  // Default Blender perspective view angle
+  camTheta=0.6; camPhi=1.15; camRadius=9;
+  updateCamera();
+
+  // ── Lights ──
+  var amb=new THREE.AmbientLight(0xffffff,.50);scene.add(amb);
+  var key=new THREE.DirectionalLight(0xffd0a0,.90);key.position.set(5,9,5);
+  key.castShadow=true;key.shadow.mapSize.set(1024,1024);scene.add(key);
+  var fill=new THREE.DirectionalLight(0x4488ff,.28);fill.position.set(-5,2,-4);scene.add(fill);
+
+  // ── Blender-style grid ──
+  var mainGrid=new THREE.GridHelper(20,20,0x4e4e4e,0x444444);
+  mainGrid.material.transparent=true;mainGrid.material.opacity=.85;scene.add(mainGrid);
+  var subGrid=new THREE.GridHelper(20,80,0x3a3a3a,0x363636);
+  subGrid.material.transparent=true;subGrid.material.opacity=.4;scene.add(subGrid);
+
+  // ── World X/Y axis lines (red/green) ──
+  var mkAxis=function(from,to,col){
+    var g=new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(...from),new THREE.Vector3(...to)
+    ]);
+    var m=new THREE.LineBasicMaterial({color:col,transparent:true,opacity:.75});
+    scene.add(new THREE.Line(g,m));
+  };
+  mkAxis([-20,.001,0],[20,.001,0],0x880000); // X axis (red)
+  mkAxis([0,.001,-20],[0,.001,20],0x008800); // Y axis (green)
+
+  // ── Default Cube (Blender's default scene, at origin) ──
+  var geo=new THREE.BoxGeometry(2,2,2);
+  cube=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({
+    color:0xaaaaaa, roughness:.80, metalness:.02,
+  }));
+  cube.position.set(0,1,0);
+  cube.castShadow=true; cube.receiveShadow=true;
+  scene.add(cube);
+
+  // Edge overlay (black wireframe on solid, like Blender)
+  cubeEdges=new THREE.LineSegments(
+    new THREE.EdgesGeometry(geo),
+    new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:.55})
+  );
+  cubeEdges.position.copy(cube.position);scene.add(cubeEdges);
+
+  // Orange selection highlight ring
+  selRing=new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(2.06,2.06,2.06)),
+    new THREE.LineBasicMaterial({color:0xff8832,transparent:true,opacity:.92})
+  );
+  selRing.position.copy(cube.position);scene.add(selRing);
+
+  // ── Per-object selection rings ──
+  lightSelRing=new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.SphereGeometry(.22,8,6)),
+    new THREE.LineBasicMaterial({color:0xff8832,transparent:true,opacity:0})
+  );
+  camSelRing=new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(.55,.42,.62)),
+    new THREE.LineBasicMaterial({color:0xff8832,transparent:true,opacity:0})
+  );
+  scene.add(lightSelRing);scene.add(camSelRing);
+
+  // ── Light visual ──
+  lightMesh=new THREE.Mesh(
+    new THREE.OctahedronGeometry(.16,0),
+    new THREE.MeshBasicMaterial({color:0xffffaa})
+  );
+  lightMesh.position.set(4.4,5.8,4.4);scene.add(lightMesh);
+  var pl=new THREE.PointLight(0xffffff,.55,14);
+  pl.position.copy(lightMesh.position);scene.add(pl);
+
+  // ── Camera visual ──
+  cGrp=new THREE.Group();
+  var cBody=new THREE.Mesh(new THREE.BoxGeometry(.48,.35,.55),new THREE.MeshStandardMaterial({color:0x2a2a2a}));
+  cGrp.add(cBody);
+  var cLens=new THREE.Mesh(new THREE.CylinderGeometry(.09,.12,.22,8),new THREE.MeshStandardMaterial({color:0x111}));
+  cLens.rotation.x=Math.PI/2;cLens.position.z=-.36;cGrp.add(cLens);
+  cGrp.position.set(4.5,2,-4.2);cGrp.rotation.y=Math.PI*.55;scene.add(cGrp);
+
+  // ── Raycaster init + selectables ──
+  initRaycaster();
+  // Invisible hitbox for cube (larger than visual for easier clicking)
+  var cubeHitbox=new THREE.Mesh(
+    new THREE.BoxGeometry(2.2,2.2,2.2),
+    new THREE.MeshBasicMaterial({visible:false,transparent:true,opacity:0})
+  );
+  cubeHitbox.position.copy(cube.position);scene.add(cubeHitbox);
+  // Link hitboxes to selectable data
+  selectables=[
+    {id:'cube',   mesh:cubeHitbox,    selRingMesh:selRing,    name:'Cube',   propName:'Cube'},
+    {id:'light',  mesh:lightMesh,      selRingMesh:lightSelRing,name:'Light',  propName:'Light'},
+    {id:'camera', mesh:cGrp.children[0],selRingMesh:camSelRing, name:'Camera', propName:'Camera'},
+  ];
+  // Cube selected by default
+  selectObject('cube','Cube','Cube');
+
+  // ── Canvas mouse/touch events ──
+  cvs.addEventListener('mousedown',onMouseDown);
+  window.addEventListener('mousemove',onMouseMove);
+  window.addEventListener('mouseup',onMouseUp);
+  cvs.addEventListener('wheel',onWheel,{passive:false});
+  cvs.addEventListener('contextmenu',function(e){e.preventDefault();});
+  cvs.addEventListener('touchstart',onTouchStart,{passive:false});
+  cvs.addEventListener('touchmove',onTouchMove,{passive:false});
+  cvs.addEventListener('touchend',onTouchEnd,{passive:true});
+
+  // ── Layout ──
+  window.addEventListener('resize',function(){
+    camera.aspect=window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    layoutHUD();
+  });
+  layoutHUD();
+  renderStep();
+  updateVPInfo();
+  updateProps();
+
+  // ── Box Select init (element fetched at runtime) ──
+
+  // ── Render loop ──
+  (function loop(){
+    requestAnimationFrame(loop);
+    // Sync cube edge overlay
     cubeEdges.position.copy(cube.position);
-    selLine.position.copy(cube.position);
-
+    cubeEdges.rotation.copy(cube.rotation);
+    cubeEdges.scale.copy(cube.scale);
+    // Sync edit mode overlays to editTargetMesh transform
+    if(isEditMode&&editTargetMesh){
+      // Keep edge overlay in sync
+      if(editTargetEdgeOverlay){
+        editTargetEdgeOverlay.position.copy(editTargetMesh.position);
+        editTargetEdgeOverlay.rotation.copy(editTargetMesh.rotation);
+        editTargetEdgeOverlay.scale.copy(editTargetMesh.scale);
+      }
+      // Keep face mesh in sync
+      if(faceMesh){
+        faceMesh.position.copy(editTargetMesh.position);
+        faceMesh.rotation.copy(editTargetMesh.rotation);
+        faceMesh.scale.copy(editTargetMesh.scale);
+      }
+      // Edge lines (LineSegments sets) sync
+      edgeLines.forEach(function(el){
+        el.position.copy(editTargetMesh.position);
+        el.rotation.copy(editTargetMesh.rotation);
+        el.scale.copy(editTargetMesh.scale);
+      });
+    }
+    // Sync hitbox to cube
+    if(selectables[0]&&selectables[0].mesh){
+      selectables[0].mesh.position.copy(cube.position);
+    }
+    // Cube sel ring
+    if(selRing&&selectedObj==='cube'){
+      selRing.position.copy(cube.position);
+      selRing.rotation.copy(cube.rotation);
+      selRing.scale.copy(cube.scale);
+    }
+    // Light sel ring — follow lightMesh
+    if(lightMesh&&selectables[1]&&selectables[1].selRingMesh){
+      selectables[1].selRingMesh.position.copy(lightMesh.position);
+    }
+    // Camera sel ring — follow cGrp
+    if(typeof cGrp!=='undefined'&&cGrp&&selectables[2]&&selectables[2].selRingMesh){
+      selectables[2].selRingMesh.position.copy(cGrp.position);
+      selectables[2].selRingMesh.rotation.copy(cGrp.rotation);
+    }
+    // Pulse light mesh
+    if(clock&&lightMesh){
+      var t=clock.getElapsedTime();
+      lightMesh.material.color.setRGB(1,.95,.6+Math.sin(t*2)*.1);
+    }
+    updateVPInfo();
     drawGizmo();
-    renderer.render(scene, camera);
+    renderer.render(scene,camera);
   })();
-
-}; // end onload
+};
 </script>
+<div id="box-select"></div>
+<div id="task-hl-box"></div>
+<div id="task-hl-label"></div>
 </body>
 </html>
